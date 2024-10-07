@@ -8,7 +8,7 @@
     <meta content="A name that suggests performance evaluation and improvement." name="description" />
     <meta content="BPSL" name="author" />
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ asset('/assets/images/favicon.ico')}}">
+    <link rel="shortcut icon" href="{{ asset('bpsl_imgs/performa-short.jpg')}}">
 
     <!-- Bootstrap Css -->
     <link href="{{ asset('/assets/css/bootstrap.min.css')}}"  rel="stylesheet" type="text/css" />
