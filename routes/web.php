@@ -19,3 +19,7 @@ Route::get('/', function () {
 })->name('login');
 
 Route::get("dashboard/index", [DashboardController::class, "index"])->name("dashboard.index");
+Route::get("dashboard/kpi/setup", [DashboardController::class, "kpi_setup"])->name("kpi.setup");
+Route::get("dashboard/score/setup", [DashboardController::class, "score_setup"])->name("score.setup");
+Route::get("dashboard/section/setup", [DashboardController::class, "section_setup"])->name("section.setup");
+

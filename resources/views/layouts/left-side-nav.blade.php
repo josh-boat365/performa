@@ -8,11 +8,27 @@
                     <ul class="metismenu list-unstyled" id="side-menu">
                         <li class="menu-title" key="t-menu">Menu</li>
 
-                         <li>
-                            <a href="chat.html" class="waves-effect">
-                               <i class="bx bxs-cog"></i>
-                                <span key="t-dashboards">Setup</span>
+                        <li>
+                            <a href="{{ route('dashboard.index') }}" class="waves-effect">
+                                <i class="bx bx-home"></i>
+                                <span key="t-dashboard">Dashboard</span>
                             </a>
+                        </li>
+
+
+                         <li>
+                            <a href="#" class="has-arrow waves-effect">
+                               <i class="bx bxs-cog"></i>
+                                <span key="t-setup">Setup</span>
+                            </a>
+                               <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('score.setup') }}" key="t-default">Score Setup</a></li>
+                                <li><a href="{{ route('kpi.setup') }}" key="t-default">KPI Setup</a></li>
+                                {{--  <li><a href="#" key="t-saas">Saas</a></li>
+                                <li><a href="#" key="t-crypto">Crypto</a></li>
+                                <li><a href="#" key="t-blog">Blog</a></li>
+                                <li><a href="#" key="t-jobs">Jobs</a></li>  --}}
+                            </ul>
                         </li>
 
                         {{--  <li>
@@ -29,7 +45,7 @@
                             </ul>
                         </li>  --}}
 
-                        <li>
+                        {{--  <li>
                             <a href="javascript: void(0);" class="waves-effect">
                                 <span class="badge rounded-pill bg-danger float-end" key="t-hot">Hot</span>
                                 <i class="bx bx-layout"></i>
@@ -71,9 +87,9 @@
                             </ul>
                         </li>
 
-                        <li class="menu-title" key="t-apps">Apps</li>
+                        <li class="menu-title" key="t-apps">Apps</li>  --}}
 
-
+{{--
 
                         <li>
                             <a href="javascript: void(0);" class="has-arrow waves-effect">
@@ -413,7 +429,7 @@
                                     </ul>
                                 </li>
                             </ul>
-                        </li>
+                        </li>  --}}
 
                     </ul>
                 </div>
