@@ -5,10 +5,12 @@
             <div class="navbar-brand-box">
                 <a href="{{ route('dashboard.index') }}" class="logo logo-light">
                     <span class="logo-sm">
-                        <img src="{{ asset('bpsl_imgs/performa-short-2.png') }}" alt="Perfoma Logo" style="width: 2.5rem; height: 2.5rem">
+                        <img src="{{ asset('bpsl_imgs/performa-short-2.png') }}" alt="Perfoma Logo"
+                            style="width: 2.5rem; height: 2.5rem">
                     </span>
                     <span class="logo-lg">
-                        <img src="{{ asset('bpsl_imgs/performa-full-3.png') }}" alt="Perfoma Logo" style="width: 15rem; height: 4rem">
+                        <img src="{{ asset('bpsl_imgs/performa-full-3.png') }}" alt="Perfoma Logo"
+                            style="width: 15rem; height: 4rem">
                     </span>
 
                 </a>
@@ -32,9 +34,8 @@
         <div class="d-flex">
 
             <div class="dropdown d-inline-block d-lg-none ms-2">
-                <button type="button" class="btn header-item noti-icon waves-effect"
-                    id="page-header-search-dropdown" data-bs-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false">
+                <button type="button" class="btn header-item noti-icon waves-effect" id="page-header-search-dropdown"
+                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="mdi mdi-magnify"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0"
@@ -55,12 +56,21 @@
                 </div>
             </div>
 
-
+            {{--  <div class="dropdown d-inline-block">
+                 <span class="badge rounded-pill bg-success">January 2024 Batch</span>
+            </div>  --}}
+            <div class="m-auto d-flex gap-1">
+                {{--  <button type="button" class="btn header-item noti-icon">  --}}
+                    <span class="badge rounded-pill bg-dark">Active Batch</span>
+                    <span class="badge rounded-pill bg-success">January 2024 Batch</span>
+                {{--  </button>  --}}
+            </div>
             <div class="dropdown d-none d-lg-inline-block ms-1">
                 <button type="button" class="btn header-item noti-icon waves-effect" data-bs-toggle="fullscreen">
                     <i class="bx bx-fullscreen"></i>
                 </button>
             </div>
+
 
             <div class="dropdown d-inline-block">
                 <button type="button" class="btn header-item noti-icon waves-effect"
@@ -94,8 +104,8 @@
                                     <div class="font-size-12 text-muted">
                                         <p class="mb-1" key="t-grammer">If several languages coalesce the
                                             grammar</p>
-                                        <p class="mb-0"><i class="mdi mdi-clock-outline"></i> <span
-                                                key="t-min-ago">3 min ago</span></p>
+                                        <p class="mb-0"><i class="mdi mdi-clock-outline"></i> <span key="t-min-ago">3
+                                                min ago</span></p>
                                     </div>
                                 </div>
                             </div>
@@ -162,7 +172,7 @@
             <div class="dropdown d-inline-block">
                 <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    
+
                     <span class="d-none d-xl-inline-block ms-1" key="t-henry">Henry</span>
                     <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
                 </button>
@@ -185,6 +195,12 @@
                             class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i> <span
                             key="t-logout">Logout</span></a>
                 </div>
+            </div>
+
+            <div class="dropdown d-inline-block">
+                <button type="button" class="btn header-item noti-icon right-bar-toggle waves-effect">
+                    <i class="bx bx-cog bx-spin"></i>
+                </button>
             </div>
 
 
