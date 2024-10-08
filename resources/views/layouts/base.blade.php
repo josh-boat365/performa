@@ -14,7 +14,7 @@
         @include('layouts.dash-nav')
 
         <!-- ========== Left Sidebar Start ========== -->
-       @include('layouts.left-side-nav')
+        @include('layouts.left-side-nav')
 
         <!-- Left Sidebar End -->
 
@@ -32,12 +32,14 @@
             <!-- End Page-content -->
 
             <!-- Transaction Modal -->
-            <div class="modal fade transaction-detailModal" tabindex="-1" role="dialog" aria-labelledby="transaction-detailModalLabel" aria-hidden="true">
+            <div class="modal fade transaction-detailModal" tabindex="-1" role="dialog"
+                aria-labelledby="transaction-detailModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="transaction-detailModalLabel">Order Details</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <p class="mb-2">Product id: <span class="text-primary">#SK2540</span></p>
@@ -56,12 +58,14 @@
                                         <tr>
                                             <th scope="row">
                                                 <div>
-                                                    <img src="{{ asset('assets/images/product/img-7.png')}}" alt="" class="avatar-sm">
+                                                    <img src="{{ asset('assets/images/product/img-7.png') }}"
+                                                        alt="" class="avatar-sm">
                                                 </div>
                                             </th>
                                             <td>
                                                 <div>
-                                                    <h5 class="text-truncate font-size-14">Wireless Headphone (Black)</h5>
+                                                    <h5 class="text-truncate font-size-14">Wireless Headphone (Black)
+                                                    </h5>
                                                     <p class="text-muted mb-0">$ 225 x 1</p>
                                                 </div>
                                             </td>
@@ -70,7 +74,8 @@
                                         <tr>
                                             <th scope="row">
                                                 <div>
-                                                    <img src="{{ asset('assets/images/product/img-4.png')}}" alt="" class="avatar-sm">
+                                                    <img src="{{ asset('assets/images/product/img-4.png') }}"
+                                                        alt="" class="avatar-sm">
                                                 </div>
                                             </th>
                                             <td>
@@ -125,11 +130,11 @@
                         <div class="col-sm-6">
                             <script>
                                 document.write(new Date().getFullYear())
-                            </script> © Skote.
+                            </script> © Perfoma | BPSL - IT Support.
                         </div>
                         <div class="col-sm-6">
                             <div class="text-sm-end d-none d-sm-block">
-                                Design & Develop by Themesbrand
+
                             </div>
                         </div>
                     </div>
@@ -140,6 +145,38 @@
 
     </div>
     <!-- END layout-wrapper -->
+
+    <!-- Right Sidebar -->
+    <div class="right-bar">
+        <div data-simplebar class="h-100">
+            <div class="rightbar-title d-flex align-items-center px-3 py-4">
+
+                <h5 class="m-0 me-2">Select Appraisal Batch</h5>
+
+                <a href="javascript:void(0);" class="right-bar-toggle ms-auto">
+                    <i class="mdi mdi-close noti-icon"></i>
+                </a>
+            </div>
+
+            <!-- Settings -->
+            <hr class="mt-0" />
+
+            <div class="p-4">
+                <div class="d-grid mb-2">
+                    <button type="submit" class="btn btn-primary"> January 2023 Batch</button>
+                </div>
+                <div class="d-grid mb-2">
+                    <button type="submit" class="btn btn-primary"> March 2025 Batch</button>
+                </div>
+                <div class="d-grid mb-2">
+                    <button type="submit" class="btn btn-primary"> June 2026 Batch</button>
+                </div>
+            </div>
+
+        </div>
+        <!-- end slimscroll-menu-->
+    </div>
+    <!-- Right-bar -->
 
     @include('layouts.footer')
 </body>
