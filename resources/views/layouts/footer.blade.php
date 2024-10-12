@@ -10,6 +10,12 @@
 
 <script src="{{ asset('assets/js/pages/form-repeater.int.js') }}"></script>
 
+<!-- jquery step -->
+<script src="{{ asset('assets/libs/jquery-steps/build/jquery.steps.min.js') }}"></script>
+
+<!-- form wizard init -->
+<script src="{{ asset('assets/js/pages/form-wizard.init.js') }}"></script>
+
 <!-- apexcharts -->
 <script src="{{ asset('assets/libs/apexcharts/apexcharts.min.js') }}"></script>
 

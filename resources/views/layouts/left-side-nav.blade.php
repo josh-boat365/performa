@@ -22,8 +22,9 @@
                                 <span key="t-setup">Setup</span>
                             </a>
                                <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('batch.setup.index') }}" key="t-default">Batch Setup</a></li>
                                 <li><a href="{{ route('score.setup') }}" key="t-default">Score Setup</a></li>
-                                <li><a href="{{ route('kpi.setup') }}" key="t-default">KPI Setup</a></li>
+                                <li><a href="{{ route('create.dep.kpi') }}" key="t-default">KPI Setup</a></li>
                                 {{--  <li><a href="#" key="t-saas">Saas</a></li>
                                 <li><a href="#" key="t-crypto">Crypto</a></li>
                                 <li><a href="#" key="t-blog">Blog</a></li>
