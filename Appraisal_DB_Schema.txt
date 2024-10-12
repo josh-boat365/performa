@@ -1,0 +1,44 @@
+Batch Table
+ - name // name of the batch
+ - period // time at which the batch will run (every 2months, 3months, 4months or 6months in a year)
+ - status //active or deactivated
+
+KPI Table
+ - batch_id
+ - department_id
+ - role_id
+ - name // title or name of KPI
+ - score // 100% weighted score for the KPI
+ - type // global or probation KPI for the role in a department
+ - status // active or deactivated for the role in a department
+
+Section Table
+ - kpi_id
+ - name // section name or title
+ - score // weighted score is dependent on the weighted score of the KPI a section belongs to
+
+Metric Table
+ - section_id
+ - name // metric name or title
+ - score // weighted score is dependent on the weighted score of the Section a metric belongs to
+
+
+Column Table
+- kpi_id
+- name // column title - eg. supervisor remarks/ratings, employee remarks/ratings
+
+
+
+KPI CREATION FLOW
+           Batch
+             |
+         Departments
+	     |
+	   Roles
+	     |
+ Key Performance Indicators (KPIs)
+         ____|____
+         |       |
+     Columns    Sections
+                    |
+                 Metrics
