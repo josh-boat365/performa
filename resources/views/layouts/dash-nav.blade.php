@@ -61,8 +61,8 @@
             </div>  --}}
             <div class="m-auto d-flex gap-1">
                 {{--  <button type="button" class="btn header-item noti-icon">  --}}
-                    <span class="badge rounded-pill bg-dark">Active Batch</span>
-                    <span class="badge rounded-pill bg-success">January 2024 Batch</span>
+                <span class="badge rounded-pill bg-dark fonte-size-13">Active Batch</span>
+                <span class="badge rounded-pill bg-success fonte-size-13">January 2024 Batch</span>
                 {{--  </button>  --}}
             </div>
             <div class="dropdown d-none d-lg-inline-block ms-1">
