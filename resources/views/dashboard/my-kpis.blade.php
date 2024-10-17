@@ -17,7 +17,7 @@
         <div class="col-md-12">
             <div class="card card-body">
                 <div class="d-flex justify-content-between">
-                    <a href="">
+                    <a href="{{ route('kpi.form') }}">
                         <h4>January 2025 Batch - First Quarter</h4>
                     </a>
                     <div>
@@ -38,7 +38,7 @@
             </div>
             <div class="card card-body">
                 <div class="d-flex justify-content-between">
-                    <a href="">
+                    <a href="{{ route('kpi.form') }}">
                         <h4>January 2025 Batch - First Quarter</h4>
                     </a>
                     <div>
@@ -72,7 +72,7 @@
 
             <div class="card card-body">
                 <div class="d-flex justify-content-between">
-                    <a href="">
+                    <a href="{{ route('kpi.form') }}">
                         <h4>January 2025 Batch - First Quarter</h4>
                     </a>
                     <div>
