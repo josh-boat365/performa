@@ -19,6 +19,10 @@ Route::get('/', function () {
 })->name('login');
 
 Route::get("dashboard/index", [DashboardController::class, "index"])->name("dashboard.index");
+Route::get("dashboard/view-kpi", [DashboardController::class, "view_kpi"])->name("view.kpi");
+Route::get("dashboard/edit-kpi", [DashboardController::class, "view_kpi"])->name("edit.kpi");
+Route::get("dashboard/kpi-form", [DashboardController::class, "kpi_form"])->name("kpi.form");
+Route::get("dashboard/my-kpis", [DashboardController::class, "my_kpis"])->name("my.kpis");
 Route::get("dashboard/batch-setup", [DashboardController::class, "batch_setup"])->name("batch.setup.index");
 Route::get("dashboard/department-kpi-setup", [DashboardController::class, "dep_kpi_setup"])->name("create.dep.kpi");
 Route::get("dashboard/role-unit-kpi-setup", [DashboardController::class, "unit_kpi_setup"])->name("create.unit.setup");
