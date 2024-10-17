@@ -22,5 +22,10 @@
 <!-- dashboard init -->
 <script src="{{ asset('assets/js/pages/dashboard.init.js') }}"></script>
 
+<!-- rating -->
+<script src="{{ asset('assets/libs/bootstrap-rating/bootstrap-rating.min.js') }}"></script>
+
+<script src="{{ asset('assets/js/pages/rating-init.js') }}"></script>
+
 <!-- App js -->
 <script src="{{ asset('assets/js/app.js') }}"></script>
