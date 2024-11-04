@@ -10,6 +10,8 @@
     <!-- Begin page -->
     <div id="layout-wrapper">
 
+        @include('sweetalert::alert')
+
 
         @include('layouts.dash-nav')
 
