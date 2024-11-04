@@ -56,15 +56,7 @@
                 </div>
             </div>
 
-            {{--  <div class="dropdown d-inline-block">
-                 <span class="badge rounded-pill bg-success">January 2024 Batch</span>
-            </div>  --}}
-            <div class="m-auto d-flex gap-1">
-                {{--  <button type="button" class="btn header-item noti-icon">  --}}
-                <span class="badge rounded-pill bg-dark fonte-size-13">Active Batch</span>
-                <span class="badge rounded-pill bg-success fonte-size-13">January 2024 Batch</span>
-                {{--  </button>  --}}
-            </div>
+
             <div class="dropdown d-none d-lg-inline-block ms-1">
                 <button type="button" class="btn header-item noti-icon waves-effect" data-bs-toggle="fullscreen">
                     <i class="bx bx-fullscreen"></i>
@@ -173,7 +165,7 @@
                 <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 
-                    <span class="d-none d-xl-inline-block ms-1" key="t-henry">Henry</span>
+                    <span class="d-none d-xl-inline-block ms-1" key="t-henry">{{ session('user_name') }}</span>
                     <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
@@ -191,9 +183,12 @@
                             class="bx bx-lock-open font-size-16 align-middle me-1"></i> <span key="t-lock-screen">Lock
                             screen</span></a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item text-danger" href="#"><i
-                            class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i> <span
-                            key="t-logout">Logout</span></a>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="dropdown-item text-danger" href="#"><i
+                                class="bx bx-power-off font-size-16 align-middle me-1 text-danger"></i> <span
+                                key="t-logout">Logout</span></button>
+                    </form>
                 </div>
             </div>
 
