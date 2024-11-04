@@ -10,7 +10,20 @@ use Illuminate\Support\Collection;
 class DashboardController extends Controller
 {
     public function index(){
-        return view("dashboard.index");
+
+        // Retrieve user data from the session
+        $apiToken = session('api_token');
+        $userName = session('user_name');
+        $userEmail = session('user_email');
+
+        // Check if access_token is present
+        if (!$apiToken) {
+            return redirect()->route('login')->withErrors(['message' => 'You need to log in to access the dashboard.']);
+        }
+
+
+
+        return view("dashboard.index", compact('userEmail', 'userName'));
     }
     public function view_kpi(){
         return view("dashboard.view-kpi");
