@@ -19,6 +19,14 @@
 <!-- apexcharts -->
 <script src="{{ asset('assets/libs/apexcharts/apexcharts.min.js') }}"></script>
 
+<!-- apexcharts init -->
+<script src="{{ asset('assets/js/pages/apexcharts.init.js') }}"></script>
+
+<!-- custom dashboard chart init -->
+{{--  <script src="{{ asset('assets/custom/dashboard-charts.js') }}"></script>  --}}
+
+<script src="{{ asset('assets/js/plugin.js') }}"></script>
+
 <!-- dashboard init -->
 <script src="{{ asset('assets/js/pages/dashboard.init.js') }}"></script>
 
@@ -26,6 +34,8 @@
 <script src="{{ asset('assets/libs/bootstrap-rating/bootstrap-rating.min.js') }}"></script>
 
 <script src="{{ asset('assets/js/pages/rating-init.js') }}"></script>
+
+
 
 <!-- App js -->
 <script src="{{ asset('assets/js/app.js') }}"></script>
