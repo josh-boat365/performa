@@ -28,17 +28,20 @@
                     <tr>
 
                         <th>Department KPI</th>
+                        <th>Batch</th>
                         <th>Created At</th>
 
                 </thead>
                 <tbody>
                     <tr>
                         <th scope="row"><a href="{{ route('create.unit.setup') }}">IT Department</a></th>
+                        <td>January 2025 Batch - First Quarter</td>
                         <td>7th October, 2022</td>
 
                     </tr>
                     <tr>
                         <th scope="row"><a href="{{ route('create.unit.setup') }}">Finanace Department</a></th>
+                        <td>January 2025 Batch - Second Quarter</td>
                          <td>7th October, 2025</td>
                     </tr>
 
@@ -84,7 +87,19 @@
                         </div>
                     </div>
 
-                   
+                    <div class="row mb-3">
+                        <label for="example-text-input" class="">Select Batch</label>
+                        <div class="col-md-12">
+                            <select name="type" class="form-select">
+                                <option>Select Batch</option>
+                                <option>January 2025 Batch - First Quarter</option>
+                                <option>January 2025 Batch - Second Quarter</option>
+                                
+                            </select>
+                        </div>
+                    </div>
+
+
                     <button type="submit" class="btn btn-primary waves-effect waves-light col-md-12 mt-4">
                          Create
                     </button>
