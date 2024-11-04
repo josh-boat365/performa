@@ -14,62 +14,29 @@
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
-        <table class="table mb-0">
+        <div class="row">
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Your Kpi Grades</h4>
 
-            <thead class="table-light">
-                <tr>
-
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <div class="col-md-12">
-                        <div class="card card-body">
-                            <div class="d-flex justify-content-between">
-                                <div class="">
-                                  <img style="width: 8%" src="{{ asset('bpsl_imgs/performa-short-3.png') }}" alt="">
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <a href="{{ route('kpi.form') }}">
-                                        <h3>January 2025 Batch - First Quarter</h3>
-                                    </a>
-                                </div>
-                        </div>
+                        <div id="column_chart_datalabel" data-colors='["--bs-primary"]' class="apex-charts"
+                            dir="ltr"></div>
                     </div>
-                </tr>
-                <tr>
-                    <div class="col-md-12">
-                        <div class="card card-body">
-                            <div class="d-flex">
-                                <div>
-                                  <img style="width: 8%" src="{{ asset('bpsl_imgs/performa-short-3.png') }}" alt="">
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <a href="#">
-                                        <h3>January 2025 Batch - Second Quarter</h3>
-                                    </a>
-                                </div>
-                        </div>
+                </div><!--end card-->
+            </div>
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Participated KPIs</h4>
+                        <span class="">4</span>
+
                     </div>
-                </tr>
+                </div><!--end card-->
+            </div>
+        </div>
 
-            </tbody>
-        </table>
 
-        {{--  Paginator  --}}
-        <nav aria-label="Page navigation example" class="mt-2">
-            <ul class="pagination justify-content-end">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Previous</a>
-                </li>
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#">Next</a>
-                </li>
-            </ul>
-        </nav>
 
     </div>
 
