@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 
 /*
@@ -18,6 +19,9 @@ Route::get('/', function () {
     return view('auth.auth-login');
 })->name('login');
 
+
+
+
 Route::get("dashboard/index", [DashboardController::class, "index"])->name("dashboard.index");
 Route::get("dashboard/view-kpi", [DashboardController::class, "view_kpi"])->name("view.kpi");
 Route::get("dashboard/edit-kpi", [DashboardController::class, "view_kpi"])->name("edit.kpi");
@@ -29,4 +33,9 @@ Route::get("dashboard/role-unit-kpi-setup", [DashboardController::class, "unit_k
 Route::get("dashboard/kpi-setup", [DashboardController::class, "kpi_setup"])->name("kpi.setup");
 Route::get("dashboard/score-setup", [DashboardController::class, "score_setup"])->name("score.setup");
 Route::get("dashboard/section-setup", [DashboardController::class, "section_setup"])->name("section.setup");
+
+
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
 
