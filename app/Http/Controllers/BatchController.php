@@ -1,0 +1,224 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Pagination\LengthAwarePaginator;
+
+class BatchController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        try {
+            // Get the access token from the request or environment
+            $accessToken = session('api_token'); // Replace with your actual access token
+
+            // Make the GET request to the external API
+            $response = Http::withToken($accessToken)
+                ->get('http://192.168.1.200:5123/Appraisal/batch');
+
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                $batch_data = $response->json();
+
+                // Sort the batch_data array by creation date in descending order
+                usort($batch_data, function ($a, $b) {
+                    return strtotime($b['createdAt']) - strtotime($a['createdAt']);
+                });
+
+                // Get current page form url e.g. &page=1
+                $currentPage = LengthAwarePaginator::resolveCurrentPage();
+
+                // Define how many items we want to be visible in each page
+                $perPage = 10;
+
+                // Slice the collection to get the items to display in current page
+                $currentItems = array_slice($batch_data, ($currentPage - 1) * $perPage, $perPage);
+
+                // Create our paginator and pass it to the view
+                $batches = new LengthAwarePaginator($currentItems, count($batch_data), $perPage);
+
+                // Append query parameters to the pagination links
+                $batches->setPath(request()->url());
+
+                return view("batch-setup.index", compact('batches'));
+            } else {
+                return redirect()->back()->with('toast_error', 'Failed to fetch batches');
+            }
+        } catch (\Exception $e) {
+            // Log the error for debugging purposes
+            Log::error('Error during batch fetch', ['error' => $e->getMessage()]);
+
+            // Return with a toast error message to the user
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
+    }
+
+
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(Request $request) {}
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        // Validate the request data
+        $request->validate([
+            'name' => 'required|string',
+            'period' => 'required|integer',
+            'year' => 'required|integer',
+        ]);
+
+        // Get the access token from the request or environment
+        $accessToken = session('api_token'); // Replace with your actual access token
+
+        // Prepare the data for the batch creation
+        $batchData = [
+            'name' => $request->input('name'),
+            'period' => $request->input('period'),
+            'year' => $request->input('year'),
+        ];
+
+        try {
+            // Make the POST request to the external API
+            $response = Http::withToken($accessToken)
+                ->post('http://192.168.1.200:5123/Appraisal/batch', $batchData);
+
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                return redirect()->back()->with('toast_success', 'Batch created successfully');
+            } else {
+                // Log the error response
+                Log::error('Failed to create batch', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to create batch');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while creating batch', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        $accessToken = session('api_token');
+
+        try {
+            // Make the GET request to the external API
+            $response = Http::withToken($accessToken)
+                ->get('http://192.168.1.200:5123/Appraisal/batch/' . $id);
+
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                $batch_data = $response->json();
+
+                return view('batch-setup.edit', compact('batch_data'));
+            } else {
+                // Log the error response
+                Log::error('Failed to fetch batch', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Batch does not exist');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while fetching batch', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
+    }
+
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        // Validate the request data
+        $request->validate([
+            'name' => 'required|string',
+            'shortName' => 'required|string',
+            'period' => 'required|integer',
+            'year' => 'required|integer',
+            'status' => 'required|boolean', // Ensure status is validated as a boolean
+        ]);
+
+        // Get the access token from the request or environment
+        $accessToken = session('api_token'); // Replace with your actual access token
+
+        // Prepare the data for the batch update
+        $batchData = [
+            'id' => $id,
+            'name' => $request->input('name'),
+            'shortName' => $request->input('shortName'),
+            'period' => $request->input('period'),
+            'year' => $request->input('year'),
+            'status' => $request->input('status') == 1 ? true : false, // Convert to boolean
+        ];
+
+        try {
+            // Make the PUT request to the external API
+            $response = Http::withToken($accessToken)
+                ->put('http://192.168.1.200:5123/Appraisal/batch', $batchData);
+
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                return redirect()->route('batch.setup.index')->with('toast_success', 'Batch updated successfully');
+            } else {
+                // Log the error response
+                Log::error('Failed to update batch', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to update batch');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while updating batch', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
+    }
+
+
+
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+    }
+}
