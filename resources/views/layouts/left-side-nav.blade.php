@@ -8,11 +8,16 @@
                     <ul class="metismenu list-unstyled" id="side-menu">
                         <li class="menu-title" key="t-menu">Menu</li>
 
-                        <li>
-                            <a href="{{ route('dashboard.index') }}" class="waves-effect">
-                                <i class="bx bx-home"></i>
+                         <li>
+                            <a href="#" class="has-arrow waves-effect">
+                               <i class="bx bx-home"></i>
                                 <span key="t-dashboard">Dashboard</span>
                             </a>
+                               <ul class="sub-menu" aria-expanded="false">
+                                <li><a href="{{ route('dashboard.index') }}" key="t-default">Overview</a></li>
+                                <li><a href="{{ route('my.kpis') }}" key="t-default">My KPIs</a></li>
+
+                            </ul>
                         </li>
 
 

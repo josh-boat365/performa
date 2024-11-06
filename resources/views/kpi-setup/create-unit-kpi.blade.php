@@ -90,12 +90,24 @@
                         <div class="col-md-12">
                             <select name="type" class="form-select">
                                 <option>Select Role/Unit In Department</option>
-                                <option>Application Surpport</option>
+                                <option>Application Support</option>
                                 <option>Infrastructure</option>
                                 <option>Manager</option>
                             </select>
                         </div>
                     </div>
+
+                    <div class="row mb-3">
+                        <label for="example-text-input" class="">Select Supervisor</label>
+                        <div class="col-md-12">
+                            <select name="type" class="form-select">
+                                <option>Eric - IT Head</option>
+                                <option>David - IT Manager</option>
+                            </select>
+                        </div>
+                    </div>
+
+
 
 
                     <button type="submit" class="btn btn-primary waves-effect waves-light col-md-12 mt-4">
