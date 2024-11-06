@@ -27,20 +27,17 @@ class LogViewerMiddleware
             abort(403);
         }
 
-
-
         LogViewer::auth(function ($request) {
-            return $request->user()
-                && in_array($request->user()->email, [
-                    'jnboateng@bestpointgh.com',
-                    'cashun@bestpointgh.com',
-                    'ranane@bestpointgh.com',
-                    'dkwarteng@bestpointgh.com',
-                    'ekwakye@bestpointgh.com',
-                ]);
+            return session('user_email')
+            && in_array(session('user_email'), [
+                'jnboateng@bestpointgh.com',
+                'cashun@bestpointgh.com',
+                'ranane@bestpointgh.com',
+                'dkwarteng@bestpointgh.com',
+                'ekwakye@bestpointgh.com',
+            ]);
         });
 
         return $next($request);
-
     }
 }
