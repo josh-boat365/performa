@@ -68,9 +68,7 @@ class DashboardController extends Controller
     public function my_kpis(){
         return view("dashboard.my-kpis");
     }
-    public function batch_setup(){
-        return view("batch-setup.index");
-    }
+   
 
     public function dep_kpi_setup(){
         return view("kpi-setup.create-department-kpi");
