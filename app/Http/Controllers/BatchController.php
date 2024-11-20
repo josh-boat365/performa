@@ -74,7 +74,6 @@ class BatchController extends Controller
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
-            'period' => 'required|integer',
             'year' => 'required|integer',
         ]);
 
@@ -84,7 +83,6 @@ class BatchController extends Controller
         // Prepare the data for the batch creation
         $batchData = [
             'name' => $request->input('name'),
-            'period' => $request->input('period'),
             'year' => $request->input('year'),
         ];
 
@@ -166,11 +164,12 @@ class BatchController extends Controller
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
-            'shortName' => 'required|string',
-            'period' => 'required|integer',
             'year' => 'required|integer',
-            'status' => 'required|boolean', // Ensure status is validated as a boolean
+            // 'status' => 'required|string',
+            'active' => 'required|integer',
         ]);
+
+        // dd($request);
 
         // Get the access token from the request or environment
         $accessToken = session('api_token'); // Replace with your actual access token
@@ -179,11 +178,12 @@ class BatchController extends Controller
         $batchData = [
             'id' => $id,
             'name' => $request->input('name'),
-            'shortName' => $request->input('shortName'),
-            'period' => $request->input('period'),
             'year' => $request->input('year'),
-            'status' => $request->input('status') == 1 ? true : false, // Convert to boolean
+            // 'status' => $request->input('status'),
+            'active' => $request->input('active') == 1 ? true : false, // Convert to boolean
         ];
+
+        // dd($batchData);
 
         try {
             // Make the PUT request to the external API
@@ -211,14 +211,149 @@ class BatchController extends Controller
         }
     }
 
+    public function update_state(Request $request, string $id)
+    {
+        // Validate the request data
+        $request->validate([
+            'active' => 'required|integer',
+        ]);
+
+        // dd($request);
+
+        // Get the access token from the request or environment
+        $accessToken = session('api_token');
+
+        // Prepare the data for the batch state update
+        $batchData = [
+            'id' => $id,
+            'active' => $request->input('active') == 1 ? true : false, // Convert to boolean
+        ];
+
+        // dd($batchData);
+
+        try {
+            // Make the PUT request to the external API
+            $response = Http::withToken($accessToken)
+                ->put('http://192.168.1.200:5123/Appraisal/batch/update-activation', $batchData);
+
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                return redirect()->route('batch.setup.index')->with('toast_success', 'Batch state updated successfully');
+            } else {
+                // Log the error response
+                Log::error('Failed to update batch', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to update batch state');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while updating batch', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
+    }
+
+    public function update_status(Request $request, string $id)
+    {
+        // Validate the request data
+        $request->validate([
+            'status' => 'required|string',
+        ]);
+
+        // dd($request);
+
+        // Get the access token from the request or environment
+        $accessToken = session('api_token'); // Replace with your actual access token
+
+        // Prepare the data for the batch update
+        $batchData = [
+            'id' => $id,
+            'status' => $request->input('status'),
+
+        ];
+
+        // dd($batchData);
+
+        try {
+            // Make the PUT request to the external API
+            $response = Http::withToken($accessToken)
+                ->put('http://192.168.1.200:5123/Appraisal/batch/update-status', $batchData);
+
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                return redirect()->route('batch.setup.index')->with('toast_success', 'Batch status updated successfully');
+            } else {
+                // Log the error response
+                Log::error('Failed to update batch', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to update batch status');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while updating batch', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
+    }
+
 
 
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function delete_batch(Request $request, string $id)
     {
-        //
+        // Validate the request data
+        $request->validate([
+            'status' => 'required|string',
+        ]);
+
+        // dd($request);
+
+        // Get the access token from the request or environment
+        $accessToken = session('api_token'); // Replace with your actual access token
+
+        // Prepare the data for the batch update
+        $batchData = [
+            'id' => $id,
+            'status' => $request->input('status'),
+
+        ];
+
+        // dd($batchData);
+
+        try {
+            // Make the PUT request to the external API
+            $response = Http::withToken($accessToken)
+                ->put('http://192.168.1.200:5123/Appraisal/batch/update-status', $batchData);
+
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                return redirect()->route('batch.setup.index')->with('toast_success', 'Batch status updated successfully');
+            } else {
+                // Log the error response
+                Log::error('Failed to update batch', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to update batch status');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while updating batch', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
     }
 }
