@@ -30,20 +30,20 @@
                                     value="{{ $batch_data['name'] }}" id="example-text-input">
                             </div>
                         </div>
-                        <div class="row mb-3">
+                        {{--  <div class="row mb-3">
                             <label for="example-text-input" class="">KPI Batch Short Name</label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="shortName" required
                                     value="{{ $batch_data['shortName'] }}" id="example-text-input">
                             </div>
-                        </div>
-                        <div class="row mb-3">
+                        </div>  --}}
+                        {{--  <div class="row mb-3">
                             <label for="example-text-input" class="">Period</label>
                             <div class="col-md-12">
                                 <input class="form-control" type="number" name="period" required
                                     value="{{ $batch_data['period'] }}" id="example-text-input">
                             </div>
-                        </div>
+                        </div>  --}}
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Batch Year</label>
                             <div class="col-md-12">
@@ -58,26 +58,52 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="row mb-3">
+                        {{--  <div class="row mb-3">
                             <label for="example-text-input" class="">Batch Status</label>
                             <div class="col-md-12">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault"
-                                         @if ($batch_data['status'] == 1) checked @endif
-                                        onchange="document.getElementById('statusHidden').value = this.checked ? 1 : 0; document.getElementById('switchStatus').textContent = this.checked ? 'Active' : 'Deactivated'">
-                                    <label class="form-check-label" for="flexSwitchCheckDefault" id="switchStatus">
-                                        @if ($batch_data['status'] == 1)
-                                            Active
-                                        @else
-                                            Deactivated
-                                        @endif
-                                    </label>
-                                </div>
-                                <input type="hidden" name="status" id="statusHidden"
-                                    value="{{ $batch_data['status'] == 1 ? 1 : 0 }}">
+                                <select class="form-control" id="statusSelect" name="status" onchange="updateStatus()">
+                                    <option value="OPEN" {{ $batch_data['status'] === 'OPEN' ? 'selected' : '' }}>
+                                        OPEN</option>
+                                    <option value="CLOSED" {{ $batch_data['status'] === 'CLOSED' ? 'selected' : '' }}>
+                                        CLOSED
+                                    </option>
+                                </select>
 
+                                <input type="hidden" name="statusHidden" id="statusHidden"
+                                    value="{{ $batch_data['status'] }}">
+
+                                <script>
+                                    function updateStatus() {
+                                        var select = document.getElementById('statusSelect');
+                                        var hiddenInput = document.getElementById('statusHidden');
+                                        hiddenInput.value = select.value;
+                                    }
+                                </script>
+                            </div>
+                        </div>  --}}
+                        <div class="row mb-3">
+                            <label for="example-text-input" class="">Batch State</label>
+                            <div class="col-md-12">
+                                <select class="form-control" id="stateSelect" name="active" onchange="updateState()">
+                                    <option value="1" {{ $batch_data['active'] === true ? 'selected' : '' }}>
+                                        Active</option>
+                                    <option value="0" {{ $batch_data['active'] === false ? 'selected' : '' }}>
+                                        Deactivate</option>
+                                </select>
+
+                                <input type="hidden" name="stateHidden" id="stateHidden"
+                                    value="{{ $batch_data['active'] }}">
+
+                                <script>
+                                    function updateState() {
+                                        var select = document.getElementById('stateSelect');
+                                        var hiddenInputx = document.getElementById('stateHidden');
+                                        hiddenInputx.value = select.value === '1';
+                                    }
+                                </script>
                             </div>
                         </div>
+
                         <button type="submit"
                             class="btn btn-success waves-effect waves-light col-md-12 mt-4">Update</button>
                     </form>

@@ -1,8 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\KpiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BatchController;
+use App\Http\Controllers\MetricController;
+use App\Http\Controllers\SectionController;
 use App\Http\Controllers\DashboardController;
 
 /*
@@ -19,29 +22,57 @@ use App\Http\Controllers\DashboardController;
 Route::get('/', function () {
     return view('auth.auth-login');
 })->name('login');
-
-
-
-
-Route::get("dashboard/index", [DashboardController::class, "index"])->name("dashboard.index");
-Route::get("dashboard/view-kpi", [DashboardController::class, "view_kpi"])->name("view.kpi");
-Route::get("dashboard/edit-kpi", [DashboardController::class, "view_kpi"])->name("edit.kpi");
-Route::get("dashboard/kpi-form", [DashboardController::class, "kpi_form"])->name("kpi.form");
-Route::get("dashboard/my-kpis", [DashboardController::class, "my_kpis"])->name("my.kpis");
-
-Route::get("dashboard/department-kpi-setup", [DashboardController::class, "dep_kpi_setup"])->name("create.dep.kpi");
-Route::get("dashboard/role-unit-kpi-setup", [DashboardController::class, "unit_kpi_setup"])->name("create.unit.setup");
-Route::get("dashboard/kpi-setup", [DashboardController::class, "kpi_setup"])->name("kpi.setup");
-Route::get("dashboard/score-setup", [DashboardController::class, "score_setup"])->name("score.setup");
-Route::get("dashboard/section-setup", [DashboardController::class, "section_setup"])->name("section.setup");
-
-
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-Route::get("dashboard/appraisal/batch-setup", [BatchController::class, "index"])->name("batch.setup.index");
-Route::post('dashboard/appraisal/create-batch', [BatchController::class, 'store'])->name('create.batch');
-Route::get("dashboard/appraisal/batch/{id}", [BatchController::class, "show"])->name("show.batch");
-Route::post("dashboard/appraisal/batch/update/{id}", [BatchController::class, "update"])->name("update.batch");
 
 
+Route::group(
+    ['middleware' => ['session.timeout']],
+    function () {
+
+        //Employee KPI Setup
+        Route::get("dashboard/index", [DashboardController::class, "index"])->name("dashboard.index");
+        Route::get("dashboard/view-kpi", [DashboardController::class, "view_kpi"])->name("view.kpi");
+        Route::get("dashboard/edit-kpi", [DashboardController::class, "view_kpi"])->name("edit.kpi");
+        Route::get("dashboard/kpi-form", [DashboardController::class, "kpi_form"])->name("kpi.form");
+        Route::get("dashboard/my-kpis", [DashboardController::class, "my_kpis"])->name("my.kpis");
+
+
+        //Batch Setup
+        Route::get("dashboard/appraisal/batch-setup", [BatchController::class, "index"])->name("batch.setup.index");
+        Route::post('dashboard/appraisal/create-batch', [BatchController::class, 'store'])->name('create.batch');
+        Route::get("dashboard/appraisal/batch/{id}/show", [BatchController::class, "show"])->name("show.batch");
+        Route::post("dashboard/appraisal/batch/update/{id}", [BatchController::class, "update"])->name("update.batch");
+        Route::post("dashboard/appraisal/batch/update-state/{id}", [BatchController::class, "update_state"])->name("update.batch.state");
+        Route::post("dashboard/appraisal/batch/update-status/{id}", [BatchController::class, "update_status"])->name("update.batch.status");
+        Route::post("dashboard/appraisal/batch/delete-batch/{id}", [BatchController::class, "delete_batch"])->name("delete.batch");
+
+
+        //Admin KPI - Setup
+        Route::get("dashboard/appraisal/kpi-setup", [KpiController::class, "index"])->name("kpi.index");
+        Route::post("dashboard/appraisal/kpi-setup", [KpiController::class, "store"])->name("create.kpi");
+        Route::get("dashboard/appraisal/kpi/{id}/show", [KpiController::class, "show"])->name("show.kpi");
+        Route::post("dashboard/appraisal/kpi/{id}/update", [KpiController::class, "update"])->name("update.kpi");
+        Route::delete("dashboard/appraisal/kpi/{id}/delete", [KpiController::class, "destroy"])->name("delete.kpi");
+
+        //Score Setup
+        Route::get("dashboard/score-setup", [DashboardController::class, "score_setup"])->name("score.setup");
+
+        //Setion Setup
+        Route::get("dashboard/kpi/{id}/section-setup", [SectionController::class, "index"])->name("section.index");
+        Route::post("dashboard/kpi/section-setup", [SectionController::class, "store"])->name("create.section");
+        Route::get("dashboard/kpi/{id}/section-update", [SectionController::class, "show"])->name("show.section");
+        Route::post("dashboard/kpi/{id}/section-update", [SectionController::class, "update"])->name("update.section");
+        Route::post("dashboard/kpi/{id}/section-delete", [SectionController::class, "destroy"])->name("delete.section");
+
+        //Metric Setup
+        Route::get("dashboard/section/{sectionId}/metric-setup", [MetricController::class, "index"])->name("metric.index");
+        Route::post("dashboard/section/metric-setup", [MetricController::class, "store"])->name("create.metric");
+        Route::get("dashboard/section/{id}/metric-update", [MetricController::class, "show"])->name("show.metric");
+        Route::post("dashboard/section/{id}/metric-update", [MetricController::class, "update"])->name("update.metric");
+        Route::post("dashboard/section/{id}/metric-delete", [MetricController::class, "destroy"])->name("delete.metric");
+
+
+
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    }
+);

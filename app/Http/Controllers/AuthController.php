@@ -53,12 +53,11 @@ class AuthController extends Controller
                 session([
                     'api_token' => $data->access_token,
                     'user_name' => $data->profile->fullName,
-                    'user_email' => $data->profile->email
+                    'user_email' => $data->profile->email,
+                    'lastActivityTime' => time(), // Initialize last activity time
                 ]);
 
-                // dd(session('user_name'));
-
-
+                logger('Authentication successful. Session set:', session()->all());
 
                 // Clear rate limit on success
                 RateLimiter::clear($throttleKey);
@@ -67,6 +66,7 @@ class AuthController extends Controller
 
                 return redirect()->route('dashboard.index')->with('toast_success', 'Logged in successfully');
             }
+            
             // Increment the rate limit on failed login attempt
             RateLimiter::hit($throttleKey, $decayMinutes * 60);
 
