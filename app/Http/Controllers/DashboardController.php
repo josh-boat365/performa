@@ -3,33 +3,29 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 
 class DashboardController extends Controller
 {
-    public function index(){
+    public function index()
+    {
 
-        // Retrieve user data from the session
-        $apiToken = session('api_token');
         $userName = session('user_name');
         $userEmail = session('user_email');
-
-        // Check if access_token is present
-        if (!$apiToken) {
-            return redirect()->route('login')->withErrors(['message' => 'You need to log in to access the dashboard.']);
-        }
-
 
 
         return view("dashboard.index", compact('userEmail', 'userName'));
     }
-    public function view_kpi(){
+    public function view_kpi()
+    {
         return view("dashboard.view-kpi");
     }
 
-    public function kpi_form(){
+    public function kpi_form()
+    {
 
         $dummyCollection = collect([
             ['id' => 1, 'name' => 'John Doe', 'position' => 'Developer', 'rating' => 5],
@@ -65,26 +61,20 @@ class DashboardController extends Controller
         return view("dashboard.kpi-form", compact('kpis'));
     }
 
-    public function my_kpis(){
+    public function my_kpis()
+    {
         return view("dashboard.my-kpis");
     }
-   
 
-    public function dep_kpi_setup(){
-        return view("kpi-setup.create-department-kpi");
-    }
 
-    public function unit_kpi_setup(){
-        return view("kpi-setup.create-unit-kpi");
-    }
-    public function kpi_setup(){
+    public function kpi_setup()
+    {
         return view("kpi-setup.kpi-setup");
     }
-    public function score_setup(){
+    public function score_setup()
+    {
         return view("kpi-setup.score-setup");
     }
 
-    public function section_setup(){
-        return view("kpi-setup.section-setup");
-    }
+    
 }
