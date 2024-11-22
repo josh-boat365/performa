@@ -7,7 +7,7 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18">
-                        <a href="{{ route('kpi.index') }}">{{ $section_data['name'] }}</a> >
+                        <a href="{{ route('section.index') }}">{{ $sectionData->name }}</a> >
                         Update Section Details
 
                     </h4>
@@ -23,41 +23,41 @@
             <div class="col-md-12">
                 <div class="card card-body">
                     <h3 class="card-title">KPI Section </h3>
-                    <form action="{{ route('update.section', $section_data['id']) }}" method="POST">
+                    <form action="{{ route('update.section', $sectionData->id) }}" method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Name</label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="name" required
-                                    value="{{ $section_data['name'] }}" id="example-text-input">
+                                    value="{{ $sectionData->name }}" id="example-text-input">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Score</label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="score" required
-                                    value="{{ $section_data['score'] }}" id="example-text-input">
+                                    value="{{ $sectionData->score }}" id="example-text-input">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Description</label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="description" required
-                                    value="{{ $section_data['description'] }}" id="example-text-input">
+                                    value="{{ $sectionData->description }}" id="example-text-input">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section State</label>
                             <div class="col-md-12">
                                 <select class="form-control" id="stateSelect" name="active" onchange="updateState()">
-                                    <option value="1" {{ $section_data['active'] === true ? 'selected' : '' }}>
+                                    <option value="1" {{ $sectionData->active === true ? 'selected' : '' }}>
                                         Active</option>
-                                    <option value="0" {{ $section_data['active'] === false ? 'selected' : '' }}>
+                                    <option value="0" {{ $sectionData->active === false ? 'selected' : '' }}>
                                         Deactivate</option>
                                 </select>
 
                                 <input type="hidden" name="stateHidden" id="stateHidden"
-                                    value="{{ $section_data['active'] }}">
+                                    value="{{ $sectionData->active }}">
 
                                 <script>
                                     function updateState() {
@@ -68,7 +68,7 @@
                                 </script>
                             </div>
                         </div>
-                        <input type="hidden" name="kpiId" value="{{ $section_data['kpi']['id'] }}">
+                        <input type="hidden" name="kpiId" value="{{ $sectionData->kpi->id }}">
                         <button type="submit"
                             class="btn btn-success waves-effect waves-light col-md-12 mt-4">Update</button>
                     </form>
