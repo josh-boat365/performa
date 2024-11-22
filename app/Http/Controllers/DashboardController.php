@@ -19,47 +19,151 @@ class DashboardController extends Controller
 
         return view("dashboard.index", compact('userEmail', 'userName'));
     }
-    public function view_kpi()
+    public function show()
     {
-        return view("dashboard.view-kpi");
+        $accessToken = session('api_token');
+
+        // Step 1: Fetch data from the API
+        $response = Http::withToken($accessToken)
+            ->get('http://192.168.1.200:5123/Appraisal/Kpi');
+
+        if ($response->successful()) {
+            $kpis = $response->json();
+
+            // Step 2: Initialize an array to hold active batches
+            $activeBatches = [];
+
+            // Step 3: Loop through the KPIs to find active batches
+            foreach ($kpis as $kpi_data) {
+                if (isset($kpi_data['batch']['active']) && $kpi_data['batch']['active'] === true) {
+
+                    $activeBatches[] = [
+                        'id' => $kpi_data['id'],
+                        'name' => $kpi_data['batch']['name'],
+                        'count' => count($kpis),
+                        'status' => $kpi_data['batch']['status'],
+                    ];
+                }
+            }
+
+            // Step 4: Pass the active batches to the view
+            return view("dashboard.show-kpis", compact('activeBatches'));
+        }
     }
 
-    public function kpi_form()
-    {
 
-        $dummyCollection = collect([
-            ['id' => 1, 'name' => 'John Doe', 'position' => 'Developer', 'rating' => 5],
-            ['id' => 2, 'name' => 'Jane Smith', 'position' => 'Designer', 'rating' => 4],
-            ['id' => 3, 'name' => 'Samuel Green', 'position' => 'Manager', 'rating' => 3],
-            ['id' => 4, 'name' => 'Emily Brown', 'position' => 'Marketer', 'rating' => 4],
-            ['id' => 5, 'name' => 'Michael Johnson', 'position' => 'Accountant', 'rating' => 5],
-            ['id' => 6, 'name' => 'Sarah Davis', 'position' => 'HR Specialist', 'rating' => 3],
-            ['id' => 7, 'name' => 'Paul Walker', 'position' => 'Developer', 'rating' => 5],
-            ['id' => 8, 'name' => 'Diana Blake', 'position' => 'Designer', 'rating' => 4],
-            ['id' => 9, 'name' => 'Chris Turner', 'position' => 'Manager', 'rating' => 4],
-            ['id' => 10, 'name' => 'Olivia White', 'position' => 'Marketer', 'rating' => 3],
-            ['id' => 11, 'name' => 'Robert Harris', 'position' => 'Developer', 'rating' => 4],
-            ['id' => 12, 'name' => 'Mia Thomas', 'position' => 'HR Specialist', 'rating' => 3],
-            ['id' => 13, 'name' => 'Jake Evans', 'position' => 'Developer', 'rating' => 5],
-            ['id' => 14, 'name' => 'Sophia Scott', 'position' => 'Designer', 'rating' => 4],
-            ['id' => 15, 'name' => 'William Clark', 'position' => 'Manager', 'rating' => 4],
-            ['id' => 16, 'name' => 'Isabella Wilson', 'position' => 'Marketer', 'rating' => 5],
-            ['id' => 17, 'name' => 'James Lewis', 'position' => 'Developer', 'rating' => 5],
-            ['id' => 18, 'name' => 'Ava Hall', 'position' => 'HR Specialist', 'rating' => 3],
-            ['id' => 19, 'name' => 'Lucas Adams', 'position' => 'Designer', 'rating' => 4],
-            ['id' => 20, 'name' => 'Ethan Campbell', 'position' => 'Accountant', 'rating' => 5],
-        ]);
+    public function edit($id){
 
-        // Convert the collection to a paginator
-        $perPage = 5; // Number of records per page
-        $currentPage = request()->get('page', 1); // Get the current page from the request
-        $items = $dummyCollection->slice(($currentPage - 1) * $perPage, $perPage)->all(); // Slice the collection
-        $kpis = new LengthAwarePaginator($items, $dummyCollection->count(), $perPage, $currentPage, [
-            'path' => request()->url(), // Set the pagination path to the current URL
-        ]);
+        // Fetch data from the API endpoints
+        $kpis = $this->fetchKpis();
+        $sections = $this->fetchSections();
+        $metrics = $this->fetchMetrics();
 
-        return view("dashboard.kpi-form", compact('kpis'));
+
+
+        // Get the employee role ID from the session
+        $currentEmpRoleId = 4; // Assuming you store the empRole ID in the session
+
+        // Organize the data
+        $organizedData = $this->organizeDataByRole($kpis, $sections, $metrics, $currentEmpRoleId);
+
+        $data = json_encode($organizedData);
+
+        $appraisal = json_decode($data);
+        // dd($appraisal);
+
+        return view("dashboard.kpi-form", compact('appraisal'));
     }
+
+    private function fetchKpis()
+    {
+        $accessToken = session('api_token');
+        $response = Http::withToken($accessToken)
+            ->get('http://192.168.1.200:5123/Appraisal/Kpi');
+
+            // dd($response->json());
+
+        return $response->json();
+    }
+
+    private function fetchSections()
+    {
+        $accessToken = session('api_token');
+        $response = Http::withToken($accessToken)
+            ->get('http://192.168.1.200:5123/Appraisal/Section');
+
+            // dd($response->json());
+
+        return $response->json();
+    }
+
+    private function fetchMetrics()
+    {
+        $accessToken = session('api_token');
+        $response = Http::withToken($accessToken)
+        ->get('http://192.168.1.200:5123/Appraisal/Metric');
+
+        // dd($response->json());
+
+        return $response->json();
+    }
+
+    private function organizeDataByRole($kpis, $sections, $metrics, $currentEmpRoleId)
+    {
+        // Initialize an array to hold organized data by role
+        $organized = [];
+
+        foreach ($kpis as $kpi) {
+            // Check if the empRole ID matches the current user's role
+            if ($kpi['empRole']['id'] === $currentEmpRoleId) {
+                $roleId = $kpi['empRole']['id'];
+                if (!isset($organized[$roleId])) {
+                    $organized[$roleId] = [
+                        'roleName' => $kpi['empRole']['name'], // Store role name
+                        'kpis' => []
+                    ];
+                }
+
+                // Add the KPI to the organized data
+                $organized[$roleId]['kpis'][$kpi['id']] = [
+                    'name' => $kpi['name'],
+                    'description' => $kpi['description'],
+                    'sections' => []
+                ];
+
+                // Find sections related to the current KPI
+                foreach ($sections as $section) {
+                    // dd($sections);
+                    if ($section['kpi']['id'] === $kpi['id']) {
+                        $organized[$roleId]['kpis'][$kpi['id']]['sections'][$section['id']] = [
+                            'name' => $section['name'],
+                            'description' => $section['description'],
+                            'metrics' => []
+                        ];
+
+                        // Find metrics related to the current section
+                        foreach ($metrics as $metric) {
+                            if ($metric['section']['id'] === $section['id']) {
+                                $organized[$roleId]['kpis'][$kpi['id']]['sections'][$section['id']]['metrics'][] = [
+                                    'id' => $metric['id'],
+                                    'name' => $metric['name'],
+                                    'description' => $metric['description'],
+                                    'score' => $metric['score'],
+                                    'active' => $metric['active']
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $organized;
+    }
+
+
+
+
 
     public function my_kpis()
     {
@@ -75,6 +179,4 @@ class DashboardController extends Controller
     {
         return view("kpi-setup.score-setup");
     }
-
-    
 }

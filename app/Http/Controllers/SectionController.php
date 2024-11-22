@@ -5,68 +5,32 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class SectionController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    // public function index($kpiId )
-    // {
-    //     // $kpiId = $id;
-    //     $accessToken = session('api_token');
-
-
-    //     // Fetch sections data
-    //     $responseSection = Http::withToken($accessToken)
-    //         ->get("http://192.168.1.200:5123/Appraisal/Section");
-
-    //         // dd($responseSection->json());
-
-    //     // if ($response->successful()) {
-    //     //     $kpi = $response->json();
-    //     //     $kpi_data = [
-    //     //         'id' => $kpi['id'],
-    //     //         'name' => $kpi['name']
-    //     //     ];
-    //     // }
-
-    //     if ($responseSection->successful()) {
-    //         $sections = $responseSection->json();
-
-    //         // Filter sections where kpi->id matches $kpiId
-    //         $filteredSections = array_filter($sections, function ($section) use ($kpiId) {
-    //             return $section['kpi']['id'] == $kpiId;
-    //         });
-
-    //         // dd($filteredSections);
-
-    //         foreach ($filteredSections as $kpi_section) {
-    //             if ($kpi_section['kpi']['id'] == $kpiId) {
-    //                 session(
-    //                     [
-    //                         'kpi_section_id' => $kpi_section['kpi']['id'],
-    //                         'kpi_section_name' => $kpi_section['kpi']['name'],
-    //                     ]
-    //                 );
-    //             }
-    //         }
-    //     }
-
-    //     return view("section-setup.index", compact('filteredSections'));
-    // }
-
-    public function index()
+    public function index(Request $request)
     {
         try {
             // Fetch sections data using helper method
-            $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
+            $sectionsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
             $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
 
             // Filter the KPIs to include only those with active state of true
             $activeKpis = collect($kpis)->filter(function ($kpi) {
                 return $kpi->active === true;
             });
+
+            // Sort the KPIs to place the newly created one first
+            $sortSections = collect($sectionsResponse);
+            $sections = $sortSections->sortByDesc('createdAt');
+
+            $sections = $this->paginate($sections, 5, $request);
+
 
 
             return view('section-setup.index', compact('sections', 'activeKpis'));
@@ -171,7 +135,7 @@ class SectionController extends Controller
         }
     }
 
-    
+
 
 
     public function show(string $id)
@@ -217,57 +181,6 @@ class SectionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    // public function update(Request $request, $id)
-    // {
-    //     // Validate the request data
-    //     $request->validate([
-    //         'name' => 'required|string',
-    //         'description' => 'required|string',
-    //         'score' => 'required|integer',
-    //         'active' => 'required|integer',
-    //         'kpiId' => 'required|integer',
-    //     ]);
-
-    //     // Get the access token from the session
-    //     $accessToken = session('api_token'); // Replace with your actual access token
-
-    //     // Prepare the data for the Section update
-    //     $sectionData = [
-    //         'id' => $id,
-    //         'name' => $request->input('name'),
-    //         'description' => $request->input('description'),
-    //         'score' => $request->input('score'),
-    //         'active' => $request->input('active') == 1 ? true : false,
-    //         'kpiId' => $request->input('kpiId'),
-    //     ];
-
-    //     try {
-    //         // Make the PUT request to the external API
-    //         $response = Http::withToken($accessToken)
-    //             ->put("http://192.168.1.200:5123/Appraisal/Section/", $sectionData);
-
-    //         // Check the response status and return appropriate response
-    //         if ($response->successful()) {
-    //             return redirect()->route('kpi.index')->with('toast_success', 'Section updated successfully');
-    //         } else {
-    //             // Log the error response
-    //             Log::error('Failed to update Section', [
-    //                 'status' => $response->status(),
-    //                 'response' => $response->body()
-    //             ]);
-    //             return redirect()->back()->with('toast_error', 'Sorry, failed to update Section');
-    //         }
-    //     } catch (\Exception $e) {
-    //         // Log the exception
-    //         Log::error('Exception occurred while updating Section', [
-    //             'message' => $e->getMessage(),
-    //             'trace' => $e->getTraceAsString()
-    //         ]);
-    //         return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
-    //     }
-    // }
-
-
     public function update(Request $request, string $id)
     {
         // Validate the request data
@@ -357,5 +270,27 @@ class SectionController extends Controller
             ]);
             return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
         }
+    }
+
+    protected function paginate(array|Collection $items, int $perPage, Request $request): LengthAwarePaginator
+    {
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+
+        if (!$items instanceof Collection) {
+            $items = collect($items);
+        }
+
+        $currentItems = $items->slice(($currentPage - 1) * $perPage, $perPage);
+
+        return new LengthAwarePaginator(
+            $currentItems,
+            $items->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
     }
 }

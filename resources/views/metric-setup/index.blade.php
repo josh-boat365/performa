@@ -65,13 +65,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($activeMetrics as $metric)
+                                    @forelse ($metrics as $metric)
                                         <tr>
                                             <td><a href="#">{{ $metric->section->name }}</a></td>
                                             <td><a href="#">{{ $metric->name }}</a></td>
                                             <td>{{ $metric->score }}</td>
                                             <td>{{ $metric->description }}</td>
-                                            <td>{{ Carbon\Carbon::parse($metric->createdAt)->format('jS F, Y : g:i A') }}</td>
+                                            <td>{{ Carbon\Carbon::parse($metric->createdAt)->format('jS F, Y : g:i A') }}
+                                            </td>
 
                                             <td>
                                                 <a href="{{ route('show.metric', $metric->id) }}">
@@ -129,6 +130,9 @@
                                 </tbody>
                             </table>
                         </div>
+                        <nav aria-label="Page navigation example" class="mt-3">
+                            {{ $metrics->links() }}
+                        </nav>
                     </div>
                 </div>
 
@@ -176,7 +180,7 @@
                                     <select name="sectionId" class="form-select">
                                         <option>Select Section</option>
 
-                                        @foreach ($sections as $section)
+                                        @foreach ($activeSections as $section)
                                             <option value="{{ $section->id }}"
                                                 {{ old('sectionId') == $section->id ? 'selected' : '' }}>
                                                 {{ $section->name }} - {{ $section->kpi->name }}

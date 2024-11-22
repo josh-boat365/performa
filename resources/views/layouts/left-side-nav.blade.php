@@ -15,7 +15,7 @@
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
                         <li><a href="{{ route('dashboard.index') }}" key="t-default">Overview</a></li>
-                        <li><a href="{{ route('my.kpis') }}" key="t-default">My KPIs</a></li>
+                        <li><a href="{{ route('show.kpis') }}" key="t-default">My KPIs</a></li>
 
                     </ul>
                 </li>
@@ -29,7 +29,17 @@
                     <ul class="sub-menu" aria-expanded="false">
                         <li><a href="{{ route('batch.setup.index') }}" key="t-default">Batch Setup</a></li>
                         <li><a href="{{ route('score.setup') }}" key="t-default">Score Setup</a></li>
-                        <li><a href="{{ route('kpi.index') }}" key="t-default">KPI Setup</a></li>
+                        <li>
+                            <a href="#" class="has-arrow waves-effect">
+                                {{--  <i class="bx bxs-cog"></i>  --}}
+                                <span key="t-setup">Appraisal Setup</span>
+                            </a>
+                            <ul class="sub-menu" aria-expanded="false">
+                                <li> <a href="{{ route('kpi.index') }}" key="t-default">KPI Setup</a></li>
+                                <li> <a href="{{ route('section.index') }}" key="t-default">Section Setup</a></li>
+                                <li> <a href="{{ route('metric.index') }}" key="t-default">Metric Setup</a></li>
+                            </ul>
+                        </li>
                         {{--  <li><a href="#" key="t-saas">Saas</a></li>
                                 <li><a href="#" key="t-crypto">Crypto</a></li>
                                 <li><a href="#" key="t-blog">Blog</a></li>

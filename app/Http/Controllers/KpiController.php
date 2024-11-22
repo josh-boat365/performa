@@ -5,255 +5,103 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+
 
 class KpiController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    // public function index()
-    // {
-
-    //     $accessToken = session('api_token');
-
-    //     $responseRoles = Http::withToken($accessToken)
-    //         ->get('http://192.168.1.200:5124/HRMS/emprole');
-
-    //     $responseBatches = Http::withToken($accessToken)
-    //         ->get('http://192.168.1.200:5123/Appraisal/batch');
-
-    //     if ($responseBatches->successful()) {
-    //         $batch_data = $responseBatches->json();
-    //     }
-
-    //     if ($responseRoles->successful()) {
-    //         $rolesWithDepartments = $responseRoles->json();
-
-    //         // Extract departments and roles
-    //         $departments = array_map(function ($role) {
-    //             return $role['department'];
-    //         }, $rolesWithDepartments);
-
-    //         $roles = array_map(function ($role) {
-    //             return [
-    //                 'id' => $role['id'],
-    //                 'name' => $role['name']
-    //             ];
-    //         }, $rolesWithDepartments);
-
-    //         // Get unique departments and roles
-    //         $uniqueDepartments = array_unique($departments, SORT_REGULAR);
-    //         $uniqueRoles = array_unique($roles, SORT_REGULAR);
-    //     }
-
-    //     return view('kpi-setup.create-department-kpi', compact('uniqueDepartments', 'batch_data', 'uniqueRoles'));
-    // }
-
-
-    public function index()
+    public function index(Request $request)
     {
         $accessToken = session('api_token');
 
-        // Fetch roles and departments
-        $responseRoles = Http::withToken($accessToken)
-            ->get('http://192.168.1.200:5124/HRMS/emprole');
+        if (!$accessToken) {
+            return redirect()->route('login')->with('toast_error', 'We can not find session, please login again'); // Redirect to login if token is missing
+        }
 
-        // Fetch batches
-        $responseBatches = Http::withToken($accessToken)
-            ->get('http://192.168.1.200:5123/Appraisal/batch');
+        // Centralized API calls
+        $responseRoles = $this->fetchApiData($accessToken, 'http://192.168.1.200:5124/HRMS/emprole');
+        $responseBatches = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/batch');
+        $responseKpis = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/Kpi');
 
-        // Fetch KPIs
-        $responseKpis = Http::withToken($accessToken)
-            ->get('http://192.168.1.200:5123/Appraisal/Kpi');
+        // Extracting data
+        $batch_data = $responseBatches ?? [];
 
+        // Filter the KPIs to include only those with active state of true or false
+        $activeKpis = collect($responseKpis)->filter(function ($kpi) {
+            return $kpi->active === true || $kpi->active === false;
+        });
 
+        // Sort the KPIs to place the newly created one first
+        $activeKpis = $activeKpis->sortByDesc('createdAt');
 
-        // Initialize variables
+        // Paginate the KPIs to display 25 per page
+        $activeKpis = $this->paginate($activeKpis, 5, $request);
+
         $uniqueDepartments = [];
         $uniqueRoles = [];
-        $batch_data = [];
-        $kpi_data = [];
 
-        // Process batches response
-        if ($responseBatches->successful()) {
-            $batch_data = $responseBatches->json();
-        }
+        if ($responseRoles) {
+            $rolesWithDepartments = collect($responseRoles);
 
-        // Process roles response
-        if ($responseRoles->successful()) {
-            $rolesWithDepartments = $responseRoles->json();
-
-            // Extract departments and roles
-            $departments = array_map(function ($role) {
-                return $role['department'];
-            }, $rolesWithDepartments);
-
-            // dd($departments);
-
-            $roles = array_map(function ($role) {
+            // Extract and deduplicate departments and roles
+            $uniqueDepartments = $rolesWithDepartments->pluck('department')->unique()->toArray();
+            $uniqueRoles = $rolesWithDepartments->map(function ($role) {
                 return [
-                    'id' => $role['id'],
-                    'name' => $role['name']
+                    'id' => $role->id,
+                    'name' => $role->name,
                 ];
-            }, $rolesWithDepartments);
-
-            // Get unique departments and roles
-            $uniqueDepartments = array_unique($departments, SORT_REGULAR);
-            $uniqueRoles = array_unique($roles, SORT_REGULAR);
+            })->unique('id')->values()->toArray();
         }
 
-        // Process KPIs response
-        if ($responseKpis->successful()) {
-            $kpi_data = $responseKpis->json();
-
-            // dd($kpi_data);
-
-            // Sort the kpi_data array by creation date in descending order
-            usort($kpi_data, function ($a, $b) {
-                return strtotime($b['createdAt']) - strtotime($a['createdAt']);
-            });
-
-            // Get current page from URL e.g. &page=1
-            $currentPage = LengthAwarePaginator::resolveCurrentPage();
-
-            // Define how many items we want to be visible in each page
-            $perPage = 10;
-
-            // Slice the collection to get the items to display in current page
-            $currentItems = array_slice($kpi_data, ($currentPage - 1) * $perPage, $perPage);
-
-            // Create our paginator and pass it to the view
-            $kpis = new LengthAwarePaginator($currentItems, count($kpi_data), $perPage);
-
-            // dd($kpi_data);
-
-            // Append query parameters to the pagination links
-            $kpis->setPath(request()->url());
-        } else {
-            $kpis = new LengthAwarePaginator([], 0, 10);
-        }
-
-        return view('kpi-setup.index', compact('uniqueDepartments', 'batch_data', 'uniqueRoles', 'kpis'));
+        return view('kpi-setup.index', compact('uniqueDepartments', 'batch_data', 'uniqueRoles', 'activeKpis'));
     }
 
-    // public function index()
-    // {
-    //     $accessToken = session('api_token');
+    // Add this method for pagination
 
-    //     // Fetch roles and departments
-    //     $responseRoles = Http::withToken($accessToken)
-    //         ->get('http://192.168.1.200:5124/HRMS/emprole');
+    protected function paginate(array|Collection $items, int $perPage, Request $request): LengthAwarePaginator
+    {
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
-    //     // Fetch batches
-    //     $responseBatches = Http::withToken($accessToken)
-    //         ->get('http://192.168.1.200:5123/Appraisal/batch');
+        if (!$items instanceof Collection) {
+            $items = collect($items);
+        }
 
-    //     // Fetch KPIs
-    //     $responseKpis = Http::withToken($accessToken)
-    //         ->get('http://192.168.1.200:5123/Appraisal/Kpi');
+        $currentItems = $items->slice(($currentPage - 1) * $perPage, $perPage);
 
-    //     // Initialize variables
-    //     $uniqueDepartments = [];
-    //     $uniqueRoles = [];
-    //     $batch_data = [];
-    //     $departmentsWithBatches = [];
+        return new LengthAwarePaginator(
+            $currentItems,
+            $items->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+    }
 
-    //     // Process batches response
-    //     if ($responseBatches->successful()) {
-    //         $batch_data = $responseBatches->json();
-    //     }
+    /**
+     * Helper function to fetch data from API and return as object.
+     *
+     * @param string $accessToken
+     * @param string $url
+     * @return object|null
+     */
+    private function fetchApiData(string $accessToken, string $url)
+    {
+        $response = Http::withToken($accessToken)->get($url);
 
-    //     // Process roles response
-    //     if ($responseRoles->successful()) {
-    //         $rolesWithDepartments = $responseRoles->json();
-
-    //         // Extract departments and roles
-    //         $departments = array_map(function ($role) {
-    //             return $role['department'];
-    //         }, $rolesWithDepartments);
-
-    //         $roles = array_map(function ($role) {
-    //             return [
-    //                 'id' => $role['id'],
-    //                 'name' => $role['name']
-    //             ];
-    //         }, $rolesWithDepartments);
-
-    //         // Get unique departments and roles
-    //         $uniqueDepartments = array_unique($departments, SORT_REGULAR);
-    //         $uniqueRoles = array_unique($roles, SORT_REGULAR);
-    //     }
-
-    //     // Process KPIs response
-    //     if ($responseKpis->successful()) {
-    //         $kpi_data = $responseKpis->json();
-
-    //         // Extract departments with their batches
-    //         foreach ($kpi_data as $kpi) {
-    //             $departmentId = $kpi['department']['id'];
-    //             $batchId = $kpi['batch']['id'];
-
-    //             if (!isset($departmentsWithBatches[$departmentId])) {
-    //                 $departmentsWithBatches[$departmentId] = [
-    //                     'department' => $kpi['department'],
-    //                     'batches' => []
-    //                 ];
-
-    //             }
-
-    //             if (!in_array($kpi['batch'], $departmentsWithBatches[$departmentId]['batches'])) {
-    //                 $departmentsWithBatches[$departmentId]['batches'][] = $kpi['batch'];
-    //             }
-    //         }
-
-    //         // Flatten the array for pagination
-    //         $departmentsWithBatches = array_values($departmentsWithBatches);
-
-
-    //         // Sort the departmentsWithBatches array by department name
-    //         usort($departmentsWithBatches, function ($a, $b) {
-    //             return strcmp($a['department']['name'], $b['department']['name']);
-    //         });
-
-    //         // Get current page from URL e.g. &page=1
-    //         $currentPage = LengthAwarePaginator::resolveCurrentPage();
-
-    //         // Define how many items we want to be visible in each page
-    //         $perPage = 10;
-
-    //         // Slice the collection to get the items to display in current page
-    //         $currentItems = array_slice($departmentsWithBatches, ($currentPage - 1) * $perPage, $perPage);
-
-    //         // Create our paginator and pass it to the view
-    //         $departmentsBatchData = new LengthAwarePaginator($currentItems, count($departmentsWithBatches), $perPage);
-
-    //         // Append query parameters to the pagination links
-    //         $departmentsBatchData->setPath(request()->url());
-    //     } else {
-    //         $departmentsBatchData = new LengthAwarePaginator([], 0, 10);
-    //     }
-
-
-    //     // dd($departmentsBatchData);
-
-    //     return view('kpi-setup.create-department-kpi', compact('uniqueDepartments', 'batch_data', 'uniqueRoles', 'departmentsBatchData'));
-    // }
-
-
-
+        return $response->successful() ? $response->object() : null;
+    }
 
 
     /**
      * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
@@ -269,48 +117,75 @@ class KpiController extends Controller
             'empRoleId' => 'required|integer',
         ]);
 
-        // Get the access token from the session
-        $accessToken = session('api_token'); // Replace with your actual access token
+        // Prepare the data for KPI creation
+        $kpiData = $request->only([
+            'name',
+            'description',
+            'score',
+            'type',
+            'batchId',
+            'departmentId',
+            'empRoleId'
+        ]);
+        $kpiData['active'] = (bool) $request->input('active'); // Cast to boolean
 
-        // Prepare the data for the KPI creation
-        $kpiData = [
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'score' => $request->input('score'),
-            'type' => $request->input('type'),
-            'active' => $request->input('active') == 1 ? true : false,
-            'batchId' => $request->input('batchId'),
-            'departmentId' => $request->input('departmentId'),
-            'empRoleId' => $request->input('empRoleId'),
-        ];
+        // Send the request to the API
+        $response = $this->sendApiRequest('http://192.168.1.200:5123/Appraisal/Kpi', $kpiData, 'POST');
+
+        // Check the response and redirect
+        if ($response->success) {
+            return redirect()->back()->with('toast_success', 'KPI created successfully');
+        }
+
+        // Log errors (if any)
+        Log::error('Failed to create KPI', [
+            'status' => $response->status ?? 'N/A',
+            'response' => $response->data ?? 'No response received',
+        ]);
+
+        return redirect()->back()->with('toast_error', 'Sorry, failed to create KPI');
+    }
+
+    /**
+     * Helper method to send an API request.
+     *
+     * @param string $url
+     * @param array $data
+     * @param string $method
+     * @return object {success: bool, status: int|null, data: mixed|null}
+     */
+    private function sendApiRequest(string $url, array $data, string $method = 'POST')
+    {
+        $accessToken = session('api_token');
 
         try {
-            // Make the POST request to the external API
-            $response = Http::withToken($accessToken)
-                ->post('http://192.168.1.200:5123/Appraisal/Kpi', $kpiData);
+            $response = Http::withToken($accessToken)->{$method}($url, $data);
 
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->back()->with('toast_success', 'KPI created successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to create KPI', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to create KPI');
-            }
+            return (object) [
+                'success' => $response->successful(),
+                'status' => $response->status(),
+                'data' => $response->successful() ? $response->object() : $response->body(),
+            ];
         } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while creating KPI', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            Log::error('API Request Error', [
+                'url' => $url,
+                'method' => $method,
+                'data' => $data,
+                'error' => $e->getMessage(),
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+
+            return (object) [
+                'success' => false,
+                'status' => null,
+                'data' => null,
+            ];
         }
     }
 
 
+    /**
+     * Store a newly created resource in storage.
+     */
 
 
 
@@ -327,7 +202,7 @@ class KpiController extends Controller
 
             // Check the response status and return appropriate response
             if ($response->successful()) {
-                $manager = $response->json();
+                $manager = $response->object();
                 return [
                     'id' => $manager['id'],
                     'name' => $manager['name'],
@@ -358,76 +233,116 @@ class KpiController extends Controller
     /**
      * Display the specified resource.
      */
+
+
     public function show(string $id)
+    {
+        try {
+            // Fetch data using helper method
+            $responseRoles = $this->fetchShowApiData('http://192.168.1.200:5124/HRMS/emprole');
+            $responseBatches = $this->fetchShowApiData('http://192.168.1.200:5123/Appraisal/batch');
+            $responseKpi = $this->fetchShowApiData('http://192.168.1.200:5123/Appraisal/Kpi/' . $id);
+
+            // Extract and process data
+            $batch_data = $responseBatches ?? [];
+            $kpi_data = $responseKpi ?? null;
+
+            $uniqueDepartments = [];
+            $uniqueRoles = [];
+
+            if ($responseRoles) {
+                $rolesWithDepartments = collect($responseRoles);
+
+                $uniqueDepartments = $rolesWithDepartments->pluck('department')->unique()->toArray();
+                $uniqueRoles = $rolesWithDepartments->map(function ($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                    ];
+                })->unique('id')->values()->toArray();
+            }
+
+            if ($kpi_data) {
+                return view('kpi-setup.edit', compact('kpi_data', 'uniqueDepartments', 'uniqueRoles', 'batch_data'));
+            }
+
+            Log::error('Failed to fetch KPI', [
+                'id' => $id,
+                'response' => $responseKpi,
+            ]);
+            return redirect()->back()->with('toast_error', 'KPI does not exist');
+        } catch (\Exception $e) {
+            Log::error('Exception occurred while fetching KPI', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
+    }
+
+    /**
+     * Helper method to fetch data from an API.
+     *
+     * @param string $url
+     * @return object|null
+     */
+    private function fetchShowApiData(string $url)
     {
         $accessToken = session('api_token');
 
         try {
+            $response = Http::withToken($accessToken)->get($url);
 
-            // Fetch roles and departments
-            $responseRoles = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5124/HRMS/emprole');
-
-            // Fetch batches
-            $responseBatches = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5123/Appraisal/batch');
-
-            // Fetch KPI
-            $responseKpi = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5123/Appraisal/Kpi/' . $id);
-
+            return $response->successful() ? $response->object() : null;
+        } catch (\Exception $e) {
+            Log::error('API Request Error', [
+                'url' => $url,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
 
 
-            // Initialize variables
-            $uniqueDepartments = [];
-            $uniqueRoles = [];
-            $batch_data = [];
-            $kpi_data = [];
+    public function update_state(Request $request, string $id)
+    {
+        // Validate the request data
+        $request->validate([
+            'active' => 'required|integer',
+        ]);
 
-            // Process batches response
-            if ($responseBatches->successful()) {
-                $batch_data = $responseBatches->json();
-            }
+        // dd($request);
 
-            // Process roles response
-            if ($responseRoles->successful()) {
-                $rolesWithDepartments = $responseRoles->json();
+        // Get the access token from the request or environment
+        $accessToken = session('api_token');
 
-                // Extract departments and roles
-                $departments = array_map(function ($role) {
-                    return $role['department'];
-                }, $rolesWithDepartments);
+        // Prepare the data for the batch state update
+        $batchData = [
+            'id' => $id,
+            'active' => $request->input('active') == 1 ? true : false, // Convert to boolean
+        ];
 
-                // dd($departments);
+        // dd($batchData);
 
-                $roles = array_map(function ($role) {
-                    return [
-                        'id' => $role['id'],
-                        'name' => $role['name']
-                    ];
-                }, $rolesWithDepartments);
+        try {
+            // Make the PUT request to the external API
+            $response = Http::withToken($accessToken)
+                ->put('http://192.168.1.200:5123/Appraisal/kpi/update-activation', $batchData);
 
-                // Get unique departments and roles
-                $uniqueDepartments = array_unique($departments, SORT_REGULAR);
-                $uniqueRoles = array_unique($roles, SORT_REGULAR);
-            }
-
-            // Process KPIs response
-            if ($responseKpi->successful()) {
-                $kpi_data = $responseKpi->json();
-
-                return view('kpi-setup.edit', compact('kpi_data', 'uniqueDepartments', 'uniqueRoles', 'batch_data'));
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                return redirect()->route('kpi.index')->with('toast_success', 'Kpi state updated successfully');
             } else {
                 // Log the error response
-                Log::error('Failed to fetch KPI', [
-                    'status' => $responseKpi->status(),
-                    'response' => $responseKpi->body()
+                Log::error('Failed to update batch', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'KPI does not exist');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to update batch state');
             }
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while fetching KPI', [
+            Log::error('Exception occurred while updating batch', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -435,10 +350,52 @@ class KpiController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id) {}
+    public function update_status(Request $request, string $id)
+    {
+        // Validate the request data
+        $request->validate([
+            'status' => 'required|string',
+        ]);
+
+        // dd($request);
+
+        // Get the access token from the request or environment
+        $accessToken = session('api_token'); // Replace with your actual access token
+
+        // Prepare the data for the batch update
+        $batchData = [
+            'id' => $id,
+            'status' => $request->input('status'),
+
+        ];
+
+        // dd($batchData);
+
+        try {
+            // Make the PUT request to the external API
+            $response = Http::withToken($accessToken)
+                ->put('http://192.168.1.200:5123/Appraisal/kpi/update-status', $batchData);
+
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                return redirect()->route('kpi.index')->with('toast_success', 'Kpi status updated successfully');
+            } else {
+                // Log the error response
+                Log::error('Failed to update batch', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to update batch status');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while updating batch', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
+    }
 
     /**
      * Update the specified resource in storage.
@@ -501,36 +458,108 @@ class KpiController extends Controller
 
 
     /**
-     * Remove the specified resource from storage.
+     * Helper method to make API requests.
+     *
+     * @param string $method HTTP method (GET, POST, PUT, DELETE)
+     * @param string $url API URL
+     * @param array|null $data Request payload
+     * @return object|null
      */
-    public function destroy($id)
+    private function makeApiRequest(string $method, string $url, array $data = null)
     {
-        // Get the access token from the session
-        $accessToken = session('api_token'); // Replace with your actual access token
+        $accessToken = session('api_token');
 
         try {
-            // Make the DELETE request to the external API
-            $response = Http::withToken($accessToken)
-                ->delete("http://192.168.1.200:5123/Appraisal/Kpi/{$id}");
+            $response = Http::withToken($accessToken)->$method($url, $data);
 
-            // Check the response status and return appropriate response
             if ($response->successful()) {
-                return redirect()->back()->with('toast_success', 'KPI deleted successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to delete KPI', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete KPI');
+                return $response->object();
             }
+
+            Log::error('API Request Failed', [
+                'method' => $method,
+                'url' => $url,
+                'status' => $response->status(),
+                'response' => $response->body(),
+            ]);
+
+            return null;
         } catch (\Exception $e) {
-            // Log the exception
+            Log::error('API Request Exception', [
+                'method' => $method,
+                'url' => $url,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+
+
+    /**
+     * Remove the specified resource from storage.
+     */
+
+    public function destroy($id)
+    {
+        try {
+            // Use helper method to make the DELETE API request
+            $response = $this->makeDestroyApiRequest('DELETE', "http://192.168.1.200:5123/Appraisal/Kpi/{$id}");
+
+            if ($response) {
+                return redirect()->back()->with('toast_success', 'KPI deleted successfully');
+            }
+
+            Log::error('Failed to delete KPI', [
+                'id' => $id,
+                'response' => $response,
+            ]);
+            return redirect()->back()->with('toast_error', 'Sorry, failed to delete KPI');
+        } catch (\Exception $e) {
             Log::error('Exception occurred while deleting KPI', [
+                'id' => $id,
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
         }
     }
+
+    /**
+     * Helper method to make API requests.
+     *
+     * @param string $method HTTP method (GET, POST, PUT, DELETE)
+     * @param string $url API URL
+     * @param array|null $data Request payload
+     * @return object|null
+     */
+    private function makeDestroyApiRequest(string $method, string $url, array $data = null)
+    {
+        $accessToken = session('api_token');
+
+        try {
+            $response = Http::withToken($accessToken)->$method($url, $data);
+
+            if ($response->successful()) {
+                return $response->object();
+            }
+
+            Log::error('API Request Failed', [
+                'method' => $method,
+                'url' => $url,
+                'status' => $response->status(),
+                'response' => $response->body(),
+            ]);
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('API Request Exception', [
+                'method' => $method,
+                'url' => $url,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
 }
