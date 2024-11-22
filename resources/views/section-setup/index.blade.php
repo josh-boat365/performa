@@ -136,6 +136,9 @@
                                 </tbody>
                             </table>
                         </div>
+                        <nav aria-label="Page navigation example" class="mt-3">
+                            {{ $sections->links() }}
+                        </nav>
                     </div>
                 </div>
 

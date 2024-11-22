@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class MetricController extends Controller
 {
@@ -12,20 +14,26 @@ class MetricController extends Controller
      * Display a listing of the resource.
      */
 
-    public function index()
+    public function index(Request $request)
     {
         try {
             // Fetch sections data using helper method
             $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
-            $metrics = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Metric");
+            $metricsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Metric");
 
             // Filter the KMetric to include only those with active state of true
-            $activeMetrics = collect($metrics)->filter(function ($metric) {
-                return $metric->active === true;
+            $activeSections = collect($sections)->filter(function ($section) {
+                return $section->active === true;
             });
 
+            // Sort the KPIs to place the newly created one first
+            $sortMetrics = collect($metricsResponse);
+            $metrics = $sortMetrics->sortByDesc('createdAt');
 
-            return view('metric-setup.index', compact('sections', 'activeMetrics'));
+            $metrics = $this->paginate($metrics, 5, $request);
+
+
+            return view('metric-setup.index', compact('metrics', 'activeSections'));
         } catch (\Exception $e) {
             Log::error('Exception occurred in index method', [
                 'message' => $e->getMessage(),
@@ -175,55 +183,6 @@ class MetricController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    // public function update(Request $request, $id)
-    // {
-    //     // Validate the request data
-    //     $request->validate([
-    //         'name' => 'required|string',
-    //         'description' => 'required|string',
-    //         'score' => 'required|integer',
-    //         'active' => 'required|integer',
-    //         'sectionId' => 'required|integer',
-    //     ]);
-
-    //     // Get the access token from the session
-    //     $accessToken = session('api_token'); // Replace with your actual access token
-
-    //     // Prepare the data for the Section update
-    //     $metricData = [
-    //         'id' => $id,
-    //         'name' => $request->input('name'),
-    //         'description' => $request->input('description'),
-    //         'score' => $request->input('score'),
-    //         'active' => $request->input('active') == 1 ? true : false,
-    //         'sectionId' => $request->input('sectionId'),
-    //     ];
-
-    //     try {
-    //         // Make the PUT request to the external API
-    //         $response = Http::withToken($accessToken)
-    //             ->put("http://192.168.1.200:5123/Appraisal/Metric/", $metricData);
-
-    //         // Check the response status and return appropriate response
-    //         if ($response->successful()) {
-    //             return redirect()->route('kpi.index')->with('toast_success', 'Metric updated successfully');
-    //         } else {
-    //             // Log the error response
-    //             Log::error('Failed to update Metric', [
-    //                 'status' => $response->status(),
-    //                 'response' => $response->body()
-    //             ]);
-    //             return redirect()->back()->with('toast_error', 'Sorry, failed to update Metric');
-    //         }
-    //     } catch (\Exception $e) {
-    //         // Log the exception
-    //         Log::error('Exception occurred while updating Metric', [
-    //             'message' => $e->getMessage(),
-    //             'trace' => $e->getTraceAsString()
-    //         ]);
-    //         return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
-    //     }
-    // }
 
     public function update(Request $request, $id)
     {
@@ -312,5 +271,27 @@ class MetricController extends Controller
             ]);
             return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
         }
+    }
+
+    protected function paginate(array|Collection $items, int $perPage, Request $request): LengthAwarePaginator
+    {
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+
+        if (!$items instanceof Collection) {
+            $items = collect($items);
+        }
+
+        $currentItems = $items->slice(($currentPage - 1) * $perPage, $perPage);
+
+        return new LengthAwarePaginator(
+            $currentItems,
+            $items->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
     }
 }
