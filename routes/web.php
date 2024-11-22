@@ -31,10 +31,10 @@ Route::group(
 
         //Employee KPI Setup
         Route::get("dashboard/index", [DashboardController::class, "index"])->name("dashboard.index");
-        Route::get("dashboard/view-kpi", [DashboardController::class, "view_kpi"])->name("view.kpi");
+        Route::get("dashboard/view-kpi", [DashboardController::class, "show"])->name("view.kpi");
         Route::get("dashboard/edit-kpi", [DashboardController::class, "view_kpi"])->name("edit.kpi");
-        Route::get("dashboard/kpi-form", [DashboardController::class, "kpi_form"])->name("kpi.form");
-        Route::get("dashboard/my-kpis", [DashboardController::class, "my_kpis"])->name("my.kpis");
+        Route::get("dashboard/batch/{id}/kpis", [DashboardController::class, "edit"])->name("kpi.form");
+        Route::get("dashboard/my-kpis", [DashboardController::class, "show"])->name("show.kpis");
 
 
         //Batch Setup
@@ -53,19 +53,21 @@ Route::group(
         Route::get("dashboard/appraisal/kpi/{id}/show", [KpiController::class, "show"])->name("show.kpi");
         Route::post("dashboard/appraisal/kpi/{id}/update", [KpiController::class, "update"])->name("update.kpi");
         Route::delete("dashboard/appraisal/kpi/{id}/delete", [KpiController::class, "destroy"])->name("delete.kpi");
+        Route::post("dashboard/appraisal/kpi/update-state/{id}", [KpiController::class, "update_state"])->name("update.kpi.state");
+        Route::post("dashboard/appraisal/kpi/update-status/{id}", [KpiController::class, "update_status"])->name("update.kpi.status");
 
         //Score Setup
         Route::get("dashboard/score-setup", [DashboardController::class, "score_setup"])->name("score.setup");
 
         //Setion Setup
-        Route::get("dashboard/kpi/{id}/section-setup", [SectionController::class, "index"])->name("section.index");
+        Route::get("dashboard/kpi/section-setup/", [SectionController::class, "index"])->name("section.index");
         Route::post("dashboard/kpi/section-setup", [SectionController::class, "store"])->name("create.section");
         Route::get("dashboard/kpi/{id}/section-update", [SectionController::class, "show"])->name("show.section");
         Route::post("dashboard/kpi/{id}/section-update", [SectionController::class, "update"])->name("update.section");
         Route::post("dashboard/kpi/{id}/section-delete", [SectionController::class, "destroy"])->name("delete.section");
 
         //Metric Setup
-        Route::get("dashboard/section/{sectionId}/metric-setup", [MetricController::class, "index"])->name("metric.index");
+        Route::get("dashboard/section/metric-setup", [MetricController::class, "index"])->name("metric.index");
         Route::post("dashboard/section/metric-setup", [MetricController::class, "store"])->name("create.metric");
         Route::get("dashboard/section/{id}/metric-update", [MetricController::class, "show"])->name("show.metric");
         Route::post("dashboard/section/{id}/metric-update", [MetricController::class, "update"])->name("update.metric");
