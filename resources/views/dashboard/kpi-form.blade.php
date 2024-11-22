@@ -45,115 +45,59 @@
 
                         <div class="tab-content p-3 text-muted">
                             <div class="tab-pane active" id="kpi-form" role="tabpanel">
-                                <form action="#">
 
-                                    <div class="container">
-                                        @foreach ($kpis as $kpi)
-                                            <hr>
-                                            <div class="row mb-3">
-                                                <div class="col-4">
-                                                    <h4>Team Work <span class="badge rounded-pill bg-dark">80:
-                                                            {{ $kpi['id'] }}</span></h4>
-                                                </div>
 
-                                            </div>
-                                            <div class="row border-bottom mb-3">
-                                                <div class="col-12 col-md-6">
-                                                    <div class="font-size-13"><b>Communication Skills</b> <span
-                                                            class="badge rounded-pill bg-dark">5</span></div>
-                                                    <div class=" align-items-center" style="margin-top: 1.8rem">
-                                                        <div>
-                                                            <p>Good construction of the use of English</p>
+                                @foreach ($appraisal as $roleId => $role)
+                                    <div class="role-section">
+                                        <h2>Role: {{ $role->roleName }}</h2>
+
+                                        @foreach ($role->kpis as $kpiId => $kpi)
+                                            <div class="kpi-section">
+                                                <h3>KPI: {{ $kpi->name }}</h3>
+                                                <p>{{ $kpi->description }}</p>
+
+                                                @if (!empty($kpi->sections))
+                                                    @foreach ($kpi->sections as $sectionId => $section)
+                                                        <div class="section">
+                                                            <h4>Section: {{ $section->name }}</h4>
+                                                            <p>{{ $section->description }}</p>
+
+                                                            @if (!empty($section->metrics))
+                                                                <ul>
+                                                                    @foreach ($section->metrics as $metric)
+                                                                        <li>
+                                                                            <strong>{{ $metric->name }}</strong>:
+                                                                            {{ $metric->score }}
+                                                                            ({{ $metric->active ? 'Active' : 'Inactive' }})
+                                                                            <p>{{ $metric->description }}</p>
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            @else
+                                                                <p>No metrics available for this section.</p>
+                                                            @endif
                                                         </div>
-                                                        <div>
-                                                            <p>Effectiveness in expressing ideas clearly</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-12 col-md-2 mb-3">
-
-                                                    <input type="number" class="form-control mb-2"
-                                                        placeholder="Self Rating" />
-                                                    <input type="number" class="form-control mb-2"
-                                                        placeholder="Self Rating" />
-                                                    <input type="number" class="form-control"
-                                                        placeholder="Self Rating" />
-                                                </div>
-                                                <div class="col-12 col-md-2">
-
-                                                    <input type="number" class="form-control mb-2"
-                                                        placeholder="Supervisor's Rating" />
-                                                    <input type="number" class="form-control mb-2"
-                                                        placeholder="Supervisor's Rating" />
-                                                    <input type="number" class="form-control"
-                                                        placeholder="Supervisor's Rating" />
-                                                </div>
-                                                <div class="col-12 col-md-2">
-
-                                                    <input type="number" class="form-control mb-2"
-                                                        placeholder="Manager's Rating" />
-                                                    <input type="number" class="form-control mb-2"
-                                                        placeholder="Manager's Rating" />
-                                                    <input type="number" class="form-control"
-                                                        placeholder="Manager's Rating" />
-                                                </div>
-                                            </div>
-
-                                            <div class="row mb-3">
-                                                <div class="col-12">
-                                                    <div class="mb-2 items-center">
-                                                        <span class="font-bold">Comments</span>
-                                                        <span class="badge rounded-pill bg-primary">+ Add Comment</span>
-                                                    </div>
-                                                    <div class="">
-                                                        <input type="text" class="form-control"
-                                                            placeholder="Enter comments" />
-                                                        <div class="float-end">
-                                                            <span class="mb-2 badge rounded-pill bg-primary">Employee's
-                                                                comment</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="">
-                                                        <input type="text" class="form-control"
-                                                            placeholder="Enter comments" />
-                                                        <div class="float-end">
-                                                            <span class="mb-2 badge rounded-pill bg-success">Supervisor's
-                                                                comment</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="">
-                                                        <input type="text" class="form-control"
-                                                            placeholder="Enter comments" />
-                                                        <div class="float-end">
-                                                            <span class="mb-2 badge rounded-pill bg-warning">Manager's
-                                                                comment</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                    @endforeach
+                                                @else
+                                                    <p>No sections available for this KPI.</p>
+                                                @endif
                                             </div>
                                         @endforeach
-
-
-                                        {{ $kpis->links() }}
-                                        <div class="d-flex gap-3 float-end">
-                                            <button class="btn btn-primary">Previous</button>
-                                            <button class="btn btn-success">Next</button>
-                                        </div>
-
                                     </div>
-
-
-
-                                </form>
+                                @endforeach
                             </div>
-                        </div>
 
+
+
+                        </div>
                     </div>
+
                 </div>
-                <!-- end card -->
             </div>
-            <!-- end col -->
+            <!-- end card -->
         </div>
+        <!-- end col -->
+    </div>
 
 
     </div>
