@@ -29,7 +29,7 @@ class SectionController extends Controller
             $sortSections = collect($sectionsResponse);
             $sections = $sortSections->sortByDesc('createdAt');
 
-            $sections = $this->paginate($sections, 5, $request);
+            $sections = $this->paginate($sections, 25, $request);
 
 
 
@@ -51,6 +51,21 @@ class SectionController extends Controller
      * @param array|null $data Request payload
      * @return object|null
      */
+
+
+    public function create(){
+
+        $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
+
+        // Filter the KPIs to include only those with active state of true
+        $activeKpis = collect($kpis)->filter(function ($kpi) {
+            return $kpi->active === true;
+        });
+
+        return view('section-setup.create', compact('activeKpis'));
+    }
+
+
     private function makeApiRequest(string $method, string $url, array $data = null)
     {
         $accessToken = session('api_token');
@@ -116,7 +131,7 @@ class SectionController extends Controller
 
             // Check the response status and return appropriate response
             if ($response->successful()) {
-                return redirect()->back()->with('toast_success', 'Section created successfully');
+                return redirect()->route('section.index')->with('toast_success', 'Section created successfully');
             } else {
                 // Log the error response
                 Log::error('Failed to create Section', [
