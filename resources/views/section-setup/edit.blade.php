@@ -28,8 +28,8 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Name</label>
                             <div class="col-md-12">
-                                <input class="form-control" type="text" name="name" required
-                                    value="{{ $sectionData->name }}" id="example-text-input">
+
+                                <textarea class="form-control" name="name" required rows="3" id="example-text-input">{{ $sectionData->name }}</textarea>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -42,8 +42,7 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Description</label>
                             <div class="col-md-12">
-                                <input class="form-control" type="text" name="description" required
-                                    value="{{ $sectionData->description }}" id="example-text-input">
+                                <textarea class="form-control" name="description" required rows="3" id="example-text-input">{{ $sectionData->description }}</textarea>
                             </div>
                         </div>
                         <div class="row mb-3">

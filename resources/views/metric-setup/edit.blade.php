@@ -28,8 +28,9 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Metric Name</label>
                             <div class="col-md-12">
-                                <input class="form-control" type="text" name="name" required
-                                    value="{{ $metricData->name }}" id="example-text-input">
+
+                                <textarea class="form-control" name="name" required placeholder="Enter Name for Section" rows="3"
+                                    id="example-text-input">{{ $metricData->name }}</textarea>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -42,8 +43,9 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Metric Description</label>
                             <div class="col-md-12">
-                                <input class="form-control" type="text" name="description" required
-                                    value="{{ $metricData->description }}" id="example-text-input">
+                                <textarea class="form-control" name="description" required placeholder="Enter Name for Section" rows="3"
+                                    id="example-text-input">{{ $metricData->description }}</textarea>
+
                             </div>
                         </div>
                         <div class="row mb-3">
