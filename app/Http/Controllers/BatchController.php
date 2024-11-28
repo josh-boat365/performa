@@ -310,46 +310,30 @@ class BatchController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function delete_batch(Request $request, string $id)
+    public function destroy(Request $request, string $id)
     {
-        // Validate the request data
-        $request->validate([
-            'status' => 'required|string',
-        ]);
-
-        // dd($request);
-
-        // Get the access token from the request or environment
+        // Get the access token from the session
         $accessToken = session('api_token'); // Replace with your actual access token
 
-        // Prepare the data for the batch update
-        $batchData = [
-            'id' => $id,
-            'status' => $request->input('status'),
-
-        ];
-
-        // dd($batchData);
-
         try {
-            // Make the PUT request to the external API
+            // Make the DELETE request to the external API
             $response = Http::withToken($accessToken)
-                ->put('http://192.168.1.200:5123/Appraisal/batch/update-status', $batchData);
+                ->delete("http://192.168.1.200:5123/Appraisal/Batch/{$id}");
 
             // Check the response status and return appropriate response
             if ($response->successful()) {
-                return redirect()->route('batch.setup.index')->with('toast_success', 'Batch status updated successfully');
+                return redirect()->route('batch.setup.index')->with('toast_success', 'Batch deleted successfully');
             } else {
                 // Log the error response
-                Log::error('Failed to update batch', [
+                Log::error('Failed to delete batch', [
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to update batch status');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to delete batch');
             }
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while updating batch', [
+            Log::error('Exception occurred while deleting batch', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
