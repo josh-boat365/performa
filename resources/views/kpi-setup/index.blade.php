@@ -13,11 +13,10 @@
         <!-- end page title -->
 
 
-        <div style="">
-
-            <button type="button" class="btn btn-success btn-rounded waves-effect waves-light " data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i class="bx bxs-plus"></i>Create
-                KPI</button>
+        <div>
+            <a href="{{ route('create.kpi') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
+                    class="bx bxs-plus"></i>Create
+                KPI</a>
         </div>
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
@@ -34,13 +33,6 @@
                             </div>
                         </div>
                     </div>
-                    {{--  <div class="col-sm-4">
-                        <div class="text-sm-end">
-                            <button type="button" class="btn btn-success btn-rounded waves-effect waves-light "
-                                data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
-                                aria-controls="offcanvasRight"><i class="bx bxs-plus"></i> + Create KPI</button>
-                        </div>
-                    </div>  --}}
                     <!-- end col-->
                 </div>
 
@@ -51,7 +43,6 @@
                             <tr>
 
                                 <th class="align-middle">KPI Name</th>
-                                {{--  <th class="align-middle">Score</th>  --}}
                                 <th class="align-middle">Type</th>
                                 <th class="align-middle">Role</th>
                                 <th class="align-middle">Department</th>
@@ -152,7 +143,7 @@
                                         @endpush
                                     </td>
                                     <td>{{ $kpi->empRole->name }}</td>
-                                    <td><span class="badge rounded-pill bg-primary">{{ $kpi->department->name }}</span>
+                                    <td><span class="badge rounded-pill bg-primary">{{ $kpi->empRole->department->name }}</span>
                                     </td>
                                     <td>{{ $kpi->batch->name }}</td>
                                     <td>
@@ -268,116 +259,37 @@
             </div>
         </div>
 
+        @push('scripts')
+            <script>
+                document.getElementById('searchTableList').addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const tableRows = document.querySelectorAll('#order-list tbody tr');
 
-        <!-- right offcanvas -->
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
-            aria-labelledby="offcanvasRightLabel">
-            <div class="offcanvas-header">
-                <h5 id="offcanvasRightLabel">Setup For KPI</h5>
-                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
-                    aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body">
-                <form action="{{ route('create.kpi') }}" class="custom-validation" method="POST">
-                    @csrf
-                    <div class="row mb-3">
-                        <label for="example-text-input" class="">KPI Name</label>
-                        <div class="col-md-12">
-                            <input class="form-control" type="text" name="name" required
-                                placeholder="Enter Name for KPI" value="{{ old('name') }}"
-                                id="example-text-input">
-                        </div>
-                    </div>
+                    tableRows.forEach(row => {
+                        const kpiName = row.querySelector('th a').textContent.toLowerCase();
+                        const type = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                        const role = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                        const department = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                        const batch = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                        const supervisors = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
+                        const active = row.querySelector('td:nth-child(7)').textContent.toLowerCase();
+                        const createdAt = row.querySelector('td:nth-child(8)').textContent.toLowerCase();
 
-                    <div class="row mb-3">
-                        <label for="example-text-input" class="">KPI Description</label>
-                        <div class="col-md-12">
-                            <input class="form-control" type="text" name="description" required
-                                placeholder="Enter Description for KPI" value="{{ old('description') }}"
-                                id="example-text-input">
-                        </div>
-                    </div>
+                        // Check if any of the fields contain the search term
+                        if (kpiName.includes(searchTerm) || type.includes(searchTerm) || role.includes(
+                            searchTerm) ||
+                            department.includes(searchTerm) || batch.includes(searchTerm) ||
+                            supervisors.includes(searchTerm) || active.includes(searchTerm) ||
+                            createdAt.includes(searchTerm)) {
+                            row.style.display = ''; // Show the row
+                        } else {
+                            row.style.display = 'none'; // Hide the row
+                        }
+                    });
+                });
+            </script>
+        @endpush
 
-                    {{--  <div class="row mb-3">
-                        <label for="example-text-input" class="">KPI Score</label>
-                        <div class="col-md-12">
-                            <input class="form-control" type="number" name="score" required
-                                value="{{ old('score') }}" id="example-text-input">
-                        </div>
-                    </div>  --}}
-
-                    <div class="row mb-3">
-                        <label for="example-text-input" class="">Select KPI Type</label>
-                        <div class="col-md-12">
-                            <select name="type" class="form-select">
-                                <option>Select KPI type</option>
-                                <option value="REGULAR" {{ old('type') == 'REGULAR' ? 'selected' : '' }}> REGULAR
-                                </option>
-                                <option value="PROBATION" {{ old('type') == 'PROBATION' ? 'selected' : '' }}>
-                                    PROBATION </option>
-                                <option value="GLOBAL" {{ old('type') == 'GLOBAL' ? 'selected' : '' }}> GLOBAL
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <label for="example-text-input" class="">Select Department</label>
-                        <div class="col-md-12">
-                            <select name="departmentId" class="form-select">
-                                <option>Select Department</option>
-
-                                @foreach ($uniqueDepartments as $department)
-                                    <option value="{{ $department->id }}"
-                                        {{ old('departmentId') == $department->id ? 'selected' : '' }}>
-                                        {{ $department->name }}
-                                    </option>
-                                @endforeach
-
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <label for="example-text-input" class="">Select Role</label>
-                        <div class="col-md-12">
-                            <select name="empRoleId" class="form-select">
-                                <option>Select Role</option>
-
-                                @foreach ($uniqueRoles as $role)
-                                    <option value="{{ $role['id'] }}"
-                                        {{ old('empRoleId') == $role['id'] ? 'selected' : '' }}> {{ $role['name'] }}
-                                    </option>
-                                @endforeach
-
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <label for="example-text-input" class="">Select Batch</label>
-                        <div class="col-md-12">
-                            <select name="batchId" class="form-select">
-                                <option>Select Batch</option>
-                                @foreach ($batch_data as $batch)
-                                    <option value="{{ $batch->id }}"
-                                        {{ old('batchId') == $batch->id ? 'selected' : '' }}>{{ $batch->name }}
-                                    </option>
-                                @endforeach
-
-                            </select>
-                        </div>
-                    </div>
-
-                    <input type="hidden" name="active" value="1">
-                    <input type="hidden" name="score" value="100">
-
-                    <button type="submit" class="btn btn-primary waves-effect waves-light col-md-12 mt-4">
-                        Create
-                    </button>
-                </form>
-            </div>
-        </div>
 
     </div>
 

@@ -15,11 +15,10 @@
         </div>
         <!-- end page title -->
 
-        <div style="">
-
-            <button type="button" class="btn btn-success btn-rounded waves-effect waves-light " data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i class="bx bxs-plus"></i>Create
-                Metric for Section</button>
+        <div>
+            <a href="{{ route('create.metric') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
+                    class="bx bxs-plus"></i>Create
+                Metric</a>
         </div>
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
@@ -41,11 +40,7 @@
                                 </div>
                             </div>
                             <div class="col-sm-4">
-                                {{--  <div class="text-sm-end">
-                                    <button type="button" data-bs-toggle="modal" data-bs-target=".bs-example-modal-xl"
-                                        class="btn btn-success btn-rounded waves-effect waves-light mb-2 me-2 "><i
-                                            class="mdi mdi-plus me-1"></i> Create Metric for Section</button>
-                                </div>  --}}
+                                <!-- Additional controls can go here -->
                             </div><!-- end col-->
                         </div>
 
@@ -55,8 +50,7 @@
                                 id="order-list">
                                 <thead class="table-light">
                                     <tr>
-
-                                        <th class="align-middle">Section Metric </th>
+                                        <th class="align-middle">Metric's Section Name</th>
                                         <th class="align-middle">Metric Name</th>
                                         <th class="align-middle">Metric Score</th>
                                         <th class="align-middle">Metric Description</th>
@@ -73,16 +67,15 @@
                                             <td>{{ $metric->description }}</td>
                                             <td>{{ Carbon\Carbon::parse($metric->createdAt)->format('jS F, Y : g:i A') }}
                                             </td>
-
                                             <td>
                                                 <a href="{{ route('show.metric', $metric->id) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
-                                                            class="bx bxs-pencil"></i>edit</span>
+                                                            class="bx bxs-pencil"></i> Edit</span>
                                                 </a>
                                                 <a href="#" data-bs-toggle="modal"
                                                     data-bs-target=".bs-delete-modal-lg-{{ $metric->id }}">
                                                     <span class="badge rounded-pill bg-danger fonte-size-13"><i
-                                                            class="bx bxs-trash"></i> delete</span>
+                                                            class="bx bxs-trash"></i> Delete</span>
                                                 </a>
 
                                                 <!-- Modal for Delete Confirmation -->
@@ -93,23 +86,20 @@
                                                         <div class="modal-content">
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title" id="myLargeModalLabel">Confirm
-                                                                    Metric
-                                                                    Deletion</h5>
+                                                                    Metric Deletion</h5>
                                                                 <button type="button" class="btn-close"
                                                                     data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body">
                                                                 <h4 class="text-center mb-4">Are you sure you want to
-                                                                    delete this
-                                                                    Metric?</h4>
+                                                                    delete this Metric?</h4>
                                                                 <form action="{{ route('delete.metric', $metric->id) }}"
                                                                     method="POST">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <div class="d-grid">
                                                                         <button type="submit"
-                                                                            class="btn btn-danger">Yes,
-                                                                            Delete</button>
+                                                                            class="btn btn-danger">Yes, Delete</button>
                                                                     </div>
                                                                 </form>
                                                             </div>
@@ -125,8 +115,6 @@
                                             </td>
                                         </tr>
                                     @endforelse
-
-
                                 </tbody>
                             </table>
                         </div>
@@ -135,73 +123,34 @@
                         </nav>
                     </div>
                 </div>
-
-                <!--  Large modal example -->
-                <!-- right offcanvas -->
-                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
-                    aria-labelledby="offcanvasRightLabel">
-                    <div class="offcanvas-header">
-                        <h5 id="offcanvasRightLabel">Setup For Metric</h5>
-                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="offcanvas-body">
-                        <form action="{{ route('create.metric') }}" class="custom-validation" method="POST">
-                            @csrf
-                            <div class="row mb-3">
-                                <label for="example-text-input" class="">Metric Name</label>
-                                <div class="col-md-12">
-                                    <input class="form-control" type="text" name="name" required
-                                        placeholder="Enter Name for Metric" value="{{ old('name') }}"
-                                        id="example-text-input">
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <label for="example-text-input" class="">Metric Description</label>
-                                <div class="col-md-12">
-                                    <input class="form-control" type="text" name="description" required
-                                        placeholder="Enter Description for Metric" value="{{ old('description') }}"
-                                        id="example-text-input">
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <label for="example-text-input" class="">Metric Score</label>
-                                <div class="col-md-12">
-                                    <input class="form-control" type="number" name="score" required
-                                        value="{{ old('score') }}" id="example-text-input">
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <label for="example-text-input" class="">Select Section</label>
-                                <div class="col-md-12">
-                                    <select name="sectionId" class="form-select">
-                                        <option>Select Section</option>
-
-                                        @foreach ($activeSections as $section)
-                                            <option value="{{ $section->id }}"
-                                                {{ old('sectionId') == $section->id ? 'selected' : '' }}>
-                                                {{ $section->name }} - {{ $section->kpi->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <input type="hidden" name="active" value="1">
-
-                            <button type="submit" class="btn btn-primary waves-effect waves-light col-md-12 mt-4">
-                                Create
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
             </div>
-            <!-- end card -->
         </div>
+
+        @push('scripts')
+            <script>
+                document.getElementById('searchTableList').addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const tableRows = document.querySelectorAll('#order-list tbody tr');
+
+                    tableRows.forEach(row => {
+                        const sectionMetric = row.querySelector('td:nth-child(1) a').textContent.toLowerCase();
+                        const metricName = row.querySelector('td:nth-child(2) a').textContent.toLowerCase();
+                        const metricScore = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                        const metricDescription = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                        const createdAt = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+
+                        // Check if any of the fields contain the search term
+                        if (sectionMetric.includes(searchTerm) || metricName.includes(searchTerm) || metricScore
+                            .includes(searchTerm) ||
+                            metricDescription.includes(searchTerm) || createdAt.includes(searchTerm)) {
+                            row.style.display = ''; // Show the row
+                        } else {
+                            row.style.display = 'none'; // Hide the row
+                        }
+                    });
+                });
+            </script>
+        @endpush
         <!-- end w-100 -->
     </div>
 
