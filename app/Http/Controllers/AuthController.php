@@ -54,10 +54,19 @@ class AuthController extends Controller
                     'api_token' => $data->access_token,
                     'user_name' => $data->profile->fullName,
                     'user_email' => $data->profile->email,
+                    'empRole' => 4,
                     'lastActivityTime' => time(), // Initialize last activity time
                 ]);
 
-                logger('Authentication successful. Session set:', session()->all());
+                $employeeData = Http::withToken(session('api_token'))
+                                ->get('http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee');
+
+                                // dd($employeeData->object());
+
+                // Store the employee data in the session
+                session(['employee_data' => $employeeData->object()]);
+
+
 
                 // Clear rate limit on success
                 RateLimiter::clear($throttleKey);
@@ -66,7 +75,7 @@ class AuthController extends Controller
 
                 return redirect()->route('dashboard.index')->with('toast_success', 'Logged in successfully');
             }
-            
+
             // Increment the rate limit on failed login attempt
             RateLimiter::hit($throttleKey, $decayMinutes * 60);
 
