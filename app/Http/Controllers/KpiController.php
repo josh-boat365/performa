@@ -24,23 +24,41 @@ class KpiController extends Controller
         }
 
         // Centralized API calls
-        $responseRoles = $this->fetchApiData($accessToken, 'http://192.168.1.200:5124/HRMS/emprole');
-        $responseBatches = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/batch');
+
         $responseKpis = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/Kpi');
 
-        // Extracting data
-        $batch_data = $responseBatches ?? [];
+
 
         // Filter the KPIs to include only those with active state of true or false
         $activeKpis = collect($responseKpis)->filter(function ($kpi) {
-            return $kpi->active === true || $kpi->active === false;
+            return $kpi->type === 'REGULAR' ;
         });
 
         // Sort the KPIs to place the newly created one first
         $activeKpis = $activeKpis->sortByDesc('createdAt');
 
         // Paginate the KPIs to display 25 per page
-        $activeKpis = $this->paginate($activeKpis, 5, $request);
+        $activeKpis = $this->paginate($activeKpis, 25, $request);
+
+
+
+        return view('kpi-setup.index', compact('activeKpis'));
+    }
+
+    // Add this method for pagination
+
+
+
+    public function create()
+    {
+
+        $accessToken = session('api_token');
+
+        $responseRoles = $this->fetchApiData($accessToken, 'http://192.168.1.200:5124/HRMS/emprole');
+        $responseBatches = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/batch');
+
+        // Extracting data
+        $batch_data = $responseBatches ?? [];
 
         $uniqueDepartments = [];
         $uniqueRoles = [];
@@ -58,31 +76,8 @@ class KpiController extends Controller
             })->unique('id')->values()->toArray();
         }
 
-        return view('kpi-setup.index', compact('uniqueDepartments', 'batch_data', 'uniqueRoles', 'activeKpis'));
-    }
 
-    // Add this method for pagination
-
-    protected function paginate(array|Collection $items, int $perPage, Request $request): LengthAwarePaginator
-    {
-        $currentPage = LengthAwarePaginator::resolveCurrentPage();
-
-        if (!$items instanceof Collection) {
-            $items = collect($items);
-        }
-
-        $currentItems = $items->slice(($currentPage - 1) * $perPage, $perPage);
-
-        return new LengthAwarePaginator(
-            $currentItems,
-            $items->count(),
-            $perPage,
-            $currentPage,
-            [
-                'path' => $request->url(),
-                'query' => $request->query(),
-            ]
-        );
+        return view('kpi-setup.create', compact('uniqueDepartments', 'batch_data', 'uniqueRoles',));
     }
 
     /**
@@ -109,11 +104,11 @@ class KpiController extends Controller
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
-            'score' => 'required|integer',
+            // 'score' => 'required|integer',
             'type' => 'required|string',
             'active' => 'required|integer',
             'batchId' => 'required|integer',
-            'departmentId' => 'required|integer',
+            // 'departmentId' => 'required|integer',
             'empRoleId' => 'required|integer',
         ]);
 
@@ -134,7 +129,7 @@ class KpiController extends Controller
 
         // Check the response and redirect
         if ($response->success) {
-            return redirect()->back()->with('toast_success', 'KPI created successfully');
+            return redirect()->route('kpi.index')->with('toast_success', 'KPI created successfully');
         }
 
         // Log errors (if any)
@@ -406,11 +401,11 @@ class KpiController extends Controller
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
-            'score' => 'required|integer',
+            // 'score' => 'required|integer',
             'type' => 'required|string',
             'active' => 'required|integer',
             'batchId' => 'required|integer',
-            'departmentId' => 'required|integer',
+            // 'departmentId' => 'required|integer',
             'empRoleId' => 'required|integer',
         ]);
 
@@ -500,66 +495,58 @@ class KpiController extends Controller
      * Remove the specified resource from storage.
      */
 
-    public function destroy($id)
+    public function destroy(Request $request, string $id)
     {
+        // Get the access token from the session
+        $accessToken = session('api_token'); // Replace with your actual access token
+
         try {
-            // Use helper method to make the DELETE API request
-            $response = $this->makeDestroyApiRequest('DELETE', "http://192.168.1.200:5123/Appraisal/Kpi/{$id}");
+            // Make the DELETE request to the external API
+            $response = Http::withToken($accessToken)
+                ->delete("http://192.168.1.200:5123/Appraisal/Kpi/{$id}");
 
-            if ($response) {
-                return redirect()->back()->with('toast_success', 'KPI deleted successfully');
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                return redirect()->route('kpi.index')->with('toast_success', 'KPI deleted successfully');
+            } else {
+                // Log the error response
+                Log::error('Failed to delete KPI', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to delete KPI');
             }
-
-            Log::error('Failed to delete KPI', [
-                'id' => $id,
-                'response' => $response,
-            ]);
-            return redirect()->back()->with('toast_error', 'Sorry, failed to delete KPI');
         } catch (\Exception $e) {
+            // Log the exception
             Log::error('Exception occurred while deleting KPI', [
-                'id' => $id,
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'trace' => $e->getTraceAsString()
             ]);
             return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
         }
     }
 
-    /**
-     * Helper method to make API requests.
-     *
-     * @param string $method HTTP method (GET, POST, PUT, DELETE)
-     * @param string $url API URL
-     * @param array|null $data Request payload
-     * @return object|null
-     */
-    private function makeDestroyApiRequest(string $method, string $url, array $data = null)
+
+
+    protected function paginate(array|Collection $items, int $perPage, Request $request): LengthAwarePaginator
     {
-        $accessToken = session('api_token');
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
-        try {
-            $response = Http::withToken($accessToken)->$method($url, $data);
-
-            if ($response->successful()) {
-                return $response->object();
-            }
-
-            Log::error('API Request Failed', [
-                'method' => $method,
-                'url' => $url,
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ]);
-
-            return null;
-        } catch (\Exception $e) {
-            Log::error('API Request Exception', [
-                'method' => $method,
-                'url' => $url,
-                'error' => $e->getMessage(),
-            ]);
-            return null;
+        if (!$items instanceof Collection) {
+            $items = collect($items);
         }
-    }
 
+        $currentItems = $items->slice(($currentPage - 1) * $perPage, $perPage);
+
+        return new LengthAwarePaginator(
+            $currentItems,
+            $items->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]
+        );
+    }
 }
