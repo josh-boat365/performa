@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 
 class DashboardController extends Controller
 {
+
     public function index()
     {
 
@@ -19,60 +22,237 @@ class DashboardController extends Controller
 
         return view("dashboard.index", compact('userEmail', 'userName'));
     }
+
+
+
     public function show()
     {
+
         $accessToken = session('api_token');
 
-        // Step 1: Fetch data from the API
-        $response = Http::withToken($accessToken)
-            ->get('http://192.168.1.200:5123/Appraisal/Kpi');
+        try {
+            $response = Http::withToken($accessToken)
+                ->get('http://192.168.1.200:5123/Appraisal/Batch');
 
-        if ($response->successful()) {
-            $kpis = $response->json();
+            if ($response->successful()) {
 
-            // Step 2: Initialize an array to hold active batches
-            $activeBatches = [];
+                $batches = $response->json();
 
-            // Step 3: Loop through the KPIs to find active batches
-            foreach ($kpis as $kpi_data) {
-                if (isset($kpi_data['batch']['active']) && $kpi_data['batch']['active'] === true) {
+                // Filter batches to get only those with status "OPEN" and active state true
+                $activeBatches = array_filter($batches, function ($batch) {
+                    return $batch['status'] === 'OPEN' && $batch['active'] === true;
+                });
 
-                    $activeBatches[] = [
-                        'id' => $kpi_data['id'],
-                        'name' => $kpi_data['batch']['name'],
-                        'count' => count($kpis),
-                        'status' => $kpi_data['batch']['status'],
-                    ];
-                }
+                return view('dashboard.show-batch', compact('activeBatches')); // Pass to view
+
+            } else {
+                // Log the error response
+                Log::error('Failed to retrieve batches', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve batches');
             }
-
-            // Step 4: Pass the active batches to the view
-            return view("dashboard.show-kpis", compact('activeBatches'));
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while retrieving batches', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
         }
     }
 
 
-    public function edit($id){
+    public function showEmployeeKpi(Request $request, $id)
+    {
+        // dd($id);
+        // Get the access token from the session
+        $accessToken = session('api_token');
 
-        // Fetch data from the API endpoints
-        $kpis = $this->fetchKpis();
-        $sections = $this->fetchSections();
-        $metrics = $this->fetchMetrics();
+        try {
+            // Make the GET request to the external API to get KPIs for the specified batch ID
+            $response = Http::withToken($accessToken)
+                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
+
+            // Check if the response is successful
+            if ($response->successful()) {
+                // Decode the response into an array of KPIs
+                $kpi = $response->json();
+
+                $employeeKpi = [
+                    'id' => $kpi[0]['kpiId'],
+                    'kpi_name' => $kpi[0]['kpiName'],
+                    'section_count' => count($kpi[0]['sections'])
+                ];
+
+                // dd($employeeKpi);
 
 
 
-        // Get the employee role ID from the session
-        $currentEmpRoleId = 4; // Assuming you store the empRole ID in the session
+                // Return the KPI names and section counts to the view
+                return view("dashboard.show-employee-kpi", compact('employeeKpi'));
+            } else {
+                // Log the error response
+                Log::error('Failed to retrieve KPIs', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while retrieving KPIs', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
+    }
 
-        // Organize the data
-        $organizedData = $this->organizeDataByRole($kpis, $sections, $metrics, $currentEmpRoleId);
+    public function editEmployeeKpi(Request $request, $id)
+    {
+        // dd($id);
+        // Get the access token from the session
+        $accessToken = session('api_token');
 
-        $data = json_encode($organizedData);
+        try {
+            // Make the GET request to the external API to get KPIs for the specified batch ID
+            $response = Http::withToken($accessToken)
+                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
 
-        $appraisal = json_decode($data);
-        // dd($appraisal);
+            // Check if the response is successful
+            if ($response->successful()) {
+                // Decode the response into an array of KPIs
+                $appraisal = $response->object();
 
-        return view("dashboard.kpi-form", compact('appraisal'));
+                    // dd($appraisal);
+
+
+
+                // Return the KPI names and section counts to the view
+                return view("dashboard.employee-kpi-form", compact('appraisal'));
+            } else {
+                // Log the error response
+                Log::error('Failed to retrieve KPIs', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while retrieving KPIs', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
+    }
+
+
+
+
+
+    public function showEmployeeSupervisorKpiScore(Request $request, $id)
+    {
+        // dd($id);
+        // Get the access token from the session
+        $accessToken = session('api_token');
+
+        try {
+            // Make the GET request to the external API to get KPIs for the specified batch ID
+            $response = Http::withToken($accessToken)
+                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
+
+            // Check if the response is successful
+            if ($response->successful()) {
+                // Decode the response into an array of KPIs
+                $appraisal = $response->object();
+
+                // dd($appraisal);
+
+
+
+                // Return the KPI names and section counts to the view
+                return view("dashboard.employee-supervisor-kpi-score-form", compact('appraisal'));
+            } else {
+                // Log the error response
+                Log::error('Failed to retrieve KPIs', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while retrieving KPIs', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
+    }
+
+    public function showEmployeeProbe(Request $request, $id)
+    {
+        // dd($id);
+        // Get the access token from the session
+        $accessToken = session('api_token');
+
+        try {
+            // Make the GET request to the external API to get KPIs for the specified batch ID
+            $response = Http::withToken($accessToken)
+                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
+
+            // Check if the response is successful
+            if ($response->successful()) {
+                // Decode the response into an array of KPIs
+                $appraisal = $response->object();
+
+                // dd($appraisal);
+
+
+
+                // Return the KPI names and section counts to the view
+                return view("dashboard.employee-probe-form", compact('appraisal'));
+            } else {
+                // Log the error response
+                Log::error('Failed to retrieve KPIs', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while retrieving KPIs', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+        }
+    }
+
+
+
+    private function fetchBatches()
+    {
+        $accessToken = session('api_token');
+        $response = Http::withToken($accessToken)
+            ->get('http://192.168.1.200:5123/Appraisal/Batch');
+
+        // Check if the response is successful and not null
+        if ($response->successful()) {
+            return $response->json() ?? [];
+        } else {
+            // Log the error and return an empty array or handle accordingly
+            Log::error('Failed to fetch batches', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            return []; // Return an empty array if the fetch fails
+        }
     }
 
     private function fetchKpis()
@@ -81,9 +261,17 @@ class DashboardController extends Controller
         $response = Http::withToken($accessToken)
             ->get('http://192.168.1.200:5123/Appraisal/Kpi');
 
-            // dd($response->json());
-
-        return $response->json();
+        // Check if the response is successful and not null
+        if ($response->successful()) {
+            return $response->json() ?? [];
+        } else {
+            // Log the error and return an empty array or handle accordingly
+            Log::error('Failed to fetch KPIs', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            return []; // Return an empty array if the fetch fails
+        }
     }
 
     private function fetchSections()
@@ -92,21 +280,38 @@ class DashboardController extends Controller
         $response = Http::withToken($accessToken)
             ->get('http://192.168.1.200:5123/Appraisal/Section');
 
-            // dd($response->json());
-
-        return $response->json();
+        // Check if the response is successful and not null
+        if ($response->successful()) {
+            return $response->json() ?? [];
+        } else {
+            // Log the error and return an empty array or handle accordingly
+            Log::error('Failed to fetch sections', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            return []; // Return an empty array if the fetch fails
+        }
     }
 
     private function fetchMetrics()
     {
         $accessToken = session('api_token');
         $response = Http::withToken($accessToken)
-        ->get('http://192.168.1.200:5123/Appraisal/Metric');
+            ->get('http://192.168.1.200:5123/Appraisal/Metric');
 
-        // dd($response->json());
-
-        return $response->json();
+        // Check if the response is successful and not null
+        if ($response->successful()) {
+            return $response->json() ?? [];
+        } else {
+            // Log the error and return an empty array or handle accordingly
+            Log::error('Failed to fetch metrics', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            return []; // Return an empty array if the fetch fails
+        }
     }
+
 
     private function organizeDataByRole($kpis, $sections, $metrics, $currentEmpRoleId)
     {
@@ -124,20 +329,30 @@ class DashboardController extends Controller
                     ];
                 }
 
+                // Initialize section count for the current KPI
+                $sectionCount = 0;
+
                 // Add the KPI to the organized data
                 $organized[$roleId]['kpis'][$kpi['id']] = [
                     'name' => $kpi['name'],
                     'description' => $kpi['description'],
+                    'active' => $kpi['active'],
+                    'section_count' => 0, // Initialize section count
                     'sections' => []
                 ];
 
                 // Find sections related to the current KPI
                 foreach ($sections as $section) {
-                    // dd($sections);
                     if ($section['kpi']['id'] === $kpi['id']) {
+                        // Increment the section count
+                        $sectionCount++;
+
+                        // Store section details
                         $organized[$roleId]['kpis'][$kpi['id']]['sections'][$section['id']] = [
                             'name' => $section['name'],
                             'description' => $section['description'],
+                            'score' => $section['score'],
+                            'active' => $section['active'],
                             'metrics' => []
                         ];
 
@@ -155,14 +370,25 @@ class DashboardController extends Controller
                         }
                     }
                 }
+
+                // Store the section count in the KPI data
+                $organized[$roleId]['kpis'][$kpi['id']]['section_count'] = $sectionCount;
+
+                // dd($sectionCount);
+
+                // Store the section count in the session
+                Session::put("kpi_section_count", $sectionCount);
             }
         }
 
         return $organized;
     }
 
+    public function supervisor()
+    {
 
-
+        return view('dashboard.supervisor');
+    }
 
 
     public function my_kpis()

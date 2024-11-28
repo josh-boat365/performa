@@ -18,22 +18,19 @@ class MetricController extends Controller
     {
         try {
             // Fetch sections data using helper method
-            $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
+
             $metricsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Metric");
 
-            // Filter the KMetric to include only those with active state of true
-            $activeSections = collect($sections)->filter(function ($section) {
-                return $section->active === true;
-            });
+
 
             // Sort the KPIs to place the newly created one first
             $sortMetrics = collect($metricsResponse);
             $metrics = $sortMetrics->sortByDesc('createdAt');
 
-            $metrics = $this->paginate($metrics, 5, $request);
+            $metrics = $this->paginate($metrics, 25, $request);
 
 
-            return view('metric-setup.index', compact('metrics', 'activeSections'));
+            return view('metric-setup.index', compact('metrics'));
         } catch (\Exception $e) {
             Log::error('Exception occurred in index method', [
                 'message' => $e->getMessage(),
@@ -41,6 +38,20 @@ class MetricController extends Controller
             ]);
             return redirect()->back()->with('toast_error', 'Failed to load metrics. Please try again.');
         }
+    }
+
+
+    public function create(){
+
+        $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
+
+        // Filter the KMetric to include only those with active state of true
+        $activeSections = collect($sections)->filter(function ($section) {
+            return $section->active === true;
+        });
+
+
+        return view('metric-setup.create', compact('activeSections'));
     }
 
 
@@ -109,7 +120,7 @@ class MetricController extends Controller
             $response = Http::withToken($accessToken)->post($apiUrl, $metricData);
 
             if ($response->successful()) {
-                return redirect()->back()->with('toast_success', 'Metric created successfully.');
+                return redirect()->route('metric.index')->with('toast_success', 'Metric created successfully.');
             }
 
             // Log unsuccessful response

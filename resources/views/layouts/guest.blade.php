@@ -9,7 +9,7 @@
     <div class="account-pages my-5 pt-sm-1">
 
         @include('sweetalert::alert')
-        
+
         <center>
             <img style="margin: 0 auto; width: 18rem; padding: 0.2rem" src="{{ asset('bpsl_imgs/performa-full-2.png') }}"
                 alt="">
@@ -35,6 +35,7 @@
     <!-- end account-pages -->
 
     @include('layouts.footer')
+    @stack('scripts')
 </body>
 
 

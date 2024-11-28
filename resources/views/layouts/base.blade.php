@@ -148,39 +148,8 @@
     </div>
     <!-- END layout-wrapper -->
 
-    <!-- Right Sidebar -->
-    <div class="right-bar">
-        <div data-simplebar class="h-100">
-            <div class="rightbar-title d-flex align-items-center px-3 py-4">
-
-                <h5 class="m-0 me-2">Select Appraisal Batch</h5>
-
-                <a href="javascript:void(0);" class="right-bar-toggle ms-auto">
-                    <i class="mdi mdi-close noti-icon"></i>
-                </a>
-            </div>
-
-            <!-- Settings -->
-            <hr class="mt-0" />
-
-            <div class="p-4">
-                <div class="d-grid mb-2">
-                    <button type="submit" class="btn btn-primary"> January 2023 Batch</button>
-                </div>
-                <div class="d-grid mb-2">
-                    <button type="submit" class="btn btn-primary"> March 2025 Batch</button>
-                </div>
-                <div class="d-grid mb-2">
-                    <button type="submit" class="btn btn-primary"> June 2026 Batch</button>
-                </div>
-            </div>
-
-        </div>
-        <!-- end slimscroll-menu-->
-    </div>
-    <!-- Right-bar -->
-
     @include('layouts.footer')
+    @stack('scripts')
 </body>
 
 

@@ -17,7 +17,7 @@
         <div class="col-md-12">
             {{--  <div class="card card-body">
                 <div class="d-flex justify-content-between">
-                    <a href="{{ route('kpi.form') }}">
+                    <a href="{{ route('show.kpi') }}">
                         <h4>January 2025 Batch - First Quarter</h4>
                     </a>
                     <div>
@@ -37,54 +37,43 @@
 
             </div>  --}}
             @forelse ($activeBatches as $batch)
-
-            <div class="card card-body">
-                <div class="d-flex justify-content-between">
-                    <a href="{{ route('kpi.form', $batch['id']) }}">
-                        <h4>{{ $batch['name'] }}</h4>
-                    </a>
-                    <div>
-                        <span class="badge rounded-pill bg-dark fonte-size-13">Number of KPIs</span>
-                        <span class="badge rounded-pill bg-primary fonte-size-13">{{ $batch['count'] }}</span>
-                    </div>
-
-                    <div>
-                        <a href="#">
-                            <span class="badge rounded-pill bg-primary fonte-size-13"><i class="bx bxs-pencil"></i>edit</span>
+                <div class="card card-body">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ route('show.batch.kpi', $batch['id']) }}">
+                            <h4>{{ $batch['name'] }}</h4>
                         </a>
-                        <a href="#">
-                            <span class="badge rounded-pill bg-dark fonte-size-13"><i class="bx bx-show-alt"></i>View</span>
-                        </a>
-
+                        <div>
+                            <span class="badge rounded-pill bg-dark fonte-size-13">Global Kpi</span>
+                            <span
+                                class="badge rounded-pill bg-primary fonte-size-13">Personal Kpi</span>
+                            <!-- Display section count -->
+                        </div>
+                        <div>
+                            <a href="{{ route('show.batch.kpi', $batch['id']) }}">
+                                <span class="badge rounded-pill bg-dark fonte-size-13"><i
+                                        class="bx bx-show-alt"></i>Open Batch</span>
+                            </a>
+                        </div>
                     </div>
-                    <div>
-                        {{--  <span class="badge rounded-pill bg-warning fonte-size-13">{{ $batch['status'] == 'true' ? 'In-Progress' : 'Submitted' }}</span>  --}}
-
-                    </div>
-
+                    {{--  <div class="mt-3">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-animated progress-bar-striped" role="progressbar"
+                                style="width: 0%; font-weight: 900;" aria-valuenow="0" aria-valuemin="0"
+                                aria-valuemax="100">0%</div>
+                        </div>
+                    </div>  --}}
                 </div>
-                <div class="mt-3">
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-animated progress-bar-striped" role="progressbar"
-                            style="width: 0%; font-weight: 900;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-                    </div>
-                </div>
-
-            </div>
             @empty
-            <div class="card card-body">
-                <div class="d-flex justify-content-between">
-                    <h3>No Kpis Available For You</h3>
-
+                <div class="card card-body">
+                    <div class="d-flex justify-content-between">
+                        <h3>No KPI batch Available </h3>
+                    </div>
                 </div>
-
-
-            </div>
             @endforelse
 
             {{--  <div class="card card-body">
                 <div class="d-flex justify-content-between">
-                    <a href="{{ route('kpi.form') }}">
+                    <a href="{{ route('show.kpi') }}">
                         <h4>January 2025 Batch - First Quarter</h4>
                     </a>
                     <div>

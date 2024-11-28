@@ -6,8 +6,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('kpi.index') }}">{{ $kpi_data->name }}</a> >
-                        Update KPI Details
+                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('global.index') }}">GLOBAL KPIS </a> > Setup For Global Kpis
 
                     </h4>
                 </div>
@@ -21,46 +20,50 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card card-body">
-                    <h3 class="card-title">Appraisal Batch </h3>
+                    <h3 class="card-title">Appraisal KPI </h3>
 
-                    <form action="{{ route('update.kpi', $kpi_data->id) }}" method="POST">
+                    <form action="{{ route('store.kpi') }}" class="custom-validation" method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">KPI Name</label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="name" required
-                                    value="{{ $kpi_data->name }}" id="example-text-input">
+                                    placeholder="Enter Name for KPI" value="{{ old('name') }}"
+                                    id="example-text-input">
                             </div>
                         </div>
+
                         <div class="row mb-3">
-                            <label for="example-text-input" class="">Description</label>
+                            <label for="example-text-input" class="">KPI Description</label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="description" required
-                                    value="{{ $kpi_data->description }}" id="example-text-input">
+                                    placeholder="Enter Description for KPI" value="{{ old('description') }}"
+                                    id="example-text-input">
                             </div>
                         </div>
-                        
+
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Select KPI Type</label>
                             <div class="col-md-12">
                                 <select name="type" class="form-select">
                                     <option>Select KPI type</option>
-                                    <option value="REGULAR" {{ $kpi_data->type == 'REGULAR' ? 'selected' : '' }}> REGULAR
+                                    <option value="GLOBAL" {{ old('type') == 'GLOBAL' ? 'selected' : '' }}> GLOBAL
                                     </option>
-
+                                    <option value="PROBATION" {{ old('type') == 'PROBATION' ? 'selected' : '' }}>
+                                        PROBATION </option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="row mb-3">
-                            <label for="example-text-input" class="">Select Role</label>
+                            <label for="example-text-input" class="">Select Role For KPI to Belong To</label>
                             <div class="col-md-12">
                                 <select name="empRoleId" class="form-select">
                                     <option>Select Role</option>
 
                                     @foreach ($uniqueRoles as $role)
                                         <option value="{{ $role['id'] }}"
-                                            {{ $role['id'] == $role['id'] ? 'selected' : '' }}>
+                                            {{ old('empRoleId') == $role['id'] ? 'selected' : '' }}>
                                             {{ $role['name'] }}
                                         </option>
                                     @endforeach
@@ -69,17 +72,14 @@
                             </div>
                         </div>
 
-
-
                         <div class="row mb-3">
-                            <label for="example-text-input" class="">Select Batch</label>
+                            <label for="example-text-input" class="">Select Batch For KPI to Belong To</label>
                             <div class="col-md-12">
                                 <select name="batchId" class="form-select">
                                     <option>Select Batch</option>
                                     @foreach ($batch_data as $batch)
                                         <option value="{{ $batch->id }}"
-                                            {{ $batch->id == $kpi_data->batch->id ? 'selected' : '' }}>
-                                            {{ $batch->name }}
+                                            {{ old('batchId') == $batch->id ? 'selected' : '' }}>{{ $batch->name }}
                                         </option>
                                     @endforeach
 
@@ -87,31 +87,11 @@
                             </div>
                         </div>
 
-                        <div class="row mb-3">
-                            <label for="example-text-input" class="">KPI State</label>
-                            <div class="col-md-12">
-                                <select class="form-control" id="stateSelect" name="active" onchange="updateState()">
-                                    <option value="1" {{ $kpi_data->active === true ? 'selected' : '' }}>
-                                        Active</option>
-                                    <option value="0" {{ $kpi_data->active === false ? 'selected' : '' }}>
-                                        Deactivate</option>
-                                </select>
+                        <input type="hidden" name="active" value="1">
 
-                                <input type="hidden" name="stateHidden" id="stateHidden"
-                                    value="{{ $kpi_data->active }}">
-
-                                <script>
-                                    function updateState() {
-                                        var select = document.getElementById('stateSelect');
-                                        var hiddenInputx = document.getElementById('stateHidden');
-                                        hiddenInputx.value = select.value === '1';
-                                    }
-                                </script>
-                            </div>
-                        </div>
-
-                        <button type="submit"
-                            class="btn btn-success waves-effect waves-light col-md-12 mt-4">Update</button>
+                        <button type="submit" class="btn btn-primary waves-effect waves-light col-md-12 mt-4">
+                            Create
+                        </button>
                     </form>
 
                 </div>

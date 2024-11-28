@@ -39,15 +39,22 @@
                                     value="{{ $kpi_data->description }}" id="example-text-input">
                             </div>
                         </div>
-                        
+                        <div class="row mb-3">
+                            <label for="example-text-input" class="">Score</label>
+                            <div class="col-md-12">
+                                <input class="form-control" type="text" name="score" required
+                                    value="{{ $kpi_data->score }}" id="example-text-input">
+                            </div>
+                        </div>
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Select KPI Type</label>
                             <div class="col-md-12">
                                 <select name="type" class="form-select">
                                     <option>Select KPI type</option>
-                                    <option value="REGULAR" {{ $kpi_data->type == 'REGULAR' ? 'selected' : '' }}> REGULAR
+                                    <option value="GLOBAL" {{ $kpi_data->type == 'GLOBAL' ? 'selected' : '' }}> GLOBAL
                                     </option>
-
+                                    <option value="PROBATION" {{ $kpi_data->type == 'PROBATION' ? 'selected' : '' }}>
+                                        PROBATION </option>
                                 </select>
                             </div>
                         </div>
@@ -69,7 +76,22 @@
                             </div>
                         </div>
 
+                        <div class="row mb-3">
+                            <label for="example-text-input" class="">Select Department</label>
+                            <div class="col-md-12">
+                                <select name="departmentId" class="form-select">
+                                    <option>Select Department</option>
 
+                                    @foreach ($uniqueDepartments as $department)
+                                        <option value="{{ $department->id }}"
+                                            {{ $department->id == $kpi_data->department->id ? 'selected' : '' }}>
+                                            {{ $department->name }}
+                                        </option>
+                                    @endforeach
+
+                                </select>
+                            </div>
+                        </div>
 
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Select Batch</label>

@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> Create KPI for Department Role</h4>
+                    <h4 class="mb-sm-0 font-size-18"> Create Global Kpis For Roles</h4>
                 </div>
             </div>
         </div>
@@ -14,7 +14,7 @@
 
 
         <div>
-            <a href="{{ route('create.kpi') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
+            <a href="{{ route('create.global.kpi') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
                     class="bx bxs-plus"></i>Create
                 KPI</a>
         </div>
@@ -43,11 +43,11 @@
                             <tr>
 
                                 <th class="align-middle">KPI Name</th>
+                                {{--  <th class="align-middle">Score</th>  --}}
                                 <th class="align-middle">Type</th>
                                 <th class="align-middle">Role</th>
-                                <th class="align-middle">Department</th>
+                                {{--  <th class="align-middle">Department</th>  --}}
                                 <th class="align-middle">Batch</th>
-                                <th class="align-middle">Supervisors</th>
                                 <th class="align-middle">Active</th>
                                 <th class="align-middle">Created At</th>
                                 <th class="align-middle">Action</th>
@@ -61,28 +61,12 @@
                                     </th>
 
                                     <td>
-                                        @if ($kpi->type == 'REGULAR')
+                                        @if($kpi->type == 'PROBATION')
                                             <span @style(['cursor: pointer']) class="dropdown badge rounded-pill bg-primary"
                                                 data-bs-toggle="dropdown" aria-expanded="false">
                                                 {{ $kpi->type }}
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item" onclick="updateModalText('PROBATION')"
-                                                        href="#" data-bs-toggle="modal"
-                                                        data-bs-target=".bs-status-modal-xl">PROBATION</a>
 
-                                                    <a class="dropdown-item" onclick="updateModalText('GLOBAL')"
-                                                        href="#" data-bs-toggle="modal"
-                                                        data-bs-target=".bs-status-modal-xl">GLOBAL</a>
-                                                </div>
-                                            </span>
-                                        @elseif($kpi->type == 'PROBATION')
-                                            <span @style(['cursor: pointer']) class="dropdown badge rounded-pill bg-primary"
-                                                data-bs-toggle="dropdown" aria-expanded="false">
-                                                {{ $kpi->type }}
-                                                <div class="dropdown-menu">
-                                                    <a class="dropdown-item" onclick="updateModalText('REGULAR')"
-                                                        href="#" data-bs-toggle="modal"
-                                                        data-bs-target=".bs-status-modal-xl">REGULAR</a>
                                                     <a class="dropdown-item" onclick="updateModalText('GLOBAL')"
                                                         href="#" data-bs-toggle="modal"
                                                         data-bs-target=".bs-status-modal-xl">GLOBAL</a>
@@ -146,16 +130,6 @@
                                     <td><span class="badge rounded-pill bg-primary">{{ $kpi->empRole->department->name }}</span>
                                     </td>
                                     <td>{{ $kpi->batch->name }}</td>
-                                    <td>
-                                        <span @style(['cursor: pointer']) class=" badge rounded-pill bg-success">
-                                            {{--  {{ $kpi['department']['manager'] }}  --}}
-                                            Department Head
-                                        </span>
-                                        <span @style(['cursor: pointer']) class=" badge rounded-pill bg-primary">
-                                            {{--  {{ $kpi['empRole']['manager'] }}  --}}
-                                            Department Manager
-                                        </span>
-                                    </td>
                                     <td>
                                         <span @style(['cursor: pointer'])
                                             class="dropdown badge rounded-pill {{ $kpi->active ? 'bg-success' : 'bg-dark' }}"
