@@ -275,7 +275,7 @@ class SectionController extends Controller
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Section');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Section, there are Metrics <br> dependent on this Section and can not be deleted, <b>DEACTIVATE INSTEAD</b>');
             }
         } catch (\Exception $e) {
             // Log the exception
