@@ -58,8 +58,9 @@
                                     data-bs-toggle="dropdown" aria-expanded="false">
                                     {{ $batch['active'] ? 'Activate' : 'Deactivated' }}
                                     <div class="dropdown-menu">
-                                        <a href="" class="dropdown-item" data-bs-toggle="modal" data-bs-target=".bs-example-modal-lg"
-                                            class="m-2"> {{ $batch['active'] ? 'Deactivate' : 'Activate' }}</a>
+                                        <a href="" class="dropdown-item" data-bs-toggle="modal"
+                                            data-bs-target=".bs-example-modal-lg" class="m-2">
+                                            {{ $batch['active'] ? 'Deactivate' : 'Activate' }}</a>
                                     </div>
                                 </span>
                                 <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog"
@@ -124,8 +125,18 @@
                                                     aria-label="Close"></button>
                                             </div>
                                             <div class="modal-body">
-                                                <h4 class="text-center mb-4">Are you sure you want to change the status
-                                                    to {{ $batch['status'] == 'PENDING' ? 'Open' : 'Close' }}?</h4>
+                                                @if ($batch['status'] == 'OPEN')
+                                                    <h4 class="text-center mb-4">Are you sure you want to change the
+                                                        status
+                                                        to {{ $batch['status'] == 'PENDING' ? 'Open' : 'Close' }}?</h4>
+                                                        <p>Closing a <b>batch</b> will entirely close it for everyone in the <b>organization</b>.</p>
+                                                        <p>This means the cycle of this <b>batch</b> has <b>ended</b> and you are ready to create a new <b>batch</b></p>
+                                                @else
+                                                    <h4 class="text-center mb-4">Are you sure you want to change the
+                                                        status
+                                                        to {{ $batch['status'] == 'PENDING' ? 'Open' : 'Close' }}?</h4>
+                                                @endif
+
                                                 <form action="{{ route('update.batch.status', $batch['id']) }}"
                                                     method="POST">
                                                     @csrf
@@ -167,10 +178,11 @@
                                                 <div class="modal-body">
                                                     <h4 class="text-center mb-4">Are you sure you want to delete this
                                                         batch?</h4>
+                                                        <p>Deleting a <b>batch</b> means removing it from the <b>system entirely</b> and you cannot <b>recover</b> it again</p>
                                                     <form action="{{ route('delete.batch', $batch['id']) }}"
                                                         method="POST">
                                                         @csrf
-                                                        @method('DELETE')
+
                                                         <div class="d-grid">
                                                             <button type="submit" class="btn btn-danger">Yes,
                                                                 Delete</button>
