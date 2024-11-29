@@ -52,9 +52,10 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th class="align-middle">Section’s KPI Name</th>
-                                        <th class="align-middle" >Section Name</th>
+                                        <th class="align-middle">Section Name</th>
                                         <th class="align-middle">Section Score</th>
-                                        <th class="align-middle" >Section Description</th>
+                                        <th class="align-middle">Section Description</th>
+                                        <th class="align-middle">Section Sate</th>
                                         <th class="align-middle">Created At</th>
                                         <th class="align-middle">Action</th>
                                     </tr>
@@ -65,7 +66,14 @@
                                             <td><a href="#">{{ $section->kpi->name }}</a></td>
                                             <td><a href="#" @style(['text-wrap: auto'])>{{ $section->name }}</a></td>
                                             <td>{{ $section->score }}</td>
-                                            <td ><span  @style(['text-wrap: auto'])>{{ $section->description }}</span></td>
+                                            <td><span @style(['text-wrap: auto'])>{{ $section->description }}</span></td>
+                                            <td>
+                                                <span 
+                                                    class="dropdown badge rounded-pill {{ $section->active ? 'bg-success' : 'bg-dark' }}"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                    {{ $section->active ? 'Activated' : 'Deactivated' }}
+                                                </span>
+                                            </td>
                                             <td>{{ Carbon\Carbon::parse($section->createdAt)->format('jS F, Y : g:i A') }}
                                             </td>
                                             <td>

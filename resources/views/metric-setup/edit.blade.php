@@ -7,7 +7,7 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18">
-                        <a href="#">{{ $metricData->name }}</a> >
+                        <a href="{{ route('metric.index') }}">{{ $metricData->name }}</a> >
                         Update Metric Details
 
                     </h4>
@@ -31,6 +31,21 @@
 
                                 <textarea class="form-control" name="name" required placeholder="Enter Name for Section" rows="3"
                                     id="example-text-input">{{ $metricData->name }}</textarea>
+                            </div>
+                        </div>
+                         <div class="row mb-3">
+                            <label for="example-text-input" class="">Select Section For Metric to Belong To</label>
+                            <div class="col-md-12">
+                                <select name="sectionId" class="form-select">
+                                    <option>Select Section</option>
+
+                                    @foreach ($activeSections as $section)
+                                        <option value="{{ $section->id }}"
+                                            {{ $section->id ===  $metricData->section->id  ? 'selected' : '' }}>
+                                            {{ $section->name }} - {{ $section->kpi->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                         <div class="row mb-3">

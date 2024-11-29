@@ -15,7 +15,6 @@
         </div>
         <!-- end page title -->
 
-
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
         <div class="row">
@@ -39,7 +38,7 @@
                                     value="{{ $kpi_data->description }}" id="example-text-input">
                             </div>
                         </div>
-                        
+
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Select KPI Type</label>
                             <div class="col-md-12">
@@ -60,7 +59,7 @@
 
                                     @foreach ($uniqueRoles as $role)
                                         <option value="{{ $role['id'] }}"
-                                            {{ $role['id'] == $role['id'] ? 'selected' : '' }}>
+                                            {{ $role['id'] == $kpi_data->empRole->id ? 'selected' : '' }}>
                                             {{ $role['name'] }}
                                         </option>
                                     @endforeach

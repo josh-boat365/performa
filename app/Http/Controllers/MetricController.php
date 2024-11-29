@@ -98,7 +98,7 @@ class MetricController extends Controller
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
-            'score' => 'required|integer',
+            'score' => 'required|numeric',
             'active' => 'required|integer',
             'sectionId' => 'required|integer',
         ]);
@@ -110,7 +110,7 @@ class MetricController extends Controller
         $metricData = [
             'name' => $request->input('name'),
             'description' => $request->input('description'),
-            'score' => $request->input('score'),
+            'score' => (float) $request->input('score'),
             'active' => $request->input('active') == 1 ? true : false,
             'sectionId' => $request->input('sectionId'),
         ];
@@ -156,15 +156,25 @@ class MetricController extends Controller
         $accessToken = session('api_token');
         $apiUrl = "http://192.168.1.200:5123/Appraisal/Metric/{$id}";
 
+
+
+
         try {
             // Make the GET request to the external API
             $response = Http::withToken($accessToken)->get($apiUrl);
+
+            $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
+
+            // Filter the Metric to include only those with active state of true
+            $activeSections = collect($sections)->filter(function ($section) {
+                return $section->active === true;
+            });
 
             if ($response->successful()) {
                 // Convert the response to an object for better handling
                 $metricData = $response->object();
 
-                return view('metric-setup.edit', compact('metricData'));
+                return view('metric-setup.edit', compact('metricData', 'activeSections'));
             }
 
             // Log unsuccessful response
@@ -201,7 +211,7 @@ class MetricController extends Controller
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
-            'score' => 'required|integer',
+            'score' => 'required|numeric',
             'active' => 'required|boolean',
             'sectionId' => 'required|integer',
         ]);
@@ -214,7 +224,7 @@ class MetricController extends Controller
             'id' => $id,
             'name' => $request->input('name'),
             'description' => $request->input('description'),
-            'score' => $request->input('score'),
+            'score' => (float) $request->input('score'),
             'active' => (bool)$request->input('active'),
             'sectionId' => $request->input('sectionId'),
         ];
@@ -233,7 +243,7 @@ class MetricController extends Controller
                 'response' => $response->body(),
             ]);
 
-            return redirect()->back()->with('toast_error', 'Sorry, failed to update Metric.');
+            return redirect()->back()->with('toast_error', 'Update Metric Error:'. $response->body());
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while updating Metric', [
@@ -272,7 +282,7 @@ class MetricController extends Controller
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Metric');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Metric, there are Section <br> dependent on this Metric and can not be deleted, <b>DEACTIVATE INSTEAD</b>');
             }
         } catch (\Exception $e) {
             // Log the exception
