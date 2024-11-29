@@ -30,6 +30,20 @@
                                     value="{{ $batch_data['name'] }}" id="example-text-input">
                             </div>
                         </div>
+                        {{--  <div class="row mb-3">
+                            <label for="example-text-input" class="">KPI Batch Short Name</label>
+                            <div class="col-md-12">
+                                <input class="form-control" type="text" name="shortName" required
+                                    value="{{ $batch_data['shortName'] }}" id="example-text-input">
+                            </div>
+                        </div>  --}}
+                        {{--  <div class="row mb-3">
+                            <label for="example-text-input" class="">Period</label>
+                            <div class="col-md-12">
+                                <input class="form-control" type="number" name="period" required
+                                    value="{{ $batch_data['period'] }}" id="example-text-input">
+                            </div>
+                        </div>  --}}
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Batch Year</label>
                             <div class="col-md-12">
@@ -44,7 +58,29 @@
                                 </select>
                             </div>
                         </div>
-                       
+                        {{--  <div class="row mb-3">
+                            <label for="example-text-input" class="">Batch Status</label>
+                            <div class="col-md-12">
+                                <select class="form-control" id="statusSelect" name="status" onchange="updateStatus()">
+                                    <option value="OPEN" {{ $batch_data['status'] === 'OPEN' ? 'selected' : '' }}>
+                                        OPEN</option>
+                                    <option value="CLOSED" {{ $batch_data['status'] === 'CLOSED' ? 'selected' : '' }}>
+                                        CLOSED
+                                    </option>
+                                </select>
+
+                                <input type="hidden" name="statusHidden" id="statusHidden"
+                                    value="{{ $batch_data['status'] }}">
+
+                                <script>
+                                    function updateStatus() {
+                                        var select = document.getElementById('statusSelect');
+                                        var hiddenInput = document.getElementById('statusHidden');
+                                        hiddenInput.value = select.value;
+                                    }
+                                </script>
+                            </div>
+                        </div>  --}}
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Batch State</label>
                             <div class="col-md-12">

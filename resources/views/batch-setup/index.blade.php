@@ -59,11 +59,11 @@
                                     {{ $batch['active'] ? 'Activate' : 'Deactivated' }}
                                     <div class="dropdown-menu">
                                         <a href="" class="dropdown-item" data-bs-toggle="modal"
-                                            data-bs-target=".bs-example-modal-lg-{{ $batch['id'] }}" class="m-2">
+                                            data-bs-target=".bs-example-modal-lg" class="m-2">
                                             {{ $batch['active'] ? 'Deactivate' : 'Activate' }}</a>
                                     </div>
                                 </span>
-                                <div class="modal fade bs-example-modal-lg-{{ $batch['id'] }}" tabindex="-1" role="dialog"
+                                <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog"
                                     aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-sm modal-dialog-centered ">
                                         <div class="modal-content">
