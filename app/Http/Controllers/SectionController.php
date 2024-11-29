@@ -107,7 +107,7 @@ class SectionController extends Controller
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
-            'score' => 'required|integer',
+            'score' => 'required|numeric',
             'active' => 'required|integer',
             'kpiId' => 'required|integer',
         ]);
@@ -119,7 +119,7 @@ class SectionController extends Controller
         $sectionData = [
             'name' => $request->input('name'),
             'description' => $request->input('description'),
-            'score' => $request->input('score'),
+            'score' => (float) $request->input('score'),
             'active' => $request->input('active') == 1 ? true : false,
             'kpiId' => $request->input('kpiId'),
         ];
@@ -158,6 +158,13 @@ class SectionController extends Controller
         $accessToken = session('api_token');
         $apiUrl = "http://192.168.1.200:5123/Appraisal/Section/{$id}";
 
+        $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
+
+        // Filter the KPIs to include only those with active state of true
+        $activeKpis = collect($kpis)->filter(function ($kpi) {
+            return $kpi->active === true;
+        });
+
         try {
             // Make the GET request to the external API
             $response = Http::withToken($accessToken)->get($apiUrl);
@@ -166,7 +173,7 @@ class SectionController extends Controller
                 // Convert the response to an object
                 $sectionData = $response->object();
 
-                return view('section-setup.edit', compact('sectionData'));
+                return view('section-setup.edit', compact('sectionData', 'activeKpis'));
             }
 
             // Log the error response
@@ -202,7 +209,7 @@ class SectionController extends Controller
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
-            'score' => 'required|integer',
+            'score' => 'required|numeric',
             'active' => 'required|boolean',
             'kpiId' => 'required|integer',
         ]);
@@ -215,7 +222,7 @@ class SectionController extends Controller
             'id' => $id,
             'name' => $request->input('name'),
             'description' => $request->input('description'),
-            'score' => $request->input('score'),
+            'score' => (float) $request->input('score'),
             'active' => (bool)$request->input('active'),
             'kpiId' => $request->input('kpiId'),
         ];
@@ -225,6 +232,7 @@ class SectionController extends Controller
             $response = Http::withToken($accessToken)->put($apiUrl, $sectionData);
 
             if ($response->successful()) {
+                // $json_message = response()->json(['message' => 'Section updated successfully.']);
                 return redirect()
                     ->route('section.index')
                     ->with('toast_success', 'Section updated successfully.');
@@ -236,7 +244,7 @@ class SectionController extends Controller
                 'response' => $response->body(),
             ]);
 
-            return redirect()->back()->with('toast_error', 'Sorry, failed to update Section.');
+            return redirect()->back()->with('toast_error', 'Update Section Error:'. $response->body());
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while updating Section', [

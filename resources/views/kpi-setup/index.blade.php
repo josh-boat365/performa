@@ -54,6 +54,7 @@
 
                         </thead>
                         <tbody>
+
                             @forelse ($activeKpis as $kpi)
                                 <tr>
                                     <th scope="row">
@@ -73,7 +74,7 @@
                                     <td>{{ $kpi->batch->name }}</td>
                                     <td>
                                         <span @style(['cursor: pointer']) class=" badge rounded-pill bg-success">
-                                            {{--  {{ $kpi->empRole->department }}  --}}
+                                            {{--  {{ $kpi->empRole->department->managerName }}  --}}
                                             Department Head
                                         </span>
                                         <span @style(['cursor: pointer']) class=" badge rounded-pill bg-primary">
