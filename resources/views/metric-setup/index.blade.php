@@ -50,11 +50,10 @@
                                 id="order-list">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="align-middle">Metric’s Section Name</th>
+                                        <th class="align-middle">Metric's Section Name</th>
                                         <th class="align-middle">Metric Name</th>
                                         <th class="align-middle">Metric Score</th>
                                         <th class="align-middle">Metric Description</th>
-                                        <th class="align-middle">Metric State</th>
                                         <th class="align-middle">Created At</th>
                                         <th class="align-middle">Action</th>
                                     </tr>
@@ -66,13 +65,6 @@
                                             <td><a href="#">{{ $metric->name }}</a></td>
                                             <td>{{ $metric->score }}</td>
                                             <td>{{ $metric->description }}</td>
-                                            <td>
-                                                <span
-                                                    class="dropdown badge rounded-pill {{ $metric->active ? 'bg-success' : 'bg-dark' }}"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                                    {{ $metric->active ? 'Activated' : 'Deactivated' }}
-                                                </span>
-                                            </td>
                                             <td>{{ Carbon\Carbon::parse($metric->createdAt)->format('jS F, Y : g:i A') }}
                                             </td>
                                             <td>
@@ -101,11 +93,10 @@
                                                             <div class="modal-body">
                                                                 <h4 class="text-center mb-4">Are you sure you want to
                                                                     delete this Metric?</h4>
-                                                                <form
-                                                                    action="{{ route('delete.metric', $metric->id) }}"
+                                                                <form action="{{ route('delete.metric', $metric->id) }}"
                                                                     method="POST">
                                                                     @csrf
-                                                                    {{--  @method('DELETE')  --}}
+                                                                    @method('DELETE')
                                                                     <div class="d-grid">
                                                                         <button type="submit"
                                                                             class="btn btn-danger">Yes, Delete</button>

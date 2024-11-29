@@ -329,7 +329,7 @@ class BatchController extends Controller
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete batch, there are KPIs, Sections and Metrics <br> dependent on this batch and can not be deleted, <b>DEACTIVATE INSTEA</b>D');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to delete batch');
             }
         } catch (\Exception $e) {
             // Log the exception
