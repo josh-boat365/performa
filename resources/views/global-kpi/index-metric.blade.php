@@ -7,7 +7,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"><a href="#">Setup For Section</a> > Metrics
+                    <h4 class="mb-sm-0 font-size-18"><a href="{{ route('global.metric.index') }}">Setup For Global Section</a> > Global Metrics
                         {{--  > <a href="#">{{ session('section_metric_name') }}</a>  --}}
                     </h4>
                 </div>
@@ -16,9 +16,9 @@
         <!-- end page title -->
 
         <div>
-            <a href="{{ route('create.metric') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
+            <a href="{{ route('create.global.metric') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
                     class="bx bxs-plus"></i>Create
-                Metric</a>
+               Global  Metric</a>
         </div>
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
@@ -68,7 +68,7 @@
                                             <td>{{ Carbon\Carbon::parse($metric->createdAt)->format('jS F, Y : g:i A') }}
                                             </td>
                                             <td>
-                                                <a href="{{ route('show.metric', $metric->id) }}">
+                                                <a href="{{ route('show.global.metric', $metric->id) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i> Edit</span>
                                                 </a>
@@ -93,7 +93,7 @@
                                                             <div class="modal-body">
                                                                 <h4 class="text-center mb-4">Are you sure you want to
                                                                     delete this Metric?</h4>
-                                                                <form action="{{ route('delete.metric', $metric->id) }}"
+                                                                <form action="{{ route('delete.global.metric', $metric->id) }}"
                                                                     method="POST">
                                                                     @csrf
                                                                     @method('DELETE')
@@ -111,7 +111,7 @@
                                     @empty
                                         <tr>
                                             <td colspan="6">
-                                                <p>No Metric For Section Created....</p>
+                                                <p>No Global Metric For Global Section Created....</p>
                                             </td>
                                         </tr>
                                     @endforelse
