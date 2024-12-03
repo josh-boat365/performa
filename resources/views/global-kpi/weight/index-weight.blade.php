@@ -6,17 +6,18 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> Create KPI for Department Role</h4>
+                    <h4 class="mb-sm-0 font-size-18"> Create Global Weighted Score For Departments</h4>
                 </div>
             </div>
         </div>
         <!-- end page title -->
 
 
-        <div>
-            <a href="{{ route('create.kpi') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
-                    class="bx bxs-plus"></i>Create
-                KPI</a>
+        <div class="d-flex gap-3">
+            <a href="{{ route('create.global.kpi') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
+                    class="bx bxs-plus"></i>Create Weight
+                </a>
+
         </div>
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
@@ -43,45 +44,35 @@
                             <tr>
 
                                 <th class="align-middle">KPI Name</th>
-                                <th class="align-middle">KPI Type</th>
-                                <th class="align-middle">KPI Role</th>
-                                <th class="align-middle">KPI Department</th>
-                                <th class="align-middle">KPI Batch</th>
-                                <th class="align-middle">KPI Supervisors</th>
-                                <th class="align-middle">KPI State</th>
+                                <th class="align-middle">Description</th>
+                                <th class="align-middle">Type</th>
+                                {{--  <th class="align-middle">Role</th>  --}}
+                                <th class="align-middle">Batch</th>
+                                <th class="align-middle">Active</th>
                                 <th class="align-middle">Created At</th>
                                 <th class="align-middle">Action</th>
 
                         </thead>
                         <tbody>
-
                             @forelse ($activeKpis as $kpi)
                                 <tr>
                                     <th scope="row">
                                         <a href="#">{{ $kpi->name }}</a>
                                     </th>
                                     <td>
-                                        <span class="dropdown badge rounded-pill bg-primary" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                            {{ $kpi->type }}
-                                        </span>
+                                        {{ $kpi->description }}
                                     </td>
-                                    <td>{{ $kpi->empRole->name }}</td>
-                                    <td><span class="badge rounded-pill bg-primary">
-                                            {{ $kpi->empRole->department->name }}
+                                    <td>
+                                        <span @style(['cursor: pointer']) class="dropdown badge rounded-pill bg-primary"
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                            {{ $kpi->type }}
+
                                         </span>
+
+                                    </td>
+
                                     </td>
                                     <td>{{ $kpi->batch->name }}</td>
-                                    <td>
-                                        <span @style(['cursor: pointer']) class=" badge rounded-pill bg-success">
-                                            {{--  {{ $kpi->empRole->department->managerName }}  --}}
-                                            Department Head
-                                        </span>
-                                        <span @style(['cursor: pointer']) class=" badge rounded-pill bg-primary">
-                                            {{--  {{ $kpi['empRole']['manager'] }}  --}}
-                                            Department Manager
-                                        </span>
-                                    </td>
                                     <td>
                                         <span @style(['cursor: pointer'])
                                             class="dropdown badge rounded-pill {{ $kpi->active ? 'bg-success' : 'bg-dark' }}"
@@ -89,11 +80,11 @@
                                             {{ $kpi->active ? 'Activated' : 'Deactivated' }}
                                             <div class="dropdown-menu">
                                                 <a href="" class="dropdown-item" data-bs-toggle="modal"
-                                                    data-bs-target=".bs-example-modal-lg-{{ $kpi->id }}" class="m-2">
+                                                    data-bs-target=".bs-example-modal-lg" class="m-2">
                                                     {{ $kpi->active ? 'Deactivate' : 'Activate' }}</a>
                                             </div>
                                         </span>
-                                        <div class="modal fade bs-example-modal-lg-{{ $kpi->id }}" tabindex="-1" role="dialog"
+                                        <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog"
                                             aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                             <div class="modal-dialog modal-md modal-dialog-centered ">
                                                 <div class="modal-content">
@@ -152,7 +143,6 @@
                                                             <h4 class="text-center mb-4">Are you sure you want to
                                                                 delete this
                                                                 KPI?</h4>
-                                                                <p>Deleting a <b>KPI</b> means removing it from the <b>system entirely</b> and you cannot <b>recover</b> it again</p>
                                                             <form action="{{ route('delete.kpi', $kpi->id) }}"
                                                                 method="POST">
                                                                 @csrf

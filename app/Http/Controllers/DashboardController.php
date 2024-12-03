@@ -59,7 +59,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -80,8 +80,11 @@ class DashboardController extends Controller
                 // Decode the response into an array of KPIs
                 $kpi = $response->json();
 
+                // dd($kpi);
+
                 $employeeKpi = [
                     'id' => $kpi[0]['kpiId'],
+                    'batch_id' => $kpi[0]['batchId'],
                     'kpi_name' => $kpi[0]['kpiName'],
                     'section_count' => count($kpi[0]['sections'])
                 ];
@@ -106,7 +109,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -124,14 +127,50 @@ class DashboardController extends Controller
             // Check if the response is successful
             if ($response->successful()) {
                 // Decode the response into an array of KPIs
-                $appraisal = $response->object();
+                $kpi = $response->object();
 
-                    // dd($appraisal);
+                // dd($kpi);
+                $batchId = $kpi[0]->batchId;
 
+                // Filter the KPIs to include only those with active state of true or false
+                $appraisal = collect($kpi)->filter(function ($kpi) {
+                    // Check if the KPI is active
+                    if ($kpi->kpiActive) {
+                        // Filter sections that are active
+                        $activeSections = collect($kpi->sections)->filter(function ($section) {
+                            return $section->sectionActive; // Only include active sections
+                        });
+
+                        // If there are no active sections, return false
+                        if ($activeSections->isEmpty()) {
+                            return false;
+                        }
+
+                        // Filter metrics within the active sections
+                        $activeSections->transform(function ($section) {
+                            $section->metrics = collect($section->metrics)->filter(function ($metric) {
+                                return $metric->metricActive; // Only include active metrics
+                            });
+
+                            // Return the section only if it has active metrics
+                            return $section->metrics->isNotEmpty() ? $section : null;
+                        });
+
+                        // Remove null sections (those without active metrics)
+                        $activeSections = $activeSections->filter();
+
+                        // Return true if there are any active sections with active metrics
+                        return $activeSections->isNotEmpty();
+                    }
+
+                    return false; // If KPI is not active, return false
+                });
+
+                // dd($appraisal);
 
 
                 // Return the KPI names and section counts to the view
-                return view("dashboard.employee-kpi-form", compact('appraisal'));
+                return view("dashboard.employee-kpi-form", compact('appraisal', 'batchId'));
             } else {
                 // Log the error response
                 Log::error('Failed to retrieve KPIs', [
@@ -146,7 +185,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -168,14 +207,50 @@ class DashboardController extends Controller
             // Check if the response is successful
             if ($response->successful()) {
                 // Decode the response into an array of KPIs
-                $appraisal = $response->object();
+                $kpi = $response->object();
 
-                // dd($appraisal);
+                $batchId = $kpi[0]->batchId;
+
+                // dd($kpi);
+
+                // Filter the KPIs to include only those with active state of true or false
+                $appraisal = collect($kpi)->filter(function ($kpi) {
+                    // Check if the KPI is active
+                    if ($kpi->kpiActive) {
+                        // Filter sections that are active
+                        $activeSections = collect($kpi->sections)->filter(function ($section) {
+                            return $section->sectionActive; // Only include active sections
+                        });
+
+                        // If there are no active sections, return false
+                        if ($activeSections->isEmpty()) {
+                            return false;
+                        }
+
+                        // Filter metrics within the active sections
+                        $activeSections->transform(function ($section) {
+                            $section->metrics = collect($section->metrics)->filter(function ($metric) {
+                                return $metric->metricActive; // Only include active metrics
+                            });
+
+                            // Return the section only if it has active metrics
+                            return $section->metrics->isNotEmpty() ? $section : null;
+                        });
+
+                        // Remove null sections (those without active metrics)
+                        $activeSections = $activeSections->filter();
+
+                        // Return true if there are any active sections with active metrics
+                        return $activeSections->isNotEmpty();
+                    }
+
+                    return false; // If KPI is not active, return false
+                });
 
 
 
                 // Return the KPI names and section counts to the view
-                return view("dashboard.employee-supervisor-kpi-score-form", compact('appraisal'));
+                return view("dashboard.employee-supervisor-kpi-score-form", compact('appraisal', 'batchId'));
             } else {
                 // Log the error response
                 Log::error('Failed to retrieve KPIs', [
@@ -190,7 +265,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -230,7 +305,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -384,11 +459,7 @@ class DashboardController extends Controller
         return $organized;
     }
 
-    public function supervisor()
-    {
 
-        return view('dashboard.supervisor');
-    }
 
 
     public function my_kpis()

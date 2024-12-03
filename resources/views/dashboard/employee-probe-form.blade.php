@@ -34,7 +34,8 @@
                                                     @foreach ($kpi->sections as $sectionId => $section)
                                                         <div class="section-card" @style(['margin-top: 2rem'])>
                                                             <h4>Section: {{ $section->sectionName }}
-                                                                ({{ $section->sectionScore }})
+                                                                (<span
+                                                                    style="color: #c80f0f">{{ $section->sectionScore }}</span>)
                                                             </h4>
                                                             <p>{{ $section->sectionDescription }}</p>
 
@@ -62,18 +63,14 @@
                                                                             value="{{ $section->sectionId }}">
                                                                         <input type="hidden" name="kpiId"
                                                                             value="{{ $kpi->kpiId }}">
-                                                                        <div class="form-check form-check-dark mb-3">
-                                                                            <input @style(['width:1.4rem; height:1.4rem'])
-                                                                                class="form-check-input" type="checkbox"
-                                                                                id="formCheckcolor4">
-                                                                        </div>
+
                                                                     </div>
                                                                 </form>
 
                                                                 <span class="mb-2 badge rounded-pill bg-dark"><strong>Supervisor
                                                                         Score and
                                                                         Comment</strong></span>
-                                                                        
+
                                                                 {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
                                                                 <form action="{{ route('self.rating') }}"
                                                                     method="POST">
@@ -99,6 +96,12 @@
                                                                         <input type="hidden" name="sectionId"
                                                                             value="{{ $sectionId }}">
 
+
+                                                                    </div>
+                                                                    <div class="form-check form-check-dark mb-3">
+                                                                        <input @style(['width:1.4rem; height:1.4rem'])
+                                                                            class="form-check-input" type="checkbox"
+                                                                            id="formCheckcolor4">
                                                                     </div>
 
                                                                 </form>
@@ -109,7 +112,8 @@
                                                                     @foreach ($section->metrics as $metricId => $metric)
                                                                         <li>
                                                                             <strong>{{ $metric->metricName }}</strong>:
-                                                                            {{ $metric->metricScore }}
+                                                                            (<span
+                                                                                style="color: #c80f0f">{{ $metric->metricScore }}</span>)
                                                                             <p>{{ $metric->metricDescription }}</p>
                                                                             {{--  ==== EMPLOYEE SCORING WITH COMMENT INPUT ====  --}}
                                                                             <form action="{{ route('self.rating') }}"
@@ -138,13 +142,7 @@
                                                                                     <input type="hidden"
                                                                                         name="sectionId"
                                                                                         value="{{ $sectionId }}">
-                                                                                    <div
-                                                                                        class="form-check form-check-dark mb-3">
-                                                                                        <input @style(['width:1.4rem; height:1.4rem'])
-                                                                                            class="form-check-input"
-                                                                                            type="checkbox"
-                                                                                            id="formCheckcolor4">
-                                                                                    </div>
+
                                                                                 </div>
 
                                                                             </form>
@@ -160,8 +158,7 @@
                                                                                 @csrf
                                                                                 <div class="d-flex gap-3">
                                                                                     <div class="col-md-2">
-                                                                                        <input
-                                                                                            class="form-control mb-3"
+                                                                                        <input class="form-control mb-3"
                                                                                             type="number" readonly
                                                                                             name="metricSupScore"
                                                                                             placeholder="Enter Score"
@@ -184,6 +181,13 @@
                                                                                         name="sectionId"
                                                                                         value="{{ $sectionId }}">
 
+                                                                                    <div
+                                                                                        class="form-check form-check-dark mb-3">
+                                                                                        <input @style(['width:1.4rem; height:1.4rem'])
+                                                                                            class="form-check-input"
+                                                                                            type="checkbox"
+                                                                                            id="formCheckcolor4">
+                                                                                    </div>
                                                                                 </div>
 
                                                                             </form>

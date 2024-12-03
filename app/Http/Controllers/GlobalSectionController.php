@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class SectionController extends Controller
+class GlobalSectionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -22,20 +22,31 @@ class SectionController extends Controller
 
             // Filter the KPIs to include only those with active state of true
             $activeKpis = collect($kpis)->filter(function ($kpi) {
-                return $kpi->active === true && $kpi->type === 'REGULAR';
+                return $kpi->active === true && $kpi->type == 'GLOBAL';
             });
 
-            // Sort the KPIs to place the newly created one first
-            $sortSections = collect($sectionsResponse);
-            $sortedSections = $sortSections->sortByDesc('createdAt');
+            // Convert the response to a collection
+            $sectionsCollect = collect($sectionsResponse);
+            // $sections = $sectionsResponse;
+            // dd($sectionsCollect);
 
-            $sections = $sortedSections->filter( fn($section) => ($section->active == true || $section->active == false) && $section->kpi->type === 'REGULAR' );
+
+            // Filter sections where active is true and the KPI type is 'GLOBAL' or 'PROBATION'
+            $filteredSections =
+            $sectionsCollect->filter(function ($section) {
+                    return ($section->active === true || $section->active === false  )&&
+                        ($section->kpi->type === 'GLOBAL' || $section->kpi->type === 'PROBATION');
+                });
+
+            $sections = $filteredSections->sortByDesc('createdAt');
+                // dd($sections);
+
 
             $sections = $this->paginate($sections, 25, $request);
 
 
 
-            return view('section-setup.index', compact('sections', 'activeKpis'));
+            return view('global-kpi.index-section', compact('sections', 'activeKpis'));
         } catch (\Exception $e) {
             Log::error('Exception occurred in index method', [
                 'message' => $e->getMessage(),
@@ -46,15 +57,8 @@ class SectionController extends Controller
     }
 
     /**
-     * Helper method to make API requests.
-     *
-     * @param string $method HTTP method (GET, POST, PUT, DELETE)
-     * @param string $url API URL
-     * @param array|null $data Request payload
-     * @return object|null
+     * Show the form for creating a new resource.
      */
-
-
     public function create()
     {
 
@@ -62,50 +66,20 @@ class SectionController extends Controller
 
         // Filter the KPIs to include only those with active state of true
         $activeKpis = collect($kpis)->filter(function ($kpi) {
-            return $kpi->active === true;
+            return $kpi->active === true &&  $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION' ;
         });
 
-        return view('section-setup.create', compact('activeKpis'));
+        // dd($activeKpis);
+
+        return view('global-kpi.create-section', compact('activeKpis'));
     }
-
-
-    private function makeApiRequest(string $method, string $url, array $data = null)
-    {
-        $accessToken = session('api_token');
-
-        try {
-            $response = Http::withToken($accessToken)->$method($url, $data);
-
-            if ($response->successful()) {
-                return $response->object();
-            }
-
-            Log::error('API Request Failed', [
-                'method' => $method,
-                'url' => $url,
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ]);
-
-            return null;
-        } catch (\Exception $e) {
-            Log::error('API Request Exception', [
-                'method' => $method,
-                'url' => $url,
-                'error' => $e->getMessage(),
-            ]);
-            return null;
-        }
-    }
-
-
-
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
+        // dd($request);
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
@@ -134,25 +108,24 @@ class SectionController extends Controller
 
             // Check the response status and return appropriate response
             if ($response->successful()) {
-                return redirect()->route('section.index')->with('toast_success', 'Section created successfully');
+                return redirect()->route('global.section.index')->with('toast_success', 'Global Section created successfully');
             } else {
                 // Log the error response
                 Log::error('Failed to create Section', [
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to create Section');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to Global create Section');
             }
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while creating Section', [
+            Log::error('Exception occurred while creating Global Section', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
             return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
         }
     }
-
 
 
 
@@ -165,7 +138,7 @@ class SectionController extends Controller
 
         // Filter the KPIs to include only those with active state of true
         $activeKpis = collect($kpis)->filter(function ($kpi) {
-            return $kpi->active === true;
+            return $kpi->active === true &&  $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION';
         });
 
         try {
@@ -176,19 +149,19 @@ class SectionController extends Controller
                 // Convert the response to an object
                 $sectionData = $response->object();
 
-                return view('section-setup.edit', compact('sectionData', 'activeKpis'));
+                return view('global-kpi.edit-section', compact('sectionData', 'activeKpis'));
             }
 
             // Log the error response
-            Log::error('Failed to fetch Section', [
+            Log::error('Failed to fetch Global Section', [
                 'status' => $response->status(),
                 'response' => $response->body()
             ]);
 
-            return redirect()->back()->with('toast_error', 'Section does not exist.');
+            return redirect()->back()->with('toast_error', 'Global Section does not exist.');
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while fetching Section', [
+            Log::error('Exception occurred while fetching Global Section', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -237,20 +210,20 @@ class SectionController extends Controller
             if ($response->successful()) {
                 // $json_message = response()->json(['message' => 'Section updated successfully.']);
                 return redirect()
-                    ->route('section.index')
-                    ->with('toast_success', 'Section updated successfully.');
+                    ->route('global.section.index')
+                    ->with('toast_success', 'Global Section updated successfully.');
             }
 
             // Log the error response
-            Log::error('Failed to update Section', [
+            Log::error('Failed to update Global Section', [
                 'status' => $response->status(),
                 'response' => $response->body(),
             ]);
 
-            return redirect()->back()->with('toast_error', 'Update Section Error:' . $response->body());
+            return redirect()->back()->with('toast_error', 'Update Global Section Error:' . $response->body());
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while updating Section', [
+            Log::error('Exception occurred while updating Global Section', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -279,22 +252,52 @@ class SectionController extends Controller
 
             // Check the response status and return appropriate response
             if ($response->successful()) {
-                return redirect()->back()->with('toast_success', 'Section deleted successfully');
+                return redirect()->back()->with('toast_success', 'Global Section deleted successfully');
             } else {
                 // Log the error response
-                Log::error('Failed to delete Section', [
+                Log::error('Failed to delete Global Section', [
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Section, there are Metrics <br> dependent on this Section and can not be deleted, <b>DEACTIVATE INSTEAD</b>');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Global Section, there are Metrics <br> dependent on this Section and can not be deleted, <b>DEACTIVATE INSTEAD</b>');
             }
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while deleting Section', [
+            Log::error('Exception occurred while deleting Global Section', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
             return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+        }
+    }
+
+
+    private function makeApiRequest(string $method, string $url, array $data = null)
+    {
+        $accessToken = session('api_token');
+
+        try {
+            $response = Http::withToken($accessToken)->$method($url, $data);
+
+            if ($response->successful()) {
+                return $response->object();
+            }
+
+            Log::error('API Request Failed: Global', [
+                'method' => $method,
+                'url' => $url,
+                'status' => $response->status(),
+                'response' => $response->body(),
+            ]);
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('API Request Exception: Global', [
+                'method' => $method,
+                'url' => $url,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
         }
     }
 

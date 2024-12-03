@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('section.index') }}">SECTIONS  </a> > Setup For Sections
+                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('global.section.index') }}">SECTIONS  </a> > Setup For Global Sections
 
                     </h4>
                 </div>
@@ -20,9 +20,9 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card card-body">
-                    <h3 class="card-title">Section Creation </h3>
+                    <h3 class="card-title">Global Section Creation </h3>
 
-                    <form action="{{ route('store.section') }}" class="custom-validation" method="POST">
+                    <form action="{{ route('store.global.section') }}" class="custom-validation" method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Name</label>
@@ -57,8 +57,7 @@
                                     @foreach ($activeKpis as $kpi)
                                         <option value="{{ $kpi->id }}"
                                             {{ old('kpiId') == $kpi->id ? 'selected' : '' }}>
-                                            {{ $kpi->name }} - {{ $kpi->department->name }} -
-                                            {{ $kpi->empRole->name }}
+                                            {{ $kpi->name }} 
                                         </option>
                                     @endforeach
                                 </select>

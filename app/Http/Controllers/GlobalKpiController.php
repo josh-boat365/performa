@@ -25,12 +25,15 @@ class GlobalKpiController extends Controller
 
         $responseKpis = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/Kpi');
 
+        // dd($responseKpis);
 
 
         // Filter the KPIs to include only those with active state of true or false
         $activeKpis = collect($responseKpis)->filter(function ($kpi) {
-            return $kpi->type === 'GLOBAL' && $kpi->type === 'PROBATION';
+            return $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION' ;
         });
+
+        // dd($activeKpis);
 
         // Sort the KPIs to place the newly created one first
         $activeKpis = $activeKpis->sortByDesc('createdAt');
@@ -57,22 +60,25 @@ class GlobalKpiController extends Controller
         // Extracting data
         $batch_data = $responseBatches ?? [];
 
-        $uniqueRoles = [];
+        $uniqueDepartments = [];
+        // $uniqueRoles = [];
 
         if ($responseRoles) {
             $rolesWithDepartments = collect($responseRoles);
 
-
-            $uniqueRoles = $rolesWithDepartments->map(function ($role) {
-                return [
-                    'id' => $role->id,
-                    'name' => $role->name,
-                ];
-            })->unique('id')->values()->toArray();
+            // Extract and deduplicate departments and roles
+            $uniqueDepartments = $rolesWithDepartments->pluck('department')->unique()->toArray();
+            // $uniqueRoles = $rolesWithDepartments->map(function ($role) {
+            //     return [
+            //         'id' => $role->id,
+            //         'name' => $role->name,
+            //     ];
+            // })->unique('id')->values()->toArray();
         }
 
+        // dd($uniqueDepartments);
 
-        return view('global-kpi.create-kpi', compact('batch_data', 'uniqueRoles',));
+        return view('global-kpi.create-kpi', compact('batch_data', 'uniqueDepartments'));
     }
 
     /**
@@ -105,7 +111,7 @@ class GlobalKpiController extends Controller
 
         // Check the response and redirect
         if ($response->success) {
-            return redirect()->route('kpi.index')->with('toast_success', 'Global KPI created successfully');
+            return redirect()->route('global.index')->with('toast_success', 'Global KPI created successfully');
         }
 
         // Log errors (if any)
@@ -160,7 +166,7 @@ class GlobalKpiController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
         }
     }
     /**

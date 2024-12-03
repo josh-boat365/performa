@@ -7,8 +7,8 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18">
-                        <a href="{{ route('section.index') }}">{{ $sectionData->name }}</a> >
-                        Update Section Details
+                        <a href="{{ route('global.section.index') }}">{{ $sectionData->name }}</a> >
+                        Update Global Section Details
 
                     </h4>
                 </div>
