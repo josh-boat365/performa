@@ -44,19 +44,19 @@
                                 @if (isset($appraisal) && !empty($appraisal))
                                     @foreach ($appraisal as $kpi)
                                         <div class="kpi">
-                                            <h3>KPI: {{ $kpi->kpiName }}</h3>
-                                            <p>{{ $kpi->kpiDescription }}</p>
-                                            {{--  {{ dd($kpi) }}  --}}
+                                            {{--  <h3>KPI: {{ $kpi->kpiName }}</h3>
+                                            <p>{{ $kpi->kpiDescription }}</p>  --}}
+
                                             @if (isset($kpi->sections) && count($kpi->sections) > 0)
                                                 @foreach ($kpi->sections as $sectionId => $section)
                                                     <div class="section-card" style="margin-top: 2rem;">
-                                                        <h4>Section: {{ $section->sectionName }}
+                                                        <h4>{{ $section->sectionName }}
                                                             (<span
                                                                 style="color: #c80f0f">{{ $section->sectionScore }}</span>)
                                                         </h4>
                                                         <p>{{ $section->sectionDescription }}</p>
 
-                                                        @if (empty($section->metrics))
+                                                        @if (!empty($section->metrics))
                                                             <form action="{{ route('self.rating') }}" method="POST"
                                                                 class="section-form">
                                                                 @csrf
@@ -74,7 +74,7 @@
                                                                         <input class="form-control mb-3 comment-input"
                                                                             type="text" name="employeeComment"
                                                                             placeholder="Enter your comments"
-                                                                            @disabled($section->sectionEmpScore->status == 'REVIEW' ? 'REVIEW' : '')
+                                                                            @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'REVIEW')
                                                                             value="{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}">
                                                                     </div>
                                                                     @if (isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'REVIEW')
@@ -151,12 +151,12 @@
                                                         @endforeach
                                                         </ul>
                                                     @else
-                                                        <p>No metrics available for this section.</p>
+                                                        <p></p>
                                                 @endif
                                         </div>
                                     @endforeach
                                 @else
-                                    <p>No sections available for this KPI.</p>
+                                    <p></p>
                                 @endif
                             </div>
 
