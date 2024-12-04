@@ -35,13 +35,13 @@
                         </a>
                     </div>
                 </div>
-                <div class="mt-3">
+                {{--  <div class="mt-3">
                     <div class="progress">
                         <div class="progress-bar progress-bar-animated progress-bar-striped" role="progressbar"
                             style="width: {{ session('progress') }}%; font-weight: 900;" aria-valuenow="0" aria-valuemin="0"
                             aria-valuemax="{{ session('progress') }}">{{ session('progress') }}%</div>
                     </div>
-                </div>
+                </div>  --}}
             </div>
 
 

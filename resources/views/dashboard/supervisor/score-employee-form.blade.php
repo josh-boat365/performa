@@ -99,7 +99,7 @@
                                                                         <input class="form-control mb-3 comment-input"
                                                                             type="text" name="supervisorComment"
                                                                             placeholder="Enter your comments"
-                                                                            @disabled($section->sectionEmpScore->status == 'CONFIRMATION' ? 'CONFIRMATION' : '')
+                                                                            @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
                                                                             value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
                                                                     </div>
                                                                     @if (isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
