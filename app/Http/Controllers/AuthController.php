@@ -33,7 +33,7 @@ class AuthController extends Controller
 
         // Prepare data for the API request
         $data = [
-            'appName' => 'HRMS',
+            'appName' => 'Nia',
             'user' => $request->input('username'),
             'password' => $request->input('password'),
             'validateAppAcess' => true
@@ -47,8 +47,6 @@ class AuthController extends Controller
             if ($response->ok() && isset($response['access_token'])) {
                 $data = $response->object();
 
-                // dd($data);
-
                 // Store access token and user profile data in the session
                 session([
                     'api_token' => $data->access_token,
@@ -59,19 +57,13 @@ class AuthController extends Controller
                 ]);
 
                 $employeeData = Http::withToken(session('api_token'))
-                                ->get('http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee');
-
-                                // dd($employeeData->object());
+                    ->get('http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee');
 
                 // Store the employee data in the session
                 session(['employee_data' => $employeeData->object()]);
 
-
-
                 // Clear rate limit on success
                 RateLimiter::clear($throttleKey);
-
-                // alert('Title', 'Lorem Lorem Lorem', 'success');
 
                 return redirect()->route('dashboard.index')->with('toast_success', 'Logged in successfully');
             }
@@ -83,8 +75,20 @@ class AuthController extends Controller
             Log::warning('Authentication failed for user', ['user' => $request->input('user')]);
             // Return error if authentication fails
             return back()->with('toast_error', ['message' => 'Invalid credentials. Please try again.']);
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            // Log the exception details for connection issues
+            Log::error('Connection error during authentication', [
+                'user' => $request->input('user'),
+                'error' => $e->getMessage(),
+            ]);
+
+            // Increment the rate limit on exception
+            RateLimiter::hit($throttleKey, $decayMinutes * 60);
+
+            // Return specific error message for no internet connection
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
         } catch (\Exception $e) {
-            // Log the exception details
+            // Log the exception details for other errors
             Log::error('Error during authentication', [
                 'user' => $request->input('user'),
                 'error' => $e->getMessage(),

@@ -7,7 +7,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"><a href="#">Setup For KPIs</a> > Section
+                    <h4 class="mb-sm-0 font-size-18"><a href="#">Setup For Global KPIs</a> > Global Section
                         Setup
                         {{--  > <a href="#">{{ session('kpi_section_name') }}</a>  --}}
                     </h4>
@@ -17,8 +17,8 @@
         <!-- end page title -->
 
         <div>
-            <a href="{{ route('create.section') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
-                    class="bx bxs-plus"></i>Create
+            <a href="{{ route('create.global.section') }}"
+                class="btn btn-success btn-rounded waves-effect waves-light "><i class="bx bxs-plus"></i>Create
                 Section</a>
         </div>
 
@@ -51,10 +51,11 @@
                                 id="order-list">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="align-middle">Section's KPI Name</th>
-                                        <th class="align-middle" >Section Name</th>
+                                        <th class="align-middle">Section’s KPI Name</th>
+                                        <th class="align-middle">Section Name</th>
                                         <th class="align-middle">Section Score</th>
-                                        <th class="align-middle" >Section Description</th>
+                                        <th class="align-middle">Section Description</th>
+                                        <th class="align-middle">Section State</th>
                                         <th class="align-middle">Created At</th>
                                         <th class="align-middle">Action</th>
                                     </tr>
@@ -65,39 +66,49 @@
                                             <td><a href="#">{{ $section->kpi->name }}</a></td>
                                             <td><a href="#" @style(['text-wrap: auto'])>{{ $section->name }}</a></td>
                                             <td>{{ $section->score }}</td>
-                                            <td ><span  @style(['text-wrap: auto'])>{{ $section->description }}</span></td>
+                                            <td><span @style(['text-wrap: auto'])>{{ $section->description }}</span></td>
+                                            <td>
+                                                <span
+                                                    class="dropdown badge rounded-pill {{ $section->active ? 'bg-success' : 'bg-dark' }}"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                    {{ $section->active ? 'Activated' : 'Deactivated' }}
+
+                                                </span>
+                                            </td>
                                             <td>{{ Carbon\Carbon::parse($section->createdAt)->format('jS F, Y : g:i A') }}
                                             </td>
                                             <td>
-                                                <a href="{{ route('show.section', $section->id) }}">
+                                                <a href="{{ route('show.global.section', $section->id) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i> Edit</span>
                                                 </a>
                                                 <a href="#" data-bs-toggle="modal"
-                                                    data-bs-target=".bs-delete-modal-lg-{{ $section->id }}">
+                                                    data-bs-target=".bs-delete-modal-xl-{{ $section->id }}">
                                                     <span class="badge rounded-pill bg-danger fonte-size-13"><i
                                                             class="bx bxs-trash"></i> Delete</span>
                                                 </a>
 
                                                 <!-- Modal for Delete Confirmation -->
-                                                <div class="modal fade bs-delete-modal-lg-{{ $section->id }}"
+                                                <div class="modal fade bs-delete-modal-xl-{{ $section->id }}"
                                                     tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
                                                     aria-hidden="true">
-                                                    <div class="modal-dialog modal-md modal-dialog-centered">
+                                                    <div class="modal-dialog modal-lg modal-dialog-centered">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title" id="myLargeModalLabel">Confirm
-                                                                    KPI Deletion</h5>
+                                                                    Global Section Deletion</h5>
                                                                 <button type="button" class="btn-close"
                                                                     data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body">
                                                                 <h4 class="text-center mb-4">Are you sure you want to
-                                                                    delete this KPI?</h4>
+                                                                    delete this Global Section
+                                                                    ?</h4>
                                                                 <form
-                                                                    action="{{ route('delete.section', $section->id) }}"
+                                                                    action="{{ route('delete.global.section', $section->id) }}"
                                                                     method="POST">
                                                                     @csrf
+                                                                    @method('DELETE')
                                                                     <div class="d-grid">
                                                                         <button type="submit"
                                                                             class="btn btn-danger">Yes, Delete</button>
@@ -112,7 +123,7 @@
                                     @empty
                                         <tr>
                                             <td colspan="6">
-                                                <p>No Section For KPI Created....</p>
+                                                <p>No Global Section For KPI Created....</p>
                                             </td>
                                         </tr>
                                     @endforelse

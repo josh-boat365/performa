@@ -226,6 +226,7 @@
                                                             <h4 class="text-center mb-4">Are you sure you want to
                                                                 delete this
                                                                 KPI?</h4>
+                                                                <p>Deleting a <b>KPI</b> means removing it from the <b>system entirely</b> and you cannot <b>recover</b> it again</p>
                                                             <form action="{{ route('delete.kpi', $kpi->id) }}"
                                                                 method="POST">
                                                                 @csrf

@@ -7,8 +7,8 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18">
-                        <a href="{{ route('section.index') }}">{{ $sectionData->name }}</a> >
-                        Update Section Details
+                        <a href="{{ route('global.section.index') }}">{{ $sectionData->name }}</a> >
+                        Update Global Section Details
 
                     </h4>
                 </div>
@@ -23,7 +23,7 @@
             <div class="col-md-12">
                 <div class="card card-body">
                     <h3 class="card-title">KPI Section </h3>
-                    <form action="{{ route('update.section', $sectionData->id) }}" method="POST">
+                    <form action="{{ route('update.global.section', $sectionData->id) }}" method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Name</label>

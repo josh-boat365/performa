@@ -3,38 +3,54 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class MetricController extends Controller
+class GlobalMetricController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-
     public function index(Request $request)
     {
         try {
             // Fetch sections data using helper method
 
             $metricsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Metric");
+            $sectionsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
+
+
+            $sections_data = collect($sectionsResponse);
+            $metrics_data = collect($metricsResponse);
+
+            $validSectionIds = $sections_data->filter(function ($section) {
+                return $section->kpi && ($section->kpi->type === 'GLOBAL' || $section->kpi->type === 'PROBATION');
+            })->pluck('id');
+
+            // Step 4: Filter metrics that belong to the valid sections
+            $filteredMetrics = $metrics_data->filter(function ($metric) use ($validSectionIds) {
+                return $validSectionIds->contains($metric->section->id);
+            });
+
+            // Optional: If you want to ensure the metrics are active, you can further filter
+            $activeMetrics = $filteredMetrics->filter(function ($metric) {
+                return $metric->active === true;
+            });
 
 
 
-            // Sort the KPIs to place the newly created one first
-            $sortMetrics = collect($metricsResponse);
-            $sortedMetrics = $sortMetrics->sortByDesc('createdAt');
+            $sortedMetrics = $activeMetrics->sortByDesc('createdAt');
             // dd($sortedMetrics);
 
-            $metrics = $sortedMetrics->filter(fn($metric) => $metric->active == true  || $metric->active == false);
+            // $metrics = $sortedMetrics->filter(fn($metric) => $metric->active == true  || $metric->active == false);
 
 
-            $metrics = $this->paginate($metrics, 25, $request);
+            $metrics = $this->paginate($sortedMetrics, 25, $request);
 
 
-            return view('metric-setup.index', compact('metrics'));
+            return view('global-kpi.index-metric', compact('metrics'));
         } catch (\Exception $e) {
             Log::error('Exception occurred in index method', [
                 'message' => $e->getMessage(),
@@ -52,42 +68,15 @@ class MetricController extends Controller
 
         // Filter the KMetric to include only those with active state of true
         $activeSections = collect($sections)->filter(function ($section) {
-            return $section->active === true && $section->kpi->type == 'REGULAR';
+            return $section->active === true && $section->kpi->type == 'GLOBAL' || $section->kpi->type == 'PROBATION' ;
         });
 
 
-        return view('metric-setup.create', compact('activeSections'));
+        return view('global-kpi.create-metric', compact('activeSections'));
     }
 
 
-    private function makeApiRequest(string $method, string $url, array $data = null)
-    {
-        $accessToken = session('api_token');
 
-        try {
-            $response = Http::withToken($accessToken)->$method($url, $data);
-
-            if ($response->successful()) {
-                return $response->object();
-            }
-
-            Log::error('API Request Failed', [
-                'method' => $method,
-                'url' => $url,
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ]);
-
-            return null;
-        } catch (\Exception $e) {
-            Log::error('API Request Exception', [
-                'method' => $method,
-                'url' => $url,
-                'error' => $e->getMessage(),
-            ]);
-            return null;
-        }
-    }
 
 
 
@@ -103,7 +92,7 @@ class MetricController extends Controller
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
-            'score' => 'required|integer',
+            'score' => 'required|numeric',
             'active' => 'required|integer',
             'sectionId' => 'required|integer',
         ]);
@@ -115,7 +104,7 @@ class MetricController extends Controller
         $metricData = [
             'name' => $request->input('name'),
             'description' => $request->input('description'),
-            'score' => $request->input('score'),
+            'score' => (float) $request->input('score'),
             'active' => $request->input('active') == 1 ? true : false,
             'sectionId' => $request->input('sectionId'),
         ];
@@ -161,16 +150,19 @@ class MetricController extends Controller
         $accessToken = session('api_token');
         $apiUrl = "http://192.168.1.200:5123/Appraisal/Metric/{$id}";
 
+
+
+
         try {
             // Make the GET request to the external API
             $response = Http::withToken($accessToken)->get($apiUrl);
-
 
             $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
 
             // Filter the Metric to include only those with active state of true
             $activeSections = collect($sections)->filter(function ($section) {
-                return $section->active === true && $section->kpi->type === 'REGULAR';
+                return $section->active === true && $section->kpi->type === 'GLOBAL' ||
+                $section->kpi->type === 'PROBATION'  ;
             });
 
             if ($response->successful()) {
@@ -178,8 +170,8 @@ class MetricController extends Controller
                 $metricData = $response->object();
 
 
-                return view('metric-setup.edit', compact('metricData', 'activeSections'));
 
+                return view('global-kpi.edit-metric', compact('metricData', 'activeSections'));
             }
 
             // Log unsuccessful response
@@ -216,7 +208,7 @@ class MetricController extends Controller
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
-            'score' => 'required|integer',
+            'score' => 'required|numeric',
             'active' => 'required|boolean',
             'sectionId' => 'required|integer',
         ]);
@@ -229,7 +221,7 @@ class MetricController extends Controller
             'id' => $id,
             'name' => $request->input('name'),
             'description' => $request->input('description'),
-            'score' => $request->input('score'),
+            'score' => (float) $request->input('score'),
             'active' => (bool)$request->input('active'),
             'sectionId' => $request->input('sectionId'),
         ];
@@ -247,9 +239,8 @@ class MetricController extends Controller
                 'status' => $response->status(),
                 'response' => $response->body(),
             ]);
-          
+
             return redirect()->back()->with('toast_error', 'Update Metric Error:' . $response->body());
-          
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while updating Metric', [
@@ -288,7 +279,7 @@ class MetricController extends Controller
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Metric');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Metric, there are Section <br> dependent on this Metric and can not be deleted, <b>DEACTIVATE INSTEAD</b>');
             }
         } catch (\Exception $e) {
             // Log the exception
@@ -297,6 +288,37 @@ class MetricController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
             return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+        }
+    }
+
+
+
+    private function makeApiRequest(string $method, string $url, array $data = null)
+    {
+        $accessToken = session('api_token');
+
+        try {
+            $response = Http::withToken($accessToken)->$method($url, $data);
+
+            if ($response->successful()) {
+                return $response->object();
+            }
+
+            Log::error('API Request Failed: Global', [
+                'method' => $method,
+                'url' => $url,
+                'status' => $response->status(),
+                'response' => $response->body(),
+            ]);
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('API Request Exception: Global', [
+                'method' => $method,
+                'url' => $url,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
         }
     }
 

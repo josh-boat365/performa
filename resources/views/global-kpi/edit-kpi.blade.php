@@ -23,7 +23,7 @@
                 <div class="card card-body">
                     <h3 class="card-title">Appraisal Batch </h3>
 
-                    <form action="{{ route('update.kpi', $kpi_data->id) }}" method="POST">
+                    <form action="{{ route('update.global.kpi', $kpi_data->id) }}" method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">KPI Name</label>

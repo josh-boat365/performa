@@ -23,7 +23,8 @@
 
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
-                                <form action="" method="POST">
+                                <form action="{{ route('submit.employee.probe') }}" method="POST">
+                                    @csrf
                                     @if (isset($appraisal) && !empty($appraisal))
                                         @foreach ($appraisal as $kpi)
                                             <div class="kpi">
@@ -34,26 +35,27 @@
                                                     @foreach ($kpi->sections as $sectionId => $section)
                                                         <div class="section-card" @style(['margin-top: 2rem'])>
                                                             <h4>Section: {{ $section->sectionName }}
-                                                                ({{ $section->sectionScore }})
+                                                                (<span
+                                                                    style="color: #c80f0f">{{ $section->sectionScore }}</span>)
                                                             </h4>
                                                             <p>{{ $section->sectionDescription }}</p>
 
                                                             @if (empty($section->metrics))
-                                                                <form action="{{ route('self.rating') }}" method="POST"
+                                                                {{--  <form action="{{ route('self.rating') }}" method="POST"
                                                                     class="section-form">
-                                                                    @csrf
+                                                                    @csrf  --}}
                                                                     <div class="d-flex gap-3">
                                                                         <div class="col-md-2">
                                                                             <input class="form-control mb-3"
                                                                                 type="number" name="sectionEmpScore"
-                                                                                required placeholder="Enter Score"
+                                                                                readonly placeholder="Enter Score"
                                                                                 value="{{ $section->sectionEmpScore->sectionEmpScore ?? '' }}">
                                                                         </div>
                                                                         <div class="col-md-9">
                                                                             <input class="form-control mb-3"
                                                                                 type="text" name="employeeComment"
                                                                                 placeholder="Enter your comments"
-                                                                                required
+                                                                                readonly
                                                                                 value="{{ $section->sectionEmpScore->employeeComment ?? '' }}">
                                                                         </div>
                                                                         <input type="hidden" name="sectionEmpScoreId"
@@ -62,46 +64,37 @@
                                                                             value="{{ $section->sectionId }}">
                                                                         <input type="hidden" name="kpiId"
                                                                             value="{{ $kpi->kpiId }}">
-                                                                        <div class="form-check form-check-dark mb-3">
-                                                                            <input @style(['width:1.4rem; height:1.4rem'])
-                                                                                class="form-check-input" type="checkbox"
-                                                                                id="formCheckcolor4">
-                                                                        </div>
+
                                                                     </div>
-                                                                </form>
+                                                                {{--  </form>  --}}
 
                                                                 <span class="mb-2 badge rounded-pill bg-dark"><strong>Supervisor
                                                                         Score and
                                                                         Comment</strong></span>
-                                                                        
-                                                                {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
-                                                                <form action="{{ route('self.rating') }}"
-                                                                    method="POST">
-                                                                    @csrf
-                                                                    <div class="d-flex gap-3">
-                                                                        <div class="col-md-2">
-                                                                            <input class="form-control mb-3"
-                                                                                type="number" readonly
-                                                                                name="metricSupScore"
-                                                                                placeholder="Enter Score" required
-                                                                                value="{{ old('metricSupScore.' . $metricId . '.' . '.' . $sectionId) }}">
-                                                                        </div>
-                                                                        <div class="col-md-9">
-                                                                            <input class="form-control mb-3"
-                                                                                type="text" readonly
-                                                                                name="supervisorComment"
-                                                                                placeholder="Enter your comments"
-                                                                                required
-                                                                                value="{{ old('supervisorComment.' . $metricId . '.' . '.' . $sectionId) }}">
-                                                                        </div>
-                                                                        <input type="hidden" name="metricId"
-                                                                            value="{{ $metric->metricId }}">
-                                                                        <input type="hidden" name="sectionId"
-                                                                            value="{{ $sectionId }}">
 
+                                                                {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
+
+                                                                    <div class="col-md-2">
+                                                                        <input class="form-control mb-3" type="number"
+                                                                            readonly name="metricSupScore"
+                                                                            placeholder="Enter Score" readonly
+                                                                            value="{{ $section->sectionEmpScore->sectionSupScore == 0 ? '' : $section->sectionEmpScore->sectionSupScore }}">
+                                                                    </div>
+                                                                    <div class="col-md-9">
+                                                                        <input class="form-control mb-3" type="text"
+                                                                            readonly name="supervisorComment"
+                                                                            placeholder="Enter your comments" readonly
+                                                                            value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
+                                                                    </div>
+                                                                    <div class="form-check form-check-dark mb-3">
+                                                                        <input @style(['width:1.4rem; height:1.4rem'])
+                                                                            class="form-check-input" type="checkbox"
+                                                                            name="scoreId" readonly
+                                                                            value="{{ $section->sectionEmpScore->id }}"
+                                                                            id="formCheckcolor4">
                                                                     </div>
 
-                                                                </form>
+
                                                             @endif
 
                                                             @if (isset($section->metrics) && count($section->metrics) > 0)
@@ -109,19 +102,18 @@
                                                                     @foreach ($section->metrics as $metricId => $metric)
                                                                         <li>
                                                                             <strong>{{ $metric->metricName }}</strong>:
-                                                                            {{ $metric->metricScore }}
+                                                                            (<span
+                                                                                style="color: #c80f0f">{{ $metric->metricScore }}</span>)
                                                                             <p>{{ $metric->metricDescription }}</p>
                                                                             {{--  ==== EMPLOYEE SCORING WITH COMMENT INPUT ====  --}}
-                                                                            <form action="{{ route('self.rating') }}"
-                                                                                method="POST">
-                                                                                @csrf
+
                                                                                 <div class="d-flex gap-3">
                                                                                     <div class="col-md-2">
                                                                                         <input class="form-control mb-3"
                                                                                             type="number"
                                                                                             name="metricEmpScore"
                                                                                             placeholder="Enter Score"
-                                                                                            required
+                                                                                            readonly
                                                                                             value="{{ $metric->metricEmpScore->metricEmpScore ?? '' }}">
                                                                                     </div>
                                                                                     <div class="col-md-9">
@@ -129,25 +121,14 @@
                                                                                             type="text"
                                                                                             name="employeeComment"
                                                                                             placeholder="Enter your comments"
-                                                                                            required
+                                                                                            readonly
                                                                                             value="{{ $metric->metricEmpScore->employeeComment ?? '' }}">
                                                                                     </div>
-                                                                                    <input type="hidden"
-                                                                                        name="metricId"
-                                                                                        value="{{ $metric->metricId }}">
-                                                                                    <input type="hidden"
-                                                                                        name="sectionId"
-                                                                                        value="{{ $sectionId }}">
-                                                                                    <div
-                                                                                        class="form-check form-check-dark mb-3">
-                                                                                        <input @style(['width:1.4rem; height:1.4rem'])
-                                                                                            class="form-check-input"
-                                                                                            type="checkbox"
-                                                                                            id="formCheckcolor4">
-                                                                                    </div>
+
+
                                                                                 </div>
 
-                                                                            </form>
+
 
                                                                             <span
                                                                                 class="mb-2 badge rounded-pill bg-dark"><strong>Supervisor
@@ -155,38 +136,38 @@
                                                                                     Comment</strong></span>
 
                                                                             {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
-                                                                            <form action="{{ route('self.rating') }}"
-                                                                                method="POST">
-                                                                                @csrf
+
                                                                                 <div class="d-flex gap-3">
                                                                                     <div class="col-md-2">
-                                                                                        <input
-                                                                                            class="form-control mb-3"
+                                                                                        <input class="form-control mb-3"
                                                                                             type="number" readonly
                                                                                             name="metricSupScore"
                                                                                             placeholder="Enter Score"
-                                                                                            required
-                                                                                            value="{{ old('metricSupScore.' . $metricId . '.' . '.' . $sectionId) }}">
+                                                                                            readonly
+                                                                                            value="{{ $metric->metricEmpScore->metricSupScore == 0 ? '' : $metric->metricEmpScore->metricSupScore }}">
                                                                                     </div>
                                                                                     <div class="col-md-9">
-                                                                                        <input
-                                                                                            class="form-control mb-3"
+                                                                                        <input class="form-control mb-3"
                                                                                             type="text" readonly
                                                                                             name="supervisorComment"
                                                                                             placeholder="Enter your comments"
-                                                                                            required
-                                                                                            value="{{ old('supervisorComment.' . $metricId . '.' . '.' . $sectionId) }}">
+                                                                                            readonly
+                                                                                            value="{{ $metric->metricEmpScore->supervisorComment ?? '' }}">
                                                                                     </div>
-                                                                                    <input type="hidden"
-                                                                                        name="metricId"
-                                                                                        value="{{ $metric->metricId }}">
-                                                                                    <input type="hidden"
-                                                                                        name="sectionId"
-                                                                                        value="{{ $sectionId }}">
 
+
+                                                                                    <div
+                                                                                        class="form-check form-check-dark mb-3">
+                                                                                        <input @style(['width:1.4rem; height:1.4rem'])
+                                                                                            class="form-check-input"
+                                                                                            type="checkbox"
+                                                                                            name="scoreId"
+                                                                                            value="{{ $metric->metricEmpScore->id }}"
+                                                                                            id="formCheckcolor4">
+                                                                                    </div>
                                                                                 </div>
 
-                                                                            </form>
+
 
 
                                                                         </li>

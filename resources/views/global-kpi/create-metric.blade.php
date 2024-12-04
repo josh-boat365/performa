@@ -6,8 +6,8 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('metric.index') }}"> METRICS </a> > Setup For
-                        Metrics
+                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('global.metric.index') }}"> GLOBAL  METRICS </a> > Setup For
+                       Global Metrics
 
                     </h4>
                 </div>
@@ -23,7 +23,7 @@
                 <div class="card card-body">
                     <h3 class="card-title">Metric Creation </h3>
 
-                    <form action="{{ route('store.metric') }}" class="custom-validation" method="POST">
+                    <form action="{{ route('store.global.metric') }}" class="custom-validation" method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Metric Name</label>

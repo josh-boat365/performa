@@ -19,21 +19,12 @@ class AppraisalScoreController extends Controller
             $totalSections = 0; // Total sections for the KPI
             $completedSections = 0; // Completed sections based on submitted scores
 
-            $kpiId = $request->input('kpiId');
-
-            $response = Http::withToken(session('api_token'))
-            ->get("http://192.168.1.200:5123/Appraisal/Score/employee-score/{$kpiId}");
-
-            if($response->successful()){
-                $kpi_scores = $response->object();
-                // dd($kpi_scores->section->score);
-            }
 
             // Validate the request based on the input type
             if ($request->input('sectionEmpScore')) {
                 $request->validate([
                     'sectionEmpScoreId' => 'nullable|numeric|min:0',
-                    'sectionEmpScore' => 'nullable|numeric|max:'. $kpi_scores->section->score,
+                    'sectionEmpScore' => 'nullable|numeric',
                     'sectionId' => 'required|integer',
                     'employeeComment' => 'nullable|string',
                 ]);
@@ -54,7 +45,7 @@ class AppraisalScoreController extends Controller
             if ($request->input('metricEmpScore')) {
                 $request->validate([
                     'metricEmpScoreId' => 'nullable|numeric|min:0',
-                    'metricEmpScore' => 'nullable|numeric|max:'. $kpi_scores->metric->score,
+                    'metricEmpScore' => 'nullable|numeric',
                     'metricId' => 'required|integer',
                     'sectionId' => 'required|integer',
                     'employeeComment' => 'nullable|string',
@@ -91,7 +82,7 @@ class AppraisalScoreController extends Controller
                 $progress = $totalSections > 0 ? ($completedSections / $totalSections) * 100 : 0;
 
                 session([
-                    'progress'=> $progress
+                    'progress' => $progress
                 ]);
 
                 $appraisalProgress = session('progress');
@@ -108,11 +99,120 @@ class AppraisalScoreController extends Controller
                 ]);
                 return back()->with('toast_error', 'Failed to submit score. Please check the logs for details.');
             }
-        }
-         catch (\Exception $e) {
+        } catch (\Exception $e) {
             // Log exception and notify the user
             Log::error('API Exception', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
         }
+    }
+
+    public function submitAppraisalForReview(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'kpiId' => 'required|integer',
+            'batchId' => 'required|integer',
+            'status' => 'required|string',
+        ]);
+
+        // dd($request);
+
+        // Prepare the data to be sent to the API
+        $data = [
+            'kpiId' => (int) $request->input('kpiId'),
+            'batchId' => (int) $request->input('batchId'),
+            'status' => $request->input('status'),
+        ];
+
+        try {
+            // Make the API request
+            // Retrieve the access token
+            $accessToken = session('api_token');
+
+            // dd($data);
+            // Submit the data to the external API
+            $response = Http::withToken($accessToken)
+                ->put('http://192.168.1.200:5123/Appraisal/Score/update-score-status', $data);
+            // dd($response);
+            // Check if the response is successful
+            if ($response->successful()) {
+                // Display success message using SweetAlert
+                return back()->with('toast_success', 'KPI submitted for review successfully.');
+            } else {
+                // Log the error if the response is not successful
+                Log::error('API Submit, Review Response Error', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                // Handle the case where the API response is not successful
+                return back()->with('toast_error', 'Failed to submit KPI for review. Please try again.');
+            }
+        } catch (\Exception $e) {
+            // Handle any exceptions that occur during the API request
+            // Log exception and notify the user
+            Log::error('API Exception, Submit, Review Response Error', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+        }
+
+    }
+    public function acceptAppraisalReview(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'kpiId' => 'required|integer',
+            'batchId' => 'required|integer',
+            'status' => 'required|string',
+        ]);
+
+        // dd($request);
+
+        // Prepare the data to be sent to the API
+        $data = [
+            'kpiId' => (int) $request->input('kpiId'),
+            'batchId' => (int) $request->input('batchId'),
+            'status' => $request->input('status'),
+        ];
+
+        try {
+            // Make the API request
+            // Retrieve the access token
+            $accessToken = session('api_token');
+
+            // dd($data);
+            // Submit the data to the external API
+            $response = Http::withToken($accessToken)
+                ->put('http://192.168.1.200:5123/Appraisal/Score/update-score-status', $data);
+
+            // Check if the response is successful
+            if ($response->successful()) {
+                // Display success message using SweetAlert
+                return back()->with('toast_success', 'KPI submitted for review successfully.');
+            } else {
+                // Log the error if the response is not successful
+                Log::error('API Submit, Confirmation Response Error', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+
+                // Handle the case where the API response is not successful
+                return back()->with('toast_error', 'Failed to submit KPI for review. Please try again.');
+            }
+        } catch (\Exception $e) {
+            // Handle any exceptions that occur during the API request
+            // Log exception and notify the user
+            Log::error('API Exception, Submit, Confirmation Response Error', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+        }
+
+
+    }
+
+    public function submitProbing(Request $request){
+
+        dd($request->all());
+
+
+        $request->validate([
+
+        ]);
     }
 }

@@ -22,7 +22,7 @@
                 <div class="card card-body">
                     <h3 class="card-title">Appraisal KPI </h3>
 
-                    <form action="{{ route('store.kpi') }}" class="custom-validation" method="POST">
+                    <form action="{{ route('store.global.kpi') }}" class="custom-validation" method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">KPI Name</label>
@@ -36,9 +36,8 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">KPI Description</label>
                             <div class="col-md-12">
-                                <input class="form-control" type="text" name="description" required
-                                    placeholder="Enter Description for KPI" value="{{ old('description') }}"
-                                    id="example-text-input">
+                               <textarea class="form-control" name="description" required placeholder="Enter Description for KPI" rows="3"
+                                    id="example-text-input">{{ old('description') }}</textarea>
                             </div>
                         </div>
 
@@ -55,14 +54,14 @@
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                         {{--  <div class="row mb-3">
                             <label for="example-text-input" class="">Select Role For KPI to Belong To</label>
                             <div class="col-md-12">
                                 <select name="empRoleId" class="form-select">
                                     <option>Select Role</option>
 
                                     @foreach ($uniqueRoles as $role)
-                                        <option value="{{ $role['id'] }}"
+                                        <option value="1"
                                             {{ old('empRoleId') == $role['id'] ? 'selected' : '' }}>
                                             {{ $role['name'] }}
                                         </option>
@@ -70,7 +69,7 @@
 
                                 </select>
                             </div>
-                        </div>
+                        </div>  --}}
 
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Select Batch For KPI to Belong To</label>
@@ -87,7 +86,32 @@
                             </div>
                         </div>
 
+                        {{--  <div class="row mb-3">
+                            <label for="example-text-input" class="">Select Department</label>
+                            <div class="col-md-12">
+                                <select name="departmentId" class="form-select">
+                                    <option>Select Department</option>
+
+                                    @foreach ($uniqueDepartments as $department)
+                                        <option value="{{ $department->id }}"
+                                            {{ old('departmentId') == $department->id ? 'selected' : '' }}>{{ $department->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>  --}}
+
+                         {{--  <div class="row mb-3">
+                            <label for="example-text-input" class="">Weight Score </label>
+                            <div class="col-md-12">
+                                <input class="form-control" type="text" name="global_score" required
+                                    placeholder="Enter Weighted Score For Department" value="{{ old('description') }}"
+                                    id="example-text-input">
+                            </div>
+                        </div>  --}}
+
                         <input type="hidden" name="active" value="1">
+                        <input type="hidden" name="empRoleId" value="1">
 
                         <button type="submit" class="btn btn-primary waves-effect waves-light col-md-12 mt-4">
                             Create

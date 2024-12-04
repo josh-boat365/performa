@@ -65,7 +65,16 @@
                                             <td><a href="#">{{ $section->kpi->name }}</a></td>
                                             <td><a href="#" @style(['text-wrap: auto'])>{{ $section->name }}</a></td>
                                             <td>{{ $section->score }}</td>
-                                            <td ><span  @style(['text-wrap: auto'])>{{ $section->description }}</span></td>
+
+                                            <td><span @style(['text-wrap: auto'])>{{ $section->description }}</span></td>
+                                            <td>
+                                                <span
+                                                    class="dropdown badge rounded-pill {{ $section->active ? 'bg-success' : 'bg-dark' }}"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                    {{ $section->active ? 'Activated' : 'Deactivated' }}
+                                                </span>
+                                            </td>
+
                                             <td>{{ Carbon\Carbon::parse($section->createdAt)->format('jS F, Y : g:i A') }}
                                             </td>
                                             <td>
@@ -93,7 +102,8 @@
                                                             </div>
                                                             <div class="modal-body">
                                                                 <h4 class="text-center mb-4">Are you sure you want to
-                                                                    delete this KPI?</h4>
+                                                                    delete this Section?</h4>
+                                                                    <p>Deleting a <b>Section</b> means removing it from the <b>system entirely</b> and you cannot <b>recover</b> it again</p>
                                                                 <form
                                                                     action="{{ route('delete.section', $section->id) }}"
                                                                     method="POST">

@@ -36,13 +36,13 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">KPI Description</label>
                             <div class="col-md-12">
-                                <input class="form-control" type="text" name="description" required
-                                    placeholder="Enter Description for KPI" value="{{ old('description') }}"
-                                    id="example-text-input">
+
+                                <textarea class="form-control" name="description" required placeholder="Enter Description for KPI" rows="3"
+                                    id="example-text-input">{{ old('description') }}</textarea>
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                        {{--  <div class="row mb-3">
                             <label for="example-text-input" class="">Select KPI Type</label>
                             <div class="col-md-12">
                                 <select name="type" class="form-select">
@@ -51,7 +51,7 @@
                                     </option>
                                 </select>
                             </div>
-                        </div>
+                        </div>  --}}
 
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Select Role For KPI to Belong To</label>
@@ -86,6 +86,7 @@
                         </div>
 
                         <input type="hidden" name="active" value="1">
+                        <input type="hidden" name="type" value="REGULAR">
 
                         <button type="submit" class="btn btn-primary waves-effect waves-light col-md-12 mt-4">
                             Create

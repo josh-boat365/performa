@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> Score Setup</h4>
+                    <h4 class="mb-sm-0 font-size-18"> Grade Setup</h4>
                 </div>
             </div>
         </div>
@@ -46,22 +46,70 @@
 
                                         <th class="align-middle">Grade</th>
                                         <th class="align-middle">Score</th>
-                                        <th class="align-middle">Description</th>
+                                        <th class="align-middle">Remark</th>
+                                        <th class="align-middle">Created At</th>
                                         <th class="align-middle">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>A</td>
-                                        <td>80 - 100</td>
-                                        <td>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</td>
-                                        <td>
-                                            <a href="#">
-                                                <span class="badge rounded-pill bg-primary fonte-size-13"><i
-                                                        class="bx bxs-pencil"></i>edit</span>
-                                            </a>
-                                        </td>
-                                    </tr>
+                                    @forelse ($grades as $grade)
+                                        <tr>
+                                            <td>{{ $grade->grade }}</td>
+                                            <td>{{ $grade->minScore }} - {{ $grade->maxScore }}</td>
+                                            <td>{{ $grade->remark }}</td>
+                                            <td>{{ Carbon\Carbon::parse($grade->createdAt)->format('jS F, Y : g:i A') }}
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('show.grade', $grade->id) }}">
+                                                    <span class="badge rounded-pill bg-primary fonte-size-13"><i
+                                                            class="bx bxs-pencil"></i>edit</span>
+                                                </a>
+                                                <a href="#" data-bs-toggle="modal"
+                                                    data-bs-target=".bs-delete-modal-lg-{{ $grade->id }}">
+                                                    <span class="badge rounded-pill bg-danger fonte-size-13"><i
+                                                            class="bx bxs-trash"></i> delete</span>
+                                                </a>
+
+                                                <!-- Modal for Delete Confirmation -->
+                                                <div class="modal fade bs-delete-modal-lg-{{ $grade->id }}"
+                                                    tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog modal-md modal-dialog-centered">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="myLargeModalLabel">Confirm
+                                                                    Grade
+                                                                    Deletion</h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <h4 class="text-center mb-4">Are you sure you want to
+                                                                    delete this
+                                                                    Grade?</h4>
+                                                                <form action="{{ route('delete.grade', $grade->id) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <div class="d-grid">
+                                                                        <button type="submit"
+                                                                            class="btn btn-danger">Yes,
+                                                                            Delete</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6">
+                                                <p>No Grades Created....</p>
+                                            </td>
+                                        </tr>
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
@@ -79,7 +127,8 @@
                                     aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form action="">
+                                <form action="{{ route('store.grade') }}" method="POST">
+                                    @csrf
                                     <div class="mb-3">
                                         <label class="form-label">Grade</label>
                                         <div>
@@ -92,18 +141,18 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <label class="form-label">Min score</label>
-                                                <input type="number" class="form-control" required
+                                                <input type="text" class="form-control" required
                                                     placeholder="Enter minimum grade score eg: 80" />
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label">Max score</label>
-                                                <input type="number" class="form-control" required
+                                                <input type="text" class="form-control" required
                                                     placeholder="Enter maximum grade score eg: 100" />
                                             </div>
                                         </div>
                                     </div>
                                     <div class="mb-3">
-                                        <label class="form-label">Description</label>
+                                        <label class="form-label">Remark</label>
                                         <div>
                                             <input type="text" class="form-control"
                                                 placeholder="Enter description eg:This is the highest grade score" />

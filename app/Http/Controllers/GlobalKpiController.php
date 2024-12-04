@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class GlobalKpiController extends Controller
@@ -25,12 +25,15 @@ class GlobalKpiController extends Controller
 
         $responseKpis = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/Kpi');
 
+        // dd($responseKpis);
 
 
         // Filter the KPIs to include only those with active state of true or false
         $activeKpis = collect($responseKpis)->filter(function ($kpi) {
-            return $kpi->type === 'GLOBAL' && $kpi->type === 'PROBATION';
+            return $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION';
         });
+
+        // dd($activeKpis);
 
         // Sort the KPIs to place the newly created one first
         $activeKpis = $activeKpis->sortByDesc('createdAt');
@@ -57,22 +60,25 @@ class GlobalKpiController extends Controller
         // Extracting data
         $batch_data = $responseBatches ?? [];
 
-        $uniqueRoles = [];
+        $uniqueDepartments = [];
+        // $uniqueRoles = [];
 
         if ($responseRoles) {
             $rolesWithDepartments = collect($responseRoles);
 
-
-            $uniqueRoles = $rolesWithDepartments->map(function ($role) {
-                return [
-                    'id' => $role->id,
-                    'name' => $role->name,
-                ];
-            })->unique('id')->values()->toArray();
+            // Extract and deduplicate departments and roles
+            $uniqueDepartments = $rolesWithDepartments->pluck('department')->unique()->toArray();
+            // $uniqueRoles = $rolesWithDepartments->map(function ($role) {
+            //     return [
+            //         'id' => $role->id,
+            //         'name' => $role->name,
+            //     ];
+            // })->unique('id')->values()->toArray();
         }
 
+        // dd($uniqueDepartments);
 
-        return view('global-kpi.create-kpi', compact('batch_data', 'uniqueRoles',));
+        return view('global-kpi.create-kpi', compact('batch_data', 'uniqueDepartments'));
     }
 
     /**
@@ -105,7 +111,7 @@ class GlobalKpiController extends Controller
 
         // Check the response and redirect
         if ($response->success) {
-            return redirect()->route('kpi.index')->with('toast_success', 'Global KPI created successfully');
+            return redirect()->route('global.index')->with('toast_success', 'Global KPI created successfully');
         }
 
         // Log errors (if any)
@@ -122,29 +128,27 @@ class GlobalKpiController extends Controller
      */  public function show(string $id)
     {
         try {
+            $accessToken = session('api_token');
+
             // Fetch data using helper method
-            $responseRoles = $this->fetchShowApiData('http://192.168.1.200:5124/HRMS/emprole');
-            $responseBatches = $this->fetchShowApiData('http://192.168.1.200:5123/Appraisal/batch');
-            $responseKpi = $this->fetchShowApiData('http://192.168.1.200:5123/Appraisal/Kpi/' . $id);
+            $responseRoles = Http::withToken($accessToken)
+                ->get('http://192.168.1.200:5124/HRMS/emprole');
+
+            $responseBatches = Http::withToken($accessToken)
+                ->get('http://192.168.1.200:5123/Appraisal/batch');
+
+
+            $responseKpi = Http::withToken($accessToken)
+                ->get("http://192.168.1.200:5123/Appraisal/Kpi/{$id}");
 
             // Extract and process data
             $batch_data = $responseBatches ?? [];
             $kpi_data = $responseKpi ?? null;
 
-            // $uniqueDepartments = [];
-            $uniqueRoles = [];
 
-            if ($responseRoles) {
-                $rolesWithDepartments = collect($responseRoles);
+            $uniqueRoles = collect($responseRoles->object());
 
-                // $uniqueDepartments = $rolesWithDepartments->pluck('department')->unique()->toArray();
-                $uniqueRoles = $rolesWithDepartments->map(function ($role) {
-                    return [
-                        'id' => $role->id,
-                        'name' => $role->name,
-                    ];
-                })->unique('id')->values()->toArray();
-            }
+
 
             if ($kpi_data) {
                 return view('global-kpi.edit', compact('kpi_data', 'uniqueRoles', 'batch_data'));
@@ -160,7 +164,7 @@ class GlobalKpiController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again.');
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
         }
     }
     /**
@@ -176,16 +180,78 @@ class GlobalKpiController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // Validate the request data
+        $request->validate([
+            'name' => 'required|string',
+            'description' => 'required|string',
+            'type' => 'required|string',
+            'active' => 'required|integer',
+            'batchId' => 'required|integer',
+            'empRoleId' => 'required|integer',
+        ]);
+
+        // Prepare the data for KPI update
+        $kpiData = $request->only([
+            'name',
+            'description',
+            'type',
+            'batchId',
+            'empRoleId'
+        ]);
+        $kpiData['active'] = (bool) $request->input('active'); // Cast to boolean
+
+        // Send the request to the API to update the KPI
+        $apiUrl = "http://192.168.1.200:5123/Appraisal/Kpi/{$id}";
+        $response = $this->sendApiRequest($apiUrl, $kpiData, 'PUT');
+
+        // Check the response and redirect
+        if ($response->success) {
+            return redirect()->route('global.index')->with('toast_success', 'Global KPI updated successfully');
+        }
+
+        // Log errors (if any)
+        Log::error('Failed to update Global KPI', [
+            'status' => $response->status ?? 'N/A',
+            'response' => $response->data ?? 'No response received',
+        ]);
+
+        return redirect()->back()->with('toast_error', 'Sorry, failed to update KPI');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        // Get the access token from the session
+        $accessToken = session('api_token'); // Replace with your actual access token
+
+        try {
+            // Make the DELETE request to the external API
+            $response = Http::withToken($accessToken)
+                ->delete("http://192.168.1.200:5123/Appraisal/Kpi/{$id}");
+
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                return redirect()->back()->with('toast_success', 'Global Kpi deleted successfully');
+            } else {
+                // Log the error response
+                Log::error('Failed to delete Section', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Global Kpi, there are Section <br> dependent on this Metric and can not be deleted, <b>DEACTIVATE INSTEAD</b>');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while deleting Global Kpi', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+        }
     }
+
 
     private function fetchApiData(string $accessToken, string $url)
     {
