@@ -89,7 +89,7 @@
                                             <div class="modal fade bs-delete-modal-lg-{{ $kpi->id }}"
                                                 tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
                                                 aria-hidden="true">
-                                                <div class="modal-dialog modal-md modal-dialog-centered">
+                                                <div class="modal-dialog modal-lg modal-dialog-centered">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="myLargeModalLabel">Confirm
@@ -104,7 +104,7 @@
                                                             <form action="{{ route('delete.global.weight', $kpi->id) }}"
                                                                 method="POST">
                                                                 @csrf
-                                                                @method('DELETE')
+                                                                {{--  @method('DELETE')  --}}
                                                                 <div class="d-grid">
                                                                     <button type="submit" class="btn btn-danger">Yes,
                                                                         Delete</button>

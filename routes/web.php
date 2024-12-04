@@ -58,8 +58,7 @@ Route::group(
 
         //Appraisal Score
         Route::post("dashboard/self-rating", [AppraisalScoreController::class, "store"])->name("self.rating");
-        Route::post("dashboard/submit-self-rating-score-for-supervisor-review", [UpdateKpiScoringState::class, "store"])->name("submit.rating");
-        Route::post("dashboard/accept-rating-score-from-supervisor-review", [UpdateKpiScoringState::class, "store"])->name("accept.rating");
+        Route::post("dashboard/submit-self-rating-score-for-supervisor-review", [UpdateKpiScoringState::class, "store"])->name("submit.appraisal");
 
 
 

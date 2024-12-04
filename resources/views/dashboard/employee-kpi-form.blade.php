@@ -189,7 +189,7 @@
                                                 <b>Submit</b> your <b>Appraisal</b> to your
                                                 <b>Supervisor</b> for <b>Review?</b>
                                             </h4>
-                                            <form action="{{ route('submit.rating') }}" method="POST">
+                                            <form action="{{ route('submit.appraisal') }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="kpiId" value="{{ $kpi->kpiId }}">
                                                 <input type="hidden" name="batchId" value="{{ $kpi->batchId }}">

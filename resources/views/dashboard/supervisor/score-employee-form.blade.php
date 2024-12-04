@@ -226,7 +226,7 @@
                                                                 <b>Confirmation</b>?
 
                                                             </h4>
-                                                            <form action="{{ route('submit.rating') }}"
+                                                            <form action="{{ route('submit.appraisal') }}"
                                                                 method="POST">
                                                                 @csrf
                                                                 <input type="hidden" name="kpiId"
