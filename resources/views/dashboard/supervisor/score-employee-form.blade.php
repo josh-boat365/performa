@@ -77,7 +77,7 @@
                                                             </div>
 
 
-                                                            <span class="mb-2 badge rounded-pill bg-primary"><strong>Supervisor
+                                                            <span class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
                                                                     Score and
                                                                     Comment</strong></span>
 
@@ -93,7 +93,7 @@
                                                                             max="{{ $section->sectionScore }}"
                                                                             @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
                                                                             title="The Score can not be more than the section score {{ $section->sectionScore }}"
-                                                                            value="{{ $section->sectionEmpScore->sectionEmpScore ?? '' }}">
+                                                                            value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? '' }}">
                                                                     </div>
                                                                     <div class="col-md-9">
                                                                         <input class="form-control mb-3 comment-input"
@@ -151,7 +151,7 @@
                                                                         </div>
 
                                                                         <span
-                                                                            class="mb-2 badge rounded-pill bg-primary"><strong>Supervisor
+                                                                            class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
                                                                                 Score and
                                                                                 Comment</strong></span>
 
@@ -168,7 +168,7 @@
                                                                                         title="The Score can not be more than the metric score {{ $metric->metricScore }}"
                                                                                         placeholder="Enter Score"
                                                                                         required
-                                                                                        value="{{ $metric->metricEmpScore->metricSupScore == 0 ? '' : $metric->metricEmpScore->metricSupScore }}">
+                                                                                        value="{{ optional($metric->metricEmpScore)->metricSupScore  ?? '' }}">
                                                                                 </div>
                                                                                 <div class="col-md-9">
                                                                                     <input class="form-control mb-3"
@@ -206,7 +206,7 @@
                                             <div></div>
                                         @else
                                             <div class="float-end">
-                                                <button type="button" data-bs-toggle="modal" class="btn btn-primary"
+                                                <button type="button" data-bs-toggle="modal" class="btn btn-success"
                                                     data-bs-target=".bs-delete-modal-lg">Submit Appraisal</button>
                                             </div>
 

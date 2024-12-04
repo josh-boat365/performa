@@ -136,7 +136,7 @@ class SupervisorScoreController extends Controller
                 // Prepare the payload for the API request
                 $payload = [
                     'scoreId' => (int) $request->input('scoreId') ?? null,
-                    'metricSupScore' => (float) $request->input('metricSupScore', 0),
+                    'metricSupScore' => (float) $request->input('metricSupScore'),
                     'supervisorComment' => $request->input('supervisorComment', ''),
                 ];
 
@@ -156,7 +156,7 @@ class SupervisorScoreController extends Controller
                 // Prepare the payload for the API request
                 $payload = [
                     'scoreId' => (int) $request->input('scoreId') ?? null,
-                    'sectionSupScore' => (float) $request->input('sectionSupScore', 0),
+                    'sectionSupScore' => (float) $request->input('sectionSupScore'),
                     'supervisorComment' => $request->input('supervisorComment', ''),
                 ];
 
