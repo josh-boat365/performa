@@ -514,7 +514,7 @@ class KpiController extends Controller
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete KPI, there are Sections and Metrics <br> dependent on this KPI and can not be deleted, <b>DEACTIVATE INSTEAD</b>');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to delete KPI');
             }
         } catch (\Exception $e) {
             // Log the exception
