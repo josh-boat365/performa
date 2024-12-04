@@ -78,7 +78,7 @@
                                                                         <input class="form-control mb-3" type="number"
                                                                             readonly name="metricSupScore"
                                                                             placeholder="Enter Score" readonly
-                                                                            value="{{ $section->sectionEmpScore->sectionSupScore == 0 ? '' : $section->sectionEmpScore->sectionSupScore }}">
+                                                                            value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? ''}}">
                                                                     </div>
                                                                     <div class="col-md-9">
                                                                         <input class="form-control mb-3" type="text"
@@ -144,7 +144,7 @@
                                                                                             name="metricSupScore"
                                                                                             placeholder="Enter Score"
                                                                                             readonly
-                                                                                            value="{{ $metric->metricEmpScore->metricSupScore == 0 ? '' : $metric->metricEmpScore->metricSupScore }}">
+                                                                                            value="{{ optional($metric->metricEmpScore)->metricSupScore ?? '' }}">
                                                                                     </div>
                                                                                     <div class="col-md-9">
                                                                                         <input class="form-control mb-3"
@@ -174,7 +174,7 @@
                                                                     @endforeach
                                                                 </ul>
                                                             @else
-                                                                <p>No metrics available for this section.</p>
+                                                                <p></p>
                                                             @endif
                                                         </div>
                                                     @endforeach
