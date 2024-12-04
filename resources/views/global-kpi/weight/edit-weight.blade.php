@@ -49,7 +49,7 @@
                                 <select name="departmentId" class="form-select">
                                     <option>Select Department</option>
 
-                                    @foreach ($uniqueDepartments as $department)
+                                    @foreach ($departments as $department)
                                         <option value="{{ $department->id }}"
                                             {{ $globalWeight->department->id == $department->id ? 'selected' : '' }}>{{ $department->name }}
                                         </option>
