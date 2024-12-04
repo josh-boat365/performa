@@ -49,7 +49,7 @@
                                                                             <input class="form-control mb-3"
                                                                                 type="number" name="sectionEmpScore"
                                                                                 readonly placeholder="Enter Score"
-                                                                                value="{{ $section->sectionEmpScore->sectionEmpScore ?? '' }}">
+                                                                                value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                         </div>
                                                                         <div class="col-md-9">
                                                                             <input class="form-control mb-3"

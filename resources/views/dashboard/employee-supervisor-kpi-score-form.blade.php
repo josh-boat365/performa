@@ -63,7 +63,7 @@
                                                                         placeholder="Enter Score" readonly
                                                                         max="{{ $section->sectionScore }}"
                                                                         title="The Score can not be more than the section score {{ $section->sectionScore }}"
-                                                                        value="{{ $section->sectionEmpScore->sectionEmpScore ?? '' }}">
+                                                                        value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                 </div>
                                                                 <div class="col-md-9">
                                                                     <input class="form-control mb-3 comment-input"
@@ -81,7 +81,7 @@
                                                                     <input class="form-control mb-3" type="number"
                                                                         readonly name="metricSupScore"
                                                                         placeholder="Enter Score" required
-                                                                        value="{{ $section->sectionEmpScore->sectionSupScore == 0 ? '' : $section->sectionEmpScore->sectionSupScore }} ">
+                                                                        value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? ''  }} ">
                                                                 </div>
                                                                 <div class="col-md-9">
                                                                     <input class="form-control mb-3" type="text"
@@ -111,7 +111,7 @@
                                                                                     readonly
                                                                                     max="{{ $metric->metricScore }}"
                                                                                     title="The Score can not be more than the metric score {{ $metric->metricScore }}"
-                                                                                    value="{{ $metric->metricEmpScore->metricEmpScore ?? '' }}">
+                                                                                    value="{{ optional($metric->metricEmpScore)->metricEmpScore ?? '' }}">
                                                                             </div>
                                                                             <div class="col-md-9">
                                                                                 <input
@@ -139,7 +139,7 @@
                                                                                     type="number" readonly
                                                                                     name="metricSupScore"
                                                                                     placeholder="Enter Score" required
-                                                                                    value="{{ $metric->metricEmpScore->metricSupScore == 0 ? '' : $metric->metricEmpScore->metricSupScore }}">
+                                                                                    value="{{ optional($metric->metricEmpScore)->metricSupScore ?? '' }}">
                                                                             </div>
                                                                             <div class="col-md-9">
                                                                                 <input class="form-control mb-3"

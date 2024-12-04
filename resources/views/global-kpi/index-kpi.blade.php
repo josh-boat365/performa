@@ -135,7 +135,7 @@
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="myLargeModalLabel">Confirm
-                                                                KPI
+                                                                Global KPI
                                                                 Deletion</h5>
                                                             <button type="button" class="btn-close"
                                                                 data-bs-dismiss="modal" aria-label="Close"></button>
@@ -143,8 +143,8 @@
                                                         <div class="modal-body">
                                                             <h4 class="text-center mb-4">Are you sure you want to
                                                                 delete this
-                                                                KPI?</h4>
-                                                            <form action="{{ route('delete.kpi', $kpi->id) }}"
+                                                                Global KPI?</h4>
+                                                            <form action="{{ route('delete.global.kpi', $kpi->id) }}"
                                                                 method="POST">
                                                                 @csrf
                                                                 @method('DELETE')
