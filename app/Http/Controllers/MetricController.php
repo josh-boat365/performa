@@ -243,13 +243,13 @@ class MetricController extends Controller
             }
 
             // Log unsuccessful response
-            Log::error('Failed to update Metric', [
+
+           Log::error('Failed to update Metric', [
                 'status' => $response->status(),
                 'response' => $response->body(),
             ]);
-          
             return redirect()->back()->with('toast_error', 'Update Metric Error:' . $response->body());
-          
+
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while updating Metric', [

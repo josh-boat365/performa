@@ -52,9 +52,10 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th class="align-middle">Section’s KPI Name</th>
-                                        <th class="align-middle" >Section Name</th>
+                                        <th class="align-middle">Section Name</th>
                                         <th class="align-middle">Section Score</th>
-                                        <th class="align-middle" >Section Description</th>
+                                        <th class="align-middle">Section Description</th>
+                                        <th class="align-middle">Section state</th>
                                         <th class="align-middle">Created At</th>
                                         <th class="align-middle">Action</th>
                                     </tr>
@@ -75,7 +76,7 @@
                                                 </span>
                                             </td>
 
-                                            <td>{{ Carbon\Carbon::parse($section->createdAt)->format('jS F, Y : g:i A') }}
+                                            <td>{{ Carbon\Carbon::parse($section->createdAt)->diffForHumans() }}
                                             </td>
                                             <td>
                                                 <a href="{{ route('show.section', $section->id) }}">
@@ -103,7 +104,9 @@
                                                             <div class="modal-body">
                                                                 <h4 class="text-center mb-4">Are you sure you want to
                                                                     delete this Section?</h4>
-                                                                    <p>Deleting a <b>Section</b> means removing it from the <b>system entirely</b> and you cannot <b>recover</b> it again</p>
+                                                                <p>Deleting a <b>Section</b> means removing it from the
+                                                                    <b>system entirely</b> and you cannot <b>recover</b>
+                                                                    it again</p>
                                                                 <form
                                                                     action="{{ route('delete.section', $section->id) }}"
                                                                     method="POST">
