@@ -62,7 +62,7 @@ class SectionController extends Controller
 
         // Filter the KPIs to include only those with active state of true
         $activeKpis = collect($kpis)->filter(function ($kpi) {
-            return $kpi->active === true;
+            return $kpi->active === true && $kpi->type === 'REGULAR';
         });
 
         return view('section-setup.create', compact('activeKpis'));
