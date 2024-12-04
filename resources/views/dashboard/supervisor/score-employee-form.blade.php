@@ -57,7 +57,7 @@
                                                         </h4>
                                                         <p>{{ $section->sectionDescription }}</p>
 
-                                                        @if (empty($section->metrics))
+                                                        @if (isset($section->metrics) && count($section->metrics) == 0)
                                                             <div class="d-flex gap-3">
                                                                 <div class="col-md-2">
                                                                     <input class="form-control mb-3 score-input"
@@ -114,6 +114,8 @@
                                                                     @endif
                                                                 </div>
                                                             </form>
+                                                        @else
+                                                            <div></div>
                                                         @endif
 
                                                         @if (isset($section->metrics) && count($section->metrics) > 0)
@@ -173,7 +175,6 @@
                                                                                         type="text"
                                                                                         name="supervisorComment"
                                                                                         placeholder="Enter your comments"
-                                                                                        required
                                                                                         value="{{ $metric->metricEmpScore->supervisorComment ?? '' }}">
                                                                                 </div>
 
