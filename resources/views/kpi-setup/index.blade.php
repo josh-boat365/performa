@@ -53,7 +53,7 @@
                                 <th class="align-middle">Action</th>
 
                         </thead>
-                        
+
                         <tbody>
                             @forelse ($activeKpis as $kpi)
                                 <tr>
@@ -215,7 +215,7 @@
                                             <div class="modal fade bs-delete-modal-lg-{{ $kpi->id }}"
                                                 tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
                                                 aria-hidden="true">
-                                                <div class="modal-dialog modal-md modal-dialog-centered">
+                                                <div class="modal-dialog modal-lg modal-dialog-centered">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="myLargeModalLabel">Confirm
@@ -228,7 +228,7 @@
                                                             <h4 class="text-center mb-4">Are you sure you want to
                                                                 delete this
                                                                 KPI?</h4>
-                                                                <p>Deleting a <b>KPI</b> means removing it from the <b>system entirely</b> and you cannot <b>recover</b> it again</p>
+                                                                <p class="text-center">Deleting a <b>KPI</b> means removing it from the <b>system entirely</b> and you cannot <b>recover</b> it again</p>
                                                             <form action="{{ route('delete.kpi', $kpi->id) }}"
                                                                 method="POST">
                                                                 @csrf
