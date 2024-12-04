@@ -16,7 +16,7 @@
         <div class="d-flex gap-3">
             <a href="{{ route('create.global.weight') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
                     class="bx bxs-plus"></i>Create Weight
-                </a>
+            </a>
 
         </div>
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
@@ -53,7 +53,6 @@
                         </thead>
                         <tbody>
                             @forelse ($activeKpis as $kpi)
-
                                 <tr>
                                     <th scope="row">
                                         <a href="#">{{ $kpi->kpi->name }}</a>
@@ -72,7 +71,7 @@
                                     </td>
                                     <td>{{ $kpi->weight }}</td>
 
-                                    <td>{{ Carbon\Carbon::parse($kpi->createdAt)->format('jS F, Y : g:i A') }}</td>
+                                    <td>{{ Carbon\Carbon::parse($kpi->createdAt)->diffForHumans() }}</td>
                                     <td>
                                         <div class="d-flex gap-3">
                                             <a href="{{ route('show.global.weight', $kpi->id) }}">
@@ -99,9 +98,11 @@
                                                         </div>
                                                         <div class="modal-body">
                                                             <h4 class="text-center mb-4">Are you sure you want to
-                                                                delete this Global <b>Weight Score</b> for <b>{{ $kpi->department->name }} </b> Department?
-                                                                </h4>
-                                                            <form action="{{ route('delete.global.weight', $kpi->id) }}"
+                                                                delete this Global <b>Weight Score</b> for
+                                                                <b>{{ $kpi->department->name }} </b> Department?
+                                                            </h4>
+                                                            <form
+                                                                action="{{ route('delete.global.weight', $kpi->id) }}"
                                                                 method="POST">
                                                                 @csrf
                                                                 {{--  @method('DELETE')  --}}

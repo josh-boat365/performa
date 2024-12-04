@@ -75,7 +75,7 @@
 
                                                 </span>
                                             </td>
-                                            <td>{{ Carbon\Carbon::parse($section->createdAt)->format('jS F, Y : g:i A') }}
+                                            <td>{{ Carbon\Carbon::parse($section->createdAt)->diffForHumans() }}
                                             </td>
                                             <td>
                                                 <a href="{{ route('show.global.section', $section->id) }}">

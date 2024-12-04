@@ -16,7 +16,7 @@
         <div class="d-flex gap-3">
             <a href="{{ route('create.global.kpi') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
                     class="bx bxs-plus"></i>Create Global
-                </a>
+            </a>
 
 
         </div>
@@ -114,7 +114,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{{ Carbon\Carbon::parse($kpi->createdAt)->format('jS F, Y : g:i A') }}</td>
+                                    <td>{{ Carbon\Carbon::parse($kpi->createdAt)->diffForHumans() }}</td>
                                     <td>
                                         <div class="d-flex gap-3">
                                             <a href="{{ route('show.global.kpi', $kpi->id) }}">

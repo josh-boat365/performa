@@ -141,7 +141,7 @@ class SectionController extends Controller
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to create Section');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to create Section'. $response->body());
             }
         } catch (\Exception $e) {
             // Log the exception

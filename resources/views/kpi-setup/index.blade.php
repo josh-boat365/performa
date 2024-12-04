@@ -198,7 +198,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{{ Carbon\Carbon::parse($kpi->createdAt)->format('jS F, Y : g:i A') }}</td>
+                                    <td>{{ Carbon\Carbon::parse($kpi->createdAt)->diffForHumans() }}</td>
                                     <td>
                                         <div class="d-flex gap-3">
                                             <a href="{{ route('show.kpi', $kpi->id) }}">
@@ -228,7 +228,9 @@
                                                             <h4 class="text-center mb-4">Are you sure you want to
                                                                 delete this
                                                                 KPI?</h4>
-                                                                <p class="text-center">Deleting a <b>KPI</b> means removing it from the <b>system entirely</b> and you cannot <b>recover</b> it again</p>
+                                                            <p class="text-center">Deleting a <b>KPI</b> means removing
+                                                                it from the <b>system entirely</b> and you cannot
+                                                                <b>recover</b> it again</p>
                                                             <form action="{{ route('delete.kpi', $kpi->id) }}"
                                                                 method="POST">
                                                                 @csrf
@@ -280,7 +282,7 @@
 
                         // Check if any of the fields contain the search term
                         if (kpiName.includes(searchTerm) || type.includes(searchTerm) || role.includes(
-                            searchTerm) ||
+                                searchTerm) ||
                             department.includes(searchTerm) || batch.includes(searchTerm) ||
                             supervisors.includes(searchTerm) || active.includes(searchTerm) ||
                             createdAt.includes(searchTerm)) {

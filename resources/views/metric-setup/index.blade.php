@@ -65,7 +65,7 @@
                                             <td><a href="#">{{ $metric->name }}</a></td>
                                             <td>{{ $metric->score }}</td>
                                             <td>{{ $metric->description }}</td>
-                                            <td>{{ Carbon\Carbon::parse($metric->createdAt)->format('jS F, Y : g:i A') }}
+                                            <td>{{ Carbon\Carbon::parse($metric->createdAt)->diffForHumans() }}
                                             </td>
                                             <td>
                                                 <a href="{{ route('show.metric', $metric->id) }}">
@@ -94,10 +94,10 @@
                                                                 <h4 class="text-center mb-4">Are you sure you want to
                                                                     delete this Metric?</h4>
 
-                                                                    <p>Deleting a <b>metric</b> means removing it from the <b>system entirely</b> and you cannot <b>recover</b> it again</p>
-                                                                <form
-                                                                    action="{{ route('delete.metric', $metric->id) }}"
-
+                                                                <p>Deleting a <b>metric</b> means removing it from the
+                                                                    <b>system entirely</b> and you cannot <b>recover</b>
+                                                                    it again</p>
+                                                                <form action="{{ route('delete.metric', $metric->id) }}"
                                                                     method="POST">
                                                                     @csrf
                                                                     @method('DELETE')
