@@ -2,7 +2,7 @@
 
     <div class="container-fluid px-5">
 
-        
+
 
         <!-- start page title -->
         <div class="row">
@@ -28,7 +28,7 @@
                     <form action="{{ route('update.global.kpi', $kpi_data->id) }}" method="POST">
                         @csrf
                         <div class="row mb-3">
-                            <label for="example-text-input" class="">KPI Name</label>
+                            <label for="example-text-input" class=""> Global KPI Name</label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="name" required
                                     value="{{ $kpi_data->name }}" id="example-text-input">
@@ -37,17 +37,11 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Description</label>
                             <div class="col-md-12">
-                                <input class="form-control" type="text" name="description" required
-                                    value="{{ $kpi_data->description }}" id="example-text-input">
+                                    <textarea class="form-control" name="description" required placeholder="Enter Description for KPI" rows="3"
+                                    id="example-text-input">{{ $kpi_data->description }}</textarea>
                             </div>
                         </div>
-                        <div class="row mb-3">
-                            <label for="example-text-input" class="">Score</label>
-                            <div class="col-md-12">
-                                <input class="form-control" type="text" name="score" required
-                                    value="{{ $kpi_data->score }}" id="example-text-input">
-                            </div>
-                        </div>
+
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Select KPI Type</label>
                             <div class="col-md-12">
@@ -57,40 +51,6 @@
                                     </option>
                                     <option value="PROBATION" {{ $kpi_data->type == 'PROBATION' ? 'selected' : '' }}>
                                         PROBATION </option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label for="example-text-input" class="">Select Role</label>
-                            <div class="col-md-12">
-                                <select name="empRoleId" class="form-select">
-                                    <option>Select Role</option>
-
-                                    @foreach ($uniqueRoles as $role)
-                                        <option value="{{ $role['id'] }}"
-                                            {{ $role['id'] == $role['id'] ? 'selected' : '' }}>
-                                            {{ $role['name'] }}
-                                        </option>
-                                    @endforeach
-
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <label for="example-text-input" class="">Select Department</label>
-                            <div class="col-md-12">
-                                <select name="departmentId" class="form-select">
-                                    <option>Select Department</option>
-
-                                    @foreach ($uniqueDepartments as $department)
-                                        <option value="{{ $department->id }}"
-                                            {{ $department->id == $kpi_data->department->id ? 'selected' : '' }}>
-                                            {{ $department->name }}
-                                        </option>
-                                    @endforeach
-
                                 </select>
                             </div>
                         </div>
@@ -133,6 +93,11 @@
                                 </script>
                             </div>
                         </div>
+
+
+
+                        <input type="hidden" name="active" value="1">
+                        <input type="hidden" name="empRoleId" value="1">
 
                         <button type="submit"
                             class="btn btn-success waves-effect waves-light col-md-12 mt-4">Update</button>

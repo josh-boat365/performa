@@ -45,7 +45,7 @@
             </div>
 
             {{--  ===== SUPVERVISOR SCORE FOR EMPLOYEE KPI - CARD =====  --}}
-            <h4 class="mb-sm-0 font-size-18">Your Supervisor Score</h4>
+            {{--  <h4 class="mb-sm-0 font-size-18">Your Supervisor Score</h4>
             <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
             <div class="card card-body">
@@ -76,7 +76,7 @@
                             aria-valuemax="100">0%</div>
                     </div>
                 </div>
-            </div>
+            </div>  --}}
 
 
 

@@ -39,9 +39,11 @@
                                         <i class="bx bx-search-alt search-icon"></i>
                                     </div>
                                 </div>
+
                             </div>
                             <div class="col-sm-4">
                                 <!-- Additional controls can go here -->
+                                <p class="font-bold">Total Score </p>
                             </div><!-- end col-->
                         </div>
 
@@ -83,17 +85,17 @@
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i> Edit</span>
                                                 </a>
-                                                <a href="#" data-bs-toggle="modal"
+                                                {{--  <a href="#" data-bs-toggle="modal"
                                                     data-bs-target=".bs-delete-modal-lg-{{ $section->id }}">
                                                     <span class="badge rounded-pill bg-danger fonte-size-13"><i
                                                             class="bx bxs-trash"></i> Delete</span>
-                                                </a>
+                                                </a>  --}}
 
                                                 <!-- Modal for Delete Confirmation -->
                                                 <div class="modal fade bs-delete-modal-lg-{{ $section->id }}"
                                                     tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
                                                     aria-hidden="true">
-                                                    <div class="modal-dialog modal-md modal-dialog-centered">
+                                                    <div class="modal-dialog modal-lg modal-dialog-centered">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title" id="myLargeModalLabel">Confirm

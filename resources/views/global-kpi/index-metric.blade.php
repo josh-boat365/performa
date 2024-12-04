@@ -73,11 +73,11 @@
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i> Edit</span>
                                                 </a>
-                                                <a href="#" data-bs-toggle="modal"
+                                                {{--  <a href="#" data-bs-toggle="modal"
                                                     data-bs-target=".bs-delete-modal-lg-{{ $metric->id }}">
                                                     <span class="badge rounded-pill bg-danger fonte-size-13"><i
                                                             class="bx bxs-trash"></i> Delete</span>
-                                                </a>
+                                                </a>  --}}
 
                                                 <!-- Modal for Delete Confirmation -->
                                                 <div class="modal fade bs-delete-modal-lg-{{ $metric->id }}"
