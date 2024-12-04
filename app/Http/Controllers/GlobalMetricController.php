@@ -42,10 +42,6 @@ class GlobalMetricController extends Controller
 
 
             $sortedMetrics = $activeMetrics->sortByDesc('createdAt');
-            // dd($sortedMetrics);
-
-            // $metrics = $sortedMetrics->filter(fn($metric) => $metric->active == true  || $metric->active == false);
-
 
             $metrics = $this->paginate($sortedMetrics, 25, $request);
 
@@ -231,7 +227,7 @@ class GlobalMetricController extends Controller
             $response = Http::withToken($accessToken)->put($apiUrl, $metricData);
 
             if ($response->successful()) {
-                return redirect()->route('metric.index')->with('toast_success', 'Metric updated successfully.');
+                return redirect()->route('global.metric.index')->with('toast_success', 'Metric updated successfully.');
             }
 
             // Log unsuccessful response
