@@ -28,8 +28,8 @@
                                     @if (isset($appraisal) && !empty($appraisal))
                                         @foreach ($appraisal as $kpi)
                                             <div class="kpi">
-                                                <h3>KPI: {{ $kpi->kpiName }}</h3>
-                                                <p>{{ $kpi->kpiDescription }}</p>
+                                                {{--  <h3>KPI: {{ $kpi->kpiName }}</h3>
+                                                <p>{{ $kpi->kpiDescription }}</p>  --}}
 
                                                 @if (isset($kpi->sections) && count($kpi->sections) > 0)
                                                     @foreach ($kpi->sections as $sectionId => $section)
