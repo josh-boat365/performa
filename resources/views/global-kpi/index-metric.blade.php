@@ -82,7 +82,7 @@
                                                 <div class="modal fade bs-delete-modal-lg-{{ $metric->id }}"
                                                     tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
                                                     aria-hidden="true">
-                                                    <div class="modal-dialog modal-md modal-dialog-centered">
+                                                    <div class="modal-dialog modal-lg modal-dialog-centered">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title" id="myLargeModalLabel">Confirm
@@ -92,7 +92,7 @@
                                                             </div>
                                                             <div class="modal-body">
                                                                 <h4 class="text-center mb-4">Are you sure you want to
-                                                                    delete this Metric?</h4>
+                                                                    delete this Global Metric?</h4>
                                                                 <form action="{{ route('delete.global.metric', $metric->id) }}"
                                                                     method="POST">
                                                                     @csrf

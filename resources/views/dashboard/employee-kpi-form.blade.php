@@ -68,14 +68,14 @@
                                                                             max="{{ $section->sectionScore }}"
                                                                             @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'REVIEW')
                                                                             title="The Score can not be more than the section score {{ $section->sectionScore }}"
-                                                                            value="{{ $section->sectionEmpScore->sectionEmpScore ?? '' }}">
+                                                                            value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                     </div>
                                                                     <div class="col-md-9">
                                                                         <input class="form-control mb-3 comment-input"
                                                                             type="text" name="employeeComment"
                                                                             placeholder="Enter your comments"
                                                                             @disabled($section->sectionEmpScore->status == 'REVIEW' ? 'REVIEW' : '')
-                                                                            value="{{ $section->sectionEmpScore->employeeComment ?? '' }}">
+                                                                            value="{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}">
                                                                     </div>
                                                                     @if (isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'REVIEW')
                                                                         <div></div>
@@ -116,7 +116,7 @@
                                                                                         max="{{ $metric->metricScore }}"
                                                                                         @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'REVIEW')
                                                                                         title="The Score can not be more than the metric score {{ $metric->metricScore }}"
-                                                                                        value="{{ $metric->metricEmpScore->metricEmpScore ?? '' }}">
+                                                                                        value="{{ optional($metric->metricEmpScore)->metricEmpScore ?? '' }}">
                                                                                 </div>
                                                                                 <div class="col-md-9">
                                                                                     <input
