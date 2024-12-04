@@ -32,30 +32,49 @@ class DashboardController extends Controller
 
         try {
             $response = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5123/Appraisal/Batch');
+                ->get('http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee');
+
+                // dd($response);
 
             if ($response->successful()) {
 
                 $batches = $response->json();
 
+                // dd($batches);
+
                 // Filter batches to get only those with status "OPEN" and active state true
-                $activeBatches = array_filter($batches, function ($batch) {
-                    return $batch['status'] === 'OPEN' && $batch['active'] === true;
+                $batch = array_filter($batches, function ($batch) {
+                    return $batch['batchStatus'] === 'OPEN' && $batch['batchActive'] === true;
                 });
 
-                return view('dashboard.show-batch', compact('activeBatches')); // Pass to view
+                // dd($batch);
+
+                $activeBatch = [
+                    'id' => $batch[0]['kpiId'],
+                    'batch_name' => $batch[0]['batchName'],
+                ];
+
+                // dd($activeBatch['id']);
+
+
+
+
+
+
+
+                return view('dashboard.show-batch', compact('activeBatch')); // Pass to view
 
             } else {
                 // Log the error response
-                Log::error('Failed to retrieve batches', [
+                Log::error('Failed to retrieve Employee Appraisal', [
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve batches');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve Appraisal');
             }
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while retrieving batches', [
+            Log::error('Exception occurred while retrieving EMployee Appraisal', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -73,27 +92,42 @@ class DashboardController extends Controller
         try {
             // Make the GET request to the external API to get KPIs for the specified batch ID
             $response = Http::withToken($accessToken)
-            ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
-
-
-            $kpi_status = Http::withToken($accessToken)
-                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
-
-                // dd($kpi_status);
+            ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
 
 
                 // Check if the response is successful
             if ($response->successful()) {
                 // Decode the response into an array of KPIs
-                $kpi = $response->json();
+                $kpis = $response->json();
 
-                // dd($kpi);
+                // dd($kpis);
+                $globalSectionCount = 0;
+                $regularSectionCount = 0;
 
+                // Loop through each KPI
+                foreach ($kpis as $kpi) {
+                    // Check if the KPI type is GLOBAL
+                    if ($kpi['kpiType'] === 'GLOBAL') {
+                        // Count the number of sections for GLOBAL KPI
+                        $globalSectionCount += count($kpi['sections']);
+                    }
+
+                    // Check if the KPI type is REGULAR
+                    if ($kpi['kpiType'] === 'REGULAR') {
+                        // Count the number of sections for REGULAR KPI
+                        $regularSectionCount += count($kpi['sections']);
+                    }
+                }
+
+                // Calculate the total section count
+                $totalSectionCount = $globalSectionCount + $regularSectionCount;
+
+                // Prepare the result
                 $employeeKpi = [
-                    'id' => $kpi[0]['kpiId'],
-                    'batch_id' => $kpi[0]['batchId'],
-                    'kpi_name' => $kpi[0]['kpiName'],
-                    'section_count' => count($kpi[0]['sections']) + 1
+                    'id' => $kpi['kpiId'],
+                    'batch_id' => $kpi['batchId'],
+                    'kpi_name' => $kpi['kpiName'],
+                    'section_count' => $totalSectionCount
                 ];
 
                 // dd($employeeKpi);
