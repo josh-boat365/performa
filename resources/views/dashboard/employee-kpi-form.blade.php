@@ -56,7 +56,7 @@
                                                         </h4>
                                                         <p>{{ $section->sectionDescription }}</p>
 
-                                                        @if (!empty($section->metrics))
+                                                        @if (isset($section->metrics) && count($section->metrics) == 0)
                                                             <form action="{{ route('self.rating') }}" method="POST"
                                                                 class="section-form">
                                                                 @csrf
@@ -92,6 +92,8 @@
                                                                     @endif
                                                                 </div>
                                                             </form>
+                                                        @else
+                                                            <div></div>
                                                         @endif
 
                                                         @if (isset($section->metrics) && count($section->metrics) > 0)
