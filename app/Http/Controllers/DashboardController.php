@@ -32,33 +32,25 @@ class DashboardController extends Controller
 
         try {
             $response = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee');
-
-                // dd($response);
+                ->get('http://192.168.1.200:5123/Appraisal/Batch');
 
             if ($response->successful()) {
 
                 $batches = $response->json();
 
-                // dd($batches);
 
                 // Filter batches to get only those with status "OPEN" and active state true
                 $batch = array_filter($batches, function ($batch) {
-                    return $batch['batchStatus'] === 'OPEN' && $batch['batchActive'] === true;
+                    return $batch['status'] === 'OPEN' && $batch['active'] === true;
                 });
 
-                // dd($batch);
 
                 $activeBatch = [
-                    'id' => $batch[0]['kpiId'],
-                    'batch_name' => $batch[0]['batchName'],
+                    'id' => $batch[0]['id'],
+                    'batch_name' => $batch[0]['name'],
                 ];
 
                 // dd($activeBatch['id']);
-
-
-
-
 
 
 
@@ -92,7 +84,7 @@ class DashboardController extends Controller
         try {
             // Make the GET request to the external API to get KPIs for the specified batch ID
             $response = Http::withToken($accessToken)
-            ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
+            ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
 
 
                 // Check if the response is successful
