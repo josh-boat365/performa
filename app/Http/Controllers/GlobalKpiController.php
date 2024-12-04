@@ -142,8 +142,8 @@ class GlobalKpiController extends Controller
                 ->get("http://192.168.1.200:5123/Appraisal/Kpi/{$id}");
 
             // Extract and process data
-            $batch_data = $responseBatches ?? [];
-            $kpi_data = $responseKpi ?? null;
+            $batch_data = $responseBatches->object() ?? [];
+            $kpi_data = $responseKpi->object() ?? null;
 
 
             $uniqueRoles = collect($responseRoles->object());
@@ -151,7 +151,7 @@ class GlobalKpiController extends Controller
 
 
             if ($kpi_data) {
-                return view('global-kpi.edit', compact('kpi_data', 'uniqueRoles', 'batch_data'));
+                return view('global-kpi.edit-kpi', compact('kpi_data', 'uniqueRoles', 'batch_data'));
             }
 
             Log::error('Failed to fetch Global KPI', [

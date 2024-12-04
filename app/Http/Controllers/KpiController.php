@@ -31,7 +31,7 @@ class KpiController extends Controller
 
         // Filter the KPIs to include only those with active state of true or false
         $activeKpis = collect($responseKpis)->filter(function ($kpi) {
-            return $kpi->type === 'REGULAR';
+            return $kpi->type === 'REGULAR' && $kpi->active == true;
         });
 
         // Sort the KPIs to place the newly created one first

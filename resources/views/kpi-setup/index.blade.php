@@ -45,7 +45,7 @@
                                 <th class="align-middle">KPI Name</th>
                                 <th class="align-middle">Type</th>
                                 <th class="align-middle">Role</th>
-                                <th class="align-middle">Department</th>
+                                {{--  <th class="align-middle">Department</th>  --}}
                                 <th class="align-middle">Batch</th>
                                 <th class="align-middle">Supervisors</th>
                                 <th class="align-middle">Active</th>
@@ -53,6 +53,7 @@
                                 <th class="align-middle">Action</th>
 
                         </thead>
+                        
                         <tbody>
                             @forelse ($activeKpis as $kpi)
                                 <tr>
@@ -143,8 +144,9 @@
                                         @endpush
                                     </td>
                                     <td>{{ $kpi->empRole->name }}</td>
-                                    <td><span class="badge rounded-pill bg-primary">{{ $kpi->empRole->department->name }}</span>
-                                    </td>
+                                    {{--  <td>
+                                        <span class="badge rounded-pill bg-primary">{{ $kpi->empRole->department }}</span>
+                                    </td>  --}}
                                     <td>{{ $kpi->batch->name }}</td>
                                     <td>
                                         <span @style(['cursor: pointer']) class=" badge rounded-pill bg-success">
