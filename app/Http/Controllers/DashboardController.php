@@ -47,7 +47,7 @@ class DashboardController extends Controller
                     return $batch['batchStatus'] === 'OPEN' && $batch['batchActive'] === true;
                 });
 
-                // dd($batch);
+                dd($batch);
 
                 $activeBatch = [
                     'id' => $batch[0]['kpiId'],
