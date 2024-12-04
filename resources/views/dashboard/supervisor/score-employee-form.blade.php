@@ -45,13 +45,13 @@
                                 @if (isset($appraisal) && !empty($appraisal))
                                     @foreach ($appraisal as $kpi)
                                         <div class="kpi">
-                                            <h3>KPI: {{ $kpi->kpiName }}</h3>
-                                            <p>{{ $kpi->kpiDescription }}</p>
+                                            {{--  <h3>KPI: {{ $kpi->kpiName }}</h3>
+                                            <p>{{ $kpi->kpiDescription }}</p>  --}}
 
                                             @if (isset($kpi->sections) && count($kpi->sections) > 0)
                                                 @foreach ($kpi->sections as $section)
                                                     <div class="section-card" style="margin-top: 2rem;">
-                                                        <h4>Section: {{ $section->sectionName }}
+                                                        <h4>{{ $section->sectionName }}
                                                             (<span
                                                                 style="color: #c80f0f">{{ $section->sectionScore }}</span>)
                                                         </h4>
@@ -168,7 +168,7 @@
                                                                                         title="The Score can not be more than the metric score {{ $metric->metricScore }}"
                                                                                         placeholder="Enter Score"
                                                                                         required
-                                                                                        value="{{ optional($metric->metricEmpScore)->metricSupScore  ?? '' }}">
+                                                                                        value="{{ optional($metric->metricEmpScore)->metricSupScore ?? '' }}">
                                                                                 </div>
                                                                                 <div class="col-md-9">
                                                                                     <input class="form-control mb-3"
@@ -193,65 +193,64 @@
                                                                 @endforeach
                                                             </ul>
                                                         @else
-                                                            <p>No metrics available for this section.</p>
+                                                            <p></p>
                                                         @endif
                                                     </div>
                                                 @endforeach
                                             @else
-                                                <p>No sections available for this KPI.</p>
+                                                <p></p>
                                             @endif
                                         </div>
-                                        <hr class="mt-10">
-                                        @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')
-                                            <div></div>
-                                        @else
-                                            <div class="float-end">
-                                                <button type="button" data-bs-toggle="modal" class="btn btn-success"
-                                                    data-bs-target=".bs-delete-modal-lg">Submit Appraisal</button>
-                                            </div>
-
-                                            <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
-                                                aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog modal-md modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="myLargeModalLabel">Confirm
-                                                                Appraisal
-                                                                Submit</h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <h4 class="text-center mb-4">Are you sure you want to
-                                                                <b>Submit</b> employee <b>Appraisal</b> for
-                                                                <b>Confirmation</b>?
-
-                                                            </h4>
-                                                            <form action="{{ route('submit.appraisal') }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="kpiId"
-                                                                    value="{{ $kpi->kpiId }}">
-                                                                <input type="hidden" name="batchId"
-                                                                    value="{{ $kpi->batchId }}">
-                                                                <input type="hidden" name="status"
-                                                                    value="CONFIRMATION">
-                                                                <div class="d-grid">
-                                                                    <div class="mt-5 ">
-                                                                        <button type="submit" id="submitReviewButton"
-                                                                            class="btn btn-success">Submit
-                                                                            Employee Appraisal
-                                                                            For Confirmation</button>
-                                                                    </div>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
                                     @endforeach
                                 @endif
+                                <hr class="mt-10">
+                                @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')
+                                    <div></div>
+                                @else
+                                    <div class="float-end">
+                                        <button type="button" data-bs-toggle="modal" class="btn btn-success"
+                                            data-bs-target=".bs-delete-modal-lg">Submit Appraisal</button>
+                                    </div>
+
+                                    <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
+                                        aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-md modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="myLargeModalLabel">Confirm
+                                                        Appraisal
+                                                        Submit</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <h4 class="text-center mb-4">Are you sure you want to
+                                                        <b>Submit</b> employee <b>Appraisal</b> for
+                                                        <b>Confirmation</b>?
+
+                                                    </h4>
+                                                    <form action="{{ route('submit.appraisal') }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="kpiId"
+                                                            value="{{ $kpi->kpiId }}">
+                                                        <input type="hidden" name="batchId"
+                                                            value="{{ $kpi->batchId }}">
+                                                        <input type="hidden" name="status" value="CONFIRMATION">
+                                                        <div class="d-grid">
+                                                            <div class="mt-5 ">
+                                                                <button type="submit" id="submitReviewButton"
+                                                                    class="btn btn-success">Submit
+                                                                    Employee Appraisal
+                                                                    For Confirmation</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
                             </div>
 
                             <script>
