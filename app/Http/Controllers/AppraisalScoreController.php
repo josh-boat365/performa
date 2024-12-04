@@ -27,6 +27,7 @@ class AppraisalScoreController extends Controller
                     'sectionEmpScore' => 'nullable|numeric',
                     'sectionId' => 'required|integer',
                     'employeeComment' => 'nullable|string',
+                    'kpiType' => 'nullable|string',
                 ]);
 
                 // Prepare the payload for the API request
@@ -35,6 +36,7 @@ class AppraisalScoreController extends Controller
                     'sectionEmpScore' => (float) $request->input('sectionEmpScore', 0),
                     'sectionId' => (int) $request->input('sectionId', 0),
                     'employeeComment' => $request->input('employeeComment', ''),
+                    'kpiType' => $request->input('kpiType', ''),
                 ];
 
                 $successMessage = 'Section score, section comment submitted successfully!';
@@ -49,6 +51,7 @@ class AppraisalScoreController extends Controller
                     'metricId' => 'required|integer',
                     'sectionId' => 'required|integer',
                     'employeeComment' => 'nullable|string',
+                    'kpiType' => 'nullable|string',
                 ]);
 
                 // Prepare the payload for the API request
@@ -58,6 +61,7 @@ class AppraisalScoreController extends Controller
                     'metricId' => (int) $request->input('metricId', 0),
                     'sectionId' => (int) $request->input('sectionId', 0),
                     'employeeComment' => $request->input('employeeComment', ''),
+                    'kpiType' => $request->input('kpiType', ''),
                 ];
 
                 $successMessage = 'Metric score, metric comment submitted successfully!';

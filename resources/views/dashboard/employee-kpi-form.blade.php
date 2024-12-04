@@ -80,6 +80,7 @@
                                                                     @if (isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'REVIEW')
                                                                         <div></div>
                                                                     @else
+                                                                    <input type="hidden" name="kpiType" value="{{ $kpi->kpiType }}">
                                                                         <input type="hidden" name="sectionEmpScoreId"
                                                                             value="{{ $section->sectionEmpScore->id ?? '' }}">
                                                                         <input type="hidden" name="sectionId"
@@ -132,6 +133,7 @@
                                                                                 @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'REVIEW')
                                                                                     <div></div>
                                                                                 @else
+                                                                                 <input type="hidden" name="kpiType" value="{{ $kpi->kpiType }}">
                                                                                     <input type="hidden"
                                                                                         name="metricEmpScoreId"
                                                                                         value="{{ $metric->metricEmpScore->id ?? '' }}">
