@@ -3,57 +3,47 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-class GlobalSectionController extends Controller
+class GlobalWeightController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        try {
-            // Fetch sections data using helper method
-            $sectionsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
-            $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
+        $accessToken = session('api_token');
 
-            // Filter the KPIs to include only those with active state of true
-            $activeKpis = collect($kpis)->filter(function ($kpi) {
-                return $kpi->active === true && $kpi->type == 'GLOBAL';
-            });
-
-            // Convert the response to a collection
-            $sectionsCollect = collect($sectionsResponse);
-            // $sections = $sectionsResponse;
-            // dd($sectionsCollect);
-
-
-            // Filter sections where active is true and the KPI type is 'GLOBAL' or 'PROBATION'
-            $filteredSections =
-                $sectionsCollect->filter(function ($section) {
-                    return ($section->active === true || $section->active === false) &&
-                        ($section->kpi->type === 'GLOBAL' || $section->kpi->type === 'PROBATION');
-                });
-
-            $sections = $filteredSections->sortByDesc('createdAt');
-            // dd($sections);
-
-
-            $sections = $this->paginate($sections, 25, $request);
-
-
-
-            return view('global-kpi.index-section', compact('sections', 'activeKpis'));
-        } catch (\Exception $e) {
-            Log::error('Exception occurred in index method', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return redirect()->back()->with('toast_error', 'Failed to load sections. Please try again.');
+        if (!$accessToken) {
+            return redirect()->route('login')->with('toast_error', 'We can not find session, please login again'); // Redirect to login if token is missing
         }
+
+        // Centralized API calls
+
+        $responseWeight = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/KpiWeight');
+
+        // dd($responseWeight);
+
+
+        // Filter the KPIs to include only those with active state of true or false
+        $active = collect($responseWeight)->filter(function ($kpi) {
+            return ($kpi->kpi->type == 'GLOBAL' || $kpi->kpi->type == 'PROBATION') && $kpi->kpi->active == true;
+        });
+
+        // dd($active);
+
+        // Sort the KPIs to place the newly created one first
+        $activeKpis = $active->sortByDesc('createdAt');
+
+        // Paginate the KPIs to display 25 per page
+        $activeKpis = $this->paginate($activeKpis, 25, $request);
+
+
+
+        return view('global-kpi.weight.index-weight', compact('activeKpis'));
     }
 
     /**
@@ -64,6 +54,13 @@ class GlobalSectionController extends Controller
 
         $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
 
+        $responseDepartment = $this->makeApiRequest('GET', 'http://192.168.1.200:5124/HRMS/Department');
+
+        $departments = collect($responseDepartment);
+
+
+
+
         // Filter the KPIs to include only those with active state of true
         $activeKpis = collect($kpis)->filter(function ($kpi) {
             return $kpi->active === true &&  $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION';
@@ -71,68 +68,55 @@ class GlobalSectionController extends Controller
 
         // dd($activeKpis);
 
-        return view('global-kpi.create-section', compact('activeKpis'));
+        return view('global-kpi.weight.create-weight', compact('activeKpis', 'departments'));
     }
+
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        // dd($request);
         // Validate the request data
         $request->validate([
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'score' => 'required|numeric',
-            'active' => 'required|integer',
             'kpiId' => 'required|integer',
+            'departmentId' => 'required|integer',
+            'weight' => 'required|numeric',
         ]);
 
-        // Get the access token from the session
-        $accessToken = session('api_token'); // Replace with your actual access token
+        // dd($request);
 
-        // Prepare the data for the Section creation
-        $sectionData = [
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'score' => (float) $request->input('score'),
-            'active' => $request->input('active') == 1 ? true : false,
+        // Prepare the data for KPI creation
+        $kpiData = [
             'kpiId' => $request->input('kpiId'),
+            'departmentId' => $request->input('departmentId'),
+            'weight' => (float) $request->input('weight'),
         ];
 
-        try {
-            // Make the POST request to the external API
-            $response = Http::withToken($accessToken)
-                ->post('http://192.168.1.200:5123/Appraisal/Section', $sectionData);
+        // Send the request to the API
+        $response = $this->sendApiRequest('http://192.168.1.200:5123/Appraisal/KpiWeight', $kpiData, 'POST');
 
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->route('global.section.index')->with('toast_success', 'Global Section created successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to create Section', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to Global create Section');
-            }
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while creating Global Section', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+        // Check the response and redirect
+        if ($response->success) {
+            return redirect()->route('global.weight.index')->with('toast_success', 'Weight For Global KPI created successfully');
         }
+
+        // Log errors (if any)
+        Log::error('Failed to create Global Weight KPI', [
+            'status' => $response->status ?? 'N/A',
+            'response' => $response->data ?? 'No response received',
+        ]);
+
+        return redirect()->back()->with('toast_error', 'Sorry, failed to create Global Weight KPI');
     }
 
-
-
+    /**
+     * Display the specified resource.
+     */
     public function show(string $id)
     {
         $accessToken = session('api_token');
-        $apiUrl = "http://192.168.1.200:5123/Appraisal/Section/{$id}";
+        $apiUrl = "http://192.168.1.200:5123/Appraisal/KpiWeight/{$id}";
 
         $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
 
@@ -141,27 +125,37 @@ class GlobalSectionController extends Controller
             return $kpi->active === true &&  $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION';
         });
 
+        $responseRoles = $this->makeApiRequest('GET', 'http://192.168.1.200:5124/HRMS/emprole');
+
+        $rolesWithDepartments = collect($responseRoles);
+
+        $uniqueDepartments = [];
+
+        $uniqueDepartments = $rolesWithDepartments->pluck('department')->unique()->toArray();
+
+
+
         try {
             // Make the GET request to the external API
             $response = Http::withToken($accessToken)->get($apiUrl);
 
             if ($response->successful()) {
                 // Convert the response to an object
-                $sectionData = $response->object();
+                $globalWeight = $response->object();
 
-                return view('global-kpi.edit-section', compact('sectionData', 'activeKpis'));
+                return view('global-kpi.weight.edit-weight', compact('globalWeight', 'activeKpis', 'uniqueDepartments'));
             }
 
             // Log the error response
-            Log::error('Failed to fetch Global Section', [
+            Log::error('Failed to fetch Global Weight', [
                 'status' => $response->status(),
                 'response' => $response->body()
             ]);
 
-            return redirect()->back()->with('toast_error', 'Global Section does not exist.');
+            return redirect()->back()->with('toast_error', 'Global Weight does not exist.');
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while fetching Global Section', [
+            Log::error('Exception occurred while fetching Global Weight', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -173,9 +167,6 @@ class GlobalSectionController extends Controller
         }
     }
 
-
-
-
     /**
      * Update the specified resource in storage.
      */
@@ -183,45 +174,48 @@ class GlobalSectionController extends Controller
     {
         // Validate the request data
         $request->validate([
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'score' => 'required|numeric',
-            'active' => 'required|boolean',
             'kpiId' => 'required|integer',
+            'departmentId' => 'required|integer',
+            'weight' => 'required|numeric',
         ]);
 
         $accessToken = session('api_token');
-        $apiUrl = "http://192.168.1.200:5123/Appraisal/Section/";
+        $apiUrl = "http://192.168.1.200:5123/Appraisal/KpiWeight";
 
-        // Prepare the data for the Section update
-        $sectionData = [
+
+
+
+        // Prepare the data for KPI creation
+        $globalWeightData = [
             'id' => $id,
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'score' => (float) $request->input('score'),
-            'active' => (bool)$request->input('active'),
             'kpiId' => $request->input('kpiId'),
+            'departmentId' => $request->input('departmentId'),
+            'weight' => (float) $request->input('weight'),
         ];
+
+        // dd($globalWeightData);
 
         try {
             // Make the PUT request to the external API
-            $response = Http::withToken($accessToken)->put($apiUrl, $sectionData);
+            $response = Http::withToken($accessToken)->put($apiUrl, $globalWeightData);
 
             if ($response->successful()) {
-
-                return redirect()->route('global.section.index')->with('toast_success', 'Global Section updated successfully.');
+                // $json_message = response()->json(['message' => 'Section updated successfully.']);
+                return redirect()
+                    ->route('global.weight.index')
+                    ->with('toast_success', 'Global Weight updated successfully.');
             }
 
             // Log the error response
-            Log::error('Failed to update Global Section', [
+            Log::error('Failed to update Global Weight', [
                 'status' => $response->status(),
                 'response' => $response->body(),
             ]);
 
-            return redirect()->back()->with('toast_error', 'Update Global Section Error:' . $response->body());
+            return redirect()->back()->with('toast_error', 'Update Global Weight Error:' . $response->body());
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while updating Global Section', [
+            Log::error('Exception occurred while updating Global Weight', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -232,7 +226,6 @@ class GlobalSectionController extends Controller
             );
         }
     }
-
 
 
     /**
@@ -246,28 +239,68 @@ class GlobalSectionController extends Controller
         try {
             // Make the DELETE request to the external API
             $response = Http::withToken($accessToken)
-                ->delete("http://192.168.1.200:5123/Appraisal/Section/{$id}");
+                ->delete("http://192.168.1.200:5123/Appraisal/KpiWeight/{$id}");
 
             // Check the response status and return appropriate response
             if ($response->successful()) {
-                return redirect()->back()->with('toast_success', 'Global Section deleted successfully');
+                return redirect()->back()->with('toast_success', 'Global Weight deleted successfully');
             } else {
                 // Log the error response
-                Log::error('Failed to delete Global Section', [
+                Log::error('Failed to delete Global Weight', [
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Global Section, there are Metrics <br> dependent on this Section and can not be deleted, <b>DEACTIVATE INSTEAD</b>');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Global Weight, there are Section <br> dependent on this Metric and can not be deleted, <b>DEACTIVATE INSTEAD</b>');
             }
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while deleting Global Section', [
+            Log::error('Exception occurred while deleting Global Weight', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
             return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
         }
     }
+
+
+    private function fetchApiData(string $accessToken, string $url)
+    {
+        $response = Http::withToken($accessToken)->get($url);
+
+        return $response->successful() ? $response->object() : null;
+    }
+
+
+    private function sendApiRequest(string $url, array $data, string $method = 'POST')
+    {
+        $accessToken = session('api_token');
+
+        try {
+            $response = Http::withToken($accessToken)->{$method}($url, $data);
+
+            return (object) [
+                'success' => $response->successful(),
+                'status' => $response->status(),
+                'data' => $response->successful() ? $response->object() : $response->body(),
+            ];
+        } catch (\Exception $e) {
+            Log::error('API Request Error', [
+                'url' => $url,
+                'method' => $method,
+                'data' => $data,
+                'error' => $e->getMessage(),
+            ]);
+
+            return (object) [
+                'success' => false,
+                'status' => null,
+                'data' => null,
+            ];
+        }
+    }
+
+
+
 
 
     private function makeApiRequest(string $method, string $url, array $data = null)

@@ -23,7 +23,7 @@
             <div class="col-md-12">
                 <div class="card card-body">
                     <h3 class="card-title">Global Metric </h3>
-                    <form action="{{ route('update.metric', $metricData->id) }}" method="POST">
+                    <form action="{{ route('update.global.metric', $metricData->id) }}" method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Metric Name</label>

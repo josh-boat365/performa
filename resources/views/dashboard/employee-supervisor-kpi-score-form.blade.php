@@ -6,7 +6,8 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('show.batch.kpi', $batchId) }}">My Kpis</a> Available KPIs For You
+                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('show.batch.kpi', $batchId) }}">My Kpis</a>
+                        Available KPIs For You
                     </h4>
                 </div>
             </div>
@@ -70,12 +71,24 @@
                                                                         placeholder="Enter your comments"
                                                                         value="{{ $section->sectionEmpScore->employeeComment ?? '' }}">
                                                                 </div>
-                                                                <input type="hidden" name="sectionEmpScoreId"
-                                                                    value="{{ $section->sectionEmpScore->id ?? '' }}">
-                                                                <input type="hidden" name="sectionId"
-                                                                    value="{{ $section->sectionId }}">
-                                                                <input type="hidden" name="kpiId"
-                                                                    value="{{ $kpi->kpiId }}">
+
+
+                                                            </div>
+                                                            {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
+
+                                                            <div class="d-flex gap-3">
+                                                                <div class="col-md-2">
+                                                                    <input class="form-control mb-3" type="number"
+                                                                        readonly name="metricSupScore"
+                                                                        placeholder="Enter Score" required
+                                                                        value="{{ $section->sectionEmpScore->sectionSupScore == 0 ? '' : $section->sectionEmpScore->sectionSupScore }} ">
+                                                                </div>
+                                                                <div class="col-md-9">
+                                                                    <input class="form-control mb-3" type="text"
+                                                                        readonly name="supervisorComment"
+                                                                        placeholder="Enter your comments" required
+                                                                        value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
+                                                                </div>
 
                                                             </div>
                                                         @endif
@@ -108,15 +121,7 @@
                                                                                     placeholder="Enter your comments"
                                                                                     value="{{ $metric->metricEmpScore->employeeComment ?? '' }}">
                                                                             </div>
-                                                                            <input type="hidden"
-                                                                                name="metricEmpScoreId"
-                                                                                value="{{ $metric->metricEmpScore->id ?? '' }}">
-                                                                            <input type="hidden" name="metricId"
-                                                                                value="{{ $metric->metricId }}">
-                                                                            <input type="hidden" name="sectionId"
-                                                                                value="{{ $section->sectionId }}">
-                                                                            <input type="hidden" name="kpiId"
-                                                                                value="{{ $kpi->kpiId }}">
+
 
                                                                         </div>
 
@@ -134,7 +139,7 @@
                                                                                     type="number" readonly
                                                                                     name="metricSupScore"
                                                                                     placeholder="Enter Score" required
-                                                                                    value="{{ old('metricSupScore.' . $metricId . '.' . '.' . $sectionId) }}">
+                                                                                    value="{{ $metric->metricEmpScore->metricSupScore == 0 ? '' : $metric->metricEmpScore->metricSupScore }}">
                                                                             </div>
                                                                             <div class="col-md-9">
                                                                                 <input class="form-control mb-3"
@@ -142,12 +147,9 @@
                                                                                     name="supervisorComment"
                                                                                     placeholder="Enter your comments"
                                                                                     required
-                                                                                    value="{{ old('supervisorComment.' . $metricId . '.' . '.' . $sectionId) }}">
+                                                                                    value="{{ $metric->metricEmpScore->supervisorComment ?? '' }}">
                                                                             </div>
-                                                                            <input type="hidden" name="metricId"
-                                                                                value="{{ $metric->metricId }}">
-                                                                            <input type="hidden" name="sectionId"
-                                                                                value="{{ $sectionId }}">
+
 
                                                                         </div>
                                                                     </li>
@@ -165,18 +167,50 @@
 
                                         <div class="float-end">
                                             <div class="mt-5 d-flex gap-3">
-                                                <form action="{{ route('accept.rating') }}" method="POST">
-                                                    @csrf
-                                                    <input type="hidden" name="kpiId"
-                                                        value="{{ $kpi->kpiId }}">
-                                                    <input type="hidden" name="batchId"
-                                                        value="{{ $kpi->batchId }}">
-                                                    <input type="hidden" name="status" value="COMPLETED">
-                                                    <button type="submit" class="btn btn-primary">Accept</button>
-                                                </form>
+
+                                                <button type="button" data-bs-toggle="modal" class="btn btn-primary"
+                                                    data-bs-target=".bs-delete-modal-lg">Accept</button>
 
                                                 <a href="{{ route('show.employee.probe', $kpi->kpiId) }}"
                                                     class="btn btn-warning">Probe</a>
+
+                                                <!-- Modal for Delete Confirmation -->
+                                                <div class="modal fade bs-delete-modal-lg"
+                                                    tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog modal-md modal-dialog-centered">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="myLargeModalLabel">Confirm Supervisor Score</h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal"
+                                                                    aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <h4 class="text-center mb-4">Are you sure you want to
+                                                                    <b>Accept</b> this scores from your
+                                                                    <b>Supervisor?</b>
+                                                                </h4>
+                                                                <form action="{{ route('accept.rating') }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    <input type="hidden" name="kpiId"
+                                                                        value="{{ $kpi->kpiId }}">
+                                                                    <input type="hidden" name="batchId"
+                                                                        value="{{ $kpi->batchId }}">
+                                                                    <input type="hidden" name="status"
+                                                                        value="COMPLETED">
+                                                                    <div class="d-grid">
+                                                                        <button type="submit"
+                                                                            class="btn btn-success">Yes,
+                                                                            Accept </button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                             </div>
                                         </div>
                                     @endforeach

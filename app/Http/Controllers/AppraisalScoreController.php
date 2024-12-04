@@ -205,4 +205,14 @@ class AppraisalScoreController extends Controller
 
 
     }
+
+    public function submitProbing(Request $request){
+
+        dd($request->all());
+
+
+        $request->validate([
+
+        ]);
+    }
 }

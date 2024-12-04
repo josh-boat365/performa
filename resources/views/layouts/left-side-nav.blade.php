@@ -45,9 +45,9 @@
                             </a>
                             <ul class="sub-menu" aria-expanded="false">
                                 <li><a href="{{ route('batch.setup.index') }}" key="t-default">Batch Setup</a></li>
-                                <li><a href="{{ route('score.setup') }}" key="t-default">Score Setup</a></li>
+                                <li><a href="{{ route('grade.index') }}" key="t-default">Grade Setup</a></li>
                                 <li> <a href="{{ route('global.index') }}" key="t-default">KPI Setup</a></li>
-                                <li> <a href="{{ route('global.index') }}" key="t-default">Global Weighted Score</a></li>
+                                <li> <a href="{{ route('global.weight.index') }}" key="t-default">Global Weighted Score</a></li>
                                 <li> <a href="{{ route('global.section.index') }}" key="t-default">Section  Setup</a></li>
                                 <li> <a href="{{ route('global.metric.index') }}" key="t-default">Metric Setup</a></li>
                             </ul>

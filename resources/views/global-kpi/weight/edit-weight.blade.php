@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('global.weight.index') }}">GLOBAL WEIGHTS </a> > Setup Weights For Global Kpi
+                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('global.weight.index') }}">GLOBAL WEIGHTS </a> >  Edit Global Weight For Department
 
                     </h4>
                 </div>
@@ -22,7 +22,9 @@
                 <div class="card card-body">
                     <h3 class="card-title">Weight KPI </h3>
 
-                    <form action="{{ route('store.global.weight') }}" class="custom-validation" method="POST">
+
+
+                    <form action="{{ route('update.global.weight', $globalWeight->id) }}" class="custom-validation" method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Select Global KPI</label>
@@ -32,7 +34,7 @@
 
                                     @foreach ($activeKpis as $kpi)
                                         <option value="{{ $kpi->id }}"
-                                            {{ old('kpiId') == $kpi->id ? 'selected' : '' }}>
+                                            {{ $kpi->id === $globalWeight->kpi->id ? 'selected' : '' }}>
                                             {{ $kpi->name }}
                                         </option>
                                     @endforeach
@@ -47,9 +49,9 @@
                                 <select name="departmentId" class="form-select">
                                     <option>Select Department</option>
 
-                                    @foreach ($departments as $department)
+                                    @foreach ($uniqueDepartments as $department)
                                         <option value="{{ $department->id }}"
-                                            {{ old('departmentId') == $department->id ? 'selected' : '' }}>{{ $department->name }}
+                                            {{ $globalWeight->department->id == $department->id ? 'selected' : '' }}>{{ $department->name }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -60,14 +62,14 @@
                             <label for="example-text-input" class="">Weight Score </label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="weight" required
-                                    placeholder="Enter Weighted Score For Department" value="{{ old('weight') }}"
+                                    placeholder="Enter Weighted Score For Department" value="{{ $globalWeight->weight }}"
                                     id="example-text-input">
                             </div>
                         </div>
 
 
                         <button type="submit" class="btn btn-primary waves-effect waves-light col-md-12 mt-4">
-                            Create
+                            Update
                         </button>
                     </form>
 

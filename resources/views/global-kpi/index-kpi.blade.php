@@ -17,15 +17,8 @@
             <a href="{{ route('create.global.kpi') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
                     class="bx bxs-plus"></i>Create Global
                 </a>
-            <a href="{{ route('create.global.kpi') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
-                    class="bx bxs-plus"></i>Setup Score For Global KPI
-               </a>
-            <a href="{{ route('create.global.kpi') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
-                    class="bx bxs-plus"></i>Create
-                KPI</a>
-            <a href="{{ route('create.global.kpi') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
-                    class="bx bxs-plus"></i>Create
-                KPI</a>
+
+
         </div>
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
@@ -124,7 +117,7 @@
                                     <td>{{ Carbon\Carbon::parse($kpi->createdAt)->format('jS F, Y : g:i A') }}</td>
                                     <td>
                                         <div class="d-flex gap-3">
-                                            <a href="{{ route('show.kpi', $kpi->id) }}">
+                                            <a href="{{ route('show.global.kpi', $kpi->id) }}">
                                                 <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                         class="bx bxs-pencil"></i>edit</span>
                                             </a>

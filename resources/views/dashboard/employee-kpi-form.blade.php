@@ -160,28 +160,54 @@
                                 @endif
                             </div>
 
-                            <hr class="mt-10">
+                        </div>
+                        @endforeach
+                        @endif
+                        <hr class="mt-10">
 
-                            @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'REVIEW')
-                                <div></div>
-                            @else
-                                <form action="{{ route('submit.rating') }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="kpiId" value="{{ $kpi->kpiId }}">
-                                    <input type="hidden" name="batchId" value="{{ $kpi->batchId }}">
-                                    <input type="hidden" name="status" value="REVIEW">
-                                    <div class="float-end">
-                                        <div class="mt-5 d-flex gap-3">
-                                            <button type="submit" id="submitReviewButton"
-                                                class="btn btn-success">Submit KPI
-                                                For Review</button>
+
+                        @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'REVIEW')
+                            <div></div>
+                        @else
+                            <div class="float-end">
+                                <button type="button" data-bs-toggle="modal" class="btn btn-primary"
+                                    data-bs-target=".bs-delete-modal-lg">Submit Appraisal</button>
+                            </div>
+
+                            <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
+                                aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-md modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="myLargeModalLabel">Confirm Appraisal
+                                                Submit</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <h4 class="text-center mb-4">Are you sure you want to
+                                                <b>Submit</b> your <b>Appraisal</b> to your
+                                                <b>Supervisor</b> for <b>Review?</b>
+                                            </h4>
+                                            <form action="{{ route('submit.rating') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="kpiId" value="{{ $kpi->kpiId }}">
+                                                <input type="hidden" name="batchId" value="{{ $kpi->batchId }}">
+                                                <input type="hidden" name="status" value="REVIEW">
+                                                <div class="d-grid">
+                                                    <div class="mt-5">
+                                                        <button type="submit" id="submitReviewButton"
+                                                            class="btn btn-success">Submit Appraisal
+                                                            For Review</button>
+                                                    </div>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
-                                </form>
-                            @endif
-                            @endforeach
-                            @endif
-                        </div>
+                                </div>
+                            </div>
+                        @endif
+
 
                         <script>
                             const scoreInputs = document.querySelectorAll('.score-input');

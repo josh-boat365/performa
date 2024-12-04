@@ -4,12 +4,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\KpiController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BatchController;
+use App\Http\Controllers\GradeController;
 use App\Http\Controllers\MetricController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GlobalKpiController;
 use App\Http\Controllers\UpdateKpiScoringState;
 use App\Http\Controllers\GlobalMetricController;
+use App\Http\Controllers\GlobalWeightController;
 use App\Http\Controllers\GlobalSectionController;
 use App\Http\Controllers\AppraisalScoreController;
 use App\Http\Controllers\SupervisorScoreController;
@@ -46,6 +48,7 @@ Route::group(
         //Supervisor Score for Employee
         Route::get("dashboard/employee-supervisor-kpi-score/{id}", [DashboardController::class, "showEmployeeSupervisorKpiScore"])->name("show.employee.supervisor.kpi.score");
         Route::get("dashboard/employee-probe/{id}", [DashboardController::class, "showEmployeeProbe"])->name("show.employee.probe");
+        Route::post("dashboard/employee-probe/submit", [AppraisalScoreController::class, "submitProbing"])->name("submit.employee.probe");
 
         Route::get("dashboard/supervisor/show-employee-kpis", [SupervisorScoreController::class, "index"])->name("supervisor.index");
         Route::get("dashboard/supervisor/show-employee-kpi-form/kpi/{kpiId}/batch/{batchId}", [SupervisorScoreController::class, "edit"])->name("supervisor.edit");
@@ -98,6 +101,21 @@ Route::group(
         Route::post("dashboard/appraisal/global-metric/{id}/update", [GlobalMetricController::class, "update"])->name("update.global.metric");
         Route::delete("dashboard/appraisal/global-metric/{id}/delete", [GlobalMetricController::class, "destroy"])->name("delete.global.metric");
 
+        //Global - Weight/Score for Department
+        Route::get("dashboard/appraisal/global-weight-setup", [GlobalWeightController::class, "index"])->name("global.weight.index");
+        Route::get("dashboard/appraisal/global-weight-setup/create", [GlobalWeightController::class, "create"])->name("create.global.weight");
+        Route::post("dashboard/appraisal/global-weight-setup/store", [GlobalWeightController::class, "store"])->name("store.global.weight");
+        Route::get("dashboard/appraisal/global-weight-setup/{id}/show", [GlobalWeightController::class, "show"])->name("show.global.weight");
+        Route::post("dashboard/appraisal/global-weight-setup/{id}update", [GlobalWeightController::class, "update"])->name("update.global.weight");
+        Route::post("dashboard/appraisal/global-weight-setup{id}/delete", [GlobalWeightController::class, "destroy"])->name("delete.global.weight");
+
+        //Grade Setup
+        Route::get("dashboard/appraisal/grade-setup", [GradeController::class, "index"])->name("grade.index");
+        Route::post("dashboard/appraisal/grade-setup/store", [GradeController::class, "store"])->name("store.grade");
+        Route::get("dashboard/appraisal/grade-setup/{id}/show", [GradeController::class, "show"])->name("show.grade");
+        Route::post("dashboard/appraisal/grade-setup/{id}update", [GradeController::class, "update"])->name("update.grade");
+        Route::post("dashboard/appraisal/grade-setup/{id}delete", [GradeController::class, "delete"])->name("delete.grade");
+
 
 
         Route::get("dashboard/appraisal/kpi-setup", [KpiController::class, "index"])->name("kpi.index");
@@ -109,8 +127,6 @@ Route::group(
         Route::post("dashboard/appraisal/kpi/update-state/{id}", [KpiController::class, "update_state"])->name("update.kpi.state");
         Route::post("dashboard/appraisal/kpi/update-status/{id}", [KpiController::class, "update_status"])->name("update.kpi.status");
 
-        //Score Setup
-        Route::get("dashboard/score-setup", [DashboardController::class, "score_setup"])->name("score.setup");
 
         //Setion Setup
         Route::get("dashboard/kpi/section-setup/", [SectionController::class, "index"])->name("section.index");

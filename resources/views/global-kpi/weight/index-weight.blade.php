@@ -14,7 +14,7 @@
 
 
         <div class="d-flex gap-3">
-            <a href="{{ route('create.global.kpi') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
+            <a href="{{ route('create.global.weight') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
                     class="bx bxs-plus"></i>Create Weight
                 </a>
 
@@ -43,80 +43,39 @@
                         <thead class="table-light">
                             <tr>
 
-                                <th class="align-middle">KPI Name</th>
-                                <th class="align-middle">Description</th>
+                                <th class="align-middle">Global KPI Name</th>
+                                <th class="align-middle">Department</th>
                                 <th class="align-middle">Type</th>
-                                {{--  <th class="align-middle">Role</th>  --}}
-                                <th class="align-middle">Batch</th>
-                                <th class="align-middle">Active</th>
+                                <th class="align-middle">Weighted Score For Department</th>
                                 <th class="align-middle">Created At</th>
                                 <th class="align-middle">Action</th>
 
                         </thead>
                         <tbody>
                             @forelse ($activeKpis as $kpi)
+
                                 <tr>
                                     <th scope="row">
-                                        <a href="#">{{ $kpi->name }}</a>
+                                        <a href="#">{{ $kpi->kpi->name }}</a>
                                     </th>
                                     <td>
-                                        {{ $kpi->description }}
+                                        {{ $kpi->department->name }}
                                     </td>
                                     <td>
                                         <span @style(['cursor: pointer']) class="dropdown badge rounded-pill bg-primary"
                                             data-bs-toggle="dropdown" aria-expanded="false">
-                                            {{ $kpi->type }}
-
+                                            {{ $kpi->kpi->type }}
                                         </span>
 
                                     </td>
 
                                     </td>
-                                    <td>{{ $kpi->batch->name }}</td>
-                                    <td>
-                                        <span @style(['cursor: pointer'])
-                                            class="dropdown badge rounded-pill {{ $kpi->active ? 'bg-success' : 'bg-dark' }}"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                            {{ $kpi->active ? 'Activated' : 'Deactivated' }}
-                                            <div class="dropdown-menu">
-                                                <a href="" class="dropdown-item" data-bs-toggle="modal"
-                                                    data-bs-target=".bs-example-modal-lg" class="m-2">
-                                                    {{ $kpi->active ? 'Deactivate' : 'Activate' }}</a>
-                                            </div>
-                                        </span>
-                                        <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog"
-                                            aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-md modal-dialog-centered ">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="myLargeModalLabel">Confirm KPI
-                                                            State
-                                                            Update</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <h4 class="text-center mb-4"> Are you sure, you want to
-                                                            {{ $kpi->active ? 'Deactivate' : 'Activate' }} ?</h4>
-                                                        <form action="{{ route('update.kpi.state', $kpi->id) }}"
-                                                            method="POST">
-                                                            @csrf
-                                                            <input type="hidden" name="active"
-                                                                value="{{ $kpi->active ? 0 : 1 }}">
-                                                            <div class="d-grid">
-                                                                <button type="submit"
-                                                                    class="btn btn-success">Yes</button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
+                                    <td>{{ $kpi->weight }}</td>
+
                                     <td>{{ Carbon\Carbon::parse($kpi->createdAt)->format('jS F, Y : g:i A') }}</td>
                                     <td>
                                         <div class="d-flex gap-3">
-                                            <a href="{{ route('show.kpi', $kpi->id) }}">
+                                            <a href="{{ route('show.global.weight', $kpi->id) }}">
                                                 <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                         class="bx bxs-pencil"></i>edit</span>
                                             </a>
@@ -134,16 +93,15 @@
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="myLargeModalLabel">Confirm
-                                                                KPI
-                                                                Deletion</h5>
+                                                                Global Weight Department Score Delete</h5>
                                                             <button type="button" class="btn-close"
                                                                 data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
                                                             <h4 class="text-center mb-4">Are you sure you want to
-                                                                delete this
-                                                                KPI?</h4>
-                                                            <form action="{{ route('delete.kpi', $kpi->id) }}"
+                                                                delete this Global <b>Weight Score</b> for <b>{{ $kpi->department->name }} </b> Department?
+                                                                </h4>
+                                                            <form action="{{ route('delete.global.weight', $kpi->id) }}"
                                                                 method="POST">
                                                                 @csrf
                                                                 @method('DELETE')

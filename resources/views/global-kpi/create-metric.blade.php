@@ -23,7 +23,7 @@
                 <div class="card card-body">
                     <h3 class="card-title">Metric Creation </h3>
 
-                    <form action="{{ route('store.metric') }}" class="custom-validation" method="POST">
+                    <form action="{{ route('store.global.metric') }}" class="custom-validation" method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Metric Name</label>

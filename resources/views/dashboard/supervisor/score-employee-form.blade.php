@@ -82,7 +82,8 @@
                                                                     Comment</strong></span>
 
                                                             {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
-                                                            <form action="{{ route('supervisor.rating') }}" method="POST" class="section-form">
+                                                            <form action="{{ route('supervisor.rating') }}"
+                                                                method="POST" class="section-form">
                                                                 @csrf
                                                                 <div class="d-flex gap-3">
                                                                     <div class="col-md-2">
@@ -153,20 +154,23 @@
                                                                                 Comment</strong></span>
 
                                                                         {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
-                                                                        <form action="{{ route('supervisor.rating') }}" method="POST">
+                                                                        <form action="{{ route('supervisor.rating') }}"
+                                                                            method="POST">
                                                                             @csrf
                                                                             <div class="d-flex gap-3">
                                                                                 <div class="col-md-2">
                                                                                     <input class="form-control mb-3"
                                                                                         type="number"
                                                                                         name="metricSupScore"
+                                                                                        max="{{ $metric->metricScore }}"
+                                                                                        title="The Score can not be more than the metric score {{ $metric->metricScore }}"
                                                                                         placeholder="Enter Score"
                                                                                         required
-                                                                                        value="{{ $metric->metricEmpScore->metricSupScore ?? '' }}">
+                                                                                        value="{{ $metric->metricEmpScore->metricSupScore == 0 ? '' : $metric->metricEmpScore->metricSupScore }}">
                                                                                 </div>
                                                                                 <div class="col-md-9">
                                                                                     <input class="form-control mb-3"
-                                                                                        type="text" readonly
+                                                                                        type="text"
                                                                                         name="supervisorComment"
                                                                                         placeholder="Enter your comments"
                                                                                         required
@@ -197,19 +201,54 @@
                                             @endif
                                         </div>
                                         <hr class="mt-10">
-                                        <form action="{{ route('submit.supervisor.rating') }}" method="POST">
-                                            @csrf
-                                            <input type="hidden" name="kpiId" value="{{ $kpi->kpiId }}">
-                                            <input type="hidden" name="batchId" value="{{ $kpi->batchId }}">
-                                            <input type="hidden" name="status" value="CONFIRMATION">
+                                        @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')
+                                            <div></div>
+                                        @else
                                             <div class="float-end">
-                                                <div class="mt-5 d-flex gap-3">
-                                                    <button type="submit" id="submitReviewButton"
-                                                        class="btn btn-success" @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')>Submit KPI
-                                                        For Review</button>
+                                                <button type="button" data-bs-toggle="modal" class="btn btn-primary"
+                                                    data-bs-target=".bs-delete-modal-lg">Submit Appraisal</button>
+                                            </div>
+
+                                            <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
+                                                aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-md modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="myLargeModalLabel">Confirm
+                                                                Appraisal
+                                                                Submit</h5>
+                                                            <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <h4 class="text-center mb-4">Are you sure you want to
+                                                                <b>Submit</b> employee <b>Appraisal</b> for
+                                                                <b>Confirmation</b>?
+
+                                                            </h4>
+                                                            <form action="{{ route('submit.rating') }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="kpiId"
+                                                                    value="{{ $kpi->kpiId }}">
+                                                                <input type="hidden" name="batchId"
+                                                                    value="{{ $kpi->batchId }}">
+                                                                <input type="hidden" name="status"
+                                                                    value="CONFIRMATION">
+                                                                <div class="d-grid">
+                                                                    <div class="mt-5 ">
+                                                                        <button type="submit" id="submitReviewButton"
+                                                                            class="btn btn-success">Submit
+                                                                            Employee Appraisal
+                                                                            For Confirmation</button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </form>
+                                        @endif
                                     @endforeach
                                 @endif
                             </div>

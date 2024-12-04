@@ -73,9 +73,16 @@ class DashboardController extends Controller
         try {
             // Make the GET request to the external API to get KPIs for the specified batch ID
             $response = Http::withToken($accessToken)
-                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
+            ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
 
-            // Check if the response is successful
+
+            $kpi_status = Http::withToken($accessToken)
+                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
+
+                // dd($kpi_status);
+
+
+                // Check if the response is successful
             if ($response->successful()) {
                 // Decode the response into an array of KPIs
                 $kpi = $response->json();
@@ -86,7 +93,7 @@ class DashboardController extends Controller
                     'id' => $kpi[0]['kpiId'],
                     'batch_id' => $kpi[0]['batchId'],
                     'kpi_name' => $kpi[0]['kpiName'],
-                    'section_count' => count($kpi[0]['sections'])
+                    'section_count' => count($kpi[0]['sections']) + 1
                 ];
 
                 // dd($employeeKpi);
