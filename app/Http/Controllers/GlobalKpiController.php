@@ -131,8 +131,8 @@ class GlobalKpiController extends Controller
             $accessToken = session('api_token');
 
             // Fetch data using helper method
-            $responseRoles = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5124/HRMS/emprole');
+            // $responseRoles = Http::withToken($accessToken)
+            //     ->get('http://192.168.1.200:5124/HRMS/emprole');
 
             $responseBatches = Http::withToken($accessToken)
                 ->get('http://192.168.1.200:5123/Appraisal/batch');
@@ -146,12 +146,12 @@ class GlobalKpiController extends Controller
             $kpi_data = $responseKpi->object() ?? null;
 
 
-            $uniqueRoles = collect($responseRoles->object());
+            // $uniqueRoles = $responseRoles->object();
 
 
 
             if ($kpi_data) {
-                return view('global-kpi.edit-kpi', compact('kpi_data', 'uniqueRoles', 'batch_data'));
+                return view('global-kpi.edit-kpi', compact('kpi_data',  'batch_data'));
             }
 
             Log::error('Failed to fetch Global KPI', [
@@ -191,17 +191,18 @@ class GlobalKpiController extends Controller
         ]);
 
         // Prepare the data for KPI update
-        $kpiData = $request->only([
-            'name',
-            'description',
-            'type',
-            'batchId',
-            'empRoleId'
-        ]);
-        $kpiData['active'] = (bool) $request->input('active'); // Cast to boolean
+        $kpiData = [
+            'id' => $id,
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'type' => $request->input('type'),
+            'active' => $request->input('active') == 1 ? true : false,
+            'batchId' => $request->input('batchId'),
+            'empRoleId' => $request->input('empRoleId'),
+        ];
 
         // Send the request to the API to update the KPI
-        $apiUrl = "http://192.168.1.200:5123/Appraisal/Kpi/{$id}";
+        $apiUrl = "http://192.168.1.200:5123/Appraisal/Kpi";
         $response = $this->sendApiRequest($apiUrl, $kpiData, 'PUT');
 
         // Check the response and redirect
@@ -215,7 +216,7 @@ class GlobalKpiController extends Controller
             'response' => $response->data ?? 'No response received',
         ]);
 
-        return redirect()->back()->with('toast_error', 'Sorry, failed to update KPI');
+        return redirect()->back()->with('toast_error', 'Sorry, failed to update Global KPI');
     }
 
     /**

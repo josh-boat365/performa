@@ -57,18 +57,18 @@
                                             <td>{{ $grade->grade }}</td>
                                             <td>{{ $grade->minScore }} - {{ $grade->maxScore }}</td>
                                             <td>{{ $grade->remark }}</td>
-                                            <td>{{ Carbon\Carbon::parse($grade->createdAt)->format('jS F, Y : g:i A') }}
+                                            <td>{{ Carbon\Carbon::parse($grade->createdAt)->diffForHumans() }}
                                             </td>
                                             <td>
                                                 <a href="{{ route('show.grade', $grade->id) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i>edit</span>
                                                 </a>
-                                                <a href="#" data-bs-toggle="modal"
+                                                {{--  <a href="#" data-bs-toggle="modal"
                                                     data-bs-target=".bs-delete-modal-lg-{{ $grade->id }}">
                                                     <span class="badge rounded-pill bg-danger fonte-size-13"><i
                                                             class="bx bxs-trash"></i> delete</span>
-                                                </a>
+                                                </a>  --}}
 
                                                 <!-- Modal for Delete Confirmation -->
                                                 <div class="modal fade bs-delete-modal-lg-{{ $grade->id }}"

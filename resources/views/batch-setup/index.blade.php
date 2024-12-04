@@ -158,16 +158,16 @@
                                         <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                 class="bx bxs-pencil"></i>edit</span>
                                     </a>
-                                    <a href="#" data-bs-toggle="modal"
+                                    {{--  <a href="#" data-bs-toggle="modal"
                                         data-bs-target=".bs-delete-modal-lg-{{ $batch['id'] }}">
                                         <span class="badge rounded-pill bg-danger fonte-size-13"><i
                                                 class="bx bxs-trash"></i> delete</span>
-                                    </a>
+                                    </a>  --}}
 
                                     <!-- Modal for Delete Confirmation -->
                                     <div class="modal fade bs-delete-modal-lg-{{ $batch['id'] }}" tabindex="-1"
                                         role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-sm modal-dialog-centered">
+                                        <div class="modal-dialog modal-lg modal-dialog-centered">
                                             <div class="modal-content">
                                                 <div class="modal-header">
                                                     <h5 class="modal-title" id="myLargeModalLabel">Confirm Batch
@@ -178,7 +178,7 @@
                                                 <div class="modal-body">
                                                     <h4 class="text-center mb-4">Are you sure you want to delete this
                                                         batch?</h4>
-                                                        <p>Deleting a <b>batch</b> means removing it from the <b>system entirely</b> and you cannot <b>recover</b> it again</p>
+                                                        <p class="text-center">Deleting a <b>batch</b> means removing it from the <b>system entirely</b> and you cannot <b>recover</b> it again</p>
                                                     <form action="{{ route('delete.batch', $batch['id']) }}"
                                                         method="POST">
                                                         @csrf
