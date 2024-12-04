@@ -41,7 +41,7 @@ Route::group(
         Route::get("dashboard/index", [DashboardController::class, "index"])->name("dashboard.index");
         Route::get("dashboard/view-kpi", [DashboardController::class, "show"])->name("view.kpi");
         Route::get("dashboard/edit-kpi", [DashboardController::class, "view_kpi"])->name("edit.kpi");
-        Route::get("dashboard/active/hr/batch", [DashboardController::class, "show"])->name("show-batch");
+        Route::get("dashboard/active/batch", [DashboardController::class, "show"])->name("show-batch");
         Route::get("dashboard/employee-batch-kpi/{id}", [DashboardController::class, "showEmployeeKpi"])->name("show.batch.kpi");
         Route::get("dashboard/employee-kpi/{id}", [DashboardController::class, "editEmployeeKpi"])->name("show.employee.kpi");
 

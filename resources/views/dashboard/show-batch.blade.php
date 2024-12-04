@@ -15,12 +15,12 @@
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
         <div class="col-md-12">
-            
-            @forelse ($activeBatches as $batch)
+
+            @if (!empty($activeBatch))
                 <div class="card card-body">
                     <div class="d-flex justify-content-between">
-                        <a href="{{ route('show.batch.kpi', $batch['id']) }}">
-                            <h4>{{ $batch['name'] }}</h4>
+                        <a href="{{ route('show.batch.kpi', $activeBatch['id']) }}">
+                            <h4>{{ $activeBatch['batch_name'] }}</h4>
                         </a>
                         <div>
                             <span class="badge rounded-pill bg-dark fonte-size-13">Global Kpi</span>
@@ -29,7 +29,7 @@
                             <!-- Display section count -->
                         </div>
                         <div>
-                            <a href="{{ route('show.batch.kpi', $batch['id']) }}">
+                            <a href="{{ route('show.batch.kpi', $activeBatch['id']) }}">
                                 <span class="badge rounded-pill bg-dark fonte-size-13"><i
                                         class="bx bx-show-alt"></i>Open Batch</span>
                             </a>
@@ -37,43 +37,14 @@
                     </div>
 
                 </div>
-            @empty
+            @else
                 <div class="card card-body">
                     <div class="d-flex justify-content-between">
                         <h3>No Active Appraisals Available </h3>
                     </div>
                 </div>
-            @endforelse
+            @endif
 
-            {{--  <div class="card card-body">
-                <div class="d-flex justify-content-between">
-                    <a href="{{ route('show.kpi') }}">
-                        <h4>January 2025 Batch - First Quarter</h4>
-                    </a>
-                    <div>
-                        <span class="badge rounded-pill bg-dark fonte-size-13">Number of KPIs</span>
-                        <span class="badge rounded-pill bg-primary fonte-size-13">16</span>
-                    </div>
-                     <div>
-
-                        <a href="#">
-                            <span class="badge rounded-pill bg-dark fonte-size-13"><i class="bx bx-show-alt"></i>View</span>
-                        </a>
-
-                    </div>
-                    <div>
-                        <span class="badge rounded-pill bg-success fonte-size-13">Submitted</span>
-                    </div>
-
-                </div>
-                <div class="mt-3">
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-animated progress-bar-striped" role="progressbar"
-                            style="width: 25%; font-weight: 900;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">70%</div>
-                    </div>
-                </div>
-
-            </div>  --}}
         </div>
 
 

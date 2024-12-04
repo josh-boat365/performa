@@ -20,18 +20,31 @@ class MetricController extends Controller
             // Fetch sections data using helper method
 
             $metricsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Metric");
+            $sectionsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
+
+
+            $sections_data = collect($sectionsResponse);
+            $metrics_data = collect($metricsResponse);
+
+            $validSectionIds = $sections_data->filter(function ($section) {
+                return $section->kpi && ($section->kpi->type === 'REGULAR' );
+            })->pluck('id');
+
+            // Step 4: Filter metrics that belong to the valid sections
+            $filteredMetrics = $metrics_data->filter(function ($metric) use ($validSectionIds) {
+                return $validSectionIds->contains($metric->section->id);
+            });
+
+            // Optional: If you want to ensure the metrics are active, you can further filter
+            $activeMetrics = $filteredMetrics->filter(function ($metric) {
+                return $metric->active === true;
+            });
 
 
 
-            // Sort the KPIs to place the newly created one first
-            $sortMetrics = collect($metricsResponse);
-            $sortedMetrics = $sortMetrics->sortByDesc('createdAt');
-            // dd($sortedMetrics);
+            $sortedMetrics = $activeMetrics->sortByDesc('createdAt');
 
-            $metrics = $sortedMetrics->filter(fn($metric) => $metric->active == true  || $metric->active == false);
-
-
-            $metrics = $this->paginate($metrics, 25, $request);
+            $metrics = $this->paginate($sortedMetrics, 25, $request);
 
 
             return view('metric-setup.index', compact('metrics'));
