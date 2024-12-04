@@ -66,7 +66,7 @@ class GlobalWeightController extends Controller
             return $kpi->active === true &&  $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION';
         });
 
-
+        // dd($activeKpis);
 
         return view('global-kpi.weight.create-weight', compact('activeKpis', 'departments'));
     }
@@ -120,15 +120,19 @@ class GlobalWeightController extends Controller
 
         $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
 
-        $responseDepartment = $this->makeApiRequest('GET', 'http://192.168.1.200:5124/HRMS/Department');
-
-        $departments = collect($responseDepartment);
-
-
         // Filter the KPIs to include only those with active state of true
         $activeKpis = collect($kpis)->filter(function ($kpi) {
             return $kpi->active === true &&  $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION';
         });
+
+        $responseRoles = $this->makeApiRequest('GET', 'http://192.168.1.200:5124/HRMS/emprole');
+
+        $rolesWithDepartments = collect($responseRoles);
+
+        $uniqueDepartments = [];
+
+        $uniqueDepartments = $rolesWithDepartments->pluck('department')->unique()->toArray();
+
 
 
         try {
@@ -139,7 +143,7 @@ class GlobalWeightController extends Controller
                 // Convert the response to an object
                 $globalWeight = $response->object();
 
-                return view('global-kpi.weight.edit-weight', compact('globalWeight', 'activeKpis', 'departments'));
+                return view('global-kpi.weight.edit-weight', compact('globalWeight', 'activeKpis', 'uniqueDepartments'));
             }
 
             // Log the error response
