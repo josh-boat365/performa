@@ -51,7 +51,9 @@ Route::group(
         Route::post("dashboard/employee-probe/submit", [AppraisalScoreController::class, "submitProbing"])->name("submit.employee.probe");
 
         Route::get("dashboard/supervisor/show-employee-kpis", [SupervisorScoreController::class, "index"])->name("supervisor.index");
+
         Route::get("dashboard/supervisor/show-employee-kpi-form/kpi/{kpiId}/batch/{batchId}", [SupervisorScoreController::class, "edit"])->name("supervisor.edit");
+        Route::get("dashboard/supervisor/show-employee-kpi-prob-form/kpi/{kpiId}/batch/{batchId}", [SupervisorScoreController::class, "editProb"])->name("prob.edit");
         //Supervisor Score
         Route::post("dashboard/supervisor/rating", [SupervisorScoreController::class, "store"])->name("supervisor.rating");
         Route::post("dashboard/submit-rating-score-for-employee-confirmation", [UpdateKpiScoringState::class, "store"])->name("submit.supervisor.rating");

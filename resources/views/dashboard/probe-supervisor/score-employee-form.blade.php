@@ -43,7 +43,7 @@
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
                                 @if (isset($appraisal) && !empty($appraisal))
-                                {{ dd($appraisal) }}
+                                    {{ dd($appraisal) }}
                                     @foreach ($appraisal as $kpi)
                                         <div class="kpi">
                                             {{--  <h3>KPI: {{ $kpi->kpiName }}</h3>
