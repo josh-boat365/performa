@@ -210,13 +210,58 @@ class AppraisalScoreController extends Controller
 
     }
 
-    public function submitProbing(Request $request){
-
-        dd($request->all());
-
-
+    public function submitProbing(Request $request)
+    {
+        // Validate the incoming request data
         $request->validate([
-
+            'scoreId' => 'required|array',
+            'scoreId.*' => 'integer', // Ensure each scoreId is an integer
         ]);
+
+        // Retrieve the score IDs from the request
+        $scoreIds = $request->input('scoreId');
+
+        // Prepare the data to be sent to the API
+        $successCount = 0; // To count successful submissions
+        $accessToken = session('api_token'); // Retrieve the access token
+
+        foreach ($scoreIds as $scoreId) {
+            // Prepare the data for the current scoreId
+            $data = [
+                'scoreId' => (int) $scoreId,
+            ];
+
+            try {
+                // Submit the data to the external API
+                $response = Http::withToken($accessToken)
+                    ->put('http://192.168.1.200:5123/Appraisal/Score/UpdateEmployeeScoreToProb', $data);
+
+                // Check if the response is successful
+                if ($response->successful()) {
+                    $successCount++;
+                } else {
+                    // Log the error if the response is not successful
+                    Log::error('API Submit, Confirmation Response Error', [
+                        'scoreId' => $scoreId,
+                        'status' => $response->status(),
+                        'body' => $response->body(),
+                    ]);
+                }
+            } catch (\Exception $e) {
+                // Handle any exceptions that occur during the API request
+                Log::error('API Exception, Submit, Confirmation Response Error', [
+                    'scoreId' => $scoreId,
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+        }
+
+        // Check if all submissions were successful
+        if ($successCount === count($scoreIds)) {
+            return back()->with('toast_success', 'All Supervisor Scores Has Been Submitted For Review Successfully.');
+        } else {
+            return back()->with('toast_error', 'Some scores failed to submit. Please check the logs for details.');
+        }
     }
 }
