@@ -40,14 +40,12 @@
                         <h4 class="card-title mb-4">Employee Evaluation Form</h4>
 
                         <div class="p-3 text-muted">
+
+
                             <div id="kpi-form">
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
                                     @foreach ($appraisal as $kpi)
                                         <div class="kpi">
-                                            {{--  <h2>{{ $kpi->kpiName }}</h2>
-                                            <p>{{ $kpi->kpiDescription }}</p>
-                                            <p>Score: {{ $kpi->kpiScore }}</p>  --}}
-
                                             @foreach ($kpi->sections as $section)
                                                 <div class="section-card" style="margin-top: 2rem;">
                                                     <h4>{{ $section->sectionName }} (<span
@@ -66,7 +64,9 @@
                                                                         placeholder="Enter Score"
                                                                         max="{{ $section->sectionScore }}"
                                                                         @disabled(isset($section->sectionEmpScore) &&
-                                                                                ($section->sectionEmpScore->status === 'REVIEW' || $section->sectionEmpScore->status === 'CONFIRMATION'))
+                                                                                ($section->sectionEmpScore->status === 'REVIEW' ||
+                                                                                    $section->sectionEmpScore->status === 'CONFIRMATION' ||
+                                                                                    $section->sectionEmpScore->status === 'COMPLETED'))
                                                                         title="The Score cannot be more than the section score {{ $section->sectionScore }}"
                                                                         value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                 </div>
@@ -75,12 +75,16 @@
                                                                         type="text" name="employeeComment"
                                                                         placeholder="Enter your comments"
                                                                         @disabled(isset($section->sectionEmpScore) &&
-                                                                                ($section->sectionEmpScore->status === 'REVIEW' || $section->sectionEmpScore->status === 'CONFIRMATION'))
+                                                                                ($section->sectionEmpScore->status === 'REVIEW' ||
+                                                                                    $section->sectionEmpScore->status === 'CONFIRMATION' ||
+                                                                                    $section->sectionEmpScore->status === 'COMPLETED'))
                                                                         value="{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}">
                                                                 </div>
                                                                 @if (
                                                                     !isset($section->sectionEmpScore) ||
-                                                                        ($section->sectionEmpScore->status !== 'REVIEW' && $section->sectionEmpScore->status !== 'CONFIRMATION'))
+                                                                        ($section->sectionEmpScore->status !== 'REVIEW' &&
+                                                                            $section->sectionEmpScore->status !== 'CONFIRMATION' &&
+                                                                            $section->sectionEmpScore->status !== 'COMPLETED'))
                                                                     <input type="hidden" name="kpiType"
                                                                         value="{{ $kpi->kpiType }}">
                                                                     <input type="hidden" name="sectionEmpScoreId"
@@ -94,26 +98,39 @@
                                                                 @endif
                                                             </div>
                                                         </form>
-                                                        {{--  SUPERVISOR COMMENT AND SCORE WHEN SUPERVISOR HAS SUBMITTED THEIR SCORES  --}}
+
+                                                        {{-- SUPERVISOR COMMENT AND SCORE WHEN SUPERVISOR HAS SUBMITTED THEIR SCORES --}}
                                                         @if (isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
                                                             <span class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
-                                                                    Score and
-                                                                    Comment</strong></span>
+                                                                    Score and Comment</strong></span>
                                                             <div class="d-flex gap-3">
                                                                 <div class="col-md-2">
                                                                     <input class="form-control mb-3" type="number"
                                                                         readonly name="metricSupScore"
                                                                         placeholder="Enter Score" required
-                                                                        @disabled(isset($section->sectionEmpScore) &&
-                                                                                ($section->sectionEmpScore->status === 'REVIEW' || $section->sectionEmpScore->status === 'CONFIRMATION'))
                                                                         value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? '' }}">
                                                                 </div>
                                                                 <div class="col-md-9">
                                                                     <input class="form-control mb-3" type="text"
                                                                         readonly name="supervisorComment"
                                                                         placeholder="Enter your comments" required
-                                                                        @disabled(isset($section->sectionEmpScore) &&
-                                                                                ($section->sectionEmpScore->status === 'REVIEW' || $section->sectionEmpScore->status === 'CONFIRMATION'))
+                                                                        value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
+                                                                </div>
+                                                            </div>
+                                                        @elseif (isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'COMPLETED')
+                                                            <span class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
+                                                                    Score and Comment</strong></span>
+                                                            <div class="d-flex gap-3">
+                                                                <div class="col-md-2">
+                                                                    <input class="form-control mb-3" type="number"
+                                                                        readonly name="metricSupScore"
+                                                                        placeholder="Enter Score" required
+                                                                        value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? '' }}">
+                                                                </div>
+                                                                <div class="col-md-9">
+                                                                    <input class ="form-control mb-3" type="text"
+                                                                        readonly name="supervisorComment"
+                                                                        placeholder="Enter your comments" required
                                                                         value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
                                                                 </div>
                                                             </div>
@@ -128,7 +145,6 @@
                                                                 </h5>
                                                                 <p>{{ $metric->metricDescription }}</p>
 
-
                                                                 <form action="{{ route('self.rating') }}"
                                                                     method="POST" class="metric-form">
                                                                     @csrf
@@ -142,7 +158,9 @@
                                                                                 type="number" name="metricEmpScore"
                                                                                 required placeholder="Enter Score"
                                                                                 @disabled(isset($metric->metricEmpScore) &&
-                                                                                        ($metric->metricEmpScore->status === 'REVIEW' || $metric->metricEmpScore->status === 'CONFIRMATION'))
+                                                                                        ($metric->metricEmpScore->status === 'REVIEW' ||
+                                                                                            $metric->metricEmpScore->status === 'CONFIRMATION' ||
+                                                                                            $section->sectionEmpScore->status === 'COMPLETED'))
                                                                                 value="{{ optional($metric->metricEmpScore)->metricEmpScore ?? '' }}">
                                                                         </div>
                                                                         <div class="col-md-9">
@@ -150,31 +168,33 @@
                                                                                 type="text" name="metricComment"
                                                                                 placeholder="Enter your comments"
                                                                                 @disabled (isset($metric->metricEmpScore) &&
-                                                                                        ($metric->metricEmpScore->status === 'REVIEW' || $metric->metricEmpScore->status === 'CONFIRMATION'))
+                                                                                        ($metric->metricEmpScore->status === 'REVIEW' ||
+                                                                                            $metric->metricEmpScore->status === 'CONFIRMATION' ||
+                                                                                            $section->sectionEmpScore->status === 'COMPLETED'))
                                                                                 value="{{ optional($metric->metricEmpScore)->metricComment ?? '' }}">
                                                                         </div>
                                                                         @if (
                                                                             !isset($metric->metricEmpScore) ||
-                                                                                ($metric->metricEmpScore->status !== 'REVIEW' && $metric->metricEmpScore->status !== 'CONFIRMATION'))
+                                                                                ($metric->metricEmpScore->status !== 'REVIEW' &&
+                                                                                    $metric->metricEmpScore->status !== 'CONFIRMATION' &&
+                                                                                    $section->sectionEmpScore->status !== 'COMPLETED'))
                                                                             <button type="submit"
                                                                                 class="btn btn-success">Save</button>
                                                                         @endif
                                                                     </div>
                                                                 </form>
-                                                                {{--  SUPERVISOR COMMENT AND SCORE WHEN SUPERVISOR HAS SUBMITTED THEIR SCORES  --}}
+
+                                                                {{-- SUPERVISOR COMMENT AND SCORE WHEN SUPERVISOR HAS SUBMITTED THEIR SCORES --}}
                                                                 @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')
                                                                     <span
                                                                         class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
-                                                                            Score and
-                                                                            Comment</strong></span>
+                                                                            Score and Comment</strong></span>
                                                                     <div class="d-flex gap-3">
                                                                         <div class="col-md-2">
                                                                             <input class="form-control mb-3"
                                                                                 type="number" readonly
                                                                                 name="metricSupScore"
                                                                                 placeholder="Enter Score" required
-                                                                                @disabled(isset($section->sectionEmpScore) &&
-                                                                                        ($section->sectionEmpScore->status === 'REVIEW' || $section->sectionEmpScore->status === 'CONFIRMATION'))
                                                                                 value="{{ optional($metric->metricEmpScore)->metricSupScore ?? '' }}">
                                                                         </div>
                                                                         <div class="col-md-9">
@@ -182,8 +202,28 @@
                                                                                 type="text" readonly
                                                                                 name="supervisorComment"
                                                                                 placeholder="Enter your comments"
-                                                                                required @disabled(isset($section->sectionEmpScore) &&
-                                                                                        ($section->sectionEmpScore->status === 'REVIEW' || $section->sectionEmpScore->status === 'CONFIRMATION'))
+                                                                                required
+                                                                                value="{{ $metric->metricEmpScore->supervisorComment ?? '' }}">
+                                                                        </div>
+                                                                    </div>
+                                                                @elseif (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'COMPLETED')
+                                                                    <span
+                                                                        class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
+                                                                            Score and Comment</strong></span>
+                                                                    <div class="d-flex gap-3">
+                                                                        <div class="col-md-2">
+                                                                            <input class="form-control mb-3"
+                                                                                type="number" readonly
+                                                                                name="metricSupScore"
+                                                                                placeholder="Enter Score" required
+                                                                                value="{{ optional($metric->metricEmpScore)->metricSupScore ?? '' }}">
+                                                                        </div>
+                                                                        <div class="col-md-9">
+                                                                            <input class="form-control mb-3"
+                                                                                type="text" readonly
+                                                                                name="supervisorComment"
+                                                                                placeholder="Enter your comments"
+                                                                                required
                                                                                 value="{{ $metric->metricEmpScore->supervisorComment ?? '' }}">
                                                                         </div>
                                                                     </div>
@@ -193,21 +233,22 @@
                                                             </div>
                                                         @endforeach
                                                     @endif
-
-
                                                 </div>
                                             @endforeach
                                         </div>
                                     @endforeach
                                 @else
-                                    <p>No appraisal data available.</p>
+                                    <p></p>
                                 @endif
                             </div>
+
 
                             <hr class="mt-10">
 
                             @if (isset($section->sectionEmpScore) &&
-                                    ($section->sectionEmpScore->status === 'REVIEW' || $section->sectionEmpScore->status === 'CONFIRMATION'))
+                                    ($section->sectionEmpScore->status === 'REVIEW' ||
+                                        $section->sectionEmpScore->status === 'CONFIRMATION' ||
+                                        $section->sectionEmpScore->status === 'COMPLETED'))
                                 <div></div>
                             @else
                                 <div class="float-end">
@@ -256,8 +297,8 @@
                             @if (isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
                                 <div class="float-end">
                                     <div class="d-flex gap-3">
-                                        <button type="button" data-bs-toggle="modal" class="btn btn-primary" @style(['width: 8rem; height: fit-content'])
-                                            data-bs-target=".bs-delete-modal-lg">Accept</button>
+                                        <button type="button" data-bs-toggle="modal" class="btn btn-primary"
+                                            @style(['width: 8rem; height: fit-content']) data-bs-target=".bs-delete-modal-lg">Accept</button>
 
                                         <a href="{{ route('show.employee.probe', $kpi->kpiId) }}"
                                             class="btn btn-warning" @style(['width: 8rem; height: fit-content'])>Probe</a>
