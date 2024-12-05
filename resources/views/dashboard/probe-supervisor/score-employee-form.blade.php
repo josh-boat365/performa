@@ -43,17 +43,12 @@
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
                                 @if (isset($appraisal) && !empty($appraisal))
-                                    {{ dd($appraisal) }}
                                     @foreach ($appraisal as $kpi)
                                         <div class="kpi">
-                                            {{--  <h3>KPI: {{ $kpi->kpiName }}</h3>
-                                            <p>{{ $kpi->kpiDescription }}</p>  --}}
-
                                             @if (isset($kpi->sections) && count($kpi->sections) > 0)
                                                 @foreach ($kpi->sections as $section)
                                                     <div class="section-card" style="margin-top: 2rem;">
-                                                        <h4>{{ $section->sectionName }}
-                                                            (<span
+                                                        <h4>{{ $section->sectionName }} (<span
                                                                 style="color: #c80f0f">{{ $section->sectionScore }}</span>)
                                                         </h4>
                                                         <p>{{ $section->sectionDescription }}</p>
@@ -74,15 +69,12 @@
                                                                         placeholder="Enter your comments" readonly
                                                                         value="{{ $section->sectionEmpScore->employeeComment ?? '' }}">
                                                                 </div>
-
                                                             </div>
 
-
                                                             <span class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
-                                                                    Score and
-                                                                    Comment</strong></span>
+                                                                    Score and Comment</strong></span>
 
-                                                            {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
+                                                            {{-- Supervisor Scoring with Comment Input --}}
                                                             <form action="{{ route('supervisor.rating') }}"
                                                                 method="POST" class="section-form">
                                                                 @csrf
@@ -108,7 +100,6 @@
                                                                     @else
                                                                         <input type="hidden" name="scoreId"
                                                                             value="{{ $section->sectionEmpScore->id ?? '' }}">
-
                                                                         <button type="submit"
                                                                             style="height: fit-content"
                                                                             class="btn btn-primary">Save</button>
@@ -148,15 +139,13 @@
                                                                                     readonly
                                                                                     value="{{ $metric->metricEmpScore->employeeComment ?? '' }}">
                                                                             </div>
-
                                                                         </div>
 
                                                                         <span
                                                                             class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
-                                                                                Score and
-                                                                                Comment</strong></span>
+                                                                                Score and Comment</strong></span>
 
-                                                                        {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
+                                                                        {{-- Supervisor Scoring with Comment Input --}}
                                                                         <form action="{{ route('supervisor.rating') }}"
                                                                             method="POST">
                                                                             @csrf
@@ -181,13 +170,10 @@
 
                                                                                 <input type="hidden" name="scoreId"
                                                                                     value="{{ $metric->metricEmpScore->id ?? '' }}">
-
-
                                                                                 <button type="submit"
                                                                                     style="height: fit-content"
                                                                                     class="btn btn-primary"
                                                                                     @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')>Save</button>
-
                                                                             </div>
                                                                         </form>
                                                                     </li>
@@ -202,56 +188,54 @@
                                                 <p></p>
                                             @endif
                                         </div>
-                                    @endforeach
-                                @endif
-                                <hr class="mt-10">
-                                @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')
-                                    <div></div>
-                                @else
-                                    <div class="float-end">
-                                        <button type="button" data-bs-toggle="modal" class="btn btn-success"
-                                            data-bs-target=".bs-delete-modal-lg">Submit Appraisal</button>
-                                    </div>
 
-                                    <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
-                                        aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-md modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="myLargeModalLabel">Confirm
-                                                        Appraisal
-                                                        Submit</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                        aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <h4 class="text-center mb-4">Are you sure you want to
-                                                        <b>Submit</b> employee <b>Appraisal</b> for
-                                                        <b>Confirmation</b>?
+                                        <hr class="mt-10">
+                                        @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')
+                                            <div></div>
+                                        @else
+                                            <div class="float-end">
+                                                <button type="button" data-bs-toggle="modal" class="btn btn-success"
+                                                    data-bs-target=".bs-delete-modal-lg">Submit Appraisal</button>
+                                            </div>
 
-                                                    </h4>
-                                                    <form action="{{ route('submit.appraisal') }}" method="POST">
-                                                        @csrf
-                                                        <input type="hidden" name="kpiId"
-                                                            value="{{ $kpi->kpiId }}">
-                                                        <input type="hidden" name="batchId"
-                                                            value="{{ $kpi->batchId }}">
-                                                        <input type="hidden" name="status" value="CONFIRMATION">
-                                                        <div class="d-grid">
-                                                            <div class="mt-5 ">
-                                                                <button type="submit" id="submitReviewButton"
-                                                                    class="btn btn-success">Submit
-                                                                    Employee Appraisal
-                                                                    For Confirmation</button>
-                                                            </div>
+                                            <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
+                                                aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-md modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="myLargeModalLabel">Confirm
+                                                                Appraisal Submit</h5>
+                                                            <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
-                                                    </form>
+                                                        <div class="modal-body">
+                                                            <h4 class="text-center mb-4">Are you sure you want to
+                                                                <b>Submit</b> employee <b>Appraisal</b> for
+                                                                <b>Confirmation</b>?</h4>
+                                                            <form action="{{ route('submit.appraisal') }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                <input type="hidden" name="kpiId"
+                                                                    value="{{ $kpi->kpiId }}">
+                                                                <input type="hidden" name="batchId"
+                                                                    value="{{ $kpi->batchId }}">
+                                                                <input type="hidden" name="status"
+                                                                    value="CONFIRMATION">
+                                                                <div class="d-grid">
+                                                                    <div class="mt-5 ">
+                                                                        <button type="submit" id="submitReviewButton"
+                                                                            class="btn btn-success">Submit Employee
+                                                                            Appraisal For Confirmation</button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
+                                        @endif
+                                    @endforeach
                                 @endif
-
                             </div>
 
                             <script>

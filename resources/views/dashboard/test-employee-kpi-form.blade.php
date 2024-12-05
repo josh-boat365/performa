@@ -66,7 +66,8 @@
                                                                         @disabled(isset($section->sectionEmpScore) &&
                                                                                 ($section->sectionEmpScore->status === 'REVIEW' ||
                                                                                     $section->sectionEmpScore->status === 'CONFIRMATION' ||
-                                                                                    $section->sectionEmpScore->status === 'COMPLETED'))
+                                                                                    $section->sectionEmpScore->status === 'COMPLETED' ||
+                                                                                    $section->sectionEmpScore->status === 'PROBLEM'))
                                                                         title="The Score cannot be more than the section score {{ $section->sectionScore }}"
                                                                         value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                 </div>
@@ -77,14 +78,15 @@
                                                                         @disabled(isset($section->sectionEmpScore) &&
                                                                                 ($section->sectionEmpScore->status === 'REVIEW' ||
                                                                                     $section->sectionEmpScore->status === 'CONFIRMATION' ||
-                                                                                    $section->sectionEmpScore->status === 'COMPLETED'))
+                                                                                    ($section->sectionEmpScore->status === 'COMPLETED') | ($section->sectionEmpScore->status === 'PROBLEM')))
                                                                         value="{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}">
                                                                 </div>
                                                                 @if (
                                                                     !isset($section->sectionEmpScore) ||
                                                                         ($section->sectionEmpScore->status !== 'REVIEW' &&
                                                                             $section->sectionEmpScore->status !== 'CONFIRMATION' &&
-                                                                            $section->sectionEmpScore->status !== 'COMPLETED'))
+                                                                            $section->sectionEmpScore->status !== 'COMPLETED' &&
+                                                                            $section->sectionEmpScore->status !== 'PROBLEM'))
                                                                     <input type="hidden" name="kpiType"
                                                                         value="{{ $kpi->kpiType }}">
                                                                     <input type="hidden" name="sectionEmpScoreId"
@@ -135,7 +137,7 @@
                                                                 </div>
                                                             </div>
                                                         @elseif(isset($section->sectionEmpScore) && $section->sectionEmpScore->prob == true)
-                                                        <span class="mb-2 badge rounded-pill bg-dark"><strong>Probing
+                                                            <span class="mb-2 badge rounded-pill bg-dark"><strong>Probing
                                                                     Score and Comment</strong></span>
                                                             <div class="d-flex gap-3">
                                                                 <div class="col-md-2">
@@ -177,7 +179,8 @@
                                                                                 @disabled(isset($metric->metricEmpScore) &&
                                                                                         ($metric->metricEmpScore->status === 'REVIEW' ||
                                                                                             $metric->metricEmpScore->status === 'CONFIRMATION' ||
-                                                                                            $section->sectionEmpScore->status === 'COMPLETED'))
+                                                                                            $section->sectionEmpScore->status === 'COMPLETED' ||
+                                                                                            $section->sectionEmpScore->status === 'PROBLEM'))
                                                                                 value="{{ optional($metric->metricEmpScore)->metricEmpScore ?? '' }}">
                                                                         </div>
                                                                         <div class="col-md-9">
@@ -187,14 +190,16 @@
                                                                                 @disabled (isset($metric->metricEmpScore) &&
                                                                                         ($metric->metricEmpScore->status === 'REVIEW' ||
                                                                                             $metric->metricEmpScore->status === 'CONFIRMATION' ||
-                                                                                            $section->sectionEmpScore->status === 'COMPLETED'))
+                                                                                            $section->sectionEmpScore->status === 'COMPLETED' ||
+                                                                                            $section->sectionEmpScore->status === 'PROBLEM'))
                                                                                 value="{{ optional($metric->metricEmpScore)->metricComment ?? '' }}">
                                                                         </div>
                                                                         @if (
                                                                             !isset($metric->metricEmpScore) ||
                                                                                 ($metric->metricEmpScore->status !== 'REVIEW' &&
                                                                                     $metric->metricEmpScore->status !== 'CONFIRMATION' &&
-                                                                                    $section->sectionEmpScore->status !== 'COMPLETED'))
+                                                                                    $section->sectionEmpScore->status !== 'COMPLETED' &&
+                                                                                    $section->sectionEmpScore->status !== 'PROBLEM'))
                                                                             <button type="submit"
                                                                                 class="btn btn-success">Save</button>
                                                                         @endif
@@ -245,7 +250,7 @@
                                                                         </div>
                                                                     </div>
                                                                 @elseif(isset($metric->metricEmpScore) && $metric->metricEmpScore->prob == true)
-                                                                <span
+                                                                    <span
                                                                         class="mb-2 badge rounded-pill bg-dark"><strong>Probing
                                                                             Score and Comment</strong></span>
                                                                     <div class="d-flex gap-3">
@@ -286,7 +291,8 @@
                             @if (isset($section->sectionEmpScore) &&
                                     ($section->sectionEmpScore->status === 'REVIEW' ||
                                         $section->sectionEmpScore->status === 'CONFIRMATION' ||
-                                        $section->sectionEmpScore->status === 'COMPLETED'))
+                                        $section->sectionEmpScore->status === 'COMPLETED' ||
+                                        $section->sectionEmpScore->status === 'PROBLEM'))
                                 <div></div>
                             @else
                                 <div class="float-end">
