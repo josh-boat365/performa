@@ -44,17 +44,20 @@ class DashboardController extends Controller
                     return $batch['status'] === 'OPEN' && $batch['active'] === true;
                 });
 
+                foreach($batch as $activeBatch ){
+                    // dd($activeBatch);
+                    $activeBatches = [
+                        'id' => $activeBatch['id'],
+                        'batch_name' => $activeBatch['name'],
+                    ];
+                }
 
-                $activeBatch = [
-                    'id' => $batch[0]['id'],
-                    'batch_name' => $batch[0]['name'],
-                ];
 
                 // dd($activeBatch['id']);
 
 
 
-                return view('dashboard.show-batch', compact('activeBatch')); // Pass to view
+                return view('dashboard.show-batch', compact('activeBatches')); // Pass to view
 
             } else {
                 // Log the error response

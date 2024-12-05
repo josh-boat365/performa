@@ -16,11 +16,11 @@
 
         <div class="col-md-12">
 
-            @if (!empty($activeBatch))
+            @if (!empty($activeBatches))
                 <div class="card card-body">
                     <div class="d-flex justify-content-between">
-                        <a href="{{ route('show.batch.kpi', $activeBatch['id']) }}">
-                            <h4>{{ $activeBatch['batch_name'] }}</h4>
+                        <a href="{{ route('show.batch.kpi', $activeBatches['id']) }}">
+                            <h4>{{ $activeBatches['batch_name'] }}</h4>
                         </a>
                         <div>
                             <span class="badge rounded-pill bg-dark fonte-size-13">Global Kpi</span>
@@ -29,7 +29,7 @@
                             <!-- Display section count -->
                         </div>
                         <div>
-                            <a href="{{ route('show.batch.kpi', $activeBatch['id']) }}">
+                            <a href="{{ route('show.batch.kpi', $activeBatches['id']) }}">
                                 <span class="badge rounded-pill bg-dark fonte-size-13"><i
                                         class="bx bx-show-alt"></i>Open Batch</span>
                             </a>

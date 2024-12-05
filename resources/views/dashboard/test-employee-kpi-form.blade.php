@@ -172,6 +172,8 @@
                                                                             value="{{ $metric->metricId }}">
                                                                         <input type="hidden" name="kpiId"
                                                                             value="{{ $kpi->kpiId }}">
+                                                                        <input type="hidden" name="sectionId"
+                                                                            value="{{ $section->sectionId }}">
                                                                         <div class="col-md-2">
                                                                             <input class="form-control mb-3"
                                                                                 type="number" name="metricEmpScore"
