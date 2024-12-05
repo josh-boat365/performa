@@ -110,6 +110,7 @@ Route::group(
 
         //Grade Setup
         Route::get("dashboard/appraisal/hr/grade-setup", [GradeController::class, "index"])->name("grade.index");
+        Route::get("dashboard/appraisal/hr/grade-setup/create", [GradeController::class, "create"])->name("create.grade");
         Route::post("dashboard/appraisal/hr/grade-setup/store", [GradeController::class, "store"])->name("store.grade");
         Route::get("dashboard/appraisal/hr/grade-setup/{id}/show", [GradeController::class, "show"])->name("show.grade");
         Route::post("dashboard/appraisal/hr/grade-setup/{id}update", [GradeController::class, "update"])->name("update.grade");
