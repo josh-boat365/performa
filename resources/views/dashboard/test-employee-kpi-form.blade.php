@@ -134,6 +134,23 @@
                                                                         value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
                                                                 </div>
                                                             </div>
+                                                        @elseif(isset($section->sectionEmpScore) && $section->sectionEmpScore->prob == true)
+                                                        <span class="mb-2 badge rounded-pill bg-dark"><strong>Probing
+                                                                    Score and Comment</strong></span>
+                                                            <div class="d-flex gap-3">
+                                                                <div class="col-md-2">
+                                                                    <input class="form-control mb-3" type="number"
+                                                                        readonly name="metricSupScore"
+                                                                        placeholder="Enter Score" required
+                                                                        value="{{ optional($section->sectionEmpScore)->sectionProbScore ?? '' }}">
+                                                                </div>
+                                                                <div class="col-md-9">
+                                                                    <input class ="form-control mb-3" type="text"
+                                                                        readonly name="supervisorComment"
+                                                                        placeholder="Enter your comments" required
+                                                                        value="{{ $section->sectionEmpScore->probComment ?? '' }}">
+                                                                </div>
+                                                            </div>
                                                         @else
                                                             <div></div>
                                                         @endif
@@ -225,6 +242,27 @@
                                                                                 placeholder="Enter your comments"
                                                                                 required
                                                                                 value="{{ $metric->metricEmpScore->supervisorComment ?? '' }}">
+                                                                        </div>
+                                                                    </div>
+                                                                @elseif(isset($metric->metricEmpScore) && $metric->metricEmpScore->prob == true)
+                                                                <span
+                                                                        class="mb-2 badge rounded-pill bg-dark"><strong>Probing
+                                                                            Score and Comment</strong></span>
+                                                                    <div class="d-flex gap-3">
+                                                                        <div class="col-md-2">
+                                                                            <input class="form-control mb-3"
+                                                                                type="number" readonly
+                                                                                name="metricSupScore"
+                                                                                placeholder="Enter Score" required
+                                                                                value="{{ optional($metric->metricEmpScore)->metricProbScore ?? '' }}">
+                                                                        </div>
+                                                                        <div class="col-md-9">
+                                                                            <input class="form-control mb-3"
+                                                                                type="text" readonly
+                                                                                name="supervisorComment"
+                                                                                placeholder="Enter your comments"
+                                                                                required
+                                                                                value="{{ $metric->metricEmpScore->probComment ?? '' }}">
                                                                         </div>
                                                                     </div>
                                                                 @else

@@ -23,78 +23,61 @@
 
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
+
+
                                 <form action="{{ route('submit.employee.probe') }}" method="POST">
                                     @csrf
                                     @if (isset($appraisal) && !empty($appraisal))
                                         @foreach ($appraisal as $kpi)
                                             <div class="kpi">
-                                                {{--  <h3>KPI: {{ $kpi->kpiName }}</h3>
-                                                <p>{{ $kpi->kpiDescription }}</p>  --}}
-
                                                 @if (isset($kpi->sections) && count($kpi->sections) > 0)
                                                     @foreach ($kpi->sections as $sectionId => $section)
-                                                        <div class="section-card" @style(['margin-top: 2rem'])>
-                                                            <h4>Section: {{ $section->sectionName }}
-                                                                (<span
+                                                        <div class="section-card" style="margin-top: 2rem;">
+                                                            <h4>{{ $section->sectionName }} (<span
                                                                     style="color: #c80f0f">{{ $section->sectionScore }}</span>)
                                                             </h4>
                                                             <p>{{ $section->sectionDescription }}</p>
 
                                                             @if (empty($section->metrics))
-                                                                {{--  <form action="{{ route('self.rating') }}" method="POST"
-                                                                    class="section-form">
-                                                                    @csrf  --}}
-                                                                    <div class="d-flex gap-3">
-                                                                        <div class="col-md-2">
-                                                                            <input class="form-control mb-3"
-                                                                                type="number" name="sectionEmpScore"
-                                                                                readonly placeholder="Enter Score"
-                                                                                value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
-                                                                        </div>
-                                                                        <div class="col-md-9">
-                                                                            <input class="form-control mb-3"
-                                                                                type="text" name="employeeComment"
-                                                                                placeholder="Enter your comments"
-                                                                                readonly
-                                                                                value="{{ $section->sectionEmpScore->employeeComment ?? '' }}">
-                                                                        </div>
-                                                                        <input type="hidden" name="sectionEmpScoreId"
-                                                                            value="{{ $section->sectionEmpScore->id ?? '' }}">
-                                                                        <input type="hidden" name="sectionId"
-                                                                            value="{{ $section->sectionId }}">
-                                                                        <input type="hidden" name="kpiId"
-                                                                            value="{{ $kpi->kpiId }}">
-
-                                                                    </div>
-                                                                {{--  </form>  --}}
-
-                                                                <span class="mb-2 badge rounded-pill bg-dark"><strong>Supervisor
-                                                                        Score and
-                                                                        Comment</strong></span>
-
-                                                                {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
-
+                                                                <div class="d-flex gap-3">
                                                                     <div class="col-md-2">
                                                                         <input class="form-control mb-3" type="number"
-                                                                            readonly name="metricSupScore"
-                                                                            placeholder="Enter Score" readonly
-                                                                            value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? ''}}">
+                                                                            readonly placeholder="Enter Score"
+                                                                            @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'REVIEW')
+                                                                            value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                     </div>
                                                                     <div class="col-md-9">
                                                                         <input class="form-control mb-3" type="text"
-                                                                            readonly name="supervisorComment"
                                                                             placeholder="Enter your comments" readonly
+                                                                            @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'REVIEW')
+                                                                            value="{{ $section->sectionEmpScore->employeeComment ?? '' }}">
+                                                                    </div>
+                                                                </div>
+
+                                                                <span class="mb-2 badge rounded-pill bg-dark"><strong>Supervisor
+                                                                        Score and Comment</strong></span>
+
+                                                                <div class="d-flex gap-3">
+                                                                    <div class="col-md-2">
+                                                                        <input class="form-control mb-3" type="number"
+                                                                            readonly placeholder="Enter Score"
+                                                                            @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'REVIEW')
+                                                                            value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? '' }}">
+                                                                    </div>
+                                                                    <div class="col-md-9">
+                                                                        <input class="form-control" type="text"
+                                                                            readonly placeholder="Enter your comments"
+                                                                            @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'REVIEW')
                                                                             value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
                                                                     </div>
                                                                     <div class="form-check form-check-dark mb-3">
                                                                         <input @style(['width:1.4rem; height:1.4rem'])
                                                                             class="form-check-input" type="checkbox"
-                                                                            name="scoreId" readonly
+                                                                            name="scoreId[]"  @checked( $section->sectionEmpScore->prob === true)
                                                                             value="{{ $section->sectionEmpScore->id }}"
                                                                             id="formCheckcolor4">
                                                                     </div>
-
-
+                                                                </div>
                                                             @endif
 
                                                             @if (isset($section->metrics) && count($section->metrics) > 0)
@@ -105,71 +88,54 @@
                                                                             (<span
                                                                                 style="color: #c80f0f">{{ $metric->metricScore }}</span>)
                                                                             <p>{{ $metric->metricDescription }}</p>
-                                                                            {{--  ==== EMPLOYEE SCORING WITH COMMENT INPUT ====  --}}
 
-                                                                                <div class="d-flex gap-3">
-                                                                                    <div class="col-md-2">
-                                                                                        <input class="form-control mb-3"
-                                                                                            type="number"
-                                                                                            name="metricEmpScore"
-                                                                                            placeholder="Enter Score"
-                                                                                            readonly
-                                                                                            value="{{ $metric->metricEmpScore->metricEmpScore ?? '' }}">
-                                                                                    </div>
-                                                                                    <div class="col-md-9">
-                                                                                        <input class="form-control mb-3"
-                                                                                            type="text"
-                                                                                            name="employeeComment"
-                                                                                            placeholder="Enter your comments"
-                                                                                            readonly
-                                                                                            value="{{ $metric->metricEmpScore->employeeComment ?? '' }}">
-                                                                                    </div>
-
-
+                                                                            <div class="d-flex gap-3">
+                                                                                <div class="col-md-2">
+                                                                                    <input class="form-control mb-3"
+                                                                                        type="number"
+                                                                                        placeholder="Enter Score"
+                                                                                        readonly
+                                                                                        @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'REVIEW')
+                                                                                        value="{{ $metric->metricEmpScore->metricEmpScore ?? '' }}">
                                                                                 </div>
-
-
+                                                                                <div class="col-md-9">
+                                                                                    <input class="form-control mb-3"
+                                                                                        type="text"
+                                                                                        placeholder="Enter your comments"
+                                                                                        readonly
+                                                                                        @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'REVIEW')
+                                                                                        value="{{ $metric->metricEmpScore->employeeComment ?? '' }}">
+                                                                                </div>
+                                                                            </div>
 
                                                                             <span
                                                                                 class="mb-2 badge rounded-pill bg-dark"><strong>Supervisor
-                                                                                    Score and
-                                                                                    Comment</strong></span>
+                                                                                    Score and Comment</strong></span>
 
-                                                                            {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
-
-                                                                                <div class="d-flex gap-3">
-                                                                                    <div class="col-md-2">
-                                                                                        <input class="form-control mb-3"
-                                                                                            type="number" readonly
-                                                                                            name="metricSupScore"
-                                                                                            placeholder="Enter Score"
-                                                                                            readonly
-                                                                                            value="{{ optional($metric->metricEmpScore)->metricSupScore ?? '' }}">
-                                                                                    </div>
-                                                                                    <div class="col-md-9">
-                                                                                        <input class="form-control mb-3"
-                                                                                            type="text" readonly
-                                                                                            name="supervisorComment"
-                                                                                            placeholder="Enter your comments"
-                                                                                            readonly
-                                                                                            value="{{ $metric->metricEmpScore->supervisorComment ?? '' }}">
-                                                                                    </div>
-
-
-                                                                                    <div
-                                                                                        class="form-check form-check-dark mb-3">
-                                                                                        <input @style(['width:1.4rem; height:1.4rem'])
-                                                                                            class="form-check-input"
-                                                                                            type="checkbox"
-                                                                                            name="scoreId"
-                                                                                            value="{{ $metric->metricEmpScore->id }}"
-                                                                                            id="formCheckcolor4">
-                                                                                    </div>
+                                                                            <div class="d-flex gap-3">
+                                                                                <div class="col-md-2">
+                                                                                    <input class="form-control mb-3"
+                                                                                        type="number" readonly
+                                                                                        placeholder="Enter Score"
+                                                                                        @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'REVIEW')
+                                                                                        value="{{ optional($metric->metricEmpScore)->metricSupScore ?? '' }}">
                                                                                 </div>
-
-
-
-
+                                                                                <div class="col-md-9">
+                                                                                    <input class="form-control mb-3"
+                                                                                        type="text" readonly
+                                                                                        placeholder="Enter your comments"
+                                                                                        @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'REVIEW')
+                                                                                        value="{{ $metric->metricEmpScore->supervisorComment ?? '' }}">
+                                                                                </div>
+                                                                                <div
+                                                                                    class="form-check form-check-dark mb-3">
+                                                                                    <input @style(['width:1.4rem; height:1.4rem'])
+                                                                                        class="form-check-input" @checked( $metric->metricEmpScore->prob == true)
+                                                                                        type="checkbox" name="scoreId[]"
+                                                                                        value="{{ $metric->metricEmpScore->id }}"
+                                                                                        id="formCheckcolor4">
+                                                                                </div>
+                                                                            </div>
                                                                         </li>
                                                                     @endforeach
                                                                 </ul>
@@ -179,7 +145,7 @@
                                                         </div>
                                                     @endforeach
                                                 @else
-                                                    <p>No sections available for this KPI.</p>
+                                                    <p></p>
                                                 @endif
                                             </div>
                                         @endforeach
