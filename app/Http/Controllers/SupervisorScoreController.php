@@ -15,16 +15,25 @@ class SupervisorScoreController extends Controller
     {
         $accessToken = session('api_token');
 
-        $response = Http::withToken($accessToken)
+        $responseSup = Http::withToken($accessToken)
             ->get('http://192.168.1.200:5123/Appraisal/Kpi/PendingSupervisorScoringKpi');
 
-        if ($response->successful()) {
-            $employeeKpiDetails = $response->object();
+
+        $responseProb = Http::withToken($accessToken)
+            ->get('http://192.168.1.200:5123/Appraisal/Kpi/PendingProbScoringKpi');
+
+        if ($responseSup->successful()) {
+            $employeeSupDetails = $responseSup->object();
         }
 
+        if ($responseProb->successful()) {
+            $employeeProbDetails = $responseProb->object();
+        }
+        // dd($employeeProbDetails);
 
 
-        return view('dashboard.supervisor.show-employee', compact('employeeKpiDetails'));
+
+        return view('dashboard.supervisor.show-employee', compact('employeeSupDetails', 'employeeProbDetails'));
     }
 
 
@@ -112,6 +121,96 @@ class SupervisorScoreController extends Controller
             return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
         }
     }
+
+
+
+    public function editProb(Request $request, $kpiId, $batchId)
+    {
+        // Get the access token from the session
+        $accessToken = session('api_token');
+
+        $data = [
+            'kpiId' => (int) $kpiId,
+            'batchId' => (int) $batchId
+        ];
+
+        // dd($data);
+        try {
+            // Make the GET request to the external API to get KPIs for the specified batch ID
+            $response = Http::withToken($accessToken)
+                ->put("http://192.168.1.200:5123/Appraisal/Kpi/GetProbScoringKpi", $data);
+
+            // dd($response);
+            // Check if the response is successful
+            if ($response->successful()) {
+                // Decode the response into an array of KPIs
+                $kpi = $response->object();
+
+                // dd($kpi);
+
+                // Filter the KPIs to include only those with active state of true or false
+                $appraisal = collect($kpi)->filter(function ($kpi) {
+                    // Check if the KPI is active
+                    if ($kpi->kpiActive) {
+                        // Filter sections that are active
+                        $activeSections = collect($kpi->sections)->filter(function ($section) {
+                            return $section->sectionActive; // Only include active sections
+                        });
+
+                        // If there are no active sections, return false
+                        if ($activeSections->isEmpty()) {
+                            return false;
+                        }
+
+                        // Filter metrics within the active sections
+                        $activeSections->transform(function ($section) {
+                            $section->metrics = collect($section->metrics)->filter(function ($metric) {
+                                return $metric->metricActive; // Only include active metrics
+                            });
+
+                            // Return the section only if it has active metrics
+                            return $section->metrics->isNotEmpty() ? $section : null;
+                        });
+
+                        // Remove null sections (those without active metrics)
+                        $activeSections = $activeSections->filter();
+
+                        // Return true if there are any active sections with active metrics
+                        return $activeSections->isNotEmpty();
+                    }
+
+                    return false; // If KPI is not active, return false
+                });
+
+                // dd($appraisal);
+
+
+
+                // Return the KPI names and section counts to the view
+                return view("dashboard.probe-supervisor.score-employee-form", compact('appraisal'));
+            } else {
+                // Log the error response
+                Log::error('Failed to retrieve KPIs', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while retrieving KPIs', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+        }
+    }
+
+
+
+
+
+
 
     /**
      * Store a newly created resource in storage.
