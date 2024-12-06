@@ -56,9 +56,10 @@
 
                         <tbody>
                             @forelse ($activeKpis as $kpi)
+
                                 <tr>
                                     <th scope="row">
-                                        <a href="#">{{ $kpi->name }}</a>
+                                        <a href="{{ url("dashboard/department/section-setup/kpi/{$kpi->score}/index/{$kpi->id}" ) }}">{{ $kpi->name }}</a>
                                     </th>
                                     <td>
                                         <span class="dropdown badge rounded-pill bg-primary" data-bs-toggle="dropdown"

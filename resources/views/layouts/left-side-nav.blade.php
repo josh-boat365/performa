@@ -59,8 +59,8 @@
                             </a>
                             <ul class="sub-menu" aria-expanded="false">
                                 <li> <a href="{{ route('kpi.index') }}" key="t-default">KPI Setup</a></li>
-                                <li> <a href="{{ route('section.index') }}" key="t-default">Section Setup</a></li>
-                                <li> <a href="{{ route('metric.index') }}" key="t-default">Metric Setup</a></li>
+                                {{--  <li> <a href="{{ route('section.index') }}" key="t-default">Section Setup</a></li>  --}}
+                                {{--  <li> <a href="{{ route('metric.index') }}" key="t-default">Metric Setup</a></li>  --}}
                             </ul>
                         </li>
                         {{--  <li><a href="#" key="t-saas">Saas</a></li>
