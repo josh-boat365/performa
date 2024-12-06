@@ -84,6 +84,8 @@ Route::group(
         Route::get("dashboard/appraisal/hr/global-kpi/{id}/show", [GlobalKpiController::class, "show"])->name("show.global.kpi");
         Route::post("dashboard/appraisal/hr/global-kpi/{id}/update", [GlobalKpiController::class, "update"])->name("update.global.kpi");
         Route::delete("dashboard/appraisal/hr/global-kpi/{id}/delete", [GlobalKpiController::class, "destroy"])->name("delete.global.kpi");
+        Route::post("dashboard/appraisal/hr/global-kpi/update-state/{id}", [GlobalKpiController::class, "update_state"])->name("update.global.kpi.state");
+        Route::post("dashboard/appraisal/hr/global-kpi/update-status/{id}", [GlobalKpiController::class, "update_status"])->name("update.global.kpi.status");
 
         // Global - section
         Route::get("dashboard/appraisal/hr/global-section-setup", [GlobalSectionController::class, "index"])->name("global.section.index");

@@ -104,7 +104,7 @@
                                         <th class="align-middle">Grade</th>
                                         <th class="align-middle">Score</th>
                                         <th class="align-middle">Remark</th>
-                                        <th class="align-middle">Created At</th>
+                                        {{--  <th class="align-middle">Created At</th>  --}}
                                         <th class="align-middle">Action</th>
                                     </tr>
                                 </thead>
@@ -114,8 +114,8 @@
                                             <td>{{ $grade->grade }}</td>
                                             <td>{{ $grade->minScore }} - {{ $grade->maxScore }}</td>
                                             <td>{{ $grade->remark }}</td>
-                                            <td>{{ Carbon\Carbon::parse($grade->createdAt)->diffForHumans() }}
-                                            </td>
+                                            {{--  <td>{{ Carbon\Carbon::parse($grade->createdAt)->diffForHumans() }}
+                                            </td>  --}}
                                             <td>
                                                 <a href="{{ route('show.grade', $grade->id) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
