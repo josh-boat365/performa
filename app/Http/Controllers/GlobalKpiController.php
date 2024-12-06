@@ -164,7 +164,7 @@ class GlobalKpiController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
     /**
@@ -219,6 +219,104 @@ class GlobalKpiController extends Controller
         return redirect()->back()->with('toast_error', 'Sorry, failed to update Global KPI');
     }
 
+
+    public function update_state(Request $request, string $id)
+    {
+        // Validate the request data
+        $request->validate([
+            'active' => 'required|integer',
+        ]);
+
+        // dd($request);
+
+        // Get the access token from the request or environment
+        $accessToken = session('api_token');
+
+        // Prepare the data for the batch state update
+        $batchData = [
+            'id' => $id,
+            'active' => $request->input('active') == 1 ? true : false, // Convert to boolean
+        ];
+
+        // dd($batchData);
+
+        try {
+            // Make the PUT request to the external API
+            $response = Http::withToken($accessToken)
+                ->put('http://192.168.1.200:5123/Appraisal/kpi/update-activation', $batchData);
+
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                return redirect()->route('global.index')->with('toast_success', 'Global Kpi state updated successfully');
+            } else {
+                // Log the error response
+                Log::error('Failed to update batch', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to update batch state');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while updating batch', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+        }
+    }
+
+    public function update_status(Request $request, string $id)
+    {
+        try {
+            // Validate the request data
+            $request->validate([
+
+                'status' => 'required|string',
+            ]);
+
+            // dd($id);
+
+            // Get the access token from the request or environment
+            $accessToken = session('api_token'); // Replace with your actual access token
+
+            // Prepare the data for the batch update
+            $batchData = [
+                'id' => (int) $id,
+                'type' => $request->input('status'),
+
+            ];
+
+            // dd($batchData);
+
+
+            // Make the PUT request to the external API
+            $response = Http::withToken($accessToken)
+                ->put("http://192.168.1.200:5123/Appraisal/Kpi/update-type/",$batchData);
+            // dd($response);
+            // Check the response status and return appropriate response
+            if ($response->successful()) {
+                return redirect()->route('global.index')->with('toast_success', 'Global Kpi status updated successfully');
+            } else {
+                // Log the error response
+                Log::error('Failed to update Global KPI Status', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to update Global KPI Status');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while updating batch', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+        }
+    }
+
+
+
     /**
      * Remove the specified resource from storage.
      */
@@ -249,7 +347,7 @@ class GlobalKpiController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 

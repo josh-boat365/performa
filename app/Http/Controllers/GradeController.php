@@ -124,7 +124,7 @@ class GradeController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -189,7 +189,7 @@ class GradeController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -225,7 +225,7 @@ class GradeController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 }

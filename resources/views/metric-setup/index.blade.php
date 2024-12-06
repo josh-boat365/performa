@@ -54,7 +54,7 @@
                                         <th class="align-middle">Metric Name</th>
                                         <th class="align-middle">Metric Score</th>
                                         <th class="align-middle">Metric Description</th>
-                                        <th class="align-middle">Created At</th>
+                                        {{--  <th class="align-middle">Created At</th>  --}}
                                         <th class="align-middle">Action</th>
                                     </tr>
                                 </thead>
@@ -65,8 +65,8 @@
                                             <td><a href="#">{{ $metric->name }}</a></td>
                                             <td>{{ $metric->score }}</td>
                                             <td>{{ $metric->description }}</td>
-                                            <td>{{ Carbon\Carbon::parse($metric->createdAt)->diffForHumans() }}
-                                            </td>
+                                            {{--  <td>{{ Carbon\Carbon::parse($metric->createdAt)->diffForHumans() }}
+                                            </td>  --}}
                                             <td>
                                                 <a href="{{ route('show.metric', $metric->id) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i

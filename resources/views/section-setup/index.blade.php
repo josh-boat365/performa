@@ -58,7 +58,7 @@
                                         <th class="align-middle">Section Score</th>
                                         <th class="align-middle">Section Description</th>
                                         <th class="align-middle">Section state</th>
-                                        <th class="align-middle">Created At</th>
+                                        {{--  <th class="align-middle">Created At</th>  --}}
                                         <th class="align-middle">Action</th>
                                     </tr>
                                 </thead>
@@ -78,8 +78,8 @@
                                                 </span>
                                             </td>
 
-                                            <td>{{ Carbon\Carbon::parse($section->createdAt)->diffForHumans() }}
-                                            </td>
+                                            {{--  <td>{{ Carbon\Carbon::parse($section->createdAt)->diffForHumans() }}
+                                            </td>  --}}
                                             <td>
                                                 <a href="{{ route('show.section', $section->id) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i

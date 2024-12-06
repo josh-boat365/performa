@@ -44,7 +44,9 @@ class DashboardController extends Controller
                     return $batch['status'] === 'OPEN' && $batch['active'] === true;
                 });
 
-                foreach($batch as $activeBatch ){
+                $activeBatches = [];
+
+                foreach ($batch as $activeBatch) {
                     // dd($activeBatch);
                     $activeBatches = [
                         'id' => $activeBatch['id'],
@@ -73,7 +75,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -87,10 +89,10 @@ class DashboardController extends Controller
         try {
             // Make the GET request to the external API to get KPIs for the specified batch ID
             $response = Http::withToken($accessToken)
-            ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
+                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
 
 
-                // Check if the response is successful
+            // Check if the response is successful
             if ($response->successful()) {
                 // Decode the response into an array of KPIs
                 $kpis = $response->json();
@@ -145,7 +147,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -221,7 +223,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -301,7 +303,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -341,7 +343,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 

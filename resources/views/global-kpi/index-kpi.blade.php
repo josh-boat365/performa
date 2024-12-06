@@ -43,16 +43,13 @@
                         id="order-list">
                         <thead class="table-light">
                             <tr>
-
                                 <th class="align-middle">KPI Name</th>
                                 <th class="align-middle">Description</th>
                                 <th class="align-middle">Type</th>
-                                {{--  <th class="align-middle">Role</th>  --}}
                                 <th class="align-middle">Batch</th>
-                                <th class="align-middle">Active</th>
-                                <th class="align-middle">Created At</th>
+                                <th class="align-middle">State</th>
                                 <th class="align-middle">Action</th>
-
+                            </tr>
                         </thead>
                         <tbody>
                             @forelse ($activeKpis as $kpi)
@@ -60,46 +57,86 @@
                                     <th scope="row">
                                         <a href="#">{{ $kpi->name }}</a>
                                     </th>
+                                    <td>{{ $kpi->description }}</td>
                                     <td>
-                                        {{ $kpi->description }}
-                                    </td>
-                                    <td>
-                                        <span @style(['cursor: pointer']) class="dropdown badge rounded-pill bg-primary"
+                                        <span style="cursor: pointer;" class="dropdown badge rounded-pill bg-primary"
                                             data-bs-toggle="dropdown" aria-expanded="false">
                                             {{ $kpi->type }}
-
-                                        </span>
-
-                                    </td>
-
-                                    </td>
-                                    <td>{{ $kpi->batch->name }}</td>
-                                    <td>
-                                        <span @style(['cursor: pointer'])
-                                            class="dropdown badge rounded-pill {{ $kpi->active ? 'bg-success' : 'bg-dark' }}"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                            {{ $kpi->active ? 'Activated' : 'Deactivated' }}
                                             <div class="dropdown-menu">
-                                                <a href="" class="dropdown-item" data-bs-toggle="modal"
-                                                    data-bs-target=".bs-example-modal-lg" class="m-2">
-                                                    {{ $kpi->active ? 'Deactivate' : 'Activate' }}</a>
+                                                @if ($kpi->type == 'PROBATION')
+                                                    <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                                        data-bs-target="#status-modal-{{ $kpi->id }}">GLOBAL</a>
+                                                @elseif($kpi->type == 'GLOBAL')
+                                                    <a class="dropdown-item" href="#" data-bs-toggle="modal"
+                                                        data-bs-target="#status-modal-{{ $kpi->id }}">PROBATION</a>
+                                                @endif
                                             </div>
                                         </span>
-                                        <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog"
-                                            aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-md modal-dialog-centered ">
+
+                                        <!-- Modal for Confirmation -->
+                                        <div class="modal fade" id="status-modal-{{ $kpi->id }}" tabindex="-1"
+                                            role="dialog" aria-labelledby="statusModalLabel-{{ $kpi->id }}"
+                                            aria-hidden="true">
+                                            <div class="modal-dialog modal-lg modal-dialog-centered">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="myLargeModalLabel">Confirm KPI
-                                                            State
-                                                            Update</h5>
+                                                        <h5 class="modal-title"
+                                                            id="statusModalLabel-{{ $kpi->id }}">
+                                                            Confirm KPI Status Update
+                                                        </h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                             aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body">
-                                                        <h4 class="text-center mb-4"> Are you sure, you want to
-                                                            {{ $kpi->active ? 'Deactivate' : 'Activate' }} ?</h4>
-                                                        <form action="{{ route('update.kpi.state', $kpi->id) }}"
+                                                        <h4 class="text-center mb-4">
+                                                            Are you sure you want to change the status to
+                                                            <b>{{ $kpi->type == 'PROBATION' ? 'GLOBAL' : 'PROBATION' }}</b>?
+                                                        </h4>
+                                                        <form
+                                                            action="{{ route('update.global.kpi.status', $kpi->id) }}"
+                                                            method="POST">
+                                                            @csrf
+                                                            <input type="hidden" name="status"
+                                                                value="{{ $kpi->type == 'PROBATION' ? 'GLOBAL' : 'PROBATION' }}">
+                                                            <div class="d-grid">
+                                                                <button type="submit"
+                                                                    class="btn btn-success">Yes</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ $kpi->batch->name }}</td>
+                                    <td>
+                                        <span
+                                            class="dropdown badge rounded-pill {{ $kpi->active ? 'bg-success' : 'bg-dark' }}"
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                            {{ $kpi->active ? 'Activated' : 'Deactivated' }}
+                                            <div class="dropdown-menu">
+                                                <a href="#" class="dropdown-item" data-bs-toggle="modal"
+                                                    data-bs-target="#kpiModal-{{ $kpi->id }}">
+                                                    {{ $kpi->active ? 'Deactivate' : 'Activate' }}
+                                                </a>
+                                            </div>
+                                        </span>
+                                        <!-- Modal for KPI Activation/Deactivation -->
+                                        <div class="modal fade" id="kpiModal-{{ $kpi->id }}" tabindex="-1"
+                                            role="dialog" aria-labelledby="kpiModalLabel-{{ $kpi->id }}"
+                                            aria-hidden="true">
+                                            <div class="modal-dialog modal-md modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="kpiModalLabel-{{ $kpi->id }}">
+                                                            Confirm KPI State Update</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></ button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <h4 class="text-center mb-4">Are you sure you want to
+                                                            {{ $kpi->active ? 'Deactivate' : 'Activate' }}?</h4>
+                                                        <form action="{{ route('update.global.kpi.state', $kpi->id) }}"
                                                             method="POST">
                                                             @csrf
                                                             <input type="hidden" name="active"
@@ -114,36 +151,29 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{{ Carbon\Carbon::parse($kpi->createdAt)->diffForHumans() }}</td>
                                     <td>
                                         <div class="d-flex gap-3">
                                             <a href="{{ route('show.global.kpi', $kpi->id) }}">
-                                                <span class="badge rounded-pill bg-primary fonte-size-13"><i
-                                                        class="bx bxs-pencil"></i>edit</span>
+                                                <span class="badge rounded-pill bg-primary font-size-13"><i
+                                                        class="bx bxs-pencil"></i> Edit</span>
                                             </a>
-                                            {{--  <a href="#" data-bs-toggle="modal"
-                                                data-bs-target=".bs-delete-modal-lg-{{ $kpi->id }}">
-                                                <span class="badge rounded-pill bg-danger fonte-size-13"><i
-                                                        class="bx bxs-trash"></i> delete</span>
-                                            </a>  --}}
-
                                             <!-- Modal for Delete Confirmation -->
                                             <div class="modal fade bs-delete-modal-lg-{{ $kpi->id }}"
-                                                tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+                                                tabindex="-1" role="dialog"
+                                                aria-labelledby="deleteModalLabel-{{ $kpi->id }}"
                                                 aria-hidden="true">
                                                 <div class="modal-dialog modal-md modal-dialog-centered">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title" id="myLargeModalLabel">Confirm
-                                                                Global KPI
-                                                                Deletion</h5>
+                                                            <h5 class="modal-title"
+                                                                id="deleteModalLabel-{{ $kpi->id }}">Confirm
+                                                                Global KPI Deletion</h5>
                                                             <button type="button" class="btn-close"
                                                                 data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
                                                             <h4 class="text-center mb-4">Are you sure you want to
-                                                                delete this
-                                                                Global KPI?</h4>
+                                                                delete this Global KPI?</h4>
                                                             <form action="{{ route('delete.global.kpi', $kpi->id) }}"
                                                                 method="POST">
                                                                 @csrf
@@ -160,7 +190,6 @@
                                         </div>
                                     </td>
                                 </tr>
-
                             @empty
                                 <tr>
                                     <td colspan="6">
@@ -170,6 +199,8 @@
                             @endforelse
                         </tbody>
                     </table>
+
+
                 </div>
                 <nav aria-label="Page navigation example" class="mt-3">
                     {{ $activeKpis->links() }}

@@ -29,7 +29,7 @@ class SectionController extends Controller
             $sortSections = collect($sectionsResponse);
             $sortedSections = $sortSections->sortByDesc('createdAt');
 
-            $sections = $sortedSections->filter( fn($section) => ($section->active == true || $section->active == false) && $section->kpi->type === 'REGULAR' );
+            $sections = $sortedSections->filter(fn($section) => ($section->active == true || $section->active == false) && $section->kpi->type === 'REGULAR');
 
             $sections = $this->paginate($sections, 25, $request);
 
@@ -141,7 +141,7 @@ class SectionController extends Controller
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to create Section'. $response->body());
+                return redirect()->back()->with('toast_error', 'Sorry, failed to create Section' . $response->body());
             }
         } catch (\Exception $e) {
             // Log the exception
@@ -149,7 +149,7 @@ class SectionController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -188,7 +188,7 @@ class SectionController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -240,7 +240,6 @@ class SectionController extends Controller
             ]);
 
             return redirect()->back()->with('toast_error', 'Update Section Error:' . $response->body());
-
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while updating Section', [
@@ -250,7 +249,7 @@ class SectionController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -287,7 +286,7 @@ class SectionController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 

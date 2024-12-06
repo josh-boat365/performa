@@ -59,11 +59,11 @@
                                     {{ $batch['active'] ? 'Activate' : 'Deactivated' }}
                                     <div class="dropdown-menu">
                                         <a href="" class="dropdown-item" data-bs-toggle="modal"
-                                            data-bs-target=".bs-example-modal-lg" class="m-2">
+                                            data-bs-target=".bs-example-modal-lg-{{ $batch['id'] }}" class="m-2">
                                             {{ $batch['active'] ? 'Deactivate' : 'Activate' }}</a>
                                     </div>
                                 </span>
-                                <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog"
+                                <div class="modal fade bs-example-modal-lg-{{ $batch['id'] }}" tabindex="-1" role="dialog"
                                     aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-sm modal-dialog-centered ">
                                         <div class="modal-content">
@@ -97,7 +97,7 @@
                                         Pending
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                                data-bs-target=".bs-status-modal-lg">Open</a>
+                                                data-bs-target=".bs-status-modal-status-{{ $batch['id'] }}">Open</a>
                                         </div>
                                     </span>
                                 @elseif($batch['status'] == 'OPEN')
@@ -106,7 +106,7 @@
                                         Open
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item" href="#" data-bs-toggle="modal"
-                                                data-bs-target=".bs-status-modal-lg">Close</a>
+                                                data-bs-target=".bs-status-modal-status-{{ $batch['id'] }}">Close</a>
                                         </div>
                                     </span>
                                 @elseif($batch['status'] == 'CLOSED')
@@ -114,7 +114,7 @@
                                 @endif
 
                                 <!-- Modal for Confirmation -->
-                                <div class="modal fade bs-status-modal-lg" tabindex="-1" role="dialog"
+                                <div class="modal fade bs-status-modal-status-{{ $batch['id'] }}" tabindex="-1" role="dialog"
                                     aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-sm modal-dialog-centered">
                                         <div class="modal-content">

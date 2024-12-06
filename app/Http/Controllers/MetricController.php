@@ -27,7 +27,7 @@ class MetricController extends Controller
             $metrics_data = collect($metricsResponse);
 
             $validSectionIds = $sections_data->filter(function ($section) {
-                return $section->kpi && ($section->kpi->type === 'REGULAR' );
+                return $section->kpi && ($section->kpi->type === 'REGULAR');
             })->pluck('id');
 
             // Step 4: Filter metrics that belong to the valid sections
@@ -147,7 +147,7 @@ class MetricController extends Controller
                 'response' => $response->body(),
             ]);
 
-            return redirect()->back()->with('toast_error', 'Sorry, failed to create Metric.'. $response->body());
+            return redirect()->back()->with('toast_error', 'Sorry, failed to create Metric.' . $response->body());
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while creating Metric', [
@@ -157,7 +157,7 @@ class MetricController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -192,7 +192,6 @@ class MetricController extends Controller
 
 
                 return view('metric-setup.edit', compact('metricData', 'activeSections'));
-
             }
 
             // Log unsuccessful response
@@ -211,7 +210,7 @@ class MetricController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -257,12 +256,11 @@ class MetricController extends Controller
 
             // Log unsuccessful response
 
-           Log::error('Failed to update Metric', [
+            Log::error('Failed to update Metric', [
                 'status' => $response->status(),
                 'response' => $response->body(),
             ]);
             return redirect()->back()->with('toast_error', 'Update Metric Error:' . $response->body());
-
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while updating Metric', [
@@ -272,7 +270,7 @@ class MetricController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -309,7 +307,7 @@ class MetricController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 

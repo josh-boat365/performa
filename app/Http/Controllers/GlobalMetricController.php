@@ -64,7 +64,7 @@ class GlobalMetricController extends Controller
 
         // Filter the KMetric to include only those with active state of true
         $activeSections = collect($sections)->filter(function ($section) {
-            return $section->active === true && $section->kpi->type == 'GLOBAL' || $section->kpi->type == 'PROBATION' ;
+            return $section->active === true && $section->kpi->type == 'GLOBAL' || $section->kpi->type == 'PROBATION';
         });
 
 
@@ -110,7 +110,7 @@ class GlobalMetricController extends Controller
             $response = Http::withToken($accessToken)->post($apiUrl, $metricData);
 
             if ($response->successful()) {
-                return redirect()->route('metric.index')->with('toast_success', 'Metric created successfully.');
+                return redirect()->route('global.metric.index')->with('toast_success', 'Metric created successfully.');
             }
 
             // Log unsuccessful response
@@ -129,7 +129,7 @@ class GlobalMetricController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -158,7 +158,7 @@ class GlobalMetricController extends Controller
             // Filter the Metric to include only those with active state of true
             $activeSections = collect($sections)->filter(function ($section) {
                 return $section->active === true && $section->kpi->type === 'GLOBAL' ||
-                $section->kpi->type === 'PROBATION'  ;
+                    $section->kpi->type === 'PROBATION';
             });
 
             if ($response->successful()) {
@@ -186,7 +186,7 @@ class GlobalMetricController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -246,7 +246,7 @@ class GlobalMetricController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -283,7 +283,7 @@ class GlobalMetricController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
