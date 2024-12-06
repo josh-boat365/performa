@@ -115,7 +115,7 @@ class GlobalSectionController extends Controller
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to Global create Section');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to Global create Section'. $response->body());
             }
         } catch (\Exception $e) {
             // Log the exception

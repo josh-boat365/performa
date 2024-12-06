@@ -138,7 +138,7 @@ class KpiController extends Controller
             'response' => $response->data ?? 'No response received',
         ]);
 
-        return redirect()->back()->with('toast_error', 'Sorry, failed to create KPI');
+        return redirect()->back()->with('toast_error', 'Sorry, failed to create KPI' . $response->body());
     }
 
     /**
@@ -439,7 +439,7 @@ class KpiController extends Controller
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to update KPI');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to update KPI'. $response->body());
             }
         } catch (\Exception $e) {
             // Log the exception

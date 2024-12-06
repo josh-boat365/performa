@@ -119,7 +119,7 @@ class GlobalMetricController extends Controller
                 'response' => $response->body(),
             ]);
 
-            return redirect()->back()->with('toast_error', 'Sorry, failed to create Metric.');
+            return redirect()->back()->with('toast_error', 'Sorry, failed to create Metric.'. $response->body());
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while creating Metric', [

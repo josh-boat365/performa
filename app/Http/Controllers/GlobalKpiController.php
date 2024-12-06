@@ -120,7 +120,7 @@ class GlobalKpiController extends Controller
             'response' => $response->data ?? 'No response received',
         ]);
 
-        return redirect()->back()->with('toast_error', 'Sorry, failed to create KPI');
+        return redirect()->back()->with('toast_error', 'Sorry, failed to create KPI'. $response->body());
     }
 
     /**
@@ -216,7 +216,7 @@ class GlobalKpiController extends Controller
             'response' => $response->data ?? 'No response received',
         ]);
 
-        return redirect()->back()->with('toast_error', 'Sorry, failed to update Global KPI');
+        return redirect()->back()->with('toast_error', 'Sorry, failed to update Global KPI'. $response->body());
     }
 
 
