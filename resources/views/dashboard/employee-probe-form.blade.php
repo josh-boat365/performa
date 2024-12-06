@@ -23,9 +23,6 @@
 
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
-
-
-
                                 @if (isset($appraisal) && !empty($appraisal))
                                     @foreach ($appraisal as $kpi)
                                         <div class="kpi">
@@ -147,9 +144,9 @@
                                                                                     class="form-check form-check-dark mb-3">
                                                                                     <input @style(['width:1.8rem; height:2rem'])
                                                                                         class="form-check-input"
-                                                                                        @checked($metric->metricEmpScore->prob == true)
+                                                                                        @checked(isset($metric->metricEmpScore) && $metric->metricEmpScore->prob === true)
                                                                                         type="checkbox" name="scoreId"
-                                                                                        value="{{ $metric->metricEmpScore->id }}"
+                                                                                        value="{{ $metric->metricEmpScore->id ?? '' }}"
                                                                                         id="formCheckcolor4">
                                                                                 </div>
                                                                                 <input type="hidden" name="metricId"
