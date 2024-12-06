@@ -14,40 +14,36 @@ class MetricController extends Controller
      * Display a listing of the resource.
      */
 
-    public function index(Request $request)
+    public function index(Request $request, $kpiScore, $sectionScore, $id)
     {
         try {
             // Fetch sections data using helper method
 
             $metricsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Metric");
-            $sectionsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
 
 
-            $sections_data = collect($sectionsResponse);
-            $metrics_data = collect($metricsResponse);
+            // dd($metricsResponse);
 
-            $validSectionIds = $sections_data->filter(function ($section) {
-                return $section->kpi && ($section->kpi->type === 'REGULAR');
-            })->pluck('id');
 
-            // Step 4: Filter metrics that belong to the valid sections
-            $filteredMetrics = $metrics_data->filter(function ($metric) use ($validSectionIds) {
-                return $validSectionIds->contains($metric->section->id);
+
+            // Filter the KPIs to include only those with active state of true
+            $activeMetrics = collect($metricsResponse)->filter(function ($metric) use ($id) {
+                return $metric->section->id == $id ;
             });
 
-            // Optional: If you want to ensure the metrics are active, you can further filter
-            $activeMetrics = $filteredMetrics->filter(function ($metric) {
-                return $metric->active === true;
-            });
+            // dd($activeMetrics);
 
-
+            $sectionId = $id;
 
             $sortedMetrics = $activeMetrics->sortByDesc('createdAt');
+
+            // Calculate the total score from the sections
+            $totalMetricScore = $sortedMetrics->sum('score');
 
             $metrics = $this->paginate($sortedMetrics, 25, $request);
 
 
-            return view('metric-setup.index', compact('metrics'));
+            return view('metric-setup.index', compact('metrics', 'sectionId', 'totalMetricScore', 'sectionScore', 'kpiScore'));
         } catch (\Exception $e) {
             Log::error('Exception occurred in index method', [
                 'message' => $e->getMessage(),
@@ -58,18 +54,21 @@ class MetricController extends Controller
     }
 
 
-    public function create()
+    public function create($id)
     {
 
-        $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
+        // $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
 
-        // Filter the KMetric to include only those with active state of true
-        $activeSections = collect($sections)->filter(function ($section) {
-            return $section->active === true && $section->kpi->type == 'REGULAR';
-        });
+        // // Filter the KMetric to include only those with active state of true
+        // $activeSections = collect($sections)->filter(function ($section) {
+        //     return $section->active === true && $section->kpi->type == 'REGULAR';
+        // });
 
+        // dd($activeSections);
 
-        return view('metric-setup.create', compact('activeSections'));
+        $sectionId = $id;
+
+        return view('metric-setup.create', compact('sectionId'));
     }
 
 
@@ -133,12 +132,14 @@ class MetricController extends Controller
             'sectionId' => $request->input('sectionId'),
         ];
 
+        $sectionId = $metricData['sectionId'];
+
         try {
             // Make the POST request to the external API
             $response = Http::withToken($accessToken)->post($apiUrl, $metricData);
 
             if ($response->successful()) {
-                return redirect()->route('metric.index')->with('toast_success', 'Metric created successfully.');
+                return redirect()->route('metric.index', $sectionId)->with('toast_success', 'Metric created successfully.');
             }
 
             // Log unsuccessful response
@@ -169,29 +170,22 @@ class MetricController extends Controller
      */
 
 
-    public function show(string $id)
+    public function show(string $sectionId, $metricId)
     {
         $accessToken = session('api_token');
-        $apiUrl = "http://192.168.1.200:5123/Appraisal/Metric/{$id}";
+        $apiUrl = "http://192.168.1.200:5123/Appraisal/Metric/{$metricId}";
 
         try {
             // Make the GET request to the external API
             $response = Http::withToken($accessToken)->get($apiUrl);
 
 
-            $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
-
-            // Filter the Metric to include only those with active state of true
-            $activeSections = collect($sections)->filter(function ($section) {
-                return $section->active === true && $section->kpi->type === 'REGULAR';
-            });
-
             if ($response->successful()) {
                 // Convert the response to an object for better handling
                 $metricData = $response->object();
 
 
-                return view('metric-setup.edit', compact('metricData', 'activeSections'));
+                return view('metric-setup.edit', compact('metricData', 'sectionId'));
             }
 
             // Log unsuccessful response
@@ -246,12 +240,14 @@ class MetricController extends Controller
             'sectionId' => $request->input('sectionId'),
         ];
 
+        $sectionId = $metricData['sectionId'];
+
         try {
             // Make the PUT request to the external API
             $response = Http::withToken($accessToken)->put($apiUrl, $metricData);
 
             if ($response->successful()) {
-                return redirect()->route('metric.index')->with('toast_success', 'Metric updated successfully.');
+                return redirect()->route('metric.index', $sectionId)->with('toast_success', 'Metric updated successfully.');
             }
 
             // Log unsuccessful response

@@ -13,29 +13,33 @@ class SectionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request, $kpiScore, $id)
     {
+
         try {
             // Fetch sections data using helper method
             $sectionsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
-            $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
 
             // Filter the KPIs to include only those with active state of true
-            $activeKpis = collect($kpis)->filter(function ($kpi) {
-                return $kpi->active === true && $kpi->type === 'REGULAR';
+            $activeSections = collect($sectionsResponse)->filter(function ($section) use ($id) {
+                return $section->kpi->id == $id && $section->kpi->type === 'REGULAR' ;
             });
-
             // Sort the KPIs to place the newly created one first
-            $sortSections = collect($sectionsResponse);
-            $sortedSections = $sortSections->sortByDesc('createdAt');
 
-            $sections = $sortedSections->filter(fn($section) => ($section->active == true || $section->active == false) && $section->kpi->type === 'REGULAR');
+            $sortedSections = $activeSections->sortByDesc('createdAt');
 
-            $sections = $this->paginate($sections, 25, $request);
+            // dd($activeSections);
+
+            $sections = $this->paginate($sortedSections, 25, $request);
+
+            // Calculate the total score from the sections
+            $totalSectionScore = $sortedSections->sum('score');
+
+            $kpiId = $id;
 
 
 
-            return view('section-setup.index', compact('sections', 'activeKpis'));
+            return view('section-setup.index', compact('sections','kpiId', 'kpiScore', 'totalSectionScore'));
         } catch (\Exception $e) {
             Log::error('Exception occurred in index method', [
                 'message' => $e->getMessage(),
@@ -55,17 +59,19 @@ class SectionController extends Controller
      */
 
 
-    public function create()
+    public function create($id)
     {
 
-        $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
+        // $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
 
         // Filter the KPIs to include only those with active state of true
-        $activeKpis = collect($kpis)->filter(function ($kpi) {
-            return $kpi->active === true && $kpi->type === 'REGULAR';
-        });
+        // $activeKpis = collect($kpis)->filter(function ($kpi) use($id) {
+        //     return $kpi->id == $id && $kpi->active === true && $kpi->type === 'REGULAR';
+        // });
 
-        return view('section-setup.create', compact('activeKpis'));
+        $kpiId = $id;
+;
+        return view('section-setup.create', compact('kpiId'));
     }
 
 
@@ -127,6 +133,8 @@ class SectionController extends Controller
             'kpiId' => $request->input('kpiId'),
         ];
 
+        $kpiId = $sectionData['kpiId'];
+
         try {
             // Make the POST request to the external API
             $response = Http::withToken($accessToken)
@@ -134,7 +142,7 @@ class SectionController extends Controller
 
             // Check the response status and return appropriate response
             if ($response->successful()) {
-                return redirect()->route('section.index')->with('toast_success', 'Section created successfully');
+                return redirect()->route('section.index', $kpiId)->with('toast_success', 'Section created successfully');
             } else {
                 // Log the error response
                 Log::error('Failed to create Section', [
@@ -156,10 +164,10 @@ class SectionController extends Controller
 
 
 
-    public function show(string $id)
+    public function show(string $kpiId, $sectionId)
     {
         $accessToken = session('api_token');
-        $apiUrl = "http://192.168.1.200:5123/Appraisal/Section/{$id}";
+        $apiUrl = "http://192.168.1.200:5123/Appraisal/Section/{$sectionId}";
 
         try {
             // Make the GET request to the external API
@@ -169,7 +177,7 @@ class SectionController extends Controller
                 // Convert the response to an object
                 $sectionData = $response->object();
 
-                return view('section-setup.edit', compact('sectionData'));
+                return view('section-setup.edit', compact('sectionData', 'kpiId'));
             }
 
             // Log the error response
@@ -199,7 +207,7 @@ class SectionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $kpiId ,$id)
     {
         // Validate the request data
         $request->validate([
@@ -229,7 +237,7 @@ class SectionController extends Controller
 
             if ($response->successful()) {
                 return redirect()
-                    ->route('section.index')
+                    ->route('section.index', $kpiId)
                     ->with('toast_success', 'Section updated successfully.');
             }
 

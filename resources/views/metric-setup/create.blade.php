@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('metric.index') }}"> METRICS </a> > Setup For
+                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('metric.index', $sectionId) }}"> METRICS </a> > Setup For
                         Metrics
 
                     </h4>
@@ -51,7 +51,7 @@
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                        {{--  <div class="row mb-3">
                             <label for="example-text-input" class="">Select Section For Metric to Belong To</label>
                             <div class="col-md-12">
                                 <select name="sectionId" class="form-select">
@@ -65,9 +65,10 @@
                                     @endforeach
                                 </select>
                             </div>
-                        </div>
+                        </div>  --}}
 
                         <input type="hidden" name="active" value="1">
+                        <input type="hidden" name="sectionId" value="{{ $sectionId }}">
 
                         <button type="submit" class="btn btn-primary waves-effect waves-light col-md-12 mt-4">
                             Create

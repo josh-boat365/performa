@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('section.index') }}">SECTIONS  </a> > Setup For Sections
+                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('section.index', $kpiId) }}">SECTIONS  </a> > Setup For Sections
 
                     </h4>
                 </div>
@@ -48,7 +48,7 @@
                             </div>
                         </div>
 
-                        <div class="row mb-3">
+                        {{--  <div class="row mb-3">
                             <label for="example-text-input" class="">Select KPI For Section to Belong To</label>
                             <div class="col-md-12">
                                 <select name="kpiId" class="form-select">
@@ -62,9 +62,10 @@
                                     @endforeach
                                 </select>
                             </div>
-                        </div>
+                        </div>  --}}
 
                         <input type="hidden" name="active" value="1">
+                        <input type="hidden" name="kpiId" value="{{ $kpiId }}">
 
                         <button type="submit" class="btn btn-primary waves-effect waves-light col-md-12 mt-4">
                             Create
