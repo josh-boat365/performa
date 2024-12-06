@@ -125,14 +125,9 @@ class GlobalWeightController extends Controller
             return $kpi->active === true &&  $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION';
         });
 
-        $responseRoles = $this->makeApiRequest('GET', 'http://192.168.1.200:5124/HRMS/emprole');
+        $responseDepartment = $this->makeApiRequest('GET', 'http://192.168.1.200:5124/HRMS/Department');
 
-        $rolesWithDepartments = collect($responseRoles);
-
-        $uniqueDepartments = [];
-
-        $uniqueDepartments = $rolesWithDepartments->pluck('department')->unique()->toArray();
-
+        $departments = collect($responseDepartment);
 
 
         try {
@@ -143,7 +138,7 @@ class GlobalWeightController extends Controller
                 // Convert the response to an object
                 $globalWeight = $response->object();
 
-                return view('global-kpi.weight.edit-weight', compact('globalWeight', 'activeKpis', 'uniqueDepartments'));
+                return view('global-kpi.weight.edit-weight', compact('globalWeight', 'activeKpis', 'departments'));
             }
 
             // Log the error response
