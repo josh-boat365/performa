@@ -49,99 +49,24 @@
                                 <th class="align-middle">Batch</th>
                                 <th class="align-middle">Supervisors</th>
                                 <th class="align-middle">Active</th>
-                                <th class="align-middle">Created At</th>
+                                {{--  <th class="align-middle">Created At</th>  --}}
                                 <th class="align-middle">Action</th>
 
                         </thead>
 
                         <tbody>
                             @forelse ($activeKpis as $kpi)
+
                                 <tr>
                                     <th scope="row">
-                                        <a href="#">{{ $kpi->name }}</a>
+                                        <a href="{{ url("dashboard/department/section-setup/kpi/{$kpi->score}/index/{$kpi->id}" ) }}">{{ $kpi->name }}</a>
                                     </th>
-
                                     <td>
-                                        @if ($kpi->type == 'REGULAR')
-                                            <span @style(['cursor: pointer']) class="dropdown badge rounded-pill bg-primary"
-                                                data-bs-toggle="dropdown" aria-expanded="false">
-                                                {{ $kpi->type }}
-                                                <div class="dropdown-menu">
-                                                    <a class="dropdown-item" onclick="updateModalText('PROBATION')"
-                                                        href="#" data-bs-toggle="modal"
-                                                        data-bs-target=".bs-status-modal-xl">PROBATION</a>
+                                        <span class="dropdown badge rounded-pill bg-primary" data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                            {{ $kpi->type }}
 
-                                                    <a class="dropdown-item" onclick="updateModalText('GLOBAL')"
-                                                        href="#" data-bs-toggle="modal"
-                                                        data-bs-target=".bs-status-modal-xl">GLOBAL</a>
-                                                </div>
-                                            </span>
-                                        @elseif($kpi->type == 'PROBATION')
-                                            <span @style(['cursor: pointer']) class="dropdown badge rounded-pill bg-primary"
-                                                data-bs-toggle="dropdown" aria-expanded="false">
-                                                {{ $kpi->type }}
-                                                <div class="dropdown-menu">
-                                                    <a class="dropdown-item" onclick="updateModalText('REGULAR')"
-                                                        href="#" data-bs-toggle="modal"
-                                                        data-bs-target=".bs-status-modal-xl">REGULAR</a>
-                                                    <a class="dropdown-item" onclick="updateModalText('GLOBAL')"
-                                                        href="#" data-bs-toggle="modal"
-                                                        data-bs-target=".bs-status-modal-xl">GLOBAL</a>
-                                                </div>
-                                            </span>
-                                        @elseif($kpi->type == 'GLOBAL')
-                                            <span @style(['cursor: pointer']) class="dropdown badge rounded-pill bg-primary"
-                                                data-bs-toggle="dropdown" aria-expanded="false">
-                                                {{ $kpi->type }}
-                                                <div class="dropdown-menu">
-                                                    <a class="dropdown-item" onclick="updateModalText('REGULAR')"
-                                                        href="#" data-bs-toggle="modal"
-                                                        data-bs-target=".bs-status-modal-xl">REGULAR</a>
-                                                    <a class="dropdown-item" onclick="updateModalText('PROBATION')"
-                                                        href="#" data-bs-toggle="modal"
-                                                        data-bs-target=".bs-status-modal-xl">PROBATION</a>
-                                                </div>
-                                            </span>
-                                        @endif
-
-                                        <!-- Modal for Confirmation -->
-                                        <div class="modal fade bs-status-modal-xl" tabindex="-1" role="dialog"
-                                            aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg modal-dialog-centered">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="myLargeModalLabel">Confirm KPI
-                                                            Status
-                                                            Update</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <h4 id="modal-status-text" class="text-center mb-4">
-                                                        </h4>
-                                                        <form action="{{ route('update.kpi.status', $kpi->id) }}"
-                                                            method="POST">
-                                                            @csrf
-                                                            <input type="hidden" name="status"
-                                                                value="{{ $kpi->type == 'REGULAR' ? 'PROBATION' : 'GLOBAL' }}">
-                                                            <div class="d-grid">
-                                                                <button type="submit"
-                                                                    class="btn btn-success">Yes</button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        @push('scripts')
-                                            <script>
-                                                function updateModalText(status) {
-                                                    const modalText = document.getElementById('modal-status-text');
-                                                    modalText.innerHTML = `Are you sure you want to change the status to '${status}'?`;
-                                                }
-                                            </script>
-                                        @endpush
+                                        </span>
                                     </td>
                                     <td>{{ $kpi->empRole->name }}</td>
                                     {{--  <td>
@@ -177,8 +102,8 @@
                                                         <h5 class="modal-title" id="myLargeModalLabel">Confirm KPI
                                                             State
                                                             Update</h5>
-                                                        <button type="button" class="btn-close"
-                                                            data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body">
                                                         <h4 class="text-center mb-4"> Are you sure, you want to
@@ -198,7 +123,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{{ Carbon\Carbon::parse($kpi->createdAt)->diffForHumans() }}</td>
+                                    {{--  <td>{{ Carbon\Carbon::parse($kpi->createdAt)->diffForHumans() }}</td>  --}}
                                     <td>
                                         <div class="d-flex gap-3">
                                             <a href="{{ route('show.kpi', $kpi->id) }}">
@@ -230,7 +155,8 @@
                                                                 KPI?</h4>
                                                             <p class="text-center">Deleting a <b>KPI</b> means removing
                                                                 it from the <b>system entirely</b> and you cannot
-                                                                <b>recover</b> it again</p>
+                                                                <b>recover</b> it again
+                                                            </p>
                                                             <form action="{{ route('delete.kpi', $kpi->id) }}"
                                                                 method="POST">
                                                                 @csrf

@@ -66,7 +66,7 @@ class GlobalWeightController extends Controller
             return $kpi->active === true &&  $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION';
         });
 
-
+        // dd($activeKpis);
 
         return view('global-kpi.weight.create-weight', compact('activeKpis', 'departments'));
     }
@@ -120,15 +120,14 @@ class GlobalWeightController extends Controller
 
         $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
 
-        $responseDepartment = $this->makeApiRequest('GET', 'http://192.168.1.200:5124/HRMS/Department');
-
-        $departments = collect($responseDepartment);
-
-
         // Filter the KPIs to include only those with active state of true
         $activeKpis = collect($kpis)->filter(function ($kpi) {
             return $kpi->active === true &&  $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION';
         });
+
+        $responseDepartment = $this->makeApiRequest('GET', 'http://192.168.1.200:5124/HRMS/Department');
+
+        $departments = collect($responseDepartment);
 
 
         try {
@@ -158,7 +157,7 @@ class GlobalWeightController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -218,7 +217,7 @@ class GlobalWeightController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -254,7 +253,7 @@ class GlobalWeightController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 

@@ -16,31 +16,63 @@
 
         <div class="col-md-12">
 
-            @forelse ($employeeKpiDetails as $employee)
-                <div class="card card-body">
-                    <div class="d-flex justify-content-between items-center">
+            @if ($employeeSupDetails)
 
-                        <a href="{{ url("dashboard/supervisor/show-employee-kpi-form/kpi/". $employee->kpis[0]->kpiId ."/batch".'/'.  $employee->kpis[0]->batchId ) }}">
-                             <span> {{ $employee->employee->employeeFullName }}</span> : <span
+                @forelse ($employeeSupDetails as $employee)
+                    <div class="card card-body">
+                        <div class="d-flex justify-content-between items-center">
+
+                            <a
+                                href="{{ url('dashboard/supervisor/show-employee-kpi-form/kpi/' . $employee->kpis[0]->kpiId . '/batch' . '/' . $employee->kpis[0]->batchId) }}">
+                                <span> {{ $employee->employee->employeeFullName }}</span> : <span
                                     class="badge rounded-pill bg-dark font-size-13">{{ $employee->kpis[0]->kpiType }}</span>
-                        </a>
+                            </a>
 
-                        <div>
-                            <span
-                                class="badge rounded-pill bg-warning font-size-13">{{ $employee->kpis[0]->kpiName }}</span>
-                        </div>
-                        <div>
-                            <span class="badge rounded-pill bg-primary font-size-13">Submitted For Review</span>
+                            <div>
+                                <span
+                                    class="badge rounded-pill bg-warning font-size-13">{{ $employee->kpis[0]->kpiName }}</span>
+                            </div>
+                            <div>
+                                <span class="badge rounded-pill bg-primary font-size-13">Submitted For Review</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            @empty
-                <div class="card card-body">
-                    <div class="justify-content-between">
-                        <h5><b>No Employee Has Submitted Their Kpi For Review Yet..............</b></h5>
+                @empty
+                    <div class="card card-body">
+                        <div class="justify-content-between">
+                            <h5><b>No Employee Has Submitted Their Kpi For Review Yet..............</b></h5>
+                        </div>
                     </div>
-                </div>
-            @endforelse
+                @endforelse
+            @else
+                @forelse ($employeeProbDetails as $employee)
+                    <div class="card card-body">
+                        <div class="d-flex justify-content-between items-center">
+
+                            <a
+                                href="{{ url('dashboard/supervisor/show-employee-kpi-prob-form/kpi/' . $employee->kpis[0]->kpiId . '/batch' . '/' . $employee->kpis[0]->batchId) }}">
+                                <span> {{ $employee->employee->employeeFullName }}</span> : <span
+                                    class="badge rounded-pill bg-dark font-size-13">{{ $employee->kpis[0]->kpiType }}</span>
+                            </a>
+
+                            <div>
+                                <span
+                                    class="badge rounded-pill bg-warning font-size-13">{{ $employee->kpis[0]->kpiName }}</span>
+                            </div>
+                            <div>
+                                <span class="badge rounded-pill bg-dark font-size-13">Submitted For Probing</span>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="card card-body">
+                        <div class="justify-content-between">
+                            <h5><b>No Employee Has Submitted Their Kpi For Probing Yet..............</b></h5>
+                        </div>
+                    </div>
+                @endforelse
+            @endif
+
 
 
 

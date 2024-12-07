@@ -7,7 +7,8 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"><a href="#">Setup For Section</a> > Metrics
+                    <h4 class="mb-sm-0 font-size-18"><a href="{{ url("dashboard/department/section-setup/kpi/{$kpiScore}/index/{$sectionId}", ) }}">Setup For
+                            Section</a> > Metrics
                         {{--  > <a href="#">{{ session('section_metric_name') }}</a>  --}}
                     </h4>
                 </div>
@@ -16,9 +17,12 @@
         <!-- end page title -->
 
         <div>
-            <a href="{{ route('create.metric') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
-                    class="bx bxs-plus"></i>Create
-                Metric</a>
+            <form action="{{ route('create.metric', $sectionId) }}" method="GET">
+                @csrf
+                <button type="submit" class="btn btn-success btn-rounded waves-effect waves-light "><i
+                        class="bx bxs-plus"></i>Create
+                    Metric</button>
+            </form>
         </div>
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
@@ -41,6 +45,12 @@
                             </div>
                             <div class="col-sm-4">
                                 <!-- Additional controls can go here -->
+                                <div class="d-flex gap-2">
+                                    <p class="font-bold">Total Section Score Required: <span
+                                            class="badge rounded-pill bg-dark">{{ $sectionScore }}</span> </p>
+                                    <p class="font-bold">Total Score For Sections Created: <span
+                                            class="badge rounded-pill bg-primary">{{ $totalMetricScore }}</span> </p>
+                                </div>
                             </div><!-- end col-->
                         </div>
 
@@ -54,7 +64,7 @@
                                         <th class="align-middle">Metric Name</th>
                                         <th class="align-middle">Metric Score</th>
                                         <th class="align-middle">Metric Description</th>
-                                        <th class="align-middle">Created At</th>
+                                        {{--  <th class="align-middle">Created At</th>  --}}
                                         <th class="align-middle">Action</th>
                                     </tr>
                                 </thead>
@@ -65,10 +75,10 @@
                                             <td><a href="#">{{ $metric->name }}</a></td>
                                             <td>{{ $metric->score }}</td>
                                             <td>{{ $metric->description }}</td>
-                                            <td>{{ Carbon\Carbon::parse($metric->createdAt)->diffForHumans() }}
-                                            </td>
+                                            {{--  <td>{{ Carbon\Carbon::parse($metric->createdAt)->diffForHumans() }}
+                                            </td>  --}}
                                             <td>
-                                                <a href="{{ route('show.metric', $metric->id) }}">
+                                                <a href="{{ url("dashboard/department/section/{$sectionId}/metric-show/{$metric->id}" ) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i> Edit</span>
                                                 </a>
@@ -94,9 +104,11 @@
                                                                 <h4 class="text-center mb-4">Are you sure you want to
                                                                     delete this Metric?</h4>
 
-                                                                <p class="text-center">Deleting a <b>metric</b> means removing it from the
+                                                                <p class="text-center">Deleting a <b>metric</b> means
+                                                                    removing it from the
                                                                     <b>system entirely</b> and you cannot <b>recover</b>
-                                                                    it again</p>
+                                                                    it again
+                                                                </p>
                                                                 <form action="{{ route('delete.metric', $metric->id) }}"
                                                                     method="POST">
                                                                     @csrf

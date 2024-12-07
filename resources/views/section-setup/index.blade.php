@@ -7,7 +7,8 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"><a href="#">Setup For KPIs</a> > Section
+                    <h4 class="mb-sm-0 font-size-18"><a href="{{ route('kpi.index', $kpiId) }}">Setup For KPIs</a> >
+                        Section
                         Setup
                         {{--  > <a href="#">{{ session('kpi_section_name') }}</a>  --}}
                     </h4>
@@ -17,9 +18,15 @@
         <!-- end page title -->
 
         <div>
-            <a href="{{ route('create.section') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
-                    class="bx bxs-plus"></i>Create
-                Section</a>
+            <form action="{{ route('create.section', $kpiId) }}" method="GET">
+                @csrf
+                {{--  <a href="" class="btn btn-success btn-rounded waves-effect waves-light ">
+                    Section</a>  --}}
+                <button type="submit" class="btn btn-success btn-rounded waves-effect waves-light ">
+                    <i class="bx bxs-plus"></i>Create
+                </button>
+
+            </form>
         </div>
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
@@ -43,7 +50,12 @@
                             </div>
                             <div class="col-sm-4">
                                 <!-- Additional controls can go here -->
-                                <p class="font-bold">Total Score </p>
+                                <div class="d-flex gap-2">
+                                    <p class="font-bold">Total Section Score Required: <span
+                                            class="badge rounded-pill bg-dark">{{ $kpiScore }}</span> </p>
+                                    <p class="font-bold">Total Score For Sections Created: <span
+                                            class="badge rounded-pill bg-primary">{{ $totalSectionScore }}</span> </p>
+                                </div>
                             </div><!-- end col-->
                         </div>
 
@@ -58,30 +70,33 @@
                                         <th class="align-middle">Section Score</th>
                                         <th class="align-middle">Section Description</th>
                                         <th class="align-middle">Section state</th>
-                                        <th class="align-middle">Created At</th>
+                                        {{--  <th class="align-middle">Created At</th>  --}}
                                         <th class="align-middle">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse ($sections as $section)
                                         <tr>
-                                            <td><a href="#">{{ $section->kpi->name }}</a></td>
+                                            <th scope="row"><a
+                                                    href="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiScore}/section/{$section->score}/index/{$section->id}" ) }}">{{ $section->kpi->name }}</a>
+                                            </th>
                                             <td><a href="#" @style(['text-wrap: auto'])>{{ $section->name }}</a></td>
                                             <td>{{ $section->score }}</td>
 
                                             <td><span @style(['text-wrap: auto'])>{{ $section->description }}</span></td>
                                             <td>
                                                 <span
-                                                    class="dropdown badge rounded-pill {{ $section->active ? 'bg-success' : 'bg-dark' }}"
+                                                    class="dropdown badge rounded-pill {{ $section->active === true ? 'bg-success' : 'bg-dark' }}"
                                                     data-bs-toggle="dropdown" aria-expanded="false">
-                                                    {{ $section->active ? 'Activated' : 'Deactivated' }}
+                                                    {{ $section->active === true ? 'Activated' : 'Deactivated' }}
                                                 </span>
                                             </td>
 
-                                            <td>{{ Carbon\Carbon::parse($section->createdAt)->diffForHumans() }}
-                                            </td>
+                                            {{--  <td>{{ Carbon\Carbon::parse($section->createdAt)->diffForHumans() }}
+                                            </td>  --}}
                                             <td>
-                                                <a href="{{ route('show.section', $section->id) }}">
+                                                <a
+                                                    href="{{ url("dashboard/department/kpi/{$kpiId}/section-show/{$section->id}") }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i> Edit</span>
                                                 </a>
@@ -108,7 +123,8 @@
                                                                     delete this Section?</h4>
                                                                 <p>Deleting a <b>Section</b> means removing it from the
                                                                     <b>system entirely</b> and you cannot <b>recover</b>
-                                                                    it again</p>
+                                                                    it again
+                                                                </p>
                                                                 <form
                                                                     action="{{ route('delete.section', $section->id) }}"
                                                                     method="POST">

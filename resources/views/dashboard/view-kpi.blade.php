@@ -16,8 +16,8 @@
             <div class="card card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                       <span class="badge rounded-pill bg-dark">Number of KPIs</span>
-                       <span class="badge rounded-pill bg-primary">16</span>
+                        <span class="badge rounded-pill bg-dark">Number of KPIs</span>
+                        <span class="badge rounded-pill bg-primary">16</span>
 
 
                     </div>

@@ -21,9 +21,9 @@ class GradeController extends Controller
         }
 
         $gradesResponse = Http::withToken($accessToken)
-        ->get('http://192.168.1.200:5123/Appraisal/Grade');
+            ->get('http://192.168.1.200:5123/Appraisal/Grade');
 
-        if($gradesResponse->successful()){
+        if ($gradesResponse->successful()) {
             $grades = $gradesResponse->object();
         }
 
@@ -41,7 +41,7 @@ class GradeController extends Controller
      */
     public function create()
     {
-        //
+        return view('grade.create');
     }
 
     /**
@@ -61,22 +61,25 @@ class GradeController extends Controller
 
         // Prepare the data for KPI creation
         $kpiData = [
-            'grade' => (Str::upper($request->input('grade'))) ,
+            'grade' => (Str::upper($request->input('grade'))),
             'minScore' => (float) $request->input('minScore'),
             'maxScore' => (float) $request->input('maxScore'),
-            'remark' => (float) $request->input('remark'),
+            'remark' =>  $request->input('remark'),
         ];
 
+        $accessToken = session('api_token');
+
         // Send the request to the API
-        $response = $this->sendApiRequest('http://192.168.1.200:5123/Appraisal/Grade', $kpiData, 'POST');
+        $response = Http::withToken($accessToken)
+            ->post('http://192.168.1.200:5123/Appraisal/Grade', $kpiData,);
 
         // Check the response and redirect
-        if ($response->success) {
-            return redirect()->route('global.kpi.score-setup')->with('toast_success', 'Grade created successfully');
+        if ($response->successful()) {
+            return redirect()->route('grade.index')->with('toast_success', 'Grade created successfully');
         }
 
         // Log errors (if any)
-        Log::error('Failed to create Global Weight KPI', [
+        Log::error('Failed to create Grade', [
             'status' => $response->status ?? 'N/A',
             'response' => $response->data ?? 'No response received',
         ]);
@@ -121,7 +124,7 @@ class GradeController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -150,8 +153,8 @@ class GradeController extends Controller
         $globalWeightData = [
             'id' => $id,
             'grade' => $grade,
-            'minScore' =>  $request->input('minScore'),
-            'maxScore' =>  $request->input('maxScore'),
+            'minScore' => (float) $request->input('minScore'),
+            'maxScore' => (float) $request->input('maxScore'),
             'remark' => $request->input('remark'),
         ];
 
@@ -186,7 +189,7 @@ class GradeController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
             );
         }
     }
@@ -222,7 +225,7 @@ class GradeController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 }

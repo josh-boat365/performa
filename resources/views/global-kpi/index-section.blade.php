@@ -56,7 +56,7 @@
                                         <th class="align-middle">Section Score</th>
                                         <th class="align-middle">Section Description</th>
                                         <th class="align-middle">Section State</th>
-                                        <th class="align-middle">Created At</th>
+                                        {{--  <th class="align-middle">Created At</th>  --}}
                                         <th class="align-middle">Action</th>
                                     </tr>
                                 </thead>
@@ -69,14 +69,13 @@
                                             <td><span @style(['text-wrap: auto'])>{{ $section->description }}</span></td>
                                             <td>
                                                 <span
-                                                    class="dropdown badge rounded-pill {{ $section->active ? 'bg-success' : 'bg-dark' }}"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                    class="dropdown badge rounded-pill {{ $section->active ? 'bg-success' : 'bg-dark' }}">
                                                     {{ $section->active ? 'Activated' : 'Deactivated' }}
 
                                                 </span>
                                             </td>
-                                            <td>{{ Carbon\Carbon::parse($section->createdAt)->diffForHumans() }}
-                                            </td>
+                                            {{--  <td>{{ Carbon\Carbon::parse($section->createdAt)->diffForHumans() }}
+                                            </td>  --}}
                                             <td>
                                                 <a href="{{ route('show.global.section', $section->id) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i

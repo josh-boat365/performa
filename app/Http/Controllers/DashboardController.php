@@ -32,37 +32,34 @@ class DashboardController extends Controller
 
         try {
             $response = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee');
-
-                // dd($response);
+                ->get('http://192.168.1.200:5123/Appraisal/Batch');
 
             if ($response->successful()) {
 
                 $batches = $response->json();
 
-                // dd($batches);
 
                 // Filter batches to get only those with status "OPEN" and active state true
                 $batch = array_filter($batches, function ($batch) {
-                    return $batch['batchStatus'] === 'OPEN' && $batch['batchActive'] === true;
+                    return $batch['status'] === 'OPEN' && $batch['active'] === true;
                 });
 
-                dd($batch);
+                $activeBatches = [];
 
-                $activeBatch = [
-                    'id' => $batch[0]['kpiId'],
-                    'batch_name' => $batch[0]['batchName'],
-                ];
+                foreach ($batch as $activeBatch) {
+                    // dd($activeBatch);
+                    $activeBatches = [
+                        'id' => $activeBatch['id'],
+                        'batch_name' => $activeBatch['name'],
+                    ];
+                }
+
 
                 // dd($activeBatch['id']);
 
 
 
-
-
-
-
-                return view('dashboard.show-batch', compact('activeBatch')); // Pass to view
+                return view('dashboard.show-batch', compact('activeBatches')); // Pass to view
 
             } else {
                 // Log the error response
@@ -78,7 +75,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -92,10 +89,10 @@ class DashboardController extends Controller
         try {
             // Make the GET request to the external API to get KPIs for the specified batch ID
             $response = Http::withToken($accessToken)
-            ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
+                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
 
 
-                // Check if the response is successful
+            // Check if the response is successful
             if ($response->successful()) {
                 // Decode the response into an array of KPIs
                 $kpis = $response->json();
@@ -150,83 +147,158 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
+    // public function editEmployeeKpi(Request $request, $id)
+    // {
+
+    //     // Get the access token from the session
+    //     $accessToken = session('api_token');
+
+    //     try {
+    //         // Make the GET request to the external API to get KPIs for the specified batch ID
+    //         $response = Http::withToken($accessToken)
+    //             ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
+
+    //         // Check if the response is successful
+    //         if ($response->successful()) {
+    //             // Decode the response into an array of KPIs
+    //             $kpi = $response->object();
+
+    //             // dd($kpi);
+    //             $batchId = $kpi[0]->batchId;
+
+    //             // Filter the KPIs to include only those with active state of true or false
+    //             $appraisal = collect($kpi)->filter(function ($kpi) {
+    //                 // Check if the KPI is active
+    //                 if ($kpi->kpiActive) {
+    //                     // Filter sections that are active
+    //                     $activeSections = collect($kpi->sections)->filter(function ($section) {
+    //                         return $section->sectionActive; // Only include active sections
+    //                     });
+
+    //                     // If there are no active sections, return false
+    //                     if ($activeSections->isEmpty()) {
+    //                         return false;
+    //                     }
+
+    //                     // Filter metrics within the active sections
+    //                     $activeSections->transform(function ($section) {
+    //                         $section->metrics = collect($section->metrics)->filter(function ($metric) {
+    //                             return $metric->metricActive; // Only include active metrics
+    //                         });
+
+    //                         // Return the section only if it has active metrics
+    //                         return $section->metrics->isNotEmpty() ? $section : null;
+    //                     });
+
+    //                     // Remove null sections (those without active metrics)
+    //                     $activeSections = $activeSections->filter();
+
+    //                     // Return true if there are any active sections with active metrics
+    //                     return $activeSections->isNotEmpty();
+    //                 }
+
+    //                 return false; // If KPI is not active, return false
+    //             });
+
+
+
+
+    //             // Return the KPI names and section counts to the view
+    //             return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId'));
+    //         } else {
+    //             // Log the error response
+    //             Log::error('Failed to retrieve KPIs', [
+    //                 'status' => $response->status(),
+    //                 'response' => $response->body()
+    //             ]);
+    //             return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
+    //         }
+    //     } catch (\Exception $e) {
+    //         // Log the exception
+    //         Log::error('Exception occurred while retrieving KPIs', [
+    //             'message' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString()
+    //         ]);
+    //         return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+    //     }
+    // }
+
+
+
     public function editEmployeeKpi(Request $request, $id)
     {
-        // dd($id);
         // Get the access token from the session
         $accessToken = session('api_token');
 
         try {
-            // Make the GET request to the external API to get KPIs for the specified batch ID
+            // Make the GET request to the external API to get KPIs for the specified employee ID
             $response = Http::withToken($accessToken)
-                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
+            ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
 
             // Check if the response is successful
-            if ($response->successful()) {
-                // Decode the response into an array of KPIs
-                $kpi = $response->object();
-
-                // dd($kpi);
-                $batchId = $kpi[0]->batchId;
-
-                // Filter the KPIs to include only those with active state of true or false
-                $appraisal = collect($kpi)->filter(function ($kpi) {
-                    // Check if the KPI is active
-                    if ($kpi->kpiActive) {
-                        // Filter sections that are active
-                        $activeSections = collect($kpi->sections)->filter(function ($section) {
-                            return $section->sectionActive; // Only include active sections
-                        });
-
-                        // If there are no active sections, return false
-                        if ($activeSections->isEmpty()) {
-                            return false;
-                        }
-
-                        // Filter metrics within the active sections
-                        $activeSections->transform(function ($section) {
-                            $section->metrics = collect($section->metrics)->filter(function ($metric) {
-                                return $metric->metricActive; // Only include active metrics
-                            });
-
-                            // Return the section only if it has active metrics
-                            return $section->metrics->isNotEmpty() ? $section : null;
-                        });
-
-                        // Remove null sections (those without active metrics)
-                        $activeSections = $activeSections->filter();
-
-                        // Return true if there are any active sections with active metrics
-                        return $activeSections->isNotEmpty();
-                    }
-
-                    return false; // If KPI is not active, return false
-                });
-
-                // dd($appraisal);
-
-
-                // Return the KPI names and section counts to the view
-                return view("dashboard.employee-kpi-form", compact('appraisal', 'batchId'));
-            } else {
-                // Log the error response
+            if (!$response->successful()) {
                 Log::error('Failed to retrieve KPIs', [
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
                 return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
             }
+
+            // Decode the response into an object
+            $kpis = $response->object();
+
+            // Initialize an empty collection for active appraisals
+            $appraisal = collect();
+
+            // Process each KPI
+            foreach ($kpis as $kpi) {
+                if ($kpi->kpiActive) {
+                    // Filter active sections
+                    $activeSections = collect($kpi->sections)->filter(function ($section) {
+                        return $section->sectionActive;
+                    });
+
+                    // Filter metrics within the active sections
+                    $activeSections->transform(function ($section) {
+                        $section->metrics = collect($section->metrics)->filter(function ($metric) {
+                            return $metric->metricActive;
+                        });
+                        return $section->metrics->isNotEmpty() ? $section : null;
+                    });
+
+                    // Remove null sections (those without active metrics)
+                    $activeSections = $activeSections->filter();
+
+                    // If there are active sections with active metrics, add to appraisal
+                    if ($activeSections->isNotEmpty()) {
+                        $appraisal->push((object) [
+                            'kpi' => $kpi,
+                            'activeSections' => $activeSections
+                        ]);
+                    }
+                }
+            }
+
+            // Get the batch ID from the first KPI if available
+            $batchId = $appraisal->isNotEmpty() ? $appraisal->first()->kpi->batchId : null;
+
+            // dd($appraisal);
+
+            // Return the KPI names and section counts to the view
+            return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId'));
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while retrieving KPIs', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            Log::error('Exception occurred while retrieving KPIs',
+                [
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]
+            );
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -290,6 +362,7 @@ class DashboardController extends Controller
 
 
 
+
                 // Return the KPI names and section counts to the view
                 return view("dashboard.employee-supervisor-kpi-score-form", compact('appraisal', 'batchId'));
             } else {
@@ -306,7 +379,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 
@@ -346,7 +419,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'There is no internet connection. Please check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
     }
 

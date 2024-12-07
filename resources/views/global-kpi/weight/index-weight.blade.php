@@ -47,7 +47,7 @@
                                 <th class="align-middle">Department</th>
                                 <th class="align-middle">Type</th>
                                 <th class="align-middle">Weighted Score For Department</th>
-                                <th class="align-middle">Created At</th>
+                                {{--  <th class="align-middle">Created At</th>  --}}
                                 <th class="align-middle">Action</th>
 
                         </thead>
@@ -71,7 +71,7 @@
                                     </td>
                                     <td>{{ $kpi->weight }}</td>
 
-                                    <td>{{ Carbon\Carbon::parse($kpi->createdAt)->diffForHumans() }}</td>
+                                    {{--  <td>{{ Carbon\Carbon::parse($kpi->createdAt)->diffForHumans() }}</td>  --}}
                                     <td>
                                         <div class="d-flex gap-3">
                                             <a href="{{ route('show.global.weight', $kpi->id) }}">

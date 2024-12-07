@@ -7,7 +7,7 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18">
-                        <a href="#">{{ $metricData->name }}</a> >
+                        <a href="{{ route('metric.index', $sectionId) }}">{{ $metricData->name }}</a> >
                         Update Metric Details
 
                     </h4>
