@@ -17,7 +17,7 @@
         <!-- end page title -->
 
         <div>
-            <form action="{{ route('create.metric', $sectionId) }}" method="GET">
+            <form action="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiScore}/section/{$sectionScore}/create/{$sectionId}") }}" method="GET">
                 @csrf
                 <button type="submit" class="btn btn-success btn-rounded waves-effect waves-light "><i
                         class="bx bxs-plus"></i>Create
