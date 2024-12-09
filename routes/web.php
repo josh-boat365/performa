@@ -88,7 +88,7 @@ Route::group(
         Route::post("dashboard/appraisal/hr/global-kpi/update-status/{id}", [GlobalKpiController::class, "update_status"])->name("update.global.kpi.status");
 
         // Global - section
-        Route::get("dashboard/appraisal/hr/global-section-setup", [GlobalSectionController::class, "index"])->name("global.section.index");
+        Route::get("dashboard/appraisal/hr/global-section-setup/kpi/{kpiScore}/index/{id}", [GlobalSectionController::class, "index"])->name("global.section.index");
         Route::get("dashboard/appraisal/hr/global-section-setup/create", [GlobalSectionController::class, "create"])->name("create.global.section");
         Route::post("dashboard/appraisal/hr/global-section-setup/store", [GlobalSectionController::class, "store"])->name("store.global.section");
         Route::get("dashboard/appraisal/hr/global-section/{id}/show", [GlobalSectionController::class, "show"])->name("show.global.section");
@@ -142,7 +142,7 @@ Route::group(
 
         //Metric Setup
         Route::get("dashboard/department/section/metric-setup/kpi/{kpiScore}/section/{sectionScore}/index/{id}", [MetricController::class, "index"])->name("metric.index");
-        Route::get("dashboard/department/section/metric-setup/create/{id}", [MetricController::class, "create"])->name("create.metric");
+        Route::get("dashboard/department/section/metric-setup/kpi/{kpiScore}/section/{sectionScore}/create/{id}", [MetricController::class, "create"])->name("create.metric");
         Route::post("dashboard/department/section/metric-setup/store", [MetricController::class, "store"])->name("store.metric");
         Route::get("dashboard/department/section/{sectionId}/metric-show/{metricId}", [MetricController::class, "show"])->name("show.metric");
         Route::post("dashboard/department/section/{id}/metric-update", [MetricController::class, "update"])->name("update.metric");

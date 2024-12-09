@@ -13,7 +13,7 @@ class GlobalSectionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request, $kpiScore, $id)
     {
         try {
             // Fetch sections data using helper method

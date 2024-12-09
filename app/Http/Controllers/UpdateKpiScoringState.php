@@ -40,19 +40,19 @@ class UpdateKpiScoringState extends Controller
 
                 switch ($status) {
                     case 'REVIEW':
-                        $successMessage = 'KPI submitted for review successfully.';
+                        $successMessage = 'Appraisal submitted for review successfully.';
                         break;
                     case 'COMPLETED':
-                        $successMessage = 'KPI marked as completed successfully.';
+                        $successMessage = 'Appraisal marked as completed successfully.';
                         break;
                     case 'CONFIRMATION':
-                        $successMessage = 'KPI confirmed successfully.';
+                        $successMessage = 'Appraisal confirmed successfully.';
                         break;
                     case 'PROBLEM':
-                        $successMessage = 'KPI status updated to problem successfully.';
+                        $successMessage = 'Appraisal status updated to problem successfully.';
                         break;
                     default:
-                        $successMessage = 'KPI status updated successfully.';
+                        $successMessage = 'Appraisal status updated successfully.';
                         break;
                 }
 
