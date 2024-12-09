@@ -80,7 +80,7 @@ class DashboardController extends Controller
     }
 
 
-    public function showEmployeeKpi(Request $request, $id)
+    public function showEmployeeKpi()
     {
         // dd($id);
         // Get the access token from the session
@@ -89,7 +89,8 @@ class DashboardController extends Controller
         try {
             // Make the GET request to the external API to get KPIs for the specified batch ID
             $response = Http::withToken($accessToken)
-                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
+                // ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
+                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee");
 
 
             // Check if the response is successful
@@ -98,36 +99,57 @@ class DashboardController extends Controller
                 $kpis = $response->json();
 
                 // dd($kpis);
-                $globalSectionCount = 0;
-                $regularSectionCount = 0;
+                // $globalSectionCount = 0;
+                // $regularSectionCount = 0;
 
                 // Loop through each KPI
-                foreach ($kpis as $kpi) {
-                    // Check if the KPI type is GLOBAL
-                    if ($kpi['kpiType'] === 'GLOBAL') {
-                        // Count the number of sections for GLOBAL KPI
-                        $globalSectionCount += count($kpi['sections']);
-                    }
+                // foreach ($kpis as $kpi) {
+                //     // Check if the KPI type is GLOBAL
+                //     if ($kpi['kpiType'] === 'GLOBAL') {
+                //         // Count the number of sections for GLOBAL KPI
+                //         $globalSectionCount += count($kpi['sections']);
+                //     }
 
-                    // Check if the KPI type is REGULAR
-                    if ($kpi['kpiType'] === 'REGULAR') {
-                        // Count the number of sections for REGULAR KPI
-                        $regularSectionCount += count($kpi['sections']);
-                    }
-                }
+                //     // Check if the KPI type is REGULAR
+                //     if ($kpi['kpiType'] === 'REGULAR') {
+                //         // Count the number of sections for REGULAR KPI
+                //         $regularSectionCount += count($kpi['sections']);
+                //     }
+                // }
 
                 // Calculate the total section count
-                $totalSectionCount = $globalSectionCount + $regularSectionCount;
+                // $totalSectionCount = $globalSectionCount + $regularSectionCount;
 
                 // Prepare the result
-                $employeeKpi = [
-                    'id' => $kpi['kpiId'],
-                    'batch_id' => $kpi['batchId'],
-                    'kpi_name' => $kpi['kpiName'],
-                    'section_count' => $totalSectionCount
-                ];
+                // $employeeKpi = [
+                //     'id' => $kpi['kpiId'],
+                //     'batch_id' => $kpi['batchId'],
+                //     'kpi_name' => $kpi['kpiName'],
+                //     'section_count' => $totalSectionCount
+                // ];
+
+                    if (empty($kpis)) {
+
+                        $employeeKpi = null;
+                    } else {
+
+                        foreach($kpis as $kpi){
+                            $employeeKpi = [
+                                'id' => $kpi['kpiId'],
+                                // 'batch_id' => $kpi['batchId'],
+                                'kpi_name' => $kpi['kpiName'],
+                                // 'section_count' => count($kpi['sections'])
+                            ];
+
+                        }
+                    }
+
+
+
 
                 // dd($employeeKpi);
+
+
 
 
 
@@ -237,7 +259,7 @@ class DashboardController extends Controller
         try {
             // Make the GET request to the external API to get KPIs for the specified employee ID
             $response = Http::withToken($accessToken)
-            ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
+                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
 
             // Check if the response is successful
             if (!$response->successful()) {
@@ -255,6 +277,7 @@ class DashboardController extends Controller
             $appraisal = collect();
 
             // Process each KPI
+            // Process each KPI
             foreach ($kpis as $kpi) {
                 if ($kpi->kpiActive) {
                     // Filter active sections
@@ -262,37 +285,89 @@ class DashboardController extends Controller
                         return $section->sectionActive;
                     });
 
-                    // Filter metrics within the active sections
+                    // Transform sections to include metrics, even if none are active
                     $activeSections->transform(function ($section) {
+                        // Filter metrics within the section
                         $section->metrics = collect($section->metrics)->filter(function ($metric) {
                             return $metric->metricActive;
                         });
-                        return $section->metrics->isNotEmpty() ? $section : null;
+                        // Return the section regardless of whether it has active metrics
+                        return $section;
                     });
 
-                    // Remove null sections (those without active metrics)
-                    $activeSections = $activeSections->filter();
+                    // Add the KPI and its sections to the appraisal
+                    $appraisal->push((object) [
+                        'kpi' => $kpi,
+                        'activeSections' => $activeSections
+                    ]);
+                }
+            }
 
-                    // If there are active sections with active metrics, add to appraisal
-                    if ($activeSections->isNotEmpty()) {
-                        $appraisal->push((object) [
-                            'kpi' => $kpi,
-                            'activeSections' => $activeSections
-                        ]);
+
+            $grade_data = [];
+
+
+            foreach ($kpis as $kpi) {
+                // Check if the KPI type is "REGULAR"
+                if ($kpi->kpiType === "REGULAR") {
+                    // Check if there are sections
+                    if (!empty($kpi->sections)) {
+                        // Get the status of the first section's employee score
+                        $firstSection = $kpi->sections[0];
+                        $status = $firstSection->sectionEmpScore->status ?? 'PENDING';
+                        // Output the KPI name and the first section's status
+                        $kpiStatus = $status;
+                        $batchId = $kpi->batchId;
+                        $employeeId = $kpi->employeeId;
                     }
                 }
             }
 
+            $grade_data = [
+                'batchId' => $batchId,
+                'employeeId' => $employeeId
+            ];
+
+            // dd($grade_data);
+
+            // dd(session('employee_id'));
+
+            $employeeGrade =
+                Http::withToken($accessToken)
+                ->put("http://192.168.1.200:5123/Appraisal/Score/employee-total-kpiscore", $grade_data);
+
             // Get the batch ID from the first KPI if available
             $batchId = $appraisal->isNotEmpty() ? $appraisal->first()->kpi->batchId : null;
 
-            // dd($appraisal);
+            if ($employeeGrade->successful() && !empty($employeeGrade->object())) {
+                $grade = $employeeGrade->object();
+                $gradeDetails = [
+                    'kpiScore' => $grade->totalKpiScore,
+                    'grade' => $grade->grade,
+                    'remark' => $grade->remark,
+                    'status' => $kpiStatus
+                ];
+            } else {
+                $gradeDetails = [
+                    'kpiScore' => null,
+                    'grade' => null,
+                    'remark' => null,
+                    'status' => $kpiStatus
+                ];
+                // Return the KPI names and section counts to the view
+                // return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails'));
+            }
+
+            // dd($gradeDetails);
+
+
 
             // Return the KPI names and section counts to the view
-            return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId'));
+            return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails'));
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while retrieving KPIs',
+            Log::error(
+                'Exception occurred while retrieving KPIs',
                 [
                     'message' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()
@@ -455,156 +530,6 @@ class DashboardController extends Controller
             );
             return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
         }
-    }
-
-
-
-    private function fetchBatches()
-    {
-        $accessToken = session('api_token');
-        $response = Http::withToken($accessToken)
-            ->get('http://192.168.1.200:5123/Appraisal/Batch');
-
-        // Check if the response is successful and not null
-        if ($response->successful()) {
-            return $response->json() ?? [];
-        } else {
-            // Log the error and return an empty array or handle accordingly
-            Log::error('Failed to fetch batches', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-            return []; // Return an empty array if the fetch fails
-        }
-    }
-
-    private function fetchKpis()
-    {
-        $accessToken = session('api_token');
-        $response = Http::withToken($accessToken)
-            ->get('http://192.168.1.200:5123/Appraisal/Kpi');
-
-        // Check if the response is successful and not null
-        if ($response->successful()) {
-            return $response->json() ?? [];
-        } else {
-            // Log the error and return an empty array or handle accordingly
-            Log::error('Failed to fetch KPIs', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-            return []; // Return an empty array if the fetch fails
-        }
-    }
-
-    private function fetchSections()
-    {
-        $accessToken = session('api_token');
-        $response = Http::withToken($accessToken)
-            ->get('http://192.168.1.200:5123/Appraisal/Section');
-
-        // Check if the response is successful and not null
-        if ($response->successful()) {
-            return $response->json() ?? [];
-        } else {
-            // Log the error and return an empty array or handle accordingly
-            Log::error('Failed to fetch sections', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-            return []; // Return an empty array if the fetch fails
-        }
-    }
-
-    private function fetchMetrics()
-    {
-        $accessToken = session('api_token');
-        $response = Http::withToken($accessToken)
-            ->get('http://192.168.1.200:5123/Appraisal/Metric');
-
-        // Check if the response is successful and not null
-        if ($response->successful()) {
-            return $response->json() ?? [];
-        } else {
-            // Log the error and return an empty array or handle accordingly
-            Log::error('Failed to fetch metrics', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-            return []; // Return an empty array if the fetch fails
-        }
-    }
-
-
-    private function organizeDataByRole($kpis, $sections, $metrics, $currentEmpRoleId)
-    {
-        // Initialize an array to hold organized data by role
-        $organized = [];
-
-        foreach ($kpis as $kpi) {
-            // Check if the empRole ID matches the current user's role
-            if ($kpi['empRole']['id'] === $currentEmpRoleId) {
-                $roleId = $kpi['empRole']['id'];
-                if (!isset($organized[$roleId])) {
-                    $organized[$roleId] = [
-                        'roleName' => $kpi['empRole']['name'], // Store role name
-                        'kpis' => []
-                    ];
-                }
-
-                // Initialize section count for the current KPI
-                $sectionCount = 0;
-
-                // Add the KPI to the organized data
-                $organized[$roleId]['kpis'][$kpi['id']] = [
-                    'name' => $kpi['name'],
-                    'description' => $kpi['description'],
-                    'active' => $kpi['active'],
-                    'section_count' => 0, // Initialize section count
-                    'sections' => []
-                ];
-
-                // Find sections related to the current KPI
-                foreach ($sections as $section) {
-                    if ($section['kpi']['id'] === $kpi['id']) {
-                        // Increment the section count
-                        $sectionCount++;
-
-                        // Store section details
-                        $organized[$roleId]['kpis'][$kpi['id']]['sections'][$section['id']] = [
-                            'name' => $section['name'],
-                            'description' => $section['description'],
-                            'score' => $section['score'],
-                            'active' => $section['active'],
-                            'metrics' => []
-                        ];
-
-                        // Find metrics related to the current section
-                        foreach ($metrics as $metric) {
-                            if ($metric['section']['id'] === $section['id']) {
-                                $organized[$roleId]['kpis'][$kpi['id']]['sections'][$section['id']]['metrics'][] = [
-                                    'id' => $metric['id'],
-                                    'name' => $metric['name'],
-                                    'description' => $metric['description'],
-                                    'score' => $metric['score'],
-                                    'active' => $metric['active']
-                                ];
-                            }
-                        }
-                    }
-                }
-
-                // Store the section count in the KPI data
-                $organized[$roleId]['kpis'][$kpi['id']]['section_count'] = $sectionCount;
-
-                // dd($sectionCount);
-
-                // Store the section count in the session
-                Session::put("kpi_section_count", $sectionCount);
-            }
-        }
-
-        return $organized;
     }
 
 

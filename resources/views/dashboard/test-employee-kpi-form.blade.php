@@ -14,22 +14,25 @@
         </div>
         <!-- end page title -->
 
-        {{--  <div class="col-md-12">
+        <div class="col-md-12">
             <div class="card card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h4>Progress</h4>
+                        <h4>Appraisal Grade</h4>
                     </div>
                 </div>
                 <div class="mt-3">
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-animated progress-bar-striped" role="progressbar"
-                            style="width: {{ session('progress') }}%;" aria-valuenow="{{ session('progress') }}"
-                            aria-valuemin="0" aria-valuemax="{{ session('progress') }}">{{ session('progress') }}%</div>
+                    <div class="d-flex gap-5">
+                        <h5>Grade: <b>{{ $gradeDetails['grade'] ?? '___' }}</b></h5>
+                        <h5>Score: <b>{{ $gradeDetails['kpiScore'] ?? '___' }}</b></h5>
+                        <h5>Remark: <b>{{ $gradeDetails['remark'] ?? '___' }}</b></h5>
+                        <h5>Status: <b><span
+                                    class="badge rounded-pill bg-success">{{ $gradeDetails['status'] ?? '---' }}</span></b>
+                        </h5>
                     </div>
                 </div>
             </div>
-        </div>  --}}
+        </div>
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
@@ -85,7 +88,7 @@
                                                                     <input type="hidden" name="sectionId"
                                                                         value="{{ $section->sectionId }}">
                                                                     <input type="hidden" name="kpiId"
-                                                                        value="{{ $kpi->kpiId }}">
+                                                                        value="{{ $kpi->kpi->kpiId }}">
                                                                     <button type="submit"
                                                                         class="btn btn-success">Save</button>
                                                                 @endif
@@ -125,7 +128,8 @@
                                                                     <div class="d-flex gap-3">
                                                                         <input type="hidden" name="metricId"
                                                                             value="{{ $metric->metricId }}">
-
+                                                                        <input type="hidden" name="kpiType"
+                                                                            value="{{ $kpi->kpi->kpiType }}">
                                                                         <input type="hidden" name="kpiId"
                                                                             value="{{ $kpi->kpi->kpiId }}">
                                                                         <input type="hidden" name="sectionId"

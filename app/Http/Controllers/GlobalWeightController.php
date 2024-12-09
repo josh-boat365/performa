@@ -30,8 +30,10 @@ class GlobalWeightController extends Controller
 
         // Filter the KPIs to include only those with active state of true or false
         $active = collect($responseWeight)->filter(function ($kpi) {
-            return ($kpi->kpi->type == 'GLOBAL' || $kpi->kpi->type == 'PROBATION') && $kpi->kpi->active == true;
+            return ($kpi->kpi?->type == 'GLOBAL' || $kpi->kpi?->type == 'PROBATION')
+            && $kpi->kpi?->active == true;
         });
+
 
         // dd($active);
 

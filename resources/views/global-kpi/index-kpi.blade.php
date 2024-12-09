@@ -55,7 +55,7 @@
                             @forelse ($activeKpis as $kpi)
                                 <tr>
                                     <th scope="row">
-                                        <a href="{{ url("dashboard/appraisal/hr/global-section-setup/kpi/{$kpi->id}/index/{$kpi->id}") }}">{{ $kpi->name }}</a>
+                                        <a href="#">{{ $kpi->name }}</a>
                                     </th>
                                     <td>{{ $kpi->description }}</td>
                                     <td>

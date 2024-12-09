@@ -97,7 +97,6 @@ class SupervisorScoreController extends Controller
 
                     return false; // If KPI is not active, return false
                 });
-
                 // dd($appraisal);
 
 

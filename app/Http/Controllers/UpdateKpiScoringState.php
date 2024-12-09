@@ -50,6 +50,7 @@ class UpdateKpiScoringState extends Controller
                         break;
                     case 'PROBLEM':
                         $successMessage = 'Appraisal status updated to problem successfully.';
+
                         break;
                     default:
                         $successMessage = 'Appraisal status updated successfully.';
@@ -57,7 +58,7 @@ class UpdateKpiScoringState extends Controller
                 }
 
                 // Display success message using SweetAlert
-                return back()->with('toast_success', $successMessage);
+                return redirect()->route('show-batch')->with('toast_success', $successMessage);
             } else {
                 // Log the error if the response is not successful
                 Log::error('API Submit, Review Response Error', [
