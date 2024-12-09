@@ -32,6 +32,8 @@ class SectionController extends Controller
 
             $sections = $this->paginate($sortedSections, 25, $request);
 
+            // dd($sections);
+
             // Calculate the total score from the sections
             $totalSectionScore = $sortedSections->sum('score');
 
@@ -70,8 +72,9 @@ class SectionController extends Controller
         // });
 
         $kpiId = $id;
+        $kpiScore = 100;
 ;
-        return view('section-setup.create', compact('kpiId'));
+        return view('section-setup.create', compact('kpiId', 'kpiScore'));
     }
 
 
@@ -169,13 +172,16 @@ class SectionController extends Controller
         $accessToken = session('api_token');
         $apiUrl = "http://192.168.1.200:5123/Appraisal/Section/{$sectionId}";
 
+
+
         try {
             // Make the GET request to the external API
             $response = Http::withToken($accessToken)->get($apiUrl);
-
+            
             if ($response->successful()) {
                 // Convert the response to an object
                 $sectionData = $response->object();
+                // dd($sectionData);
 
                 return view('section-setup.edit', compact('sectionData', 'kpiId'));
             }

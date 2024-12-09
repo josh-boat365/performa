@@ -207,231 +207,13 @@ class AppraisalScoreController extends Controller
         }
     }
 
-    // public function submitProbing(Request $request)
-    // {
-    //     // Validate the incoming request data
-    //     $request->validate([
-    //         'scoreId' => 'required|array',
-    //         'scoreId.*' => 'integer', // Ensure each scoreId is an integer
-    //     ]);
-
-    //     // Retrieve the score IDs from the request
-    //     $scoreIds = $request->input('scoreId');
-
-    //     // Prepare the data to be sent to the API
-    //     $successCount = 0; // To count successful submissions
-    //     $accessToken = session('api_token'); // Retrieve the access token
-
-    //     foreach ($scoreIds as $scoreId) {
-    //         // Prepare the data for the current scoreId
-    //         $data = [
-    //             'scoreId' => (int) $scoreId,
-    //         ];
-
-    //         try {
-    //             // Submit the data to the external API
-    //             $response = Http::withToken($accessToken)
-    //                 ->put('http://192.168.1.200:5123/Appraisal/Score/UpdateEmployeeScoreToProb', $data);
-
-    //             // Check if the response is successful
-    //             if ($response->successful()) {
-    //                 $successCount++;
-    //             } else {
-    //                 // Log the error if the response is not successful
-    //                 Log::error('API Submit, Confirmation Response Error', [
-    //                     'scoreId' => $scoreId,
-    //                     'status' => $response->status(),
-    //                     'body' => $response->body(),
-    //                 ]);
-    //             }
-    //         } catch (\Exception $e) {
-    //             // Handle any exceptions that occur during the API request
-    //             Log::error('API Exception, Submit, Confirmation Response Error', [
-    //                 'scoreId' => $scoreId,
-    //                 'message' => $e->getMessage(),
-    //                 'trace' => $e->getTraceAsString(),
-    //             ]);
-    //         }
-    //     }
-
-    //     // Check if all submissions were successful
-    //     if ($successCount === count($scoreIds)) {
-    //         return back()->with('toast_success', 'All Supervisor Scores Has Been Submitted For Review Successfully.');
-    //     } else {
-    //         return back()->with('toast_error', 'Some scores failed to submit. Please check the logs for details.');
-    //     }
-    // }
-
-
-    // public function submitProbing(Request $request){
-    //         dd($request->all());
-    // }
-
-
-    // public function submitProbing(Request $request)
-    // {
-    //     // Validate the incoming request data
-    //     $request->validate([
-    //         'scoreId' => 'nullable|integer', // Ensure scoreId is an integer
-    //         'employeeComment' => 'nullable|string',
-    //         'sectionId' => 'nullable|integer',
-    //         'metricId' => 'nullable|integer',
-    //         'kpiType' => 'nullable|string',
-    //     ]);
-
-    //     // Retrieve the score ID and employee comment from the request
-    //     $scoreId = $request->input('scoreId');
-    //     $employeeComment = $request->input('employeeComment');
-
-    //     // Prepare the access token
-    //     $accessToken = session('api_token'); // Retrieve the access token
-
-    //     // Check if both scoreId and employeeComment are present
-    //     if ($employeeComment !== null && $scoreId !== null) {
-    //         // Prepare payload for the second API
-    //         $payload = [
-    //             'id' => (int) $scoreId,
-    //             'sectionId' => (int) $request->input('sectionId', 0),
-    //             'employeeComment' => $employeeComment,
-    //             'kpiType' => $request->input('kpiType', ''),
-    //         ];
-
-    //         try {
-    //             // Call the second API to update the employee comment
-    //             $response = Http::withToken($accessToken)
-    //             ->put('http://192.168.1.200:5123/Appraisal/Score/employee-score', $payload);
-
-    //             // Check if the response is successful
-    //             if (!$response->successful()) {
-    //                 // Log the error if the response is not successful
-    //                 Log::error('API Submit, Confirmation Response Error for employee comment to Probe', [
-    //                     'scoreId' => $scoreId,
-    //                     'employeeComment' => $employeeComment,
-    //                     'status' => $response->status(),
-    //                     'body' => $response->body(),
-    //                 ]);
-    //                 return back()->with('toast_error', 'Failed to submit employee comment to Probe. ');
-    //             }
-    //         } catch (\Exception $e) {
-    //             // Handle any exceptions that occur during the API request
-    //             Log::error('API Exception, Submit, employee-score Error', [
-    //                 'scoreId' => $scoreId,
-    //                 'message' => $e->getMessage(),
-    //                 'trace' => $e->getTraceAsString(),
-    //             ]);
-    //             return back()->with('toast_error', 'An error occurred while submitting the employee comment.');
-    //         }
-
-    //         // Prepare data for the first API
-    //         $data = [
-    //             'scoreId' => (int) $scoreId,
-    //         ];
-
-    //         try {
-    //             // Call the first API to update the score ID
-    //             $response = Http::withToken($accessToken)
-    //                 ->put('http://192.168.1.200:5123/Appraisal/Score/UpdateEmployeeScoreToProb', $data);
-
-    //             // Check if the response is successful
-    //             if ($response->successful()) {
-    //                 return back()->with('toast_success', ' Submitted  to Probe Successfully.');
-    //             } else {
-    //                 // Log the error if the response is not successful
-    //                 Log::error('API Submit, Confirmation Response Error for UpdateEmployeeScoreToProb', [
-    //                     'scoreId' => $scoreId,
-    //                     'status' => $response->status(),
-    //                     'body' => $response->body(),
-    //                 ]);
-    //                 return back()->with('toast_error', 'Failed to submit supervisor score to Probe.');
-    //             }
-    //         } catch (\Exception $e) {
-    //             // Handle any exceptions that occur during the API request
-    //             Log::error('API Exception, Submit, UpdateEmployeeScoreToProb Error', [
-    //                 'scoreId' => $scoreId,
-    //                 'message' => $e->getMessage(),
-    //                 'trace' => $e->getTraceAsString(),
-    //             ]);
-    //             return back()->with('toast_error', 'An error occurred while updating the supervisor score to Probe ');
-    //         }
-    //     } elseif ($employeeComment !== null
-    //     ) {
-    //         // If only employeeComment is present, call the second API
-    //         $payload = [
-    //             'id' => (int) $scoreId,
-    //             'sectionId' => (int) $request->input('sectionId', 0),
-    //             'employeeComment' => $employeeComment,
-    //             'kpiType' => $request->input('kpiType', ''),
-    //         ];
-
-    //         try {
-    //             // Call the second API to update the employee comment
-    //             $response = Http::withToken($accessToken)
-    //             ->put('http://192.168.1.200:5123/Appraisal/Score/employee-score', $payload);
-
-    //             // Check if the response is successful
-    //             if ($response->successful()) {
-    //                 return back()->with('toast_success', 'Employee comment Saved for Probing successfully.');
-    //             } else {
-    //                 // Log the error if the response is not successful
-    //                 Log::error('API Submit, Confirmation Response Error for employee comment', [
-    //                     'scoreId' => $scoreId,
-    //                     'employeeComment' => $employeeComment,
-    //                     'status' => $response->status(),
-    //                     'body' => $response->body(),
-    //                 ]);
-    //                 return back()->with('toast_error', 'Failed to save employee comment to Probe');
-    //             }
-    //         } catch (\Exception $e) {
-    //             // Handle any exceptions that occur during the API request
-    //             Log::error('API Exception, Submit, employee comment Error', [
-    //                 'scoreId' => $scoreId,
-    //                 'message' => $e->getMessage(),
-    //                 'trace' => $e->getTraceAsString(),
-    //             ]);
-    //             return back()->with('toast_error', 'An error occurred while saving  the employee comment to Probe.');
-    //         }
-    //     } elseif ($scoreId !== null) {
-    //         // If only scoreId is present, call the first API
-    //         $data = [
-    //             'scoreId' => (int) $scoreId,
-    //         ];
-
-    //         try {
-    //             // Call the first API to update the score ID
-    //             $response = Http::withToken($accessToken)
-    //             ->put('http://192.168.1.200:5123/Appraisal/Score/UpdateEmployeeScoreToProb', $data);
-
-    //             // Check if the response is successful
-    //             if ($response->successful()) {
-    //                 return back()->with('toast_success', 'Supervisor Score Saved for Probing Successfully.');
-    //             } else {
-    //                 // Log the error if the response is not successful
-    //                 Log::error('API Submit, Confirmation Response Error for UpdateEmployeeScoreToProb', [
-    //                     'scoreId' => $scoreId,
-    //                     'status' => $response->status(),
-    //                     'body' => $response->body(),
-    //                 ]);
-    //                 return back()->with('toast_error', 'Failed  to save Supervisor Score  to Probe.');
-    //             }
-    //         } catch (\Exception $e) {
-    //             // Handle any exceptions that occur during the API request
-    //             Log::error('API Exception, Submit, UpdateEmployeeScoreToProb Error', [
-    //                 'scoreId' => $scoreId,
-    //                 'message' => $e->getMessage(),
-    //                 'trace' => $e->getTraceAsString(),
-    //             ]);
-    //             return back()->with('toast_error', 'An error occurred while saving Supervisor Score  to Probe.');
-    //         }
-    //     } else {
-    //         return back()->with('toast_error', 'No valid data provided for Submission: <b>You Need to Select A Check Box To Confirm</b>');
-    //     }
-    // }
-
 
 
 
     public function submitProbing(Request $request)
     {
+
+        // dd($request);
         // Validate the incoming request data
         $request->validate([
             'scoreId' => 'nullable|integer', // Make scoreId nullable
@@ -445,15 +227,18 @@ class AppraisalScoreController extends Controller
 
         // Retrieve the score ID and employee comment from the request
         $scoreId = $request->input('scoreId');
+        $prob = $request->has('prob') ? true : false;
         $employeeComment = $request->input('employeeComment');
 
         // Prepare the access token
-        $accessToken = session('api_token'); // Retrieve the access token
+        $accessToken = session('api_token'); // Retrieve the access tok
 
         // If both scoreId and employeeComment are present
         if (
-            $employeeComment !== null && $scoreId !== null
+            $employeeComment == null
         ) {
+            return back()->with('toast_error', 'Input a comment to probe');
+        } else {
             // Prepare payload for the second API
             $payload = [
                 'id' => (int) $scoreId,
@@ -487,105 +272,43 @@ class AppraisalScoreController extends Controller
                 ]);
                 return back()->with('toast_error', 'An error occurred while updating the employee comment.');
             }
+        }
 
-            // Prepare data for the first API
-            $data = [
-                'scoreId' => (int) $scoreId,
-            ];
 
-            try {
-                // Call the first API to update the score ID
-                $response = Http::withToken($accessToken)
-                    ->put('http://192.168.1.200:5123/Appraisal/Score/UpdateEmployeeScoreToProb', $data);
+        // Prepare data for the first API
+        $data = [
+            'scoreId' => (int) $scoreId,
+            'prob' => $prob,
+        ];
 
-                // Check if the response is successful
-                if ($response->successful()) {
-                    return back()->with('toast_success', 'Supervisor Score and Comment Submitted Successfully.');
-                } else {
-                    // Log the error if the response is not successful
-                    Log::error('API Submit, Confirmation Response Error for UpdateEmployeeScoreToProb', [
-                        'scoreId' => $scoreId,
-                        'status' => $response->status(),
-                        'body' => $response->body(),
-                    ]);
-                    return back()->with('toast_error', 'Failed to update score ID. Please check the logs for details.');
-                }
-            } catch (\Exception $e) {
-                // Handle any exceptions that occur during the API request
-                Log::error('API Exception, Submit, UpdateEmployeeScoreToProb Error', [
+        // dd($data);
+
+
+        try {
+            // Call the first API to update the score ID
+            $response = Http::withToken($accessToken)
+                ->put('http://192.168.1.200:5123/Appraisal/Score/UpdateEmployeeScoreToProb', $data);
+
+            // Check if the response is successful
+            if ($response->successful()) {
+                return back()->with('toast_success', 'Supervisor Score and Comment Submitted Successfully.');
+            } else {
+                // Log the error if the response is not successful
+                Log::error('API Submit, Confirmation Response Error for UpdateEmployeeScoreToProb', [
                     'scoreId' => $scoreId,
-                    'message' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
+                    'status' => $response->status(),
+                    'body' => $response->body(),
                 ]);
-                return back()->with('toast_error', 'An error occurred while updating the score ID .');
+                return back()->with('toast_error', 'Failed to update score ID. Please check the logs for details.');
             }
-        } elseif ($employeeComment !== null) {
-            // If only employeeComment is provided, prepare the payload for the comment API
-            $payload = [
-                'employeeComment' => $employeeComment,
-                'sectionId' => (int) $request->input('sectionId', 0),
-                'kpiType' => $request->input('kpiType', ''),
-            ];
-
-            try {
-                // Call the API to submit the employee comment
-                $response = Http::withToken($accessToken)
-                    ->post('http://192.168.1.200:5123/Appraisal/Score/employee-score', $payload);
-
-                // Check if the response is successful
-                if ($response->successful()) {
-                    return back()->with('toast_success', 'Employee Comment Submitted Successfully.');
-                } else {
-                    // Log the error if the response is not successful
-                    Log::error('API Submit, Confirmation Response Error for submitComment', [
-                        'employeeComment' => $employeeComment,
-                        'status' => $response->status(),
-                        'body' => $response->body(),
-                    ]);
-                    return back()->with('toast_error', 'Failed to submit employee comment. Please check the logs for details.');
-                }
-            } catch (\Exception $e) {
-                // Handle any exceptions that occur during the API request
-                Log::error('API Exception, Submit, submitComment Error', [
-                    'message' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]);
-                return back()->with('toast_error', 'An error occurred while submitting the employee comment.');
-            }
-        } elseif ($scoreId !== null) {
-            // If only scoreId is provided, prepare the payload for the score ID API
-            $data = [
-                'scoreId' => (int) $scoreId,
-            ];
-
-            try {
-                // Call the API to update the score ID
-                $response = Http::withToken($accessToken)
-                    ->put('http://192.168.1.200:5123/Appraisal/Score/UpdateEmployeeScoreToProb', $data);
-
-                // Check if the response is successful
-                if ($response->successful()) {
-                    return back()->with('toast_success', 'Score ID Submitted Successfully.');
-                } else {
-                    // Log the error if the response is not successful
-                    Log::error('API Submit, Confirmation Response Error for UpdateEmployeeScoreToProb', [
-                        'scoreId' => $scoreId,
-                        'status' => $response->status(),
-                        'body' => $response->body(),
-                    ]);
-                    return back()->with('toast_error', 'Failed to update score ID. Please check the logs for details.');
-                }
-            } catch (\Exception $e) {
-                // Handle any exceptions that occur during the API request
-                Log::error('API Exception, Submit, UpdateEmployeeScoreToProb Error', [
-                    'scoreId' => $scoreId,
-                    'message' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]);
-                return back()->with('toast_error', 'An error occurred while updating the score ID.');
-            }
-        } else {
-            return back()->with('toast_error', 'No data provided to submit.');
+        } catch (\Exception $e) {
+            // Handle any exceptions that occur during the API request
+            Log::error('API Exception, Submit, UpdateEmployeeScoreToProb Error', [
+                'scoreId' => $scoreId,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return back()->with('toast_error', 'An error occurred while updating the score ID .');
         }
     }
 

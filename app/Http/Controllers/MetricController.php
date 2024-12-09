@@ -54,7 +54,7 @@ class MetricController extends Controller
     }
 
 
-    public function create($id)
+    public function create(string $kpiScore, $sectionScore, $id)
     {
 
         // $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
@@ -68,7 +68,7 @@ class MetricController extends Controller
 
         $sectionId = $id;
 
-        return view('metric-setup.create', compact('sectionId'));
+        return view('metric-setup.create', compact('sectionId', 'kpiScore', 'sectionScore'));
     }
 
 

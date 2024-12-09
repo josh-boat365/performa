@@ -7,7 +7,7 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18">
-                        <a href="{{ route('section.index', $kpiId) }}">{{ $sectionData->name }}</a> >
+                        {{--  <a href="{{ route('section.index', $kpiId) }}">{{ $sectionData->name }}</a> >  --}}
                         Update Section Details
 
                     </h4>
@@ -43,6 +43,7 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Description</label>
                             <div class="col-md-12">
+
                                 <textarea class="form-control" name="description" required rows="3" id="example-text-input">{{ $sectionData->description }}</textarea>
                             </div>
                         </div>
@@ -50,6 +51,7 @@
                             <label for="stateSelect" class="">Section State</label>
                             <div class="col-md-12">
                                 <select class="form-control" id="stateSelect" name="active" onchange="updateState()">
+
                                     <option value="1" @selected($sectionData->active === true)>Active</option>
                                     <option value="0" @selected($sectionData->active === false)>Deactivate
                                     </option>
