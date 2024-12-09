@@ -47,11 +47,14 @@ class AuthController extends Controller
             if ($response->ok() && isset($response['access_token'])) {
                 $data = $response->object();
 
+                // dd($data);
+
                 // Store access token and user profile data in the session
                 session([
                     'api_token' => $data->access_token,
                     'user_name' => $data->profile->fullName,
                     'user_email' => $data->profile->email,
+                    'employee_id' => $data->profile->id,
                     'empRole' => 4,
                     'lastActivityTime' => time(), // Initialize last activity time
                 ]);

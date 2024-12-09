@@ -61,21 +61,21 @@
                                                                         placeholder="Enter Score"
                                                                         max="{{ $section->sectionScore }}" readonly
                                                                         title="The Score can not be more than the section score {{ $section->sectionScore }}"
-                                                                        @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'PROBLEM')
+                                                                        @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'REVIEW')
                                                                         value="{{ $section->sectionEmpScore->sectionEmpScore ?? '' }}">
                                                                 </div>
                                                                 <div class="col-md-9">
                                                                     <input class="form-control mb-3 comment-input"
                                                                         type="text" name="employeeComment"
                                                                         placeholder="Enter your comments" readonly
-                                                                        @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'PROBLEM')
+                                                                        @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'REVIEW')
                                                                         value="{{ $section->sectionEmpScore->employeeComment ?? '' }}">
                                                                 </div>
 
                                                             </div>
 
 
-                                                            <span class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
+                                                            <span class="mb-2 badge rounded-pill bg-primary"><strong>Supervisor
                                                                     Score and
                                                                     Comment</strong></span>
 
@@ -132,8 +132,8 @@
                                                                                     type="number" name="metricEmpScore"
                                                                                     placeholder="Enter Score" required
                                                                                     max="{{ $metric->metricScore }}"
-                                                                                    readonly
-                                                                                    @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
+
+                                                                                    @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW','CONFIRMATION', 'PROBLEM']))
                                                                                     title="The Score can not be more than the metric score {{ $metric->metricScore }}"
                                                                                     value="{{ $metric->metricEmpScore->metricEmpScore ?? '' }}">
                                                                             </div>
@@ -143,15 +143,15 @@
                                                                                     type="text"
                                                                                     name="employeeComment"
                                                                                     placeholder="Enter your comments"
-                                                                                    readonly
-                                                                                    @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
+
+                                                                                    @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW','CONFIRMATION', 'PROBLEM']))
                                                                                     value="{{ $metric->metricEmpScore->employeeComment ?? '' }}">
                                                                             </div>
 
                                                                         </div>
 
                                                                         <span
-                                                                            class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
+                                                                            class="mb-2 badge rounded-pill bg-primary"><strong>Supervisor
                                                                                 Score and
                                                                                 Comment</strong></span>
 
@@ -203,110 +203,61 @@
                                                 <p></p>
                                             @endif
                                         </div>
-                                        @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')
-                                            <div></div>
-                                        @else
-                                            <div class="float-end">
-                                                <button type="button" data-bs-toggle="modal" class="btn btn-success"
-                                                    data-bs-target=".bs-delete-modal-lg">Submit Appraisal</button>
-                                            </div>
-
-                                            <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
-                                                aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog modal-md modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="myLargeModalLabel">Confirm
-                                                                Appraisal
-                                                                Submit</h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <h4 class="text-center mb-4">Are you sure you want to
-                                                                <b>Submit</b> employee <b>Appraisal</b> for
-                                                                <b>Confirmation</b>?
-
-                                                            </h4>
-                                                            <form action="{{ route('submit.appraisal') }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="kpiId"
-                                                                    value="{{ $kpi->kpiId }}">
-                                                                <input type="hidden" name="batchId"
-                                                                    value="{{ $kpi->batchId }}">
-                                                                <input type="hidden" name="status"
-                                                                    value="CONFIRMATION">
-                                                                <div class="d-grid">
-                                                                    <div class="mt-5 ">
-                                                                        <button type="submit" id="submitReviewButton"
-                                                                            class="btn btn-success">Submit
-                                                                            Employee Appraisal
-                                                                            For Confirmation</button>
-                                                                    </div>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
-
-
-                                        @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'PROBLEM')
-                                            <div></div>
-                                        @else
-                                            <div class="float-end">
-                                                <button type="button" data-bs-toggle="modal" class="btn btn-success"
-                                                    data-bs-target=".bs-delete-modal-lg">Resolve Employee
-                                                    Probe</button>
-                                            </div>
-
-                                            <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
-                                                aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog modal-md modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="myLargeModalLabel">Confirm
-                                                                Appraisal
-                                                                Submit</h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <h4 class="text-center mb-4">Are you sure you want to
-                                                                <b>Submit to resolve</b> employee <b>Appraisal</b>
-                                                                <b>Probe</b>?
-
-                                                            </h4>
-                                                            <form action="{{ route('submit.employee.probe') }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="kpiId"
-                                                                    value="{{ $kpi->kpiId }}">
-                                                                <input type="hidden" name="batchId"
-                                                                    value="{{ $kpi->batchId }}">
-                                                                <input type="hidden" name="status"
-                                                                    value="COMPLETED">
-                                                                <div class="d-grid">
-                                                                    <div class="mt-5 ">
-                                                                        <button type="submit" id="submitReviewButton"
-                                                                            class="btn btn-success">Submit
-                                                                            Employee Appraisal
-                                                                            For Confirmation</button>
-                                                                    </div>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
                                     @endforeach
+                                    <hr class="mt-10">
+
+                                    @if (isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM', 'COMPLETED']))
+                                        <div></div>
+                                    @else
+                                        <div class="float-end">
+                                            <button type="button" data-bs-toggle="modal" class="btn btn-primary"
+                                                data-bs-target=".bs-delete-modal-lg">Submit Appraisal</button>
+                                        </div>
+
+                                        <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
+                                            aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-md modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="myLargeModalLabel">Confirm
+                                                            Appraisal
+                                                            Submit</h5>
+                                                        <button type="button" class="btn-close"
+                                                            data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <h4 class="text-center mb-4">Are you sure you want to
+                                                            <b>Submit</b> employee <b>Appraisal</b> for
+                                                            <b>Confirmation</b>?
+
+                                                        </h4>
+                                                        <form action="{{ route('submit.appraisal') }}"
+                                                            method="POST">
+                                                            @csrf
+                                                            <input type="hidden" name="kpiId"
+                                                                value="{{ $kpi->kpiId }}">
+                                                            <input type="hidden" name="batchId"
+                                                                value="{{ $kpi->batchId }}">
+                                                            <input type="hidden" name="status"
+                                                                value="CONFIRMATION">
+                                                            <div class="d-grid">
+                                                                <div class="mt-5 ">
+                                                                    <button type="submit" id="submitReviewButton"
+                                                                        class="btn btn-success">Submit
+                                                                        Employee Appraisal
+                                                                        For Confirmation</button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
                                 @endif
-                                <hr class="mt-10">
 
                             </div>
+
 
                             <script>
                                 const scoreInputs = document.querySelectorAll('.score-input');

@@ -37,7 +37,7 @@
                     <tr>
                         <th>Batch Name</th>
                         <th>Batch Short Name</th>
-                        <th>Created at</th>
+                        {{--  <th>Created at</th>  --}}
                         <th>State</th>
                         <th>Status</th>
                         <th>Action</th>
@@ -51,7 +51,7 @@
                         <tr>
                             <th scope="row"><a href="#">{{ $batch['name'] }}</a></th>
                             <td>{{ $batch['shortName'] }}</td>
-                            <td>{{ Carbon\Carbon::parse($batch['createdAt'])->format('jS F, Y : g:i A') }}</td>
+                            {{--  <td>{{ Carbon\Carbon::parse($batch['createdAt'])->format('jS F, Y : g:i A') }}</td>  --}}
                             <td>
                                 <span @style(['cursor: pointer'])
                                     class="dropdown badge rounded-pill {{ $batch['active'] ? 'bg-success' : 'bg-dark' }}"
@@ -205,7 +205,7 @@
                 </tbody>
             </table>
             <nav aria-label="Page navigation example" class="mt-3">
-                {{ $batches->links() }}
+                {{--  {{ $batches->links() }}  --}}
             </nav>
         </div>
 

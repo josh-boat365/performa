@@ -42,7 +42,8 @@ Route::group(
         Route::get("dashboard/view-kpi", [DashboardController::class, "show"])->name("view.kpi");
         Route::get("dashboard/edit-kpi", [DashboardController::class, "view_kpi"])->name("edit.kpi");
         Route::get("dashboard/active/batch", [DashboardController::class, "show"])->name("show-batch");
-        Route::get("dashboard/employee-batch-kpi/{id}", [DashboardController::class, "showEmployeeKpi"])->name("show.batch.kpi");
+        // Route::get("dashboard/employee-batch-kpi/{id}", [DashboardController::class, "showEmployeeKpi"])->name("show.batch.kpi");
+        Route::get("dashboard/employee-batch-kpi/", [DashboardController::class, "showEmployeeKpi"])->name("show.batch.kpi");
         Route::get("dashboard/employee-kpi/{id}", [DashboardController::class, "editEmployeeKpi"])->name("show.employee.kpi");
         Route::post("dashboard/self-rating", [AppraisalScoreController::class, "store"])->name("self.rating");
 
@@ -89,7 +90,7 @@ Route::group(
         Route::post("dashboard/appraisal/hr/global-kpi/update-status/{id}", [GlobalKpiController::class, "update_status"])->name("update.global.kpi.status");
 
         // Global - section
-        Route::get("dashboard/appraisal/hr/global-section-setup/kpi/{kpiScore}/index/{id}", [GlobalSectionController::class, "index"])->name("global.section.index");
+        Route::get("dashboard/appraisal/hr/global-section-setup/", [GlobalSectionController::class, "index"])->name("global.section.index");
         Route::get("dashboard/appraisal/hr/global-section-setup/create", [GlobalSectionController::class, "create"])->name("create.global.section");
         Route::post("dashboard/appraisal/hr/global-section-setup/store", [GlobalSectionController::class, "store"])->name("store.global.section");
         Route::get("dashboard/appraisal/hr/global-section/{id}/show", [GlobalSectionController::class, "show"])->name("show.global.section");

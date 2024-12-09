@@ -75,13 +75,12 @@
                                                             </div>
 
 
-                                                            <span class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
+                                                            <span class="mb-2 badge rounded-pill bg-primary"><strong>Supervisor
                                                                     Score and
                                                                     Comment</strong></span>
 
                                                             {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
 
-                                                            @csrf
                                                             <div class="d-flex gap-3">
                                                                 <div class="col-md-2">
                                                                     <input class="form-control mb-3 score-input"
@@ -200,7 +199,7 @@
                                                                         </div>
 
                                                                         <span
-                                                                            class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
+                                                                            class="mb-2 badge rounded-pill bg-primary"><strong>Supervisor
                                                                                 Score and
                                                                                 Comment</strong></span>
 
@@ -313,59 +312,55 @@
                                                 <p></p>
                                             @endif
                                         </div>
-                                        <hr class="mt-10">
+                                    @endforeach
+                                    <hr class="mt-10">
+                                    @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'COMPLETED')
+                                        <div></div>
+                                    @else
+                                        <div class="float-end">
+                                            <button type="button" data-bs-toggle="modal" class="btn btn-dark"
+                                                data-bs-target=".bs-delete-modal-lg">Resolve Employee
+                                                Probe</button>
+                                        </div>
 
+                                        <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
+                                            aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-md modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="myLargeModalLabel">Confirm
+                                                            Appraisal
+                                                            Submit</h5>
+                                                        <button type="button" class="btn-close"
+                                                            data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <h4 class="text-center mb-4">Are you sure you want to
+                                                            <b>Submit to resolve</b> employee <b>Appraisal</b>
+                                                            <b>Probe</b>?
 
-                                        @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'COMPLETED')
-                                            <div></div>
-                                        @else
-                                            <div class="float-end">
-                                                <button type="button" data-bs-toggle="modal" class="btn btn-dark"
-                                                    data-bs-target=".bs-delete-modal-lg">Resolve Employee
-                                                    Probe</button>
-                                            </div>
-
-                                            <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
-                                                aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog modal-md modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="myLargeModalLabel">Confirm
-                                                                Appraisal
-                                                                Submit</h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <h4 class="text-center mb-4">Are you sure you want to
-                                                                <b>Submit to resolve</b> employee <b>Appraisal</b>
-                                                                <b>Probe</b>?
-
-                                                            </h4>
-                                                            <form action="{{ route('submit.appraisal') }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                <input type="hidden" name="kpiId"
-                                                                    value="{{ $kpi->kpiId }}">
-                                                                <input type="hidden" name="batchId"
-                                                                    value="{{ $kpi->batchId }}">
-                                                                <input type="hidden" name="status"
-                                                                    value="COMPLETED">
-                                                                {{--  <div class="d-grid">  --}}
-                                                                <div class="mt-5 ">
-                                                                    <button type="submit"
-                                                                        class="btn btn-success">Submit
-                                                                        Employee Appraisal
-                                                                        For Confirmation</button>
-                                                                </div>
-                                                                {{--  </div>  --}}
-                                                            </form>
-                                                        </div>
+                                                        </h4>
+                                                        <form action="{{ route('submit.appraisal') }}"
+                                                            method="POST">
+                                                            @csrf
+                                                            <input type="hidden" name="kpiId"
+                                                                value="{{ $kpi->kpiId }}">
+                                                            <input type="hidden" name="batchId"
+                                                                value="{{ $kpi->batchId }}">
+                                                            <input type="hidden" name="status" value="COMPLETED">
+                                                            {{--  <div class="d-grid">  --}}
+                                                            <div class="mt-5 ">
+                                                                <button type="submit" class="btn btn-success">Submit
+                                                                    Employee Appraisal
+                                                                    For Confirmation</button>
+                                                            </div>
+                                                            {{--  </div>  --}}
+                                                        </form>
                                                     </div>
                                                 </div>
                                             </div>
-                                        @endif
-                                    @endforeach
+                                        </div>
+                                    @endif
                                 @endif
 
 
