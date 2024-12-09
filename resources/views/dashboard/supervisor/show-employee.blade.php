@@ -16,7 +16,8 @@
 
         <div class="col-md-12">
 
-            @if ($employeeSupDetails)
+
+            @if (!empty($employeeSupDetails))
 
                 @forelse ($employeeSupDetails as $employee)
                     <div class="card card-body">
@@ -67,7 +68,7 @@
                 @empty
                     <div class="card card-body">
                         <div class="justify-content-between">
-                            <h5><b>No Employee Has Submitted Their Kpi For Probing Yet..............</b></h5>
+                            <h5><b>No Employee Has Submitted Their Appraisal Yet..............</b></h5>
                         </div>
                     </div>
                 @endforelse
