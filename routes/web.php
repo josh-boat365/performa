@@ -44,23 +44,24 @@ Route::group(
         Route::get("dashboard/active/batch", [DashboardController::class, "show"])->name("show-batch");
         Route::get("dashboard/employee-batch-kpi/{id}", [DashboardController::class, "showEmployeeKpi"])->name("show.batch.kpi");
         Route::get("dashboard/employee-kpi/{id}", [DashboardController::class, "editEmployeeKpi"])->name("show.employee.kpi");
+        Route::post("dashboard/self-rating", [AppraisalScoreController::class, "store"])->name("self.rating");
 
         //Supervisor Score for Employee
         Route::get("dashboard/employee-supervisor-kpi-score/{id}", [DashboardController::class, "showEmployeeSupervisorKpiScore"])->name("show.employee.supervisor.kpi.score");
         Route::get("dashboard/employee-probe/{id}", [DashboardController::class, "showEmployeeProbe"])->name("show.employee.probe");
         Route::post("dashboard/employee-probe/submit", [AppraisalScoreController::class, "submitProbing"])->name("submit.employee.probe");
-
         Route::get("dashboard/supervisor/show-employee-kpis", [SupervisorScoreController::class, "index"])->name("supervisor.index");
-
         Route::get("dashboard/supervisor/show-employee-kpi-form/kpi/{kpiId}/batch/{batchId}", [SupervisorScoreController::class, "edit"])->name("supervisor.edit");
-        Route::get("dashboard/supervisor/show-employee-kpi-prob-form/kpi/{kpiId}/batch/{batchId}", [SupervisorScoreController::class, "editProb"])->name("prob.edit");
-        //Supervisor Score
         Route::post("dashboard/supervisor/rating", [SupervisorScoreController::class, "store"])->name("supervisor.rating");
-        Route::post("dashboard/submit-rating-score-for-employee-confirmation", [UpdateKpiScoringState::class, "store"])->name("submit.supervisor.rating");
+
+
+        //Supervisor Probe Score
+        Route::get("dashboard/supervisor/show-employee-kpi-prob-form/kpi/{kpiId}/batch/{batchId}", [SupervisorScoreController::class, "editProb"])->name("prob.edit");
+        Route::post("dashboard/supervisor/probe-score", [SupervisorScoreController::class, "probScore"])->name("prob.store");
+
 
         //Appraisal Score
-        Route::post("dashboard/self-rating", [AppraisalScoreController::class, "store"])->name("self.rating");
-        Route::post("dashboard/submit-self-rating-score-for-supervisor-review", [UpdateKpiScoringState::class, "store"])->name("submit.appraisal");
+        Route::post("dashboard/submit-appraisal", [UpdateKpiScoringState::class, "store"])->name("submit.appraisal");
 
 
 

@@ -14,7 +14,7 @@
         </div>
         <!-- end page title -->
 
-        <div class="col-md-12">
+        {{--  <div class="col-md-12">
             <div class="card card-body">
                 <div class="d-flex justify-content-between">
                     <div>
@@ -28,7 +28,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>  --}}
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 

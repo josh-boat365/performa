@@ -44,9 +44,6 @@
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
                                     @foreach ($appraisal as $kpi)
                                         <div class="kpi">
-                                            {{--  <h3>{{ $kpi->kpi->kpiName }} (Batch: {{ $kpi->kpi->batchName }})</h3>
-                                            <p>{{ $kpi->kpi->kpiDescription }}</p>
-                                            <p>Score: {{ $kpi->kpi->kpiScore }}</p>  --}}
 
                                             @foreach ($kpi->activeSections as $section)
                                                 <div class="section-card" style="margin-top: 2rem;">

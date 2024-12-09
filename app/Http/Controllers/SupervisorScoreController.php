@@ -294,6 +294,86 @@ class SupervisorScoreController extends Controller
     }
 
 
+    public function probScore(Request $request)
+    {
+        try {
+            // dd($request);
+            // Initialize a variable for the success message
+            $successMessage = '';
+
+            // Initialize the payload variable
+            $payload = null; // Initialize as null
+
+            // Check for metric score input
+            if ($request->input('metricProbScore')) {
+                $request->validate([
+                    'scoreId' => 'nullable|numeric|min:0',
+                    'metricProbScore' => 'nullable|numeric',
+                    'probComment' => 'nullable|string',
+                ]);
+
+                // Prepare the payload for the API request
+                $payload = [
+                    'scoreId' => (int) $request->input('scoreId') ?? null,
+                    'metricProbScore' => (float) $request->input('metricProbScore'),
+                    'probComment' => $request->input('probComment', ''),
+                ];
+
+                // dd($payload);
+
+                $successMessage = 'Metric score, metric comment submitted successfully!';
+            }
+
+            // Check for section score input
+            if ($request->input('sectionProbScore')) {
+                $request->validate([
+                    'scoreId' => 'nullable|numeric|min:0',
+                    'sectionProbScore' => 'nullable|numeric',
+                    'probComment' => 'nullable|string',
+                ]);
+
+                // Prepare the payload for the API request
+                $payload = [
+                    'scoreId' => (int) $request->input('scoreId') ?? null,
+                    'sectionProbScore' => (float) $request->input('sectionProbScore'),
+                    'probComment' => $request->input('probComment', ''),
+                ];
+
+                $successMessage = 'Section score, section comment submitted successfully!';
+            }
+
+            // Check if the payload is null (i.e., no score was submitted)
+            if (is_null($payload)) {
+                return back()->with('toast_error', 'No scores submitted. Please provide a score.');
+            }
+
+            // Retrieve the access token
+            $accessToken = session('api_token');
+
+            // Submit the data to the external API
+            $response = Http::withToken($accessToken)
+                ->put('http://192.168.1.200:5123/Appraisal/Score/prob-score', $payload);
+
+            // Check if the response is successful
+            if ($response->status() === 200) {
+                // Return success message
+                return back()->with('toast_success', $successMessage);
+            } else {
+                // Log the error if the response is not successful
+                Log::error('API Response Error', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+                return back()->with('toast_error', 'Failed to submit score. Please check the logs for details.');
+            }
+        } catch (\Exception $e) {
+            // Log exception and notify the user
+            Log::error('API Exception', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
+        }
+    }
+
+
 
     /**
      * Update the specified resource in storage.
