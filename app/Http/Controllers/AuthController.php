@@ -56,11 +56,6 @@ class AuthController extends Controller
                     'lastActivityTime' => time(), // Initialize last activity time
                 ]);
 
-                $employeeData = Http::withToken(session('api_token'))
-                    ->get('http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee');
-
-                // Store the employee data in the session
-                session(['employee_data' => $employeeData->object()]);
 
                 // Clear rate limit on success
                 RateLimiter::clear($throttleKey);
