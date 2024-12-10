@@ -143,7 +143,7 @@ Route::group(
         Route::post("dashboard/department/kpi/{id}/section-delete", [SectionController::class, "destroy"])->name("delete.section");
 
         //Metric Setup
-        Route::get("dashboard/department/section/metric-setup/kpi/{kpiScore}/section/{sectionScore}/index/{id}", [MetricController::class, "index"])->name("metric.index");
+        Route::get("dashboard/department/section/metric-setup/kpi/{kpiId}/section/{sectionScore}/index/{id}", [MetricController::class, "index"])->name("metric.index");
         Route::get("dashboard/department/section/metric-setup/kpi/{kpiScore}/section/{sectionScore}/create/{id}", [MetricController::class, "create"])->name("create.metric");
         Route::post("dashboard/department/section/metric-setup/store", [MetricController::class, "store"])->name("store.metric");
         Route::get("dashboard/department/section/{sectionId}/metric-show/{metricId}", [MetricController::class, "show"])->name("show.metric");

@@ -65,9 +65,9 @@
                                                                         type="number" name="sectionEmpScore" required
                                                                         placeholder="Enter Score"
                                                                         max="{{ $section->sectionScore }}"
+                                                                        title="The Score cannot be more than the section score {{ $section->sectionScore }}"
                                                                         @disabled(isset($section->sectionEmpScore) &&
                                                                                 in_array($section->sectionEmpScore->status, ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))
-                                                                        title="The Score cannot be more than the section score {{ $section->sectionScore }}"
                                                                         value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                 </div>
                                                                 <div class="col-md-9">
@@ -89,7 +89,7 @@
                                                                         value="{{ $section->sectionId }}">
                                                                     <input type="hidden" name="kpiId"
                                                                         value="{{ $kpi->kpi->kpiId }}">
-                                                                    <button type="submit"
+                                                                    <button type="submit" @style(['height: fit-content'])
                                                                         class="btn btn-success">Save</button>
                                                                 @endif
                                                             </div>
@@ -138,6 +138,8 @@
                                                                             <input class="form-control mb-3"
                                                                                 type="number" name="metricEmpScore"
                                                                                 required placeholder="Enter Score"
+                                                                                max="{{ $metric->metricScore }}"
+                                                                                title="The Score cannot be more than the section score {{ $metric->metricScore }}"
                                                                                 @disabled(
                                                                                     (isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION'])) ||
                                                                                         (isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['COMPLETED', 'PROBLEM'])))
@@ -156,7 +158,7 @@
                                                                             !isset($metric->metricEmpScore) ||
                                                                                 (!in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION']) &&
                                                                                     !in_array($section->sectionEmpScore->status, ['COMPLETED', 'PROBLEM'])))
-                                                                            <button type="submit"
+                                                                            <button type="submit" @style(['height: fit-content'])
                                                                                 class="btn btn-success">Save</button>
                                                                         @endif
                                                                     </div>
@@ -231,7 +233,8 @@
                             @else
                                 <div class="float-end">
                                     <button type="button" data-bs-toggle="modal" class="btn btn-primary"
-                                        data-bs-target=".bs-delete-modal-lg">Submit Appraisal</button>
+                                        data-bs-target=".bs-delete-modal-lg" id="submitAppraisalButton"
+                                        disabled>Submit Appraisal</button>
                                 </div>
 
                                 <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
@@ -249,7 +252,8 @@
                                                     <b>Submit</b> your <b>Appraisal</b> to your
                                                     <b>Supervisor</b> for <b>Review?</b>
                                                 </h4>
-                                                <form action="{{ route('submit.appraisal') }}" method="POST">
+                                                <form action="{{ route('submit.appraisal') }}" method="POST"
+                                                    id="appraisalForm">
                                                     @csrf
                                                     <input type="hidden" name="kpiId"
                                                         value="{{ $kpi->kpi->kpiId }}">
@@ -259,8 +263,8 @@
                                                     <div class="d-grid">
                                                         <div class="mt-5">
                                                             <button type="submit" id="submitReviewButton"
-                                                                class="btn btn-success">Submit Appraisal
-                                                                For Review</button>
+                                                                class="btn btn-success" disabled>Submit Appraisal For
+                                                                Review</button>
                                                         </div>
                                                     </div>
                                                 </form>
@@ -269,6 +273,25 @@
                                     </div>
                                 </div>
                             @endif
+
+                            <script>
+                                // Function to check if all score inputs are filled
+                                function checkInputs() {
+                                    const scoreInputs = document.querySelectorAll('input[type="number"][name*="EmpScore"]');
+                                    const allFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+
+                                    // Enable or disable the submit button based on input values
+                                    document.getElementById('submitAppraisalButton').disabled = !allFilled;
+                                }
+
+                                // Attach event listeners to all score inputs
+                                document.querySelectorAll('input[type="number"][name*="EmpScore"]').forEach(input => {
+                                    input.addEventListener('input', checkInputs);
+                                });
+
+                                // Initial check in case inputs are pre-filled
+                                checkInputs();
+                            </script>
 
                             {{--  WHEN SUPERVISOR HAS SUBMITTED THEIR REVIEW  --}}
 
@@ -320,32 +343,7 @@
                             @endif
 
 
-                            <script>
-                                const scoreInputs = document.querySelectorAll('.score-input');
-                                const submitButton = document.getElementById('submitReviewButton');
 
-                                function checkScores() {
-                                    let allFilled = true;
-
-                                    scoreInputs.forEach(input => {
-                                        // Check if the input value is not empty and greater than 0
-                                        if (input.value === '' || input.value <= 0) {
-                                            allFilled = false;
-                                        }
-                                    });
-
-                                    // Enable or disable the submit button based on the check
-                                    submitButton.disabled = !allFilled;
-                                }
-
-                                // Initial check to set the button state on page load
-                                checkScores();
-
-                                // Add event listeners to score inputs to check scores on input change
-                                scoreInputs.forEach(input => {
-                                    input.addEventListener('input', checkScores);
-                                });
-                            </script>
                         </div>
 
 

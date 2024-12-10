@@ -11,14 +11,10 @@ class AppraisalScoreController extends Controller
 
     public function store(Request $request)
     {
+        dd($request);
         try {
             // Initialize a variable for the success message
             $successMessage = '';
-
-            // Initialize variables to track progress
-            $totalSections = 0; // Total sections for the KPI
-            $completedSections = 0; // Completed sections based on submitted scores
-
 
             // Validate the request based on the input type
             if ($request->input('sectionEmpScore')) {
@@ -40,8 +36,6 @@ class AppraisalScoreController extends Controller
                 ];
 
                 $successMessage = 'Section score, section comment submitted successfully!';
-                $totalSections = 1; // Assuming one section is being processed
-                $completedSections = (float) $request->input('sectionEmpScore', 0) > 0 ? 1 : 0; // Mark as completed if score is greater than 0
             }
 
             if ($request->input('metricEmpScore')) {
@@ -65,8 +59,6 @@ class AppraisalScoreController extends Controller
                 ];
 
                 $successMessage = 'Metric score, metric comment submitted successfully!';
-                $totalSections = 1; // Assuming one section is being processed
-                $completedSections = (float) $request->input('metricEmpScore', 0) > 0 ? 1 : 0; // Mark as completed if score is greater than 0
             }
 
             // Retrieve the access token
@@ -74,27 +66,12 @@ class AppraisalScoreController extends Controller
 
             // Submit the data to the external API
             $response = Http::withToken($accessToken)
-                ->post(
-                    'http://192.168.1.200:5123/Appraisal/Score/employee-score',
-                    $payload
-                );
-
+                ->post('http://192.168.1.200:5123/Appraisal/Score/employee-score', $payload);
 
             // Check if the response is successful
             if ($response->status() === 200) {
-                // Calculate progress
-                $progress = $totalSections > 0 ? ($completedSections / $totalSections) * 100 : 0;
-
-                session([
-                    'progress' => $progress
-                ]);
-
-                $appraisalProgress = session('progress');
-
-
-
-                // Return success message and progress
-                return back()->with('toast_success', $successMessage); // Send progress back to the frontend
+                // Return success message
+                return back()->with('toast_success', $successMessage);
             } else {
                 // Log the error if the response is not successful
                 Log::error('API Response Error', [

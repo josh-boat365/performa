@@ -177,7 +177,7 @@ class SectionController extends Controller
         try {
             // Make the GET request to the external API
             $response = Http::withToken($accessToken)->get($apiUrl);
-            
+
             if ($response->successful()) {
                 // Convert the response to an object
                 $sectionData = $response->object();
@@ -240,10 +240,12 @@ class SectionController extends Controller
         try {
             // Make the PUT request to the external API
             $response = Http::withToken($accessToken)->put($apiUrl, $sectionData);
+            $kpiScore = 100;
+            $id = $kpiId;
 
             if ($response->successful()) {
                 return redirect()
-                    ->route('section.index', $kpiId)
+                    ->route('section.index', compact('kpiScore', 'id'))
                     ->with('toast_success', 'Section updated successfully.');
             }
 
