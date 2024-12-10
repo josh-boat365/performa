@@ -14,7 +14,7 @@ class MetricController extends Controller
      * Display a listing of the resource.
      */
 
-    public function index(Request $request, $kpiScore, $sectionScore, $id)
+    public function index(Request $request, $kpiId, $sectionScore, $id)
     {
         try {
             // Fetch sections data using helper method
@@ -43,7 +43,7 @@ class MetricController extends Controller
             $metrics = $this->paginate($sortedMetrics, 25, $request);
 
 
-            return view('metric-setup.index', compact('metrics', 'sectionId', 'totalMetricScore', 'sectionScore', 'kpiScore'));
+            return view('metric-setup.index', compact('metrics', 'sectionId', 'totalMetricScore', 'sectionScore', 'kpiId'));
         } catch (\Exception $e) {
             Log::error('Exception occurred in index method', [
                 'message' => $e->getMessage(),

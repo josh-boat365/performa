@@ -7,7 +7,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"><a href="{{ url("dashboard/department/section-setup/kpi/{$kpiScore}/index/{$sectionId}", ) }}">Setup For
+                    <h4 class="mb-sm-0 font-size-18"><a href="{{ url("dashboard/department/section-setup/kpi/100/index/{$kpiId}", ) }}">Setup For
                             Section</a> > Metrics
                         {{--  > <a href="#">{{ session('section_metric_name') }}</a>  --}}
                     </h4>
@@ -17,7 +17,7 @@
         <!-- end page title -->
 
         <div>
-            <form action="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiScore}/section/{$sectionScore}/create/{$sectionId}") }}" method="GET">
+            <form action="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiId}/section/{$sectionScore}/create/{$sectionId}") }}" method="GET">
                 @csrf
                 <button type="submit" class="btn btn-success btn-rounded waves-effect waves-light "><i
                         class="bx bxs-plus"></i>Create

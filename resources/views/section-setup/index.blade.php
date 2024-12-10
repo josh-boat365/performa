@@ -78,7 +78,7 @@
                                     @forelse ($sections as $section)
                                         <tr>
                                             <th scope="row"><a
-                                                    href="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiScore}/section/{$section->score}/index/{$section->id}" ) }}">{{ $section->kpi->name }}</a>
+                                                    href="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiId}/section/{$section->score}/index/{$section->id}" ) }}">{{ $section->kpi->name }}</a>
                                             </th>
                                             <td><a href="#" @style(['text-wrap: auto'])>{{ $section->name }}</a></td>
                                             <td>{{ $section->score }}</td>

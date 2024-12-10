@@ -132,8 +132,7 @@
                                                                                     type="number" name="metricEmpScore"
                                                                                     placeholder="Enter Score" required
                                                                                     max="{{ $metric->metricScore }}"
-
-                                                                                    @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW','CONFIRMATION', 'PROBLEM']))
+                                                                                    @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION', 'PROBLEM']))
                                                                                     title="The Score can not be more than the metric score {{ $metric->metricScore }}"
                                                                                     value="{{ $metric->metricEmpScore->metricEmpScore ?? '' }}">
                                                                             </div>
@@ -143,8 +142,7 @@
                                                                                     type="text"
                                                                                     name="employeeComment"
                                                                                     placeholder="Enter your comments"
-
-                                                                                    @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW','CONFIRMATION', 'PROBLEM']))
+                                                                                    @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION', 'PROBLEM']))
                                                                                     value="{{ $metric->metricEmpScore->employeeComment ?? '' }}">
                                                                             </div>
 
@@ -206,12 +204,14 @@
                                     @endforeach
                                     <hr class="mt-10">
 
-                                    @if (isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM', 'COMPLETED']))
+                                    @if (isset($metric->metricEmpScore) &&
+                                            in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM', 'COMPLETED']))
                                         <div></div>
                                     @else
                                         <div class="float-end">
                                             <button type="button" data-bs-toggle="modal" class="btn btn-primary"
-                                                data-bs-target=".bs-delete-modal-lg">Submit Appraisal</button>
+                                                data-bs-target=".bs-delete-modal-lg" id="submitAppraisalButton"
+                                                disabled>Submit Appraisal</button>
                                         </div>
 
                                         <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
@@ -260,26 +260,22 @@
 
 
                             <script>
-                                const scoreInputs = document.querySelectorAll('.score-input');
-                                const submitButton = document.getElementById('submitReviewButton');
+                                // Function to check if all score inputs are filled
+                                function checkInputs() {
+                                    const scoreInputs = document.querySelectorAll('input[type="number"][name*="EmpScore"]');
+                                    const allFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
 
-                                function checkScores() {
-                                    let allFilled = true;
-
-                                    scoreInputs.forEach(input => {
-                                        if (input.value === '' || input.value <= 0) {
-                                            allFilled = false;
-                                        }
-                                    });
-
-                                    submitButton.disabled = !allFilled;
+                                    // Enable or disable the submit button based on input values
+                                    document.getElementById('submitAppraisalButton').disabled = !allFilled;
                                 }
 
-                                checkScores();
-
-                                scoreInputs.forEach(input => {
-                                    input.addEventListener('input', checkScores);
+                                // Attach event listeners to all score inputs
+                                document.querySelectorAll('input[type="number"][name*="EmpScore"]').forEach(input => {
+                                    input.addEventListener('input', checkInputs);
                                 });
+
+                                // Initial check in case inputs are pre-filled
+                                checkInputs();
                             </script>
                         </div>
                     </div>
