@@ -7,7 +7,7 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18">
-                        <a href="{{ route('metric.index', $sectionId) }}">{{ $metricData->name }}</a> >
+                        <a href="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiId}/section/{$sectionMetricScore}/index/{$sectionId}") }}">{{ $metricData->name }}</a> >
                         Update Metric Details
 
                     </h4>
@@ -25,6 +25,9 @@
                     <h3 class="card-title">Section Metric </h3>
                     <form action="{{ route('update.metric', $metricData->id) }}" method="POST">
                         @csrf
+                        <input type="hidden" name="kpiId" value="{{ $kpiId }}">
+                        <input type="hidden" name="sectionMetricScore" value="{{ $sectionMetricScore }}">
+                        
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Metric Name</label>
                             <div class="col-md-12">

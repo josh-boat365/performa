@@ -262,7 +262,7 @@
                             <script>
                                 // Function to check if all score inputs are filled
                                 function checkInputs() {
-                                    const scoreInputs = document.querySelectorAll('input[type="number"][name*="EmpScore"]');
+                                    const scoreInputs = document.querySelectorAll('input[type="number"][name*="SupScore"]');
                                     const allFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
 
                                     // Enable or disable the submit button based on input values

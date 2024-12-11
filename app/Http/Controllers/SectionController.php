@@ -36,6 +36,7 @@ class SectionController extends Controller
 
             // Calculate the total score from the sections
             $totalSectionScore = $sortedSections->sum('score');
+            session(['totalSectionScore' => $totalSectionScore]);
 
             $kpiId = $id;
 
@@ -73,8 +74,9 @@ class SectionController extends Controller
 
         $kpiId = $id;
         $kpiScore = 100;
-;
-        return view('section-setup.create', compact('kpiId', 'kpiScore'));
+        $totalSectionScore = session('totalSectionScore');
+
+        return view('section-setup.create', compact('kpiId', 'kpiScore', 'totalSectionScore'));
     }
 
 
@@ -145,7 +147,9 @@ class SectionController extends Controller
 
             // Check the response status and return appropriate response
             if ($response->successful()) {
-                return redirect()->route('section.index', $kpiId)->with('toast_success', 'Section created successfully');
+                $kpiScore = 100;
+                $id = $kpiId;
+                return redirect()->route('section.index', compact('kpiScore', 'id'))->with('toast_success', 'Section created successfully');
             } else {
                 // Log the error response
                 Log::error('Failed to create Section', [
@@ -183,7 +187,9 @@ class SectionController extends Controller
                 $sectionData = $response->object();
                 // dd($sectionData);
 
-                return view('section-setup.edit', compact('sectionData', 'kpiId'));
+                $totalSectionScore = session('totalSectionScore');
+
+                return view('section-setup.edit', compact('sectionData', 'kpiId', 'totalSectionScore'));
             }
 
             // Log the error response

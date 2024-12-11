@@ -28,7 +28,7 @@ class MetricController extends Controller
 
             // Filter the KPIs to include only those with active state of true
             $activeMetrics = collect($metricsResponse)->filter(function ($metric) use ($id) {
-                return $metric->section->id == $id ;
+                return $metric->section->id == $id;
             });
 
             // dd($activeMetrics);
@@ -39,6 +39,7 @@ class MetricController extends Controller
 
             // Calculate the total score from the sections
             $totalMetricScore = $sortedMetrics->sum('score');
+            session(['totalMetricScore' => $totalMetricScore]);
 
             $metrics = $this->paginate($sortedMetrics, 25, $request);
 
@@ -54,7 +55,7 @@ class MetricController extends Controller
     }
 
 
-    public function create(string $kpiScore, $sectionScore, $id)
+    public function create(string $kpiScore, $sectionMetricScore, $id)
     {
 
         // $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
@@ -67,8 +68,10 @@ class MetricController extends Controller
         // dd($activeSections);
 
         $sectionId = $id;
+        $totalMetricScore = session('totalMetricScore');
 
-        return view('metric-setup.create', compact('sectionId', 'kpiScore', 'sectionScore'));
+
+        return view('metric-setup.create', compact('sectionId', 'kpiScore', 'sectionMetricScore', 'totalMetricScore'));
     }
 
 
@@ -139,7 +142,14 @@ class MetricController extends Controller
             $response = Http::withToken($accessToken)->post($apiUrl, $metricData);
 
             if ($response->successful()) {
-                return redirect()->route('metric.index', $sectionId)->with('toast_success', 'Metric created successfully.');
+                $kpiId = $request->input('kpiId');
+                $sectionScore = $request->input('sectionScore');
+                $id = $sectionId;
+                session([
+                    'kpiId' => $kpiId,
+                    'sectionScore' => $sectionScore
+                ]);
+                return redirect()->route('metric.index', compact('kpiId', 'sectionScore','id'))->with('toast_success', 'Metric created successfully.');
             }
 
             // Log unsuccessful response
@@ -170,7 +180,7 @@ class MetricController extends Controller
      */
 
 
-    public function show(string $sectionId, $metricId)
+    public function show(string $kpiId, $sectionMetricScore, $sectionId, $metricId)
     {
         $accessToken = session('api_token');
         $apiUrl = "http://192.168.1.200:5123/Appraisal/Metric/{$metricId}";
@@ -184,8 +194,14 @@ class MetricController extends Controller
                 // Convert the response to an object for better handling
                 $metricData = $response->object();
 
+                // dd($metricData);
 
-                return view('metric-setup.edit', compact('metricData', 'sectionId'));
+
+                // $kpiId = session('kpiId');
+                // dd($kpiId);
+                // $sectionMetricScore = session('sectionScore');
+
+                return view('metric-setup.edit', compact('metricData', 'sectionId', 'kpiId', 'sectionMetricScore'));
             }
 
             // Log unsuccessful response
@@ -247,7 +263,10 @@ class MetricController extends Controller
             $response = Http::withToken($accessToken)->put($apiUrl, $metricData);
 
             if ($response->successful()) {
-                return redirect()->route('metric.index', $sectionId)->with('toast_success', 'Metric updated successfully.');
+                $kpiId = $request->input('kpiId');
+                $sectionMetricScore = $request->input('sectionMetricScore');
+                $id = $sectionId;
+                return redirect()->route('metric.index', compact('kpiId','sectionMetricScore', 'id'))->with('toast_success', 'Metric updated successfully.');
             }
 
             // Log unsuccessful response

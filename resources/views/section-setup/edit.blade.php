@@ -36,7 +36,9 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Score</label>
                             <div class="col-md-12">
-                                <input class="form-control" type="text" name="score" required
+
+                                <input class="form-control" type="text" name="score" max="{{ $totalSectionScore }}"
+                                    title="The Score cannot be more than the section score {{ $totalSectionScore }}" required
                                     value="{{ $sectionData->score }}" id="example-text-input">
                             </div>
                         </div>

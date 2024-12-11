@@ -6,7 +6,9 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ url("dashboard/department/section-setup/kpi/{$kpiScore}/index/{$kpiId}") }}">SECTIONS  </a> > Setup For Sections
+                    <h4 class="mb-sm-0 font-size-18"> <a
+                            href="{{ url("dashboard/department/section-setup/kpi/{$kpiScore}/index/{$kpiId}") }}">SECTIONS
+                        </a> > Setup For Sections
 
                     </h4>
                 </div>
@@ -43,8 +45,9 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Score</label>
                             <div class="col-md-12">
-                                <input class="form-control" type="number" name="score" required
-                                    value="{{ old('score') }}" id="example-text-input">
+                                <input class="form-control" type="number" name="score" max="{{ $totalSectionScore == 0 ? 100 :  $totalSectionScore }}"
+                                    title="The Score cannot be more than the section score {{ $totalSectionScore }}"
+                                    required value="{{ old('score') }}" id="example-text-input">
                             </div>
                         </div>
 

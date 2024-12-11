@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiScore}/section/{$sectionScore}/index/{$sectionId}" ) }}"> METRICS </a> > Setup For
+                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiScore}/section/{$sectionMetricScore}/index/{$sectionId}" ) }}"> METRICS </a> > Setup For
                         Metrics
 
                     </h4>
@@ -25,6 +25,8 @@
 
                     <form action="{{ route('store.metric') }}" class="custom-validation" method="POST">
                         @csrf
+                        <input type="hidden" name="kpiId" value="$kpiScore">
+                        <input type="hidden" name="sectionMetricScore" value="$sectionMetricScore">
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Metric Name</label>
                             <div class="col-md-12">
@@ -46,7 +48,8 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Metric Score</label>
                             <div class="col-md-12">
-                                <input class="form-control" type="number" name="score" required
+                                <input class="form-control" type="number" name="score" max="{{ $totalMetricScore == 0 ? $sectionMetricScore :  $totalMetricScore }}"
+                                    title="The Score cannot be more than the section score {{ $totalMetricScore }}" required
                                     value="{{ old('score') }}" id="example-text-input">
                             </div>
                         </div>
