@@ -78,7 +78,8 @@
                                             {{--  <td>{{ Carbon\Carbon::parse($metric->createdAt)->diffForHumans() }}
                                             </td>  --}}
                                             <td>
-                                                <a href="{{ url("dashboard/department/section/{$sectionId}/metric-show/{$metric->id}" ) }}">
+
+                                                <a href="{{ url("dashboard/department/section/kpi/{$kpiId}/section/{$sectionScore}/{$sectionId}/metric-show/{$metric->id}" ) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i> Edit</span>
                                                 </a>
