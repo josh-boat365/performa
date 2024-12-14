@@ -124,7 +124,7 @@ class GradeController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -189,7 +189,7 @@ class GradeController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -225,7 +225,7 @@ class GradeController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 }

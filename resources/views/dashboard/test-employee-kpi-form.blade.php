@@ -67,7 +67,8 @@
 
                                             @foreach ($kpi->activeSections as $section)
                                                 <div class="card border border-primary" @style(['border-radius: 10px;'])>
-                                                    <div class="card-body">
+                                                    <div class="card-body"
+                                                        style="{{ $section->metrics->isEmpty() ? 'background-color: #0000ff0d;' : '' }}">
                                                         <div class="section-card" style="margin-top: 2rem;">
                                                             <h4 class="card-title">{{ $section->sectionName }} (<span
                                                                     style="color: #c80f0f">{{ $section->sectionScore }}</span>)
@@ -75,8 +76,8 @@
                                                             <p>{{ $section->sectionDescription }}</p>
 
                                                             @if ($section->metrics->isEmpty())
-                                                                <form action="{{ route('self.rating') }}" method="POST"
-                                                                    class="section-form">
+                                                                <form action="{{ route('self.rating') }}"
+                                                                    method="POST" class="section-form">
                                                                     @csrf
                                                                     <div class="d-flex gap-3">
                                                                         <div class="col-md-2">
@@ -167,7 +168,7 @@
                                                                 @foreach ($section->metrics as $metric)
                                                                     <div class="card border border-success"
                                                                         @style(['border-radius: 10px;'])>
-                                                                        <div class="card-body">
+                                                                        <div class="card-body" @style(['background-color: #1eff000d'])>
                                                                             <div class="metric-card">
                                                                                 <h5>{{ $metric->metricName }} (<span
                                                                                         style="color: #c80f0f">{{ $metric->metricScore }}</span>)

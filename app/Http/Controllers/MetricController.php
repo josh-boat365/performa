@@ -149,7 +149,7 @@ class MetricController extends Controller
                     'kpiId' => $kpiId,
                     'sectionScore' => $sectionScore
                 ]);
-                return redirect()->route('metric.index', compact('kpiId', 'sectionScore','id'))->with('toast_success', 'Metric created successfully.');
+                return redirect()->route('metric.index', compact('kpiId', 'sectionScore', 'id'))->with('toast_success', 'Metric created successfully.');
             }
 
             // Log unsuccessful response
@@ -168,7 +168,7 @@ class MetricController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -220,7 +220,7 @@ class MetricController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -266,7 +266,7 @@ class MetricController extends Controller
                 $kpiId = $request->input('kpiId');
                 $sectionMetricScore = $request->input('sectionMetricScore');
                 $id = $sectionId;
-                return redirect()->route('metric.index', compact('kpiId','sectionMetricScore', 'id'))->with('toast_success', 'Metric updated successfully.');
+                return redirect()->route('metric.index', compact('kpiId', 'sectionMetricScore', 'id'))->with('toast_success', 'Metric updated successfully.');
             }
 
             // Log unsuccessful response
@@ -285,7 +285,7 @@ class MetricController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -322,7 +322,7 @@ class MetricController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 

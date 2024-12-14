@@ -75,7 +75,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 
@@ -128,21 +128,20 @@ class DashboardController extends Controller
                 //     'section_count' => $totalSectionCount
                 // ];
 
-                    if (empty($kpis)) {
+                if (empty($kpis)) {
 
-                        $employeeKpi = null;
-                    } else {
+                    $employeeKpi = null;
+                } else {
 
-                        foreach($kpis as $kpi){
-                            $employeeKpi = [
-                                'id' => $kpi['kpiId'],
-                                // 'batch_id' => $kpi['batchId'],
-                                'kpi_name' => $kpi['kpiName'],
-                                // 'section_count' => count($kpi['sections'])
-                            ];
-
-                        }
+                    foreach ($kpis as $kpi) {
+                        $employeeKpi = [
+                            'id' => $kpi['kpiId'],
+                            // 'batch_id' => $kpi['batchId'],
+                            'kpi_name' => $kpi['kpiName'],
+                            // 'section_count' => count($kpi['sections'])
+                        ];
                     }
+                }
 
 
 
@@ -169,7 +168,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 
@@ -245,7 +244,7 @@ class DashboardController extends Controller
     //             'message' => $e->getMessage(),
     //             'trace' => $e->getTraceAsString()
     //         ]);
-    //         return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+    //         return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
     //     }
     // }
 
@@ -267,7 +266,7 @@ class DashboardController extends Controller
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve Appraisal, <b>Contact Application Support for Assistance</b>');
             }
 
             // Decode the response into an object
@@ -373,7 +372,7 @@ class DashboardController extends Controller
                     'trace' => $e->getTraceAsString()
                 ]
             );
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 
@@ -454,7 +453,7 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 
@@ -528,7 +527,7 @@ class DashboardController extends Controller
                     'trace' => $e->getTraceAsString()
                 ]
             );
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 
