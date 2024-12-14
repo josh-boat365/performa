@@ -95,24 +95,45 @@
                                                             </div>
                                                         </form>
 
+
                                                         {{-- Supervisor Comment and Score when Supervisor has submitted their scores --}}
                                                         @if (isset($section->sectionEmpScore))
-                                                            <span class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
-                                                                    Score and Comment</strong></span>
-                                                            <div class="d-flex gap-3">
-                                                                <div class="col-md-2">
-                                                                    <input class="form-control mb-3" type="number"
-                                                                        readonly name="metricSupScore"
-                                                                        placeholder="Enter Score" required
-                                                                        value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? '' }}">
+                                                            @if ($section->sectionEmpScore->status === 'CONFIRMATION' || $section->sectionEmpScore->status === 'COMPLETED')
+                                                                <span
+                                                                    class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
+                                                                        Score and Comment</strong></span>
+                                                                <div class="d-flex gap-3">
+                                                                    <div class="col-md-2">
+                                                                        <input class="form-control mb-3" type="number"
+                                                                            readonly name="metricSupScore"
+                                                                            placeholder="Enter Score" required
+                                                                            value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? '' }}">
+                                                                    </div>
+                                                                    <div class="col-md-9">
+                                                                        <input class="form-control mb-3" type="text"
+                                                                            readonly name="supervisorComment"
+                                                                            placeholder="Enter your comments" required
+                                                                            value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
+                                                                    </div>
                                                                 </div>
-                                                                <div class="col-md-9">
-                                                                    <input class="form-control mb-3" type="text"
-                                                                        readonly name="supervisorComment"
-                                                                        placeholder="Enter your comments" required
-                                                                        value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
+                                                            @elseif(isset($section->sectionEmpScore) && $section->sectionEmpScore->prob == true)
+                                                                <span class="mb-2 badge rounded-pill bg-dark"><strong>Probing
+                                                                        Score and Comment</strong></span>
+                                                                <div class="d-flex gap-3">
+                                                                    <div class="col-md-2">
+                                                                        <input class="form-control mb-3" type="number"
+                                                                            readonly name="metricSupScore"
+                                                                            placeholder="Enter Score" required
+                                                                            value="{{ optional($section->sectionEmpScore)->sectionProbScore ?? '' }}">
+                                                                    </div>
+                                                                    <div class="col-md-9">
+                                                                        <input class="form-control mb-3" type="text"
+                                                                            readonly name="supervisorComment"
+                                                                            placeholder="Enter your comments" required
+                                                                            value="{{ $section->sectionEmpScore->probComment ?? '' }}">
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                            @endif
                                                         @endif
                                                     @else
                                                         @foreach ($section->metrics as $metric)
