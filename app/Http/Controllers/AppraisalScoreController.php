@@ -11,7 +11,7 @@ class AppraisalScoreController extends Controller
 
     public function store(Request $request)
     {
-        dd($request);
+        // dd($request);
         try {
             // Initialize a variable for the success message
             $successMessage = '';
