@@ -284,7 +284,7 @@
                                                     <div class="d-grid">
                                                         <div class="mt-5">
                                                             <button type="submit" id="submitReviewButton"
-                                                                class="btn btn-success" disabled>Submit Appraisal For
+                                                                class="btn btn-success">Submit Appraisal For
                                                                 Review</button>
                                                         </div>
                                                     </div>
