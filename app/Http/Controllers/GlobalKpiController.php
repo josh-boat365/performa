@@ -120,7 +120,7 @@ class GlobalKpiController extends Controller
             'response' => $response->data ?? 'No response received',
         ]);
 
-        return redirect()->back()->with('toast_error', 'Sorry, failed to create KPI'. $response->body());
+        return redirect()->back()->with('toast_error', 'Sorry, failed to create KPI' . $response->body());
     }
 
     /**
@@ -164,7 +164,7 @@ class GlobalKpiController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
     /**
@@ -216,7 +216,7 @@ class GlobalKpiController extends Controller
             'response' => $response->data ?? 'No response received',
         ]);
 
-        return redirect()->back()->with('toast_error', 'Sorry, failed to update Global KPI'. $response->body());
+        return redirect()->back()->with('toast_error', 'Sorry, failed to update Global KPI' . $response->body());
     }
 
 
@@ -262,7 +262,7 @@ class GlobalKpiController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 
@@ -292,7 +292,7 @@ class GlobalKpiController extends Controller
 
             // Make the PUT request to the external API
             $response = Http::withToken($accessToken)
-                ->put("http://192.168.1.200:5123/Appraisal/Kpi/update-type/",$batchData);
+                ->put("http://192.168.1.200:5123/Appraisal/Kpi/update-type/", $batchData);
             // dd($response);
             // Check the response status and return appropriate response
             if ($response->successful()) {
@@ -311,7 +311,7 @@ class GlobalKpiController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 
@@ -347,7 +347,7 @@ class GlobalKpiController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 

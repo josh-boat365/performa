@@ -119,7 +119,7 @@ class GlobalMetricController extends Controller
                 'response' => $response->body(),
             ]);
 
-            return redirect()->back()->with('toast_error', 'Sorry, failed to create Metric.'. $response->body());
+            return redirect()->back()->with('toast_error', 'Sorry, failed to create Metric.' . $response->body());
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while creating Metric', [
@@ -129,7 +129,7 @@ class GlobalMetricController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -186,7 +186,7 @@ class GlobalMetricController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -246,7 +246,7 @@ class GlobalMetricController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -283,7 +283,7 @@ class GlobalMetricController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 

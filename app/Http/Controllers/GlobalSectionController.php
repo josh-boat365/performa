@@ -13,7 +13,7 @@ class GlobalSectionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request )
+    public function index(Request $request)
     {
         try {
             // Fetch sections data using helper method
@@ -115,7 +115,7 @@ class GlobalSectionController extends Controller
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to Global create Section'. $response->body());
+                return redirect()->back()->with('toast_error', 'Sorry, failed to Global create Section' . $response->body());
             }
         } catch (\Exception $e) {
             // Log the exception
@@ -123,7 +123,7 @@ class GlobalSectionController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 
@@ -168,7 +168,7 @@ class GlobalSectionController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -228,7 +228,7 @@ class GlobalSectionController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -265,7 +265,7 @@ class GlobalSectionController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 

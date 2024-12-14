@@ -84,7 +84,7 @@ class AuthController extends Controller
             RateLimiter::hit($throttleKey, $decayMinutes * 60);
 
             // Return specific error message for no internet connection
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         } catch (\Exception $e) {
             // Log the exception details for other errors
             Log::error('Error during authentication', [

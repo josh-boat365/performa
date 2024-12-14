@@ -31,7 +31,7 @@ class GlobalWeightController extends Controller
         // Filter the KPIs to include only those with active state of true or false
         $active = collect($responseWeight)->filter(function ($kpi) {
             return ($kpi->kpi?->type == 'GLOBAL' || $kpi->kpi?->type == 'PROBATION')
-            && $kpi->kpi?->active == true;
+                && $kpi->kpi?->active == true;
         });
 
 
@@ -159,7 +159,7 @@ class GlobalWeightController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -219,7 +219,7 @@ class GlobalWeightController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -255,7 +255,7 @@ class GlobalWeightController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 

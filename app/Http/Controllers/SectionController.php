@@ -22,7 +22,7 @@ class SectionController extends Controller
 
             // Filter the KPIs to include only those with active state of true
             $activeSections = collect($sectionsResponse)->filter(function ($section) use ($id) {
-                return $section->kpi->id == $id && $section->kpi->type === 'REGULAR' ;
+                return $section->kpi->id == $id && $section->kpi->type === 'REGULAR';
             });
             // Sort the KPIs to place the newly created one first
 
@@ -42,7 +42,7 @@ class SectionController extends Controller
 
 
 
-            return view('section-setup.index', compact('sections','kpiId', 'kpiScore', 'totalSectionScore'));
+            return view('section-setup.index', compact('sections', 'kpiId', 'kpiScore', 'totalSectionScore'));
         } catch (\Exception $e) {
             Log::error('Exception occurred in index method', [
                 'message' => $e->getMessage(),
@@ -164,7 +164,7 @@ class SectionController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 
@@ -208,7 +208,7 @@ class SectionController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -219,7 +219,7 @@ class SectionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $kpiId ,$id)
+    public function update(Request $request, $kpiId, $id)
     {
         // Validate the request data
         $request->validate([
@@ -271,7 +271,7 @@ class SectionController extends Controller
 
             return redirect()->back()->with(
                 'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact IT</b>'
+                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
             );
         }
     }
@@ -308,7 +308,7 @@ class SectionController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact IT</b>');
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 
