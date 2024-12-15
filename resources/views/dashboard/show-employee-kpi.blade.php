@@ -25,9 +25,9 @@
                             <h4>{{ $employeeKpi['kpi_name'] }}</h4>
                         </a>
                         <div>
-                            {{--  <span class="badge rounded-pill bg-dark font-size-13">Number of KPIS</span>  --}}
-                            {{--  <span
-                            class="badge rounded-pill bg-primary font-size-13">{{ $employeeKpi['section_count'] }}</span>  --}}
+                            <span class="badge rounded-pill bg-dark font-size-13">Number of KPIS</span>
+                            <span
+                                class="badge rounded-pill bg-primary font-size-13">{{ $employeeKpi['section_count'] }}</span>
                             <!-- Display section count -->
                         </div>
                         <div>
@@ -37,13 +37,33 @@
                             </a>
                         </div>
                     </div>
-                    {{--  <div class="mt-3">
-                    <div class="progress">
-                        <div class="progress-bar progress-bar-animated progress-bar-striped" role="progressbar"
-                            style="width: {{ session('progress') }}%; font-weight: 900;" aria-valuenow="0" aria-valuemin="0"
-                            aria-valuemax="{{ session('progress') }}">{{ session('progress') }}%</div>
+                    @php
+                        function getBadgeDetails($status)
+                        {
+                            return match ($status) {
+                                'PENDING' => ['class' => 'bg-dark', 'text' => 'PENDING'],
+                                'REVIEW' => ['class' => 'bg-warning', 'text' => 'REVIEW'],
+                                'CONFIRMATION' => ['class' => 'bg-primary', 'text' => 'CONFIRMATION'],
+                                'COMPLETED' => ['class' => 'bg-success', 'text' => 'COMPLETED'],
+                                'PROBLEM' => ['class' => 'bg-danger', 'text' => 'PROBE'],
+                                default => ['class' => 'bg-secondary', 'text' => 'PENDING'],
+                            };
+                        }
+                        $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
+                    @endphp
+
+
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between">
+                            <h5>Grade: <b>{{ $gradeDetails['grade'] ?? '___' }}</b></h5>
+                            <h5>Score: <b>{{ $gradeDetails['kpiScore'] ?? '___' }}</b></h5>
+                            <h5>Remark: <b>{{ $gradeDetails['remark'] ?? '___' }}</b></h5>
+                            <h5>Status: <b><span class="badge rounded-pill {{ $badgeDetails['class'] }}">
+                                        {{ $badgeDetails['text'] }}
+                                    </span></b>
+                            </h5>
+                        </div>
                     </div>
-                </div>  --}}
                 </div>
             @else
                 <div class="card card-body mb-10">
