@@ -50,19 +50,19 @@ class SupervisorScoreController extends Controller
             'batchId' => (int) $batchId
         ];
 
-        // dd($data);
+
         try {
-            // Make the GET request to the external API to get KPIs for the specified batch ID
+
             $response = Http::withToken($accessToken)
                 ->put("http://192.168.1.200:5123/Appraisal/Kpi/GetSupervisorScoringKpi", $data);
 
             // dd($response);
-            // Check if the response is successful
+
             if ($response->successful()) {
-                // Decode the response into an array of KPIs
+
                 $kpis = $response->object();
 
-                // Initialize an empty collection for active appraisals
+
                 $appraisal = collect();
 
                 // Process each KPI
@@ -95,7 +95,6 @@ class SupervisorScoreController extends Controller
 
 
 
-                // Return the KPI names and section counts to the view
                 return view("dashboard.supervisor.score-employee-form", compact('appraisal'));
             } else {
                 // Log the error response
@@ -106,7 +105,7 @@ class SupervisorScoreController extends Controller
                 return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve Employee Appraisal, <b>Contact Application Support for Assistance</b>');
             }
         } catch (\Exception $e) {
-            // Log the exception
+
             Log::error('Exception occurred while retrieving KPIs', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -127,53 +126,45 @@ class SupervisorScoreController extends Controller
             'batchId' => (int) $batchId
         ];
 
-        // dd($data);
+
         try {
-            // Make the GET request to the external API to get KPIs for the specified batch ID
+
             $response = Http::withToken($accessToken)
                 ->put("http://192.168.1.200:5123/Appraisal/Kpi/GetProbScoringKpi", $data);
 
-            // dd($response);
-            // Check if the response is successful
+
             if ($response->successful()) {
-                // Decode the response into an array of KPIs
-                $kpi = $response->object();
 
-                // dd($kpi);
+                $kpis = $response->object();
 
-                // Filter the KPIs to include only those with active state of true or false
-                $appraisal = collect($kpi)->filter(function ($kpi) {
-                    // Check if the KPI is active
+
+                $appraisal = collect();
+
+                // Process each KPI
+                foreach ($kpis as $kpi) {
                     if ($kpi->kpiActive) {
-                        // Filter sections that are active
+                        // Filter active sections
                         $activeSections = collect($kpi->sections)->filter(function ($section) {
-                            return $section->sectionActive; // Only include active sections
+                            return $section->sectionActive;
                         });
 
-                        // If there are no active sections, return false
-                        if ($activeSections->isEmpty()) {
-                            return false;
-                        }
-
-                        // Filter metrics within the active sections
+                        // Transform sections to include metrics, even if none are active
                         $activeSections->transform(function ($section) {
+                            // Filter metrics within the section
                             $section->metrics = collect($section->metrics)->filter(function ($metric) {
-                                return $metric->metricActive; // Only include active metrics
+                                return $metric->metricActive;
                             });
-
-                            // Return the section only if it has active metrics
-                            return $section->metrics->isNotEmpty() ? $section : null;
+                            // Return the section regardless of whether it has active metrics
+                            return $section;
                         });
 
-                        // Remove null sections (those without active metrics)
-                        $activeSections = $activeSections->filter();
-
-                        // Return true if there are any active sections with active metrics
-                        return $activeSections->isNotEmpty();
+                        // Add the KPI and its sections to the appraisal
+                        $appraisal->push((object) [
+                            'kpi' => $kpi,
+                            'activeSections' => $activeSections
+                        ]);
                     }
-
-                    return false; // If KPI is not active, return false
-                });
+                }
 
                 // dd($appraisal);
 
@@ -349,6 +340,7 @@ class SupervisorScoreController extends Controller
 
             // Check if the response is successful
             if ($response->status() === 200) {
+                // dd($response);
                 // Return success message
                 return back()->with('toast_success', $successMessage);
             } else {

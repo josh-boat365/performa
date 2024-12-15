@@ -341,11 +341,11 @@
                                                         value="{{ $kpi->kpi->batchId }}">
                                                     <input type="hidden" name="status" value="REVIEW">
                                                     <div class="d-grid">
-                                                        <div class="mt-5">
+
                                                             <button type="submit" id="submitReviewButton"
                                                                 class="btn btn-success">Submit Appraisal For
                                                                 Review</button>
-                                                        </div>
+                                                        
                                                     </div>
                                                 </form>
                                             </div>
