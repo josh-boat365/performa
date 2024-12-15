@@ -172,81 +172,6 @@ class DashboardController extends Controller
         }
     }
 
-    // public function editEmployeeKpi(Request $request, $id)
-    // {
-
-    //     // Get the access token from the session
-    //     $accessToken = session('api_token');
-
-    //     try {
-    //         // Make the GET request to the external API to get KPIs for the specified batch ID
-    //         $response = Http::withToken($accessToken)
-    //             ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
-
-    //         // Check if the response is successful
-    //         if ($response->successful()) {
-    //             // Decode the response into an array of KPIs
-    //             $kpi = $response->object();
-
-    //             // dd($kpi);
-    //             $batchId = $kpi[0]->batchId;
-
-    //             // Filter the KPIs to include only those with active state of true or false
-    //             $appraisal = collect($kpi)->filter(function ($kpi) {
-    //                 // Check if the KPI is active
-    //                 if ($kpi->kpiActive) {
-    //                     // Filter sections that are active
-    //                     $activeSections = collect($kpi->sections)->filter(function ($section) {
-    //                         return $section->sectionActive; // Only include active sections
-    //                     });
-
-    //                     // If there are no active sections, return false
-    //                     if ($activeSections->isEmpty()) {
-    //                         return false;
-    //                     }
-
-    //                     // Filter metrics within the active sections
-    //                     $activeSections->transform(function ($section) {
-    //                         $section->metrics = collect($section->metrics)->filter(function ($metric) {
-    //                             return $metric->metricActive; // Only include active metrics
-    //                         });
-
-    //                         // Return the section only if it has active metrics
-    //                         return $section->metrics->isNotEmpty() ? $section : null;
-    //                     });
-
-    //                     // Remove null sections (those without active metrics)
-    //                     $activeSections = $activeSections->filter();
-
-    //                     // Return true if there are any active sections with active metrics
-    //                     return $activeSections->isNotEmpty();
-    //                 }
-
-    //                 return false; // If KPI is not active, return false
-    //             });
-
-
-
-
-    //             // Return the KPI names and section counts to the view
-    //             return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId'));
-    //         } else {
-    //             // Log the error response
-    //             Log::error('Failed to retrieve KPIs', [
-    //                 'status' => $response->status(),
-    //                 'response' => $response->body()
-    //             ]);
-    //             return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
-    //         }
-    //     } catch (\Exception $e) {
-    //         // Log the exception
-    //         Log::error('Exception occurred while retrieving KPIs', [
-    //             'message' => $e->getMessage(),
-    //             'trace' => $e->getTraceAsString()
-    //         ]);
-    //         return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
-    //     }
-    // }
 
 
 
@@ -275,7 +200,7 @@ class DashboardController extends Controller
             // Initialize an empty collection for active appraisals
             $appraisal = collect();
 
-            // Process each KPI
+
             // Process each KPI
             foreach ($kpis as $kpi) {
                 if ($kpi->kpiActive) {
@@ -284,17 +209,14 @@ class DashboardController extends Controller
                         return $section->sectionActive;
                     });
 
-                    // Transform sections to include metrics, even if none are active
                     $activeSections->transform(function ($section) {
-                        // Filter metrics within the section
                         $section->metrics = collect($section->metrics)->filter(function ($metric) {
                             return $metric->metricActive;
                         });
-                        // Return the section regardless of whether it has active metrics
                         return $section;
                     });
 
-                    // Add the KPI and its sections to the appraisal
+
                     $appraisal->push((object) [
                         'kpi' => $kpi,
                         'activeSections' => $activeSections
@@ -307,14 +229,14 @@ class DashboardController extends Controller
 
 
             foreach ($kpis as $kpi) {
-                // Check if the KPI type is "REGULAR"
+
                 if ($kpi->kpiType === "REGULAR") {
-                    // Check if there are sections
+
                     if (!empty($kpi->sections)) {
-                        // Get the status of the first section's employee score
+
                         $firstSection = $kpi->sections[0];
                         $status = $firstSection->sectionEmpScore->status ?? 'PENDING';
-                        // Output the KPI name and the first section's status
+
                         $kpiStatus = $status;
                         $batchId = $kpi->batchId;
                         $employeeId = $kpi->employeeId;
@@ -327,15 +249,12 @@ class DashboardController extends Controller
                 'employeeId' => $employeeId
             ];
 
-            // dd($grade_data);
-
-            // dd(session('employee_id'));
 
             $employeeGrade =
                 Http::withToken($accessToken)
                 ->put("http://192.168.1.200:5123/Appraisal/Score/employee-total-kpiscore", $grade_data);
 
-            // Get the batch ID from the first KPI if available
+
             $batchId = $appraisal->isNotEmpty() ? $appraisal->first()->kpi->batchId : null;
 
             if ($employeeGrade->successful() && !empty($employeeGrade->object())) {
@@ -353,8 +272,6 @@ class DashboardController extends Controller
                     'remark' => null,
                     'status' => $kpiStatus
                 ];
-                // Return the KPI names and section counts to the view
-                // return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails'));
             }
 
             // dd($gradeDetails);
@@ -482,6 +399,7 @@ class DashboardController extends Controller
             // Initialize an empty collection for active appraisals
             $appraisal = collect();
 
+
             // Process each KPI
             foreach ($kpis as $kpi) {
                 if ($kpi->kpiActive) {
@@ -490,26 +408,22 @@ class DashboardController extends Controller
                         return $section->sectionActive;
                     });
 
-                    // Filter metrics within the active sections
                     $activeSections->transform(function ($section) {
                         $section->metrics = collect($section->metrics)->filter(function ($metric) {
-                            return $metric->metricActive;
-                        });
-                        return $section->metrics->isNotEmpty() ? $section : null;
+                                return $metric->metricActive;
+                            });
+                        return $section;
                     });
 
-                    // Remove null sections (those without active metrics)
-                    $activeSections = $activeSections->filter();
 
-                    // If there are active sections with active metrics, add to appraisal
-                    if ($activeSections->isNotEmpty()) {
-                        $appraisal->push((object) [
-                            'kpi' => $kpi,
-                            'activeSections' => $activeSections
-                        ]);
-                    }
+                    $appraisal->push((object) [
+                        'kpi' => $kpi,
+                        'activeSections' => $activeSections
+                    ]);
                 }
             }
+
+
 
             // Get the batch ID from the first KPI if available
             $batchId = $appraisal->isNotEmpty() ? $appraisal->first()->kpi->batchId : null;
