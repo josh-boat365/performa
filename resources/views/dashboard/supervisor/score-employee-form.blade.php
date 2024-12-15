@@ -22,14 +22,22 @@
                     <div class="card-body">
                         <h4 class="card-title mb-4">Supervisor Evaluation Form</h4>
 
+                        <div id="pagination-count" class=" text-center mb-3">
+                            <span><b>Current Page</b></span>
+                            <span class="badge rounded-pill bg-primary" id="current-page">1</span>/ <span><b>Last
+                                    Page</b></span><span class="badge rounded-pill bg-dark" id="total-pages">1</span>
+                        </div>
+
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
-                                    @foreach ($appraisal as $kpi)
+                                    @foreach ($appraisal as $index => $kpi)
                                         <div class="kpi">
 
-                                            @foreach ($kpi->activeSections as $section)
-                                                <div class="card border border-primary" style="border-radius: 10px; ">
+                                            @foreach ($kpi->activeSections as $sectionIndex => $section)
+                                                <div class="card border border-primary section-tab" @style(['border-radius: 10px;'])
+                                                    @style(['border-radius: 10px; display: none;'])
+                                                    data-section-page="{{ floor($sectionIndex / 3) }}">
                                                     <div class="card-body"
                                                         style=" {{ $section->metrics->isEmpty() ? 'background-color: #0000ff0d;' : '' }}">
                                                         <div class="section-card" style="margin-top: 2rem;">
@@ -203,9 +211,14 @@
                                 <div></div>
                             @else
                                 <div class="float-end">
-                                    <button type="button" data-bs-toggle="modal" class="btn btn-primary"
-                                        data-bs-target=".bs-delete-modal-lg" id="submitAppraisalButton"
-                                        disabled>Submit Appraisal</button>
+                                    <div class="d-flex gap-3 pagination-controls">
+                                        <button id="prev-btn" class="btn btn-dark" disabled>Previous</button>
+                                        <button id="next-btn" class="btn btn-primary">Next</button>
+
+                                        <button id="submit-btn" type="button" data-bs-toggle="modal"
+                                            class="btn btn-success" data-bs-target=".bs-delete-modal-lg"
+                                            id="submitAppraisalButton" disabled>Submit Appraisal</button>
+                                    </div>
                                 </div>
 
                                 <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
@@ -234,11 +247,11 @@
                                                     <input type="hidden" name="status" value="CONFIRMATION">
                                                     <div class="d-grid">
 
-                                                            <button type="submit" id="submitReviewButton"
-                                                                class="btn btn-success">Submit
-                                                                Employee Appraisal
-                                                                For Confirmation</button>
-                                                    
+                                                        <button type="submit" id="submitReviewButton"
+                                                            class="btn btn-success">Submit
+                                                            Employee Appraisal
+                                                            For Confirmation</button>
+
                                                     </div>
                                                 </form>
                                             </div>
@@ -247,24 +260,88 @@
                                 </div>
                             @endif
 
-                            <script>
-                                // Function to check if all score inputs are filled
-                                function checkInputs() {
-                                    const scoreInputs = document.querySelectorAll('input[type="number"][name*="SupScore"]');
-                                    const allFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                            @push('scripts')
+                                <script>
+                                    // Function to check if all score inputs are filled
+                                    function checkInputs() {
+                                        const scoreInputs = document.querySelectorAll('input[type="number"][name*="SupScore"]');
+                                        const allFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
 
-                                    // Enable or disable the submit button based on input values
-                                    document.getElementById('submitAppraisalButton').disabled = !allFilled;
-                                }
+                                        // Enable or disable the submit button based on input values
+                                        document.getElementById('submitAppraisalButton').disabled = !allFilled;
+                                    }
 
-                                // Attach event listeners to all score inputs
-                                document.querySelectorAll('input[type="number"][name*="SupScore"]').forEach(input => {
-                                    input.addEventListener('input', checkInputs);
-                                });
+                                    // Attach event listeners to all score inputs
+                                    document.querySelectorAll('input[type="number"][name*="SupScore"]').forEach(input => {
+                                        input.addEventListener('input', checkInputs);
+                                    });
 
-                                // Initial check in case inputs are pre-filled
-                                checkInputs();
-                            </script>
+                                    // Initial check in case inputs are pre-filled
+                                    checkInputs();
+                                </script>
+
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const sections = document.querySelectorAll('.section-tab');
+                                        const prevBtn = document.getElementById('prev-btn');
+                                        const nextBtn = document.getElementById('next-btn');
+                                        const submitBtn = document.getElementById('submit-btn');
+                                        const currentPageSpan = document.getElementById('current-page');
+                                        const totalPagesSpan = document.getElementById('total-pages');
+                                        let currentPage = parseInt(localStorage.getItem('currentPage') || 0);
+                                        const sectionsPerPage = 3;
+                                        const totalPages = Math.ceil(sections.length / sectionsPerPage);
+
+                                        // Initialize Pagination Count
+                                        totalPagesSpan.textContent = totalPages;
+
+                                        function showPage(page) {
+                                            sections.forEach(section => {
+                                                section.style.display = 'none';
+                                            });
+                                            const start = page * sectionsPerPage;
+                                            const end = start + sectionsPerPage;
+                                            for (let i = start; i < end && i < sections.length; i++) {
+                                                sections[i].style.display = 'block';
+                                            }
+                                            prevBtn.disabled = page === 0;
+                                            nextBtn.disabled = page === totalPages - 1;
+                                            submitBtn.disabled = totalPages > 1 && page !== totalPages - 1;
+
+                                            currentPageSpan.textContent = page + 1; // Update current page display
+                                            localStorage.setItem('currentPage', page); // Save the current page to localStorage
+                                        }
+
+                                        prevBtn.addEventListener('click', function() {
+                                            if (currentPage > 0) {
+                                                currentPage--;
+                                                showPage(currentPage);
+                                            }
+                                        });
+
+                                        nextBtn.addEventListener('click', function() {
+                                            if (currentPage < totalPages - 1) {
+                                                currentPage++;
+                                                showPage(currentPage);
+                                            }
+                                        });
+
+                                        // Attach event listener to forms to keep the page after submission
+                                        const scoreForms = document.querySelectorAll('.score-form');
+                                        scoreForms.forEach(form => {
+                                            form.addEventListener('submit', function() {
+                                                localStorage.setItem('currentPage',
+                                                    currentPage); // Save the current page before form submission
+                                            });
+                                        });
+
+                                        // Show the page on load
+                                        showPage(currentPage);
+                                    });
+                                </script>
+                            @endpush
+
 
 
                         </div>
