@@ -161,7 +161,6 @@
                                                                                 </h5>
                                                                                 <p>{{ $metric->metricDescription }}</p>
 
-
                                                                                 <div class="d-flex gap-3">
                                                                                     <div class="col-md-2">
                                                                                         <input
@@ -268,7 +267,8 @@
                                                                                                     title="The Score can not be more than the metric score {{ $metric->metricScore }}"
                                                                                                     placeholder="Enter Score"
                                                                                                     required
-                                                                                                    value"{{ optional($metric->metricEmpScore)->metricProbScore == 0 ? '' : optional($metric->metricEmpScore)->metricProbScore }}">
+                                                                                                    {{--  value"{{ optional($metric->metricEmpScore)->metricProbScore === 0 ? '' : optional($metric->metricEmpScore)->metricProbScore }}">  --}}
+                                                                                                    value="{{ optional($metric->metricEmpScore)->metricProbScore ?: '' }}">
                                                                                             </div>
                                                                                             <div class="col-md-9">
                                                                                                 <input
