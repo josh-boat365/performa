@@ -22,16 +22,11 @@
                     <div class="card-body">
                         <h4 class="card-title mb-4">Supervisor Evaluation Form</h4>
 
-                        @if (in_array($kpiStatus, ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))
-                            <div></div>
-                        @else
-                            <div id="pagination-count" class=" text-center mb-3">
-                                <span><b>Current Page</b></span>
-                                <span class="badge rounded-pill bg-primary" id="current-page">1</span>/ <span><b>Last
-                                        Page</b></span><span class="badge rounded-pill bg-dark"
-                                    id="total-pages">1</span>
-                            </div>
-                        @endif
+                        <div id="pagination-count" class=" text-center mb-3">
+                            <span><b>Current Page</b></span>
+                            <span class="badge rounded-pill bg-primary" id="current-page">1</span>/ <span><b>Last
+                                    Page</b></span><span class="badge rounded-pill bg-dark" id="total-pages">1</span>
+                        </div>
 
                         <div class="p-3 text-muted">
                             <div id="kpi-form">

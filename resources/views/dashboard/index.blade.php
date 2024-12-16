@@ -18,7 +18,7 @@
             <div class="col-xl-6">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title mb-4">Your Appraisal Grades</h4>
+                        <h4 class="card-title mb-4">Your Kpi Grades</h4>
 
                         {{--  <div id="column_chart_datalabel" data-colors='["--bs-primary"]' class="apex-charts"
                             dir="ltr"></div>  --}}
@@ -35,7 +35,7 @@
             <div class="col-xl-6">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title mb-4">Participated Appraisals</h4>
+                        <h4 class="card-title mb-4">Participated KPIs</h4>
 
                         <span class="badge rounded-pill bg-primary py-1">{{ $employeeKpi['batch_name'] }}</span>
 
@@ -132,7 +132,7 @@
                     },
                     yaxis: {
                         title: {
-                            text: "Scores"
+                            text: "Grades"
                         }
                     },
                     fill: {

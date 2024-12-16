@@ -162,8 +162,7 @@ class DashboardController extends Controller
 
                 // Filter batches to get only those with status "OPEN" and active state true
                 $batch = array_filter($batches, function ($batch) {
-                    // return $batch['status'] === 'OPEN' && $batch['active'] === true;
-                    return  $batch['active'] === true;
+                    return $batch['status'] === 'OPEN' && $batch['active'] === true;
                 });
 
                 $activeBatches = [];
@@ -173,12 +172,11 @@ class DashboardController extends Controller
                     $activeBatches = [
                         'id' => $activeBatch['id'],
                         'batch_name' => $activeBatch['name'],
-                        'status' => $activeBatch['status']
                     ];
                 }
 
 
-                // dd($activeBatches);
+                // dd($activeBatch['id']);
 
 
 
@@ -306,7 +304,7 @@ class DashboardController extends Controller
 
 
             // Return the KPI names and section counts to the view
-            return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails', 'kpiStatus'));
+            return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails'));
         } catch (\Exception $e) {
             // Log the exception
             Log::error(

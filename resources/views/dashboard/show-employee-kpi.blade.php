@@ -24,15 +24,16 @@
                         <a href="{{ route('show.employee.kpi', $employeeKpi['id']) }}">
                             <h4>{{ $employeeKpi['kpi_name'] }}</h4>
                         </a>
-                        {{--  <div>
+                        <div>
                             <span class="badge rounded-pill bg-dark font-size-13">Number of KPIS</span>
-                            <!-- Display section count -->
                             <span
                                 class="badge rounded-pill bg-primary font-size-13">{{ $employeeKpi['section_count'] }}</span>
-                        </div>  --}}
+                            <!-- Display section count -->
+                        </div>
                         <div>
                             <a href="{{ route('show.employee.kpi', $employeeKpi['id']) }}">
-                                <span class="badge rounded-pill bg-dark font-size-13">Click to Open</span>
+                                <span class="badge rounded-pill bg-dark font-size-13"><i class="bx bx-show-alt"></i>Open
+                                    kpi</span>
                             </a>
                         </div>
                     </div>

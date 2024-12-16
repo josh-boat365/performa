@@ -22,45 +22,30 @@
                         <a href="{{ route('show.batch.kpi', $activeBatches['id']) }}">
                             <h4>{{ $activeBatches['batch_name'] }}</h4>
                         </a>
-
                         <div>
-                            <span class="badge rounded-pill font-size-13 bg-dark">
-                                Status:
-                            </span>
-                            @if($activeBatches['status'] == 'PENDING')
-                            <span class="badge rounded-pill font-size-13 bg-warning">
-                                {{ $activeBatches['status'] }}
-                            </span>
-                            @elseif($activeBatches['status'] == 'OPEN')
-                            <span class="badge rounded-pill font-size-13 bg-primary">
-                                {{ $activeBatches['status'] }}
-                            </span>
-                            @else
-                              <span class="badge rounded-pill font-size-13 bg-dark">
-                                {{ $activeBatches['status'] }}
-                            </span>
-                            @endif
+                            <span class="badge rounded-pill bg-dark fonte-size-13">Global Kpi</span>
+                            <span
+                                class="badge rounded-pill bg-primary fonte-size-13">Personal Kpi</span>
+                            <!-- Display section count -->
                         </div>
-
                         <div>
                             <a href="{{ route('show.batch.kpi', $activeBatches['id']) }}">
-                                <span class="badge rounded-pill bg-dark font-size-13">Click to
-                                    Open Batch</span>
+                                <span class="badge rounded-pill bg-dark fonte-size-13"><i
+                                        class="bx bx-show-alt"></i>Open Batch</span>
                             </a>
                         </div>
                     </div>
+
                 </div>
+            @else
+                <div class="card card-body">
+                    <div class="d-flex justify-content-between">
+                        <h3>No Active Appraisals Available </h3>
+                    </div>
+                </div>
+            @endif
 
         </div>
-    @else
-        <div class="card card-body">
-            <div class="d-flex justify-content-between">
-                <h3>No Active Appraisals Available </h3>
-            </div>
-        </div>
-        @endif
-
-    </div>
 
 
 
