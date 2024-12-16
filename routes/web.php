@@ -34,7 +34,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 
 Route::group(
-    ['middleware' => ['session.notfound']],
+    ['middleware' => ['session.timeout']],
     function () {
 
         //Employee KPI Setup
