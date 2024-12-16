@@ -216,6 +216,102 @@ class DashboardController extends Controller
         }
     }
 
+
+    public function showEmployeeKpi()
+    {
+        // dd($id);
+        // Get the access token from the session
+        $accessToken = session('api_token');
+
+        try {
+            // Make the GET request to the external API to get KPIs for the specified batch ID
+            $response = Http::withToken($accessToken)
+                // ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
+                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee");
+
+
+            // Check if the response is successful
+            if ($response->successful()) {
+                // Decode the response into an array of KPIs
+                $kpis = $response->json();
+
+                // dd($kpis);
+                // $globalSectionCount = 0;
+                // $regularSectionCount = 0;
+
+                // Loop through each KPI
+                // foreach ($kpis as $kpi) {
+                //     // Check if the KPI type is GLOBAL
+                //     if ($kpi['kpiType'] === 'GLOBAL') {
+                //         // Count the number of sections for GLOBAL KPI
+                //         $globalSectionCount += count($kpi['sections']);
+                //     }
+
+                //     // Check if the KPI type is REGULAR
+                //     if ($kpi['kpiType'] === 'REGULAR') {
+                //         // Count the number of sections for REGULAR KPI
+                //         $regularSectionCount += count($kpi['sections']);
+                //     }
+                // }
+
+                // Calculate the total section count
+                // $totalSectionCount = $globalSectionCount + $regularSectionCount;
+
+                // Prepare the result
+                // $employeeKpi = [
+                //     'id' => $kpi['kpiId'],
+                //     'batch_id' => $kpi['batchId'],
+                //     'kpi_name' => $kpi['kpiName'],
+                //     'section_count' => $totalSectionCount
+                // ];
+
+                if (empty($kpis)) {
+
+                    $employeeKpi = null;
+                } else {
+
+                    foreach ($kpis as $kpi) {
+                        $employeeKpi = [
+                            'id' => $kpi['kpiId'],
+                            // 'batch_id' => $kpi['batchId'],
+                            'kpi_name' => $kpi['kpiName'],
+                            // 'section_count' => count($kpi['sections'])
+                        ];
+                    }
+                }
+
+
+
+
+                // dd($employeeKpi);
+
+
+
+
+
+                // Return the KPI names and section counts to the view
+                return view("dashboard.show-employee-kpi", compact('employeeKpi'));
+            } else {
+                // Log the error response
+                Log::error('Failed to retrieve KPIs', [
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
+            }
+        } catch (\Exception $e) {
+            // Log the exception
+            Log::error('Exception occurred while retrieving KPIs', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+        }
+    }
+
+
+
+
     public function editEmployeeKpi(Request $request, $id)
     {
         // Get the access token from the session
@@ -598,8 +694,8 @@ class DashboardController extends Controller
 
                     $activeSections->transform(function ($section) {
                         $section->metrics = collect($section->metrics)->filter(function ($metric) {
-                            return $metric->metricActive;
-                        });
+                                return $metric->metricActive;
+                            });
                         return $section;
                     });
 
