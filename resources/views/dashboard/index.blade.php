@@ -14,7 +14,7 @@
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
         <div class="row">
-            <div class="col-xl-6">
+            {{--  <div class="col-xl-6">
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title mb-4">Your Appraisal Grades</h4>
@@ -23,8 +23,8 @@
                             dir="ltr"></div>
                     </div>
                 </div><!--end card-->
-            </div>
-            <div class="col-xl-6">
+            </div>  --}}
+            <div class="col-xl-12">
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title mb-4">Participated Appraisals</h4>

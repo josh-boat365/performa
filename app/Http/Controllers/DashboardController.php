@@ -576,9 +576,14 @@ class DashboardController extends Controller
                         'kpi' => $kpi,
                         'activeSections' => $activeSections
                     ]);
-                    $firstSection = $kpi['sections'][0];
-                    $status = $firstSection['sectionEmpScore']['status'] ?? 'PENDING';
-                    $kpiStatus = $status;
+                    // Get the status of the first section safely
+                    if (!empty($kpi->sections)) {
+                        $firstSection = $kpi->sections[0];
+                        $status = $firstSection->sectionEmpScore->status ?? 'PENDING';
+                        $kpiStatus = $status;
+                    } else {
+                        $kpiStatus = 'PENDING'; // Handle the case where there are no sections
+                    }
                 }
             }
 
