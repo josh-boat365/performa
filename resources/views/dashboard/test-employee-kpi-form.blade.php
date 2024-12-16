@@ -72,6 +72,7 @@
                        @endif
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
+                            
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
                                     @foreach ($appraisal as $index => $kpi)
                                         <div class="kpi">
@@ -224,12 +225,12 @@
                                                                                             <input
                                                                                                 class="form-control mb-3"
                                                                                                 type="text"
-                                                                                                name="metricComment"
+                                                                                                name="employeeComment"
                                                                                                 placeholder="Enter your comments"
                                                                                                 @disabled(
                                                                                                     (isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION'])) ||
                                                                                                         (isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['COMPLETED', 'PROBLEM'])))
-                                                                                                value="{{ optional($metric->metricEmpScore)->metricComment ?? '' }}">
+                                                                                                value="{{ optional($metric->metricEmpScore)->employeeComment ?? '' }}">
                                                                                         </div>
                                                                                         @if (
                                                                                             !isset($metric->metricEmpScore) ||
