@@ -21,6 +21,8 @@
                     <div class="card-body">
                         <h4 class="card-title mb-4">Employee Probing Form</h4>
 
+                      
+
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
@@ -86,8 +88,7 @@
                                                                                 class="form-check-input" type="checkbox"
                                                                                 name="prob" id="checkProb"
                                                                                 value="true"
-                                                                                @checked(isset($section->sectionEmpScore) && $section->sectionEmpScore->prob === true)
-                                                                                >
+                                                                                @checked(isset($section->sectionEmpScore) && $section->sectionEmpScore->prob === true)>
                                                                         </div>
                                                                         <input type="hidden" name="scoreId"
                                                                             value="{{ $section->sectionEmpScore->id ?? '' }}">
