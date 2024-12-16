@@ -59,20 +59,19 @@
                     <div class="card-body">
                         <h4 class="card-title mb-4">Employee Evaluation Form</h4>
 
-                       @if(in_array($kpiStatus, ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))
-                        <div></div>
-                       @else
-
-                        <div id="pagination-count" class=" text-center mb-3">
-                            <span><b>Current Page</b></span>
-                            <span class="badge rounded-pill bg-primary" id="current-page">1</span>/ <span><b>Last Page</b></span><span
-                                class="badge rounded-pill bg-dark" id="total-pages">1</span>
-                        </div>
-
-                       @endif
+                        @if (in_array($kpiStatus, ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))
+                            <div></div>
+                        @else
+                            <div id="pagination-count" class=" text-center mb-3">
+                                <span><b>Current Page</b></span>
+                                <span class="badge rounded-pill bg-primary" id="current-page">1</span>/ <span><b>Last
+                                        Page</b></span><span class="badge rounded-pill bg-dark"
+                                    id="total-pages">1</span>
+                            </div>
+                        @endif
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
-                            
+
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
                                     @foreach ($appraisal as $index => $kpi)
                                         <div class="kpi">
@@ -134,7 +133,9 @@
 
                                                                 {{-- Supervisor Comment and Score when Supervisor has submitted their scores --}}
                                                                 @if (isset($section->sectionEmpScore))
-                                                                    @if ($section->sectionEmpScore->status === 'CONFIRMATION' || $section->sectionEmpScore->status === 'COMPLETED')
+                                                                    @if (
+                                                                        ($section->sectionEmpScore->status === 'CONFIRMATION' || $section->sectionEmpScore->status === 'COMPLETED') &&
+                                                                            $section->sectionEmpScore->prob == false)
                                                                         <span
                                                                             class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
                                                                                 Score and Comment</strong></span>
@@ -155,7 +156,30 @@
                                                                                     value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
                                                                             </div>
                                                                         </div>
-                                                                    @elseif(isset($section->sectionEmpScore) && $section->sectionEmpScore->prob == true)
+                                                                    @elseif(
+                                                                        ($section->sectionEmpScore->status === 'CONFIRMATION' || $section->sectionEmpScore->status === 'COMPLETED') &&
+                                                                            $section->sectionEmpScore->prob == true)
+                                                                        <span
+                                                                            class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
+                                                                                Score and Comment</strong></span>
+                                                                        <div class="d-flex gap-3">
+                                                                            <div class="col-md-2">
+                                                                                <input class="form-control mb-3"
+                                                                                    type="number" readonly
+                                                                                    name="metricSupScore"
+                                                                                    placeholder="Enter Score" required
+                                                                                    value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? '' }}">
+                                                                            </div>
+                                                                            <div class="col-md-9">
+                                                                                <input class="form-control mb-3"
+                                                                                    type="text" readonly
+                                                                                    name="supervisorComment"
+                                                                                    placeholder="Enter your comments"
+                                                                                    required
+                                                                                    value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
+                                                                            </div>
+                                                                        </div>
+
                                                                         <span
                                                                             class="mb-2 badge rounded-pill bg-dark"><strong>Probing
                                                                                 Score and Comment</strong></span>
@@ -245,7 +269,9 @@
 
                                                                                 {{-- Supervisor Comment and Score when Supervisor has submitted their scores --}}
                                                                                 @if (isset($metric->metricEmpScore))
-                                                                                    @if ($metric->metricEmpScore->status === 'CONFIRMATION' || $metric->metricEmpScore->status === 'COMPLETED')
+                                                                                    @if (
+                                                                                        ($metric->metricEmpScore->status === 'CONFIRMATION' || $metric->metricEmpScore->status === 'COMPLETED') &&
+                                                                                            $metric->metricEmpScore->prob == false)
                                                                                         <span
                                                                                             class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
                                                                                                 Score and
@@ -272,7 +298,36 @@
                                                                                                     value="{{ $metric->metricEmpScore->supervisorComment ?? '' }}">
                                                                                             </div>
                                                                                         </div>
-                                                                                    @elseif(isset($metric->metricEmpScore) && $metric->metricEmpScore->prob == true)
+                                                                                        {{--  @elseif((isset($metric->metricEmpScore) || $metric->metricEmpScore->status === 'COMPLETED') && $metric->metricEmpScore->prob == true)  --}}
+                                                                                    @elseif(
+                                                                                        ($metric->metricEmpScore->status === 'CONFIRMATION' || $metric->metricEmpScore->status === 'COMPLETED') &&
+                                                                                            $metric->metricEmpScore->prob == true)
+                                                                                        <span
+                                                                                            class="mb-2 badge rounded-pill bg-success"><strong>Supervisor
+                                                                                                Score and
+                                                                                                Comment</strong></span>
+                                                                                        <div class="d-flex gap-3">
+                                                                                            <div class="col-md-2">
+                                                                                                <input
+                                                                                                    class="form-control mb-3"
+                                                                                                    type="number"
+                                                                                                    readonly
+                                                                                                    name="metricSupScore"
+                                                                                                    placeholder="Enter Score"
+                                                                                                    required
+                                                                                                    value="{{ optional($metric->metricEmpScore)->metricSupScore ?? '' }}">
+                                                                                            </div>
+                                                                                            <div class="col-md-9">
+                                                                                                <input
+                                                                                                    class="form-control mb-3"
+                                                                                                    type="text"
+                                                                                                    readonly
+                                                                                                    name="supervisorComment"
+                                                                                                    placeholder="Enter your comments"
+                                                                                                    required
+                                                                                                    value="{{ $metric->metricEmpScore->supervisorComment ?? '' }}">
+                                                                                            </div>
+                                                                                        </div>
                                                                                         <span
                                                                                             class="mb-2 badge rounded-pill bg-dark"><strong>Probing
                                                                                                 Score and
@@ -494,7 +549,7 @@
                                         scoreForms.forEach(form => {
                                             form.addEventListener('submit', function() {
                                                 localStorage.setItem('currentPage',
-                                                currentPage); // Save the current page before form submission
+                                                    currentPage); // Save the current page before form submission
                                             });
                                         });
 
