@@ -103,7 +103,7 @@ class KpiController extends Controller
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             // 'score' => 'required|integer',
             'type' => 'required|string',
             'active' => 'required|integer',
@@ -400,7 +400,7 @@ class KpiController extends Controller
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             // 'score' => 'required|integer',
             'type' => 'required|string',
             'active' => 'required|integer',
