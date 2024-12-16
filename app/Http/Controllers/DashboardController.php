@@ -320,7 +320,7 @@ class DashboardController extends Controller
 
 
             // Return the KPI names and section counts to the view
-            return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails'));
+            return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails', 'kpiStatus'));
         } catch (\Exception $e) {
             // Log the exception
             Log::error(
@@ -338,58 +338,49 @@ class DashboardController extends Controller
 
     public function showEmployeeKpi()
     {
-        // dd($id);
         // Get the access token from the session
         $accessToken = session('api_token');
 
         try {
-            // Make the GET request to the external API to get KPIs for the specified batch ID
+            // Make the GET request to the external API to get KPIs for the specified employee
             $response = Http::withToken($accessToken)
-                // ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
                 ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee");
-
-
 
             if ($response->successful()) {
                 // Decode the response into an array of KPIs
                 $kpi = $response->json();
 
-                // Debugging output
-                // dd($kpi);
+                // Initialize variables for employee KPI and grade details
+                $employeeKpi = null;
+                $gradeDetails = null;
 
                 // Check if $kpi is not empty and contains the expected structure
                 if (!empty($kpi) && isset($kpi[0]['kpiId'])) {
                     $id = $kpi[0]['kpiId'];
 
+                    // Make another GET request to fetch detailed KPI information
                     $responseKpis = Http::withToken($accessToken)
-                        ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$kpi[0]['kpiId']}");
+                        ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
 
                     $kpis = $responseKpis->json();
 
-                    // dd($kpis);
-
-                    if (empty($kpis)) {
-
-                        $employeeKpi = null;
-                    } else {
+                    // Check if the detailed KPIs are empty
+                    if (!empty($kpis)) {
                         $globalSectionCount = 0;
                         $regularSectionCount = 0;
 
-                        // Loop through each KPI
+                        // Loop through each KPI to process them
                         foreach ($kpis as $kpi) {
-                            // Check if the KPI type is GLOBAL
+                            // Count sections for GLOBAL KPIs
                             if ($kpi['kpiType'] === 'GLOBAL') {
-                                // Count the number of sections for GLOBAL KPI
                                 $globalSectionCount += count($kpi['sections']);
                             }
 
-                            // Check if the KPI type is REGULAR
+                            // Count sections for REGULAR KPIs and get the first section's status
                             if ($kpi['kpiType'] === 'REGULAR') {
                                 $regularSectionCount += count($kpi['sections']);
                                 $firstSection = $kpi['sections'][0];
                                 $status = $firstSection['sectionEmpScore']['status'] ?? 'PENDING';
-
-
 
                                 $kpiStatus = $status;
                                 $batchId = $kpi['batchId'];
@@ -400,19 +391,17 @@ class DashboardController extends Controller
                         // Calculate the total section count
                         $totalSectionCount = $globalSectionCount + $regularSectionCount;
 
-
+                        // Prepare data for grade calculation
                         $grade_data = [
                             'batchId' => $batchId,
                             'employeeId' => $employeeId
                         ];
 
-
-                        $employeeGrade =
-                            Http::withToken($accessToken)
+                        // Make a PUT request to calculate the total KPI score for the employee
+                        $employeeGrade = Http::withToken($accessToken)
                             ->put("http://192.168.1.200:5123/Appraisal/Score/employee-total-kpiscore", $grade_data);
 
-
-
+                        // Prepare grade details based on the response
                         if ($employeeGrade->successful() && !empty($employeeGrade->object())) {
                             $grade = $employeeGrade->object();
                             $gradeDetails = [
@@ -430,7 +419,7 @@ class DashboardController extends Controller
                             ];
                         }
 
-                        // Prepare the result
+                        // Prepare the result for the view
                         $employeeKpi = [
                             'id' => $kpi['kpiId'],
                             'batch_id' => $kpi['batchId'],
@@ -438,29 +427,12 @@ class DashboardController extends Controller
                             'section_count' => $totalSectionCount
                         ];
                     }
-                    // Return the KPI names and section counts to the view
-                    return view("dashboard.show-employee-kpi", compact('employeeKpi', 'gradeDetails'));
-                } else {
-                    $employeeKpi = [
-                        'id' => null,
-                        'batch_id' => null,
-                        'kpi_name' => null,
-                        'batch_name' => null,
-                        'section_count' => null
-                    ];
-
-                    $gradeDetails = [
-                        'kpiScore' => null,
-                        'grade' => null,
-                        'remark' => null,
-                        'status' => '---'
-                    ];
-
-                    // Return the KPI names and section counts to the view
-                    return view("dashboard.show-employee-kpi", compact('employeeKpi', 'gradeDetails'));
                 }
+
+                // Return the view with the data
+                return view("dashboard.show-employee-kpi", compact('employeeKpi', 'gradeDetails'));
             } else {
-                // Log the error response
+                // Log the error response if the API call fails
                 Log::error('Failed to retrieve KPIs', [
                     'status' => $response->status(),
                     'response' => $response->body()
@@ -468,12 +440,12 @@ class DashboardController extends Controller
                 return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
             }
         } catch (\Exception $e) {
-            // Log the exception
+            // Log the exception if an error occurs
             Log::error('Exception occurred while retrieving KPIs', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+            return redirect()->back()->with('toast_error ', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
 
