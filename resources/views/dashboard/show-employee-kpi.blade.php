@@ -18,7 +18,7 @@
         <div class="col-md-12">
 
             {{--  ===== KPI FOR EMPLOYEE - CARD =====  --}}
-            @if ($employeeKpi !== null)
+            @if (in_array($employeeKpi, [null]))
                 <div class="card card-body mb-10">
                     <div class="d-flex justify-content-between">
                         <a href="{{ route('show.employee.kpi', $employeeKpi['id']) }}">
@@ -67,7 +67,7 @@
                 </div>
             @else
                 <div class="card card-body mb-10">
-                    <h5>You Have No Available KPIs</h5>
+                    <h5>You Have No Active Appraisal </h5>
                 </div>
             @endif
 

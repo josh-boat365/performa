@@ -88,6 +88,10 @@ class SupervisorScoreController extends Controller
                             'kpi' => $kpi,
                             'activeSections' => $activeSections
                         ]);
+
+                        $firstSection = $kpi['sections'][0];
+                        $status = $firstSection['sectionEmpScore']['status'] ?? 'PENDING';
+                        $kpiStatus = $status;
                     }
                 }
 
@@ -95,7 +99,7 @@ class SupervisorScoreController extends Controller
 
 
 
-                return view("dashboard.supervisor.score-employee-form", compact('appraisal'));
+                return view("dashboard.supervisor.score-employee-form", compact('appraisal', 'kpiStatus'));
             } else {
                 // Log the error response
                 Log::error('Failed to retrieve KPIs', [

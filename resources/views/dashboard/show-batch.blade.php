@@ -22,12 +22,12 @@
                         <a href="{{ route('show.batch.kpi', $activeBatches['id']) }}">
                             <h4>{{ $activeBatches['batch_name'] }}</h4>
                         </a>
-                        <div>
+                        {{--  <div>
                             <span class="badge rounded-pill bg-dark fonte-size-13">Global Kpi</span>
                             <span
                                 class="badge rounded-pill bg-primary fonte-size-13">Personal Kpi</span>
                             <!-- Display section count -->
-                        </div>
+                        </div>  --}}
                         <div>
                             <a href="{{ route('show.batch.kpi', $activeBatches['id']) }}">
                                 <span class="badge rounded-pill bg-dark fonte-size-13"><i
