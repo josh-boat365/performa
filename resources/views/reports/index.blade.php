@@ -11,6 +11,8 @@
         </div>
         <!-- end page title -->
 
+        {{--  {{ dd($reports, $batches, $employees, $kpis, $departments) }}  --}}
+
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -22,24 +24,15 @@
                                         data-bs-toggle="dropdown" aria-expanded="false">Batch<i
                                             class="mdi mdi-chevron-down"></i></button>
                                     <div class="dropdown-menu p-3">
+                                        @foreach ($batches as $batch )
                                         <div class="form-check form-check-primary mb-3">
-                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1">
+                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1" value="{{ $batch->batchId }}">
                                             <label class="form-check-label" for="formCheckcolor1">
-                                                First Half - 2024
+                                                {{ $batch['batchName'] }}
                                             </label>
                                         </div>
-                                        <div class="form-check form-check-primary mb-3">
-                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1">
-                                            <label class="form-check-label" for="formCheckcolor1">
-                                                Second Half - 2024
-                                            </label>
-                                        </div>
-                                        <div class="form-check form-check-primary mb-3">
-                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1">
-                                            <label class="form-check-label" for="formCheckcolor1">
-                                                First Half - 2025
-                                            </label>
-                                        </div>
+                                        @endforeach
+
                                     </div>
                                 </div>
                                 <div class="btn-group">
@@ -47,49 +40,29 @@
                                         data-bs-toggle="dropdown" aria-expanded="false">Department<i
                                             class="mdi mdi-chevron-down"></i></button>
                                     <div class="dropdown-menu p-3">
+                                        @foreach ($departments as $department )
                                         <div class="form-check form-check-primary mb-3">
-                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1">
+                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1" value="{{ $department->departmentId }}">
                                             <label class="form-check-label" for="formCheckcolor1">
-                                                Admin
+                                                {{ $department['departmentName'] }}
                                             </label>
                                         </div>
-                                        <div class="form-check form-check-primary mb-3">
-                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1">
-                                            <label class="form-check-label" for="formCheckcolor1">
-                                                Hr
-                                            </label>
-                                        </div>
-                                        <div class="form-check form-check-primary mb-3">
-                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1">
-                                            <label class="form-check-label" for="formCheckcolor1">
-                                                IT
-                                            </label>
-                                        </div>
+                                        @endforeach
                                     </div>
                                 </div>
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-primary dropdown-toggle"
-                                        data-bs-toggle="dropdown" aria-expanded="false">Role<i
+                                        data-bs-toggle="dropdown" aria-expanded="false">KPI<i
                                             class="mdi mdi-chevron-down"></i></button>
                                     <div class="dropdown-menu p-3">
+                                        @foreach ($kpis as $kpi )
                                         <div class="form-check form-check-primary mb-3">
-                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1">
+                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1" value="{{ $kpi->kpiId }}">
                                             <label class="form-check-label" for="formCheckcolor1">
-                                                Admin Officer
+                                                {{ $kpi['kpiName'] }}
                                             </label>
                                         </div>
-                                        <div class="form-check form-check-primary mb-3">
-                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1">
-                                            <label class="form-check-label" for="formCheckcolor1">
-                                                Hr Officer
-                                            </label>
-                                        </div>
-                                        <div class="form-check form-check-primary mb-3">
-                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1">
-                                            <label class="form-check-label" for="formCheckcolor1">
-                                                Application Support Officer
-                                            </label>
-                                        </div>
+                                        @endforeach
                                     </div>
                                 </div>
                                 <div class="btn-group">
@@ -97,24 +70,17 @@
                                         data-bs-toggle="dropdown" aria-expanded="false">Employee<i
                                             class="mdi mdi-chevron-down"></i></button>
                                     <div class="dropdown-menu p-3">
+                                        @foreach ($employees as $employee)
                                         <div class="form-check form-check-primary mb-3">
-                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1">
+                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1" value="{{ $employee->employeeId }}">
                                             <label class="form-check-label" for="formCheckcolor1">
-                                                Christian Ashun
+                                                {{ $employee['employeeName'] }}
                                             </label>
                                         </div>
-                                        <div class="form-check form-check-primary mb-3">
-                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1">
-                                            <label class="form-check-label" for="formCheckcolor1">
-                                                Joshua Nyarko Boateng
-                                            </label>
-                                        </div>
-                                        <div class="form-check form-check-primary mb-3">
-                                            <input class="form-check-input" type="checkbox" id="formCheckcolor1">
-                                            <label class="form-check-label" for="formCheckcolor1">
-                                                Richard Anane
-                                            </label>
-                                        </div>
+
+                                        @endforeach
+
+
                                     </div>
                                 </div>
 
@@ -140,14 +106,10 @@
                 <div class="card">
                     <div class="card-body">
 
-                        {{--  {{ dd($reports) }}  --}}
+
 
                         <h4 class="card-title mb-4">Appraisal Reports Table</h4>
-                        {{--  <p class="card-title-desc">The Buttons extension for DataTables
-                            provides a common set of options, API methods and styling to display
-                            buttons on a page that will interact with a DataTable. The core library
-                            provides the based framework upon which plug-ins can built.
-                        </p>  --}}
+
 
                         <div class="table-responsive">
                             <table id="datatable-buttons"
