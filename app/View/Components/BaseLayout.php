@@ -2,8 +2,9 @@
 
 namespace App\View\Components;
 
-use Illuminate\View\Component;
 use Illuminate\View\View;
+use Illuminate\View\Component;
+use Illuminate\Support\Facades\Http;
 
 class BaseLayout extends Component
 {
@@ -12,6 +13,34 @@ class BaseLayout extends Component
      */
     public function render(): View
     {
-        return view('layouts.base');
+        $accessToken = session('api_token');
+        // Fetch user information
+        $responseUser   = Http::withToken($accessToken)
+            ->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+
+        // Handle responses
+        $user = $responseUser->successful() ? $responseUser->object() : null;
+
+        $responseDepartments = Http::withToken($accessToken)->get('http://192.168.1.200:5124/HRMS/Department');
+        $responseRoles = Http::withToken($accessToken)->get('http://192.168.1.200:5124/HRMS/EmpRole');
+        $responseUser = Http::withToken($accessToken)->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+
+        $departments = collect($responseDepartments->object())->pluck('id')->toArray();
+        $managers = collect($responseDepartments->object())->pluck('manager')->unique()->toArray();
+        $roleManagers = collect($responseRoles->object())->pluck('manager')->unique()->toArray();
+        // $roleManagers = dd(collect($responseDepartments->object()));
+        // dd($managers, $roleManagers, collect($responseDepartments->object()) );
+
+        session([
+            'user' => $user,
+            'departments' => $departments,
+            'managers' => $managers,
+            'roleManagers' => $roleManagers,
+        ]);
+
+
+
+
+        return view('layouts.base', compact('user', 'departments', 'managers', 'roleManagers'));
     }
 }

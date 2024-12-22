@@ -16,14 +16,14 @@ class SessionNotFound
      */
     public function handle(Request $request, Closure $next): Response
     {
-
         $apiToken = session('api_token');
+        $tokenIssuedAt = session('token_issued_at');
 
-        if (empty($apiToken)) {
-
+        // Check if the token is present and if it has expired
+        if (empty($apiToken) || (cache('token_expiration_' . $apiToken) ?? (time() - $tokenIssuedAt) > 3600)) {
             Auth::logout();
             $request->session()->flush();
-            return redirect()->route('login')->with('toast_error', 'Your Session Expired, Kindly Login Again');
+            return redirect()->route('login')->with('toast_error', 'Your session has expired. Please log in again.');
         }
 
         return $next($request);

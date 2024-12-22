@@ -37,6 +37,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \RealRashid\SweetAlert\ToSweetAlert::class,
+            // \App\Http\Middleware\PermissionMiddleware::class,
         ],
 
         'api' => [
@@ -67,5 +68,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'session.timeout' => \App\Http\Middleware\SessionTimeout::class,
         'session.notfound' => \App\Http\Middleware\SessionNotFound::class,
+        'check.permissions' => \App\Http\Middleware\PermissionMiddleware::class,
+
     ];
 }

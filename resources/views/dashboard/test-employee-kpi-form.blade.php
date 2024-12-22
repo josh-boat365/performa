@@ -13,7 +13,6 @@
             </div>
         </div>
         <!-- end page title -->
-
         <div class="col-md-12">
             <div class="card card-body">
                 <div class="d-flex justify-content-between">
@@ -104,13 +103,13 @@
                                                                                 value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                         </div>
                                                                         <div class="col-md-9">
-                                                                            <input
+                                                                            <textarea
                                                                                 class="form-control mb-3 comment-input"
-                                                                                type="text" name="employeeComment"
+                                                                                type="text" name="employeeComment" required
                                                                                 placeholder="Enter your comments"
                                                                                 @disabled(isset($section->sectionEmpScore) &&
                                                                                         in_array($section->sectionEmpScore->status, ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))
-                                                                                value="{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}">
+                                                                                rows="3">{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}</textarea>
                                                                         </div>
                                                                         @if (
                                                                             !isset($section->sectionEmpScore) ||
