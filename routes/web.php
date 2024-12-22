@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BatchController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\MetricController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GlobalKpiController;
@@ -34,7 +35,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 
 Route::group(
-    ['middleware' => ['session.timeout']],
+    ['middleware' => ['session.notfound']],
     function () {
 
         //Employee KPI Setup
@@ -153,8 +154,8 @@ Route::group(
 
 
 
-        //SEGREGATION
-        // Route::get("dashboard/appraisal-department-kpi/section/{id}", [SectionController::class, "index"])->name("seg.section.index");
+        //REPORTS
+        Route::get('dashboard/appraisal/report', [ReportController::class, 'index'])->name('report.index');
 
 
 

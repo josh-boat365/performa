@@ -16,9 +16,11 @@
         @include('layouts.dash-nav')
 
         <!-- ========== Left Sidebar Start ========== -->
-        @include('layouts.left-side-nav')
+        @include('layouts.left-side-nav', ['user' => $user])
 
         <!-- Left Sidebar End -->
+
+        {{--  {{ dd(session('user'),  session('roleManagers')) }}  --}}
 
 
 
@@ -130,6 +132,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-sm-6">
+                            2024 -
                             <script>
                                 document.write(new Date().getFullYear())
                             </script> © Perfoma | BPSL - IT Support.

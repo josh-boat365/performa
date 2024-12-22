@@ -15,141 +15,137 @@ class DashboardController extends Controller
 
     public function index()
     {
-        // dd($id);
         // Get the access token from the session
         $accessToken = session('api_token');
+
+        // Check if the access token is available
+        if (!$accessToken) {
+            return redirect()->back()->with('toast_error', 'Access token is missing. Please log in again.');
+        }
 
         try {
             // Make the GET request to the external API to get KPIs for the specified batch ID
             $response = Http::withToken($accessToken)
-                // ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForBatch/{$id}");
                 ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee");
 
-
-
-
             // Check if the response is successful
-            if ($response->successful()) {
-                // Decode the response into an array of KPIs
-                $kpi = $response->json();
-
-                // Debugging output
-                // dd($kpi);
-
-                // Check if $kpi is not empty and contains the expected structure
-                if (!empty($kpi) && isset($kpi[0]['kpiId'])) {
-                    $id = $kpi[0]['kpiId'];
-
-                    $responseKpis = Http::withToken($accessToken)
-                        ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
-
-                    $kpis = $responseKpis->json();
-
-                    // dd($kpis);
-
-                    if (empty($kpis)) {
-
-                        $employeeKpi = null;
-                    } else {
-                        $globalSectionCount = 0;
-                        $regularSectionCount = 0;
-
-                        // Loop through each KPI
-                        foreach ($kpis as $kpi) {
-                            // Check if the KPI type is GLOBAL
-                            if ($kpi['kpiType'] === 'GLOBAL') {
-                                // Count the number of sections for GLOBAL KPI
-                                $globalSectionCount += count($kpi['sections']);
-                            }
-
-                            // Check if the KPI type is REGULAR
-                            if ($kpi['kpiType'] === 'REGULAR') {
-                                $regularSectionCount += count($kpi['sections']);
-                                $firstSection = $kpi['sections'][0];
-                                $status = $firstSection['sectionEmpScore']['status'] ?? 'PENDING';
-
-
-
-                                $kpiStatus = $status;
-                                $batchId = $kpi['batchId'];
-                                $batchName = $kpi['batchName'];
-                                $employeeId = $kpi['employeeId'];
-                            }
-                        }
-
-                        // Calculate the total section count
-                        $totalSectionCount = $globalSectionCount + $regularSectionCount;
-
-
-                        $grade_data = [
-                            'batchId' => $batchId,
-                            'employeeId' => $employeeId
-                        ];
-
-
-                        $employeeGrade =
-                            Http::withToken($accessToken)
-                            ->put("http://192.168.1.200:5123/Appraisal/Score/employee-total-kpiscore", $grade_data);
-
-
-
-                        if ($employeeGrade->successful() && !empty($employeeGrade->object())) {
-                            $grade = $employeeGrade->object();
-                            $gradeDetails = [
-                                'kpiScore' => $grade->totalKpiScore,
-                                'grade' => $grade->grade,
-                                'remark' => $grade->remark,
-                                'status' => $kpiStatus
-                            ];
-                        } else {
-                            $gradeDetails = [
-                                'kpiScore' => null,
-                                'grade' => null,
-                                'remark' => null,
-                                'status' => $kpiStatus
-                            ];
-                        }
-
-                        // Prepare the result
-                        $employeeKpi = [
-                            'id' => $kpi['kpiId'],
-                            'batch_id' => $kpi['batchId'],
-                            'kpi_name' => $kpi['kpiName'],
-                            'batch_name' => $batchName,
-                            'section_count' => $totalSectionCount
-                        ];
-                    }
-
-
-                    // Return the KPI names and section counts to the view
-                    return view("dashboard.index", compact('employeeKpi', 'gradeDetails'));
-                } else {
-
-
-                    $employeeKpi = [
-                        'id' => '---',
-                        'batch_id' => '---',
-                        'kpi_name' => '---',
-                        'batch_name' => '---',
-                        'section_count' => '---'
-                    ];
-
-                    $gradeDetails = [
-                        'kpiScore' => null,
-                        'grade' => null,
-                        'remark' => null,
-                        'status' => '---'
-                    ];
-                    return view("dashboard.index", compact('employeeKpi', 'gradeDetails'));
-                }
-            } else {
-                // Log the error response
-                Log::error('Failed to retrieve Appraisal Overview', [
+            if (!$response->successful()) {
+                Log::error('Failed to retrieve KPIs', [
                     'status' => $response->status(),
                     'response' => $response->body()
                 ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve Appraisal Overview');
+                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs.');
             }
+
+            // Decode the response into an array of KPIs
+            $kpi = $response->json();
+
+            // Initialize variables
+            $employeeKpi = null;
+            $gradeDetails = [
+                'kpiScore' => null,
+                'grade' => null,
+                'remark' => null,
+                'status' => '---'
+            ];
+
+            // Check if $kpi is not empty and contains the expected structure
+            if (!empty($kpi) && isset($kpi[0]['kpiId'])) {
+                $id = $kpi[0]['kpiId'];
+
+                // Fetch detailed KPI information
+                $responseKpis = Http::withToken($accessToken)
+                    ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
+
+                if ($responseKpis->successful()) {
+                    $kpis = $responseKpis->json();
+
+                    // Initialize counters and variables
+                    $globalSectionCount = 0;
+                    $regularSectionCount = 0;
+                    $kpiStatus = 'PENDING'; // Default status
+                    $batchId = '';
+                    $batchName = '';
+                    $employeeId = '';
+
+                    // dd($kpis);
+
+                    // Loop through each KPI
+                    foreach ($kpis as $kpi) {
+                        $sections = $kpi['sections'] ?? [];
+                        $sectionCount = count($sections);
+
+                        // Check if the KPI type is GLOBAL
+                        if ($kpi['kpiType'] === 'GLOBAL') {
+                            $globalSectionCount += $sectionCount;
+                            if (!empty($sections)) {
+                                $firstSection = $sections[0];
+                                $kpiStatus = $firstSection['sectionEmpScore']['status'] ?? $kpiStatus;
+                            }
+                        }
+
+                        // Check if the KPI type is REGULAR
+                        if ($kpi['kpiType'] === 'REGULAR') {
+                            $regularSectionCount += $sectionCount;
+                            if (!empty($sections)) {
+                                $firstSection = $sections[0];
+                                $kpiStatus = $firstSection['sectionEmpScore']['status'] ?? $kpiStatus;
+                            }
+                        }
+
+                        // Store batch and employee details
+                        $batchId = $kpi['batchId'] ?? $batchId;
+                        $batchName = $kpi['batchName'] ?? $batchName;
+                        $employeeId = $kpi['employeeId'] ?? $employeeId;
+                    }
+
+                    // Calculate the total section count
+                    $totalSectionCount = $globalSectionCount + $regularSectionCount;
+
+                    // Prepare grade data
+                    $grade_data = [
+                        'batchId' => $batchId,
+                        'employeeId' => $employeeId
+                    ];
+
+                    // Fetch employee grade
+                    $employeeGradeResponse = Http::withToken($accessToken)
+                        ->put("http://192.168.1.200:5123/Appraisal/Score/employee-total-kpiscore", $grade_data);
+
+                    if ($employeeGradeResponse->successful() && !empty($employeeGradeResponse->object())) {
+                        $grade = $employeeGradeResponse->object();
+                        $gradeDetails = [
+                            'kpiScore' => $grade->totalKpiScore,
+                            'grade' => $grade->grade,
+                            'remark' => $grade->remark,
+                            'status' => $kpiStatus
+                        ];
+                    }
+                    // dd($kpi);
+                    // Prepare the result
+                    $employeeKpi = [
+                        'id' => $kpi['kpiId'],
+                        'batch_id' => $batchId,
+                        'kpi_name' => $kpi['kpiName'],
+                        'batch_name' => $batchName,
+                        'section_count' => $totalSectionCount
+                    ];
+                }
+            }
+
+            // Handle case where no KPIs were found
+            if (is_null($employeeKpi)) {
+                $employeeKpi = [
+                    'id' => '---',
+                    'batch_id' => '---',
+                    'kpi_name' => '---',
+                    'batch_name' => '---',
+                    'section_count' => '---'
+                ];
+            }
+
+            // Return the KPI names and section counts to the view
+            return view("dashboard.index", compact('employeeKpi', 'gradeDetails'));
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while retrieving Appraisal Overview', [
@@ -271,17 +267,25 @@ class DashboardController extends Controller
 
             foreach ($kpis as $kpi) {
 
-                if ($kpi->kpiType === "REGULAR") {
+                $statuses = []; // Initialize an array to hold statuses
 
-                    if (!empty($kpi->sections)) {
-
-                        $firstSection = $kpi->sections[0];
-                        $status = $firstSection->sectionEmpScore->status ?? 'PENDING';
-
-                        $kpiStatus = $status;
-                        $batchId = $kpi->batchId;
-                        $employeeId = $kpi->employeeId;
+                if (
+                    $kpi->kpiType === 'GLOBAL' || $kpi->kpiType === 'REGULAR'
+                ) {
+                    // Iterate through the sections to collect statuses
+                    foreach ($kpi->sections as $section) {
+                        // Get the status from each section's employee score
+                        $status = $section->sectionEmpScore->status ?? 'PENDING';
+                        $statuses[] = $status; // Add the status to the array
                     }
+
+                    // Get unique statuses or just pick one
+                    $uniqueStatuses = array_unique($statuses);
+                    $kpiStatus = count($uniqueStatuses) > 0 ? reset($uniqueStatuses) : 'PENDING'; // Get the first unique status or default to 'PENDING'
+
+                    // Set batchId and employeeId
+                    $batchId = $kpi->batchId;
+                    $employeeId = $kpi->employeeId;
                 }
             }
 
@@ -349,7 +353,7 @@ class DashboardController extends Controller
             if ($response->successful()) {
                 // Decode the response into an array of KPIs
                 $kpi = $response->json();
-
+                // dd($kpi);
                 // Initialize variables for employee KPI and grade details
                 $employeeKpi = null;
                 $gradeDetails = null;
@@ -379,10 +383,23 @@ class DashboardController extends Controller
                             // Count sections for REGULAR KPIs and get the first section's status
                             if ($kpi['kpiType'] === 'REGULAR') {
                                 $regularSectionCount += count($kpi['sections']);
-                                $firstSection = $kpi['sections'][0];
-                                $status = $firstSection['sectionEmpScore']['status'] ?? 'PENDING';
+                            }
 
-                                $kpiStatus = $status;
+                            $statuses = []; // Initialize an array to hold statuses
+
+                            if ($kpi['kpiType'] == 'GLOBAL' || $kpi['kpiType'] == 'REGULAR') {
+                                // Iterate through the sections to collect statuses
+                                foreach ($kpi['sections'] as $section) {
+                                    // Get the status from each section's employee score
+                                    $status = $section['sectionEmpScore']['status'] ?? 'PENDING';
+                                    $statuses[] = $status; // Add the status to the array
+                                }
+
+                                // Get unique statuses or just pick one
+                                $uniqueStatuses = array_unique($statuses);
+                                $kpiStatus = count($uniqueStatuses) > 0 ? reset($uniqueStatuses) : 'PENDING'; // Get the first unique status or default to 'PENDING'
+
+                                // Set batchId and employeeId
                                 $batchId = $kpi['batchId'];
                                 $employeeId = $kpi['employeeId'];
                             }
