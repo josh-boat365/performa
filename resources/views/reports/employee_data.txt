@@ -1,0 +1,761 @@
+array:1 [▼ // app\Http\Controllers\ReportController.php:102
+  0 => {#465 ▼
+    +"batchId": 21
+    +"batchName": "HALF YEAR (JUNE-2025)"
+    +"status": "OPEN"
+    +"createdAt": "2024-12-09T13:07:10.9380604"
+    +"employees": array:1 [▼
+      0 => {#468 ▼
+        +"employeeId": 2
+        +"employeeName": "Christian Ashun"
+        +"departmentName": "IT DEPARTMENT"
+        +"roleName": "Application Support"
+        +"roleId": 5
+        +"departmentId": 6
+        +"scores": array:32 [▼
+          0 => {#481 ▼
+            +"scoreId": 1250
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 20.0
+            +"metricScore": 10.0
+            +"sectionEmpScore": null
+            +"metricEmpScore": 10.0
+            +"sectionSupScore": null
+            +"metricSupScore": 5.0
+            +"sectionProbScore": null
+            +"metricProbScore": 8.0
+            +"employeeComment": "i coorporated"
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "Eric Kwakye"
+            +"prob": true
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:50:30.3445295"
+          }
+          1 => {#469 ▼
+            +"scoreId": 1251
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 20.0
+            +"metricScore": 10.0
+            +"sectionEmpScore": null
+            +"metricEmpScore": 10.0
+            +"sectionSupScore": null
+            +"metricSupScore": 10.0
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:50:33.2204144"
+          }
+          2 => {#496 ▼
+            +"scoreId": 1252
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 40.0
+            +"metricScore": 10.0
+            +"sectionEmpScore": null
+            +"metricEmpScore": 10.0
+            +"sectionSupScore": null
+            +"metricSupScore": 10.0
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:50:37.8783313"
+          }
+          3 => {#495 ▼
+            +"scoreId": 1253
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 40.0
+            +"metricScore": 10.0
+            +"sectionEmpScore": null
+            +"metricEmpScore": 10.0
+            +"sectionSupScore": null
+            +"metricSupScore": 10.0
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:50:41.7146005"
+          }
+          4 => {#494 ▼
+            +"scoreId": 1254
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 40.0
+            +"metricScore": 10.0
+            +"sectionEmpScore": null
+            +"metricEmpScore": 10.0
+            +"sectionSupScore": null
+            +"metricSupScore": 10.0
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:50:46.6901456"
+          }
+          5 => {#493 ▼
+            +"scoreId": 1255
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 40.0
+            +"metricScore": 10.0
+            +"sectionEmpScore": null
+            +"metricEmpScore": 10.0
+            +"sectionSupScore": null
+            +"metricSupScore": 10.0
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:50:50.8260224"
+          }
+          6 => {#492 ▼
+            +"scoreId": 1256
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 40.0
+            +"metricScore": 10.0
+            +"sectionEmpScore": null
+            +"metricEmpScore": 10.0
+            +"sectionSupScore": 0.0
+            +"metricSupScore": 0.0
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:50:54.5686557"
+          }
+          7 => {#491 ▼
+            +"scoreId": 1257
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 40.0
+            +"metricScore": 10.0
+            +"sectionEmpScore": null
+            +"metricEmpScore": 10.0
+            +"sectionSupScore": 0.0
+            +"metricSupScore": 0.0
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:02.8899721"
+          }
+          8 => {#489 ▼
+            +"scoreId": 1258
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 40.0
+            +"metricScore": 10.0
+            +"sectionEmpScore": null
+            +"metricEmpScore": 10.0
+            +"sectionSupScore": null
+            +"metricSupScore": 10.0
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:08.4090998"
+          }
+          9 => {#476 ▼
+            +"scoreId": 1259
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 40.0
+            +"metricScore": 10.0
+            +"sectionEmpScore": null
+            +"metricEmpScore": 10.0
+            +"sectionSupScore": null
+            +"metricSupScore": 10.0
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:12.9628442"
+          }
+          10 => {#475 ▼
+            +"scoreId": 1260
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 5.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 5.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 5.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:19.1145044"
+          }
+          11 => {#474 ▼
+            +"scoreId": 1261
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 5.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 5.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 5.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:21.8694606"
+          }
+          12 => {#472 ▼
+            +"scoreId": 1262
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 5.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 5.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 5.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:25.0062597"
+          }
+          13 => {#473 ▼
+            +"scoreId": 1263
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 5.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 5.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 5.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:31.8579558"
+          }
+          14 => {#503 ▼
+            +"scoreId": 1264
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 5.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 5.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 5.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:34.2534554"
+          }
+          15 => {#470 ▼
+            +"scoreId": 1265
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 5.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 5.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 5.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:37.1218422"
+          }
+          16 => {#471 ▼
+            +"scoreId": 1266
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 5.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 5.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 5.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:41.9386531"
+          }
+          17 => {#485 ▼
+            +"scoreId": 1267
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 5.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 5.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 5.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:44.5799033"
+          }
+          18 => {#483 ▼
+            +"scoreId": 1268
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 5.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 5.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 5.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:47.4654298"
+          }
+          19 => {#482 ▼
+            +"scoreId": 1269
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 4.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 3.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 3.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:51:53.4469546"
+          }
+          20 => {#480 ▼
+            +"scoreId": 1270
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 5.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 4.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 4.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:52:02.0281383"
+          }
+          21 => {#479 ▼
+            +"scoreId": 1271
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 4.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 4.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 4.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:52:05.5528268"
+          }
+          22 => {#478 ▼
+            +"scoreId": 1272
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 5.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 5.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 5.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:52:14.8724175"
+          }
+          23 => {#477 ▼
+            +"scoreId": 1273
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 4.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 4.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 4.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:52:18.890249"
+          }
+          24 => {#511 ▼
+            +"scoreId": 1274
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 4.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 4.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 4.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:52:22.1084904"
+          }
+          25 => {#509 ▼
+            +"scoreId": 1275
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 4.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 4.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 4.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:52:27.0142634"
+          }
+          26 => {#507 ▼
+            +"scoreId": 1276
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 4.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 4.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 4.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:52:31.3249171"
+          }
+          27 => {#508 ▼
+            +"scoreId": 1277
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 4.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 4.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 4.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:52:34.3437249"
+          }
+          28 => {#510 ▼
+            +"scoreId": 1278
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 4.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 4.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 4.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:52:38.8891397"
+          }
+          29 => {#490 ▼
+            +"scoreId": 1279
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 4.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 4.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 4.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:52:42.4243151"
+          }
+          30 => {#512 ▼
+            +"scoreId": 1280
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 5.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 5.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 5.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:53:22.1789719"
+          }
+          31 => {#499 ▼
+            +"scoreId": 1281
+            +"kpiId": 1041
+            +"kpiName": "APPLICATION SUPPORT"
+            +"sectionScore": 4.0
+            +"metricScore": 0.0
+            +"sectionEmpScore": 4.0
+            +"metricEmpScore": null
+            +"sectionSupScore": 4.0
+            +"metricSupScore": null
+            +"sectionProbScore": 0.0
+            +"metricProbScore": 0.0
+            +"employeeComment": null
+            +"supervisorComment": null
+            +"probComment": null
+            +"supervisorName": "David Kwarteng"
+            +"probName": "N/A"
+            +"prob": false
+            +"questionName": null
+            +"questionDescription": null
+            +"status": "COMPLETED"
+            +"createdAt": "2024-12-16T13:53:51.8583181"
+          }
+        ]
+        +"totalScore": {#498 ▼
+          +"totalKpiScore": 98.0
+          +"grade": "A"
+          +"remark": "Exceeded Expectations"
+        }
+      }
+    ]
+  }
+]

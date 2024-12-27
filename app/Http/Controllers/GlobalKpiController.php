@@ -89,7 +89,7 @@ class GlobalKpiController extends Controller
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'type' => 'required|string',
             'active' => 'required|integer',
             'batchId' => 'required|integer',
@@ -183,7 +183,7 @@ class GlobalKpiController extends Controller
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'type' => 'required|string',
             'active' => 'required|integer',
             'batchId' => 'required|integer',
