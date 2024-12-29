@@ -161,6 +161,7 @@ Route::group(
         Route::get('dashboard/appraisal/report/show/employee/{employeeId}/full-report-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.full.details');
 
         Route::get('/employee/{employeeId}/print-pdf', [ReportController::class, 'generateEmployeePdf'])->name('employee.printPdf');
+        Route::view('/test-report', 'reports.test-report');
 
 
 
