@@ -156,6 +156,13 @@ Route::group(
 
         //REPORTS
         Route::get('dashboard/appraisal/report', [ReportController::class, 'index'])->name('report.index');
+        Route::post('dashboard/appraisal/report/filter', [ReportController::class, 'index'])->name('reports.filter');
+        Route::get('dashboard/appraisal/report/show/employee/{employeeId}/summary-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.summary');
+        Route::get('dashboard/appraisal/report/show/employee/{employeeId}/full-report-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.full.details');
+
+        Route::get('/employee/{employeeId}/print-pdf', [ReportController::class, 'generateEmployeePdf'])->name('employee.printPdf');
+        Route::view('/test-report', 'reports.test-report');
+
 
 
 

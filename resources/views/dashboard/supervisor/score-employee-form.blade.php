@@ -57,12 +57,9 @@
                                                                             value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                     </div>
                                                                     <div class="col-md-9">
-                                                                        <input class="form-control mb-3 comment-input"
-                                                                            type="text" name="employeeComment"
-                                                                            placeholder="Enter your comments"
-                                                                            @disabled(isset($section->sectionEmpScore) &&
-                                                                                    in_array($section->sectionEmpScore->status, ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))
-                                                                            value="{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}">
+                                                                        <textarea class="form-control mb-3 comment-input" type="text" name="employeeComment"
+                                                                            placeholder="Enter your comments" rows="3" @disabled(isset($section->sectionEmpScore) &&
+                                                                                    in_array($section->sectionEmpScore->status, ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))>{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}</textarea>
                                                                     </div>
                                                                 </div>
 
@@ -87,12 +84,8 @@
                                                                                 value="{{ optional($section->sectionEmpScore)->sectionSupScore == 0 ? '' : optional($section->sectionEmpScore)->sectionSupScore }}">
                                                                         </div>
                                                                         <div class="col-md-9">
-                                                                            <input
-                                                                                class="form-control mb-3 comment-input"
-                                                                                type="text" name="supervisorComment"
-                                                                                placeholder="Enter your comments"
-                                                                                @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
-                                                                                value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
+                                                                            <textarea class="form-control mb-3 comment-input" type="text" name="supervisorComment"
+                                                                                placeholder="Enter your comments" rows="3" @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))>{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
                                                                         </div>
                                                                         @if (isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                             <div></div>
@@ -132,13 +125,8 @@
                                                                                             value="{{ $metric->metricEmpScore->metricEmpScore ?? '' }}">
                                                                                     </div>
                                                                                     <div class="col-md-9">
-                                                                                        <input
-                                                                                            class="form-control mb-3 comment-input"
-                                                                                            type="text"
-                                                                                            name="employeeComment"
-                                                                                            placeholder="Enter your comments"
-                                                                                            @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION', 'PROBLEM']))
-                                                                                            value="{{ $metric->metricEmpScore->employeeComment ?? '' }}">
+                                                                                        <textarea class="form-control mb-3 comment-input" type="text" name="employeeComment" rows="3"
+                                                                                            placeholder="Enter your comments" @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION', 'PROBLEM']))>{{ $metric->metricEmpScore->employeeComment ?? '' }}</textarea>
                                                                                     </div>
 
                                                                                 </div>
@@ -167,13 +155,8 @@
                                                                                                 value="{{ optional($metric->metricEmpScore)->metricSupScore == 0 ? '' : optional($metric->metricEmpScore)->metricSupScore }}">
                                                                                         </div>
                                                                                         <div class="col-md-9">
-                                                                                            <input
-                                                                                                class="form-control mb-3"
-                                                                                                type="text"
-                                                                                                name="supervisorComment"
-                                                                                                @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
-                                                                                                placeholder="Enter your comments"
-                                                                                                value="{{ $metric->metricEmpScore->supervisorComment ?? '' }}">
+                                                                                            <textarea class="form-control mb-3" type="text" name="supervisorComment" @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
+                                                                                                placeholder="Enter your comments" rows="3">{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
                                                                                         </div>
 
                                                                                         <input type="hidden"
@@ -262,19 +245,23 @@
 
                             @push('scripts')
                                 <script>
-                                    // Function to check if all score inputs are filled
+                                    // Function to check if all score inputs and comments are filled
                                     function checkInputs() {
                                         const scoreInputs = document.querySelectorAll('input[type="number"][name*="SupScore"]');
-                                        const allFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                                        const commentInputs = document.querySelectorAll('textarea[name="employeeComment"]');
+
+                                        const allScoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                                        const allCommentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');
 
                                         // Enable or disable the submit button based on input values
-                                        document.getElementById('submitAppraisalButton').disabled = !allFilled;
+                                        document.getElementById('submit-btn').disabled = !(allScoresFilled && allCommentsFilled);
                                     }
 
-                                    // Attach event listeners to all score inputs
-                                    document.querySelectorAll('input[type="number"][name*="SupScore"]').forEach(input => {
-                                        input.addEventListener('input', checkInputs);
-                                    });
+                                    // Attach event listeners to all score inputs and comment inputs
+                                    document.querySelectorAll('input[type="number"][name*="SupScore"], textarea[name="employeeComment"]').forEach(
+                                        input => {
+                                            input.addEventListener('input', checkInputs);
+                                        });
 
                                     // Initial check in case inputs are pre-filled
                                     checkInputs();

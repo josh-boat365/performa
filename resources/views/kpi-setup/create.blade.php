@@ -37,7 +37,7 @@
                             <label for="example-text-input" class="">KPI Description</label>
                             <div class="col-md-12">
 
-                                <textarea class="form-control" name="description" placeholder="Enter Description for KPI" rows="3"
+                                <textarea class="form-control" required name="description" placeholder="Enter Description for KPI" rows="3"
                                     id="example-text-input">{{ old('description') }}</textarea>
                             </div>
                         </div>

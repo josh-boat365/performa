@@ -21,7 +21,7 @@
                     <div class="card-body">
                         <h4 class="card-title mb-4">Employee Probing Form</h4>
 
-                      
+
 
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
@@ -55,12 +55,12 @@
                                                                                 value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                         </div>
                                                                         <div class="col-md-9">
-                                                                            <input
+                                                                            <textarea
                                                                                 class="form-control mb-3 comment-input"
-                                                                                type="text" name="employeeComment"
+                                                                                type="text" name="employeeComment" required
                                                                                 placeholder="Enter your comments"
                                                                                 @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'COMPLETED')
-                                                                                value="{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}">
+                                                                                rows="3">{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}</textarea>
                                                                         </div>
                                                                     </div>
 
@@ -77,11 +77,11 @@
                                                                                 value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? '' }}">
                                                                         </div>
                                                                         <div class="col-md-8">
-                                                                            <input class="form-control" type="text"
+                                                                            <textarea class="form-control" type="text"
                                                                                 readonly
-                                                                                placeholder="Enter your comments"
+                                                                                placeholder="Enter your comments" rows="3"
                                                                                 @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
-                                                                                value="{{ $section->sectionEmpScore->supervisorComment ?? '' }}">
+                                                                                >{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
                                                                         </div>
                                                                         <div class="form-check form-check-dark mb-3">
                                                                             <input @style(['width:1.8rem; height:2rem'])
@@ -134,13 +134,8 @@
                                                                                                 value="{{ $metric->metricEmpScore->metricEmpScore ?? '' }}">
                                                                                         </div>
                                                                                         <div class="col-md-9">
-                                                                                            <input
-                                                                                                class="form-control mb-3"
-                                                                                                type="text"
-                                                                                                name="employeeComment"
-                                                                                                placeholder="Enter your comments"
-                                                                                                @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'COMPLETED')
-                                                                                                value="{{ $metric->metricEmpScore->employeeComment ?? '' }}">
+                                                                                            <textarea class="form-control mb-3" type="text" required name="employeeComment" placeholder="Enter your comments"
+                                                                                                rows="3" @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'COMPLETED')>{{ $metric->metricEmpScore->employeeComment ?? '' }}</textarea>
                                                                                         </div>
                                                                                     </div>
 
@@ -159,12 +154,8 @@
                                                                                                 value="{{ optional($metric->metricEmpScore)->metricSupScore ?? '' }}">
                                                                                         </div>
                                                                                         <div class="col-md-8">
-                                                                                            <input
-                                                                                                class="form-control mb-3"
-                                                                                                type="text" readonly
-                                                                                                placeholder="Enter your comments"
-                                                                                                @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')
-                                                                                                value="{{ $metric->metricEmpScore->supervisorComment ?? '' }}">
+                                                                                            <textarea class="form-control mb-3" type="text" readonly placeholder="Enter your comments" rows="3"
+                                                                                                @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')>{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
                                                                                         </div>
                                                                                         <div
                                                                                             class="form-check form-check-dark mb-3">
