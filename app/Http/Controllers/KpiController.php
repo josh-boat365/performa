@@ -27,11 +27,16 @@ class KpiController extends Controller
 
         $responseKpis = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/Kpi');
 
+        $user = $this->fetchApiData($accessToken, 'http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+
+        $userDepartmentId = $user->department->id;
+        // dd($userDepartmentId, $responseKpis);
+
 
 
         // Filter the KPIs to include only those with active state of true or false
-        $activeKpis = collect($responseKpis)->filter(function ($kpi) {
-            return $kpi->type === 'REGULAR' && ($kpi->active == true || $kpi->active == false);
+        $activeKpis = collect($responseKpis)->filter(function ($kpi) use ($userDepartmentId) {
+            return $kpi->type === 'REGULAR' && ($kpi->active == true || $kpi->active == false) && ($kpi->empRole->departmentId === $userDepartmentId);
         });
 
         // Sort the KPIs to place the newly created one first
