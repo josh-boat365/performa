@@ -18,7 +18,7 @@
                         <li><a href="{{ route('show-batch') }}" key="t-default">My KPIs</a></li>
 
 
-                        @if (isset($user) &&  (in_array($user->empRole->id, $managers) || in_array($user->id, $roleManagers)))
+                        @if (isset($user) && (in_array($user->empRole->id, $managers) || in_array($user->id, $roleManagers)))
                             <li>
                                 <a href="#" class="has-arrow waves-effect" aria-label="Supervisor Menu">
                                     <span key="t-setup">Supervisor</span>
@@ -53,6 +53,15 @@
                             </li>
                             <li><a href="{{ route('global.metric.index') }}" key="t-default">Metric Setup</a>
                             </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" class="has-arrow waves-effect" aria-label="Department Setup Menu">
+                            <i class="bx bxs-cog"></i>
+                            <span key="t-setup">Department Setup</span>
+                        </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li><a href="{{ route('kpi.index') }}" key="t-default">KPI Setup</a></li>
                         </ul>
                     </li>
                 @else

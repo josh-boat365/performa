@@ -1,4 +1,34 @@
 <x-base-layout>
+
+    <style>
+        @media print {
+
+            /* Hide everything outside the col-xl-12 content */
+            body * {
+                visibility: hidden;
+            }
+
+            /* Make col-xl-12 content visible */
+            .col-xl-12,
+            .col-xl-12 * {
+                visibility: visible;
+            }
+
+            /* Ensure the col-xl-12 content takes up the full width */
+            .col-xl-12 {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+            }
+
+            /* Hide the print button */
+            #print-pdf {
+                display: none;
+            }
+        }
+    </style>
+
     <div class="container-fluid px-2">
         <div class="row">
             <div class="col-12">
@@ -10,10 +40,10 @@
             </div>
         </div>
         <div class="row mb-4">
-            <form action="{{ route('employee.printPdf', $employeeId) }}" method="GET">
-                @csrf
+            <form action="#">
+                {{--  @csrf  --}}
                 <div class="float-end">
-                    <button type="submit" class="btn btn-success" id="print-pdf">
+                    <button type="submit" class="btn btn-success" id="print-pdf" onclick="window.print()">
                         <i class="bx bx-file"></i> Print-PDF
                     </button>
                 </div>
@@ -110,14 +140,17 @@
                                                 <tr>
                                                     <td style="background-color: rgba(243, 249, 255, 0.904);">
                                                         <b>Employee Comment: </b> <br>
-                                                        {{ $score->employeeComment ?? '___' }}</td>
+                                                        {{ $score->employeeComment ?? '___' }}
+                                                    </td>
                                                     <td style="background-color: rgba(243, 249, 255, 0.904);">
                                                         <b>Supervisor Comment: </b> <br>
-                                                        {{ $score->supervisorComment ?? '___' }}</td>
+                                                        {{ $score->supervisorComment ?? '___' }}
+                                                    </td>
                                                     @if ($score->metricEmpScore === null && $score->prob === true)
                                                         <td style="background-color: rgba(243, 249, 255, 0.904);">
                                                             <b>Probe Supervisor Comment: </b> <br>
-                                                            {{ $score->probComment ?? '___' }}</td>
+                                                            {{ $score->probComment ?? '___' }}
+                                                        </td>
                                                     @endif
                                                 </tr>
                                             </tbody>
@@ -151,14 +184,17 @@
                                                 <tr>
                                                     <td style="background-color: rgba(243, 249, 255, 0.904);">
                                                         <b>Employee Comment: </b> <br>
-                                                        {{ $score->employeeComment ?? '___' }}</td>
+                                                        {{ $score->employeeComment ?? '___' }}
+                                                    </td>
                                                     <td style="background-color: rgba(243, 249, 255, 0.904);">
                                                         <b>Supervisor Comment: </b> <br>
-                                                        {{ $score->supervisorComment ?? '___' }}</td>
+                                                        {{ $score->supervisorComment ?? '___' }}
+                                                    </td>
                                                     @if ($score->sectionEmpScore === null && $score->prob === true)
                                                         <td style="background-color: rgba(243, 249, 255, 0.904);">
                                                             <b>Probe Supervisor Comment: </b> <br>
-                                                            {{ $score->probComment ?? '___' }}</td>
+                                                            {{ $score->probComment ?? '___' }}
+                                                        </td>
                                                     @endif
                                                 </tr>
                                             </tbody>
@@ -168,7 +204,6 @@
                             </div>
                             <hr class=" mb-3">
                         @endforeach
-
                     @endforeach
                 </div>
             </div>

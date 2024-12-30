@@ -1,6 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 
+@foreach ($employee->scores as $index => $score)
+                            <div>
+                                @if ($score->metricEmpScore === null)
+                                    <h5 class="p-2" style="background-color: rgb(229 232 236);">
+                                        <b>Question {{ $index + 1 }}. </b>{{ $score->questionName ?? '___' }}
+                                        (<b>{{ $score->sectionScore }}</b>)
+                                        <br>
+                                        <small>{{ $score->questionDescription ?? '___' }}</small>
+                                    </h5>
+
+                                    <div class="table-responsive">
+                                        <table class="table mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Employee Section Score: {{ $score->sectionEmpScore ?? '___' }}
+                                                    </th>
+                                                    <th>Supervisor Section Score:
+                                                        {{ $score->sectionSupScore ?? '___' }}</th>
+                                                    @if ($score->metricEmpScore === null && $score->prob === true)
+                                                        <th>Probe Supervisor Score:
+                                                            {{ $score->sectionProbScore ?? '___' }}</th>
+                                                    @endif
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td style="background-color: rgba(243, 249, 255, 0.904);">
+                                                        <b>Employee Comment: </b> <br>
+                                                        {{ $score->employeeComment ?? '___' }}
+                                                    </td>
+                                                    <td style="background-color: rgba(243, 249, 255, 0.904);">
+                                                        <b>Supervisor Comment: </b> <br>
+                                                        {{ $score->supervisorComment ?? '___' }}
+                                                    </td>
+                                                    @if ($score->metricEmpScore === null && $score->prob === true)
+                                                        <td style="background-color: rgba(243, 249, 255, 0.904);">
+                                                            <b>Probe Supervisor Comment: </b> <br>
+                                                            {{ $score->probComment ?? '___' }}
+                                                        </td>
+                                                    @endif
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
+
+                                @if ($score->sectionEmpScore === null)
+                                    <h5 class="p-2" style="background-color: rgb(229 232 236);">
+                                        <b>Question {{ $index + 1 }}. </b>{{ $score->questionName ?? '___' }}
+                                        (<b>{{ $score->metricScore }}</b>)
+                                        <br>
+                                        <small>{{ $score->questionDescription ?? '___' }}</small>
+                                    </h5>
+
+                                    <div class="table-responsive">
+                                        <table class="table mb-0">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Employee Metric Score: {{ $score->metricEmpScore ?? '___' }}
+                                                    </th>
+                                                    <th>Supervisor Metric Score:
+                                                        {{ $score->metricSupScore ?? '___' }}</th>
+                                                    @if ($score->sectionEmpScore === null && $score->prob === true)
+                                                        <th>Probe Supervisor Score:
+                                                            {{ $score->metricProbScore ?? '___' }}</th>
+                                                    @endif
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td style="background-color: rgba(243, 249, 255, 0.904);">
+                                                        <b>Employee Comment: </b> <br>
+                                                        {{ $score->employeeComment ?? '___' }}
+                                                    </td>
+                                                    <td style="background-color: rgba(243, 249, 255, 0.904);">
+                                                        <b>Supervisor Comment: </b> <br>
+                                                        {{ $score->supervisorComment ?? '___' }}
+                                                    </td>
+                                                    @if ($score->sectionEmpScore === null && $score->prob === true)
+                                                        <td style="background-color: rgba(243, 249, 255, 0.904);">
+                                                            <b>Probe Supervisor Comment: </b> <br>
+                                                            {{ $score->probComment ?? '___' }}
+                                                        </td>
+                                                    @endif
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
+                            </div>
+                            <hr class=" mb-3">
+                        @endforeach
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

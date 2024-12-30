@@ -294,7 +294,7 @@ class ReportController extends Controller
         exit;
     }
 
-    public function generateEmployeePdfxx($employeeId)
+    public function generateEmployeePdfReport($employeeId)
     {
         // Retrieve employee data
         $accessToken = session('api_token');
@@ -303,68 +303,90 @@ class ReportController extends Controller
         $response = Http::withToken($accessToken)
             ->put("http://192.168.1.200:5123/Appraisal/Report", $data);
 
-        $employeeData = $response->json();
+        $employeeResponseData = $response->object();
 
         // Handle cases where employee data is not available
-        if (!$employeeData || empty($employeeData)) {
+        if (!$employeeResponseData || empty($employeeResponseData)) {
             return response()->json(['error' => 'Employee data not found or empty.'], 404);
         }
+
+        // // Convert the response data into a collection
+        // $employeeCollection = collect($employeeResponseData);
+
+        // if (!$employeeCollection) {
+        //     return response()->json(['error' => 'Invalid employee data structure.'], 500);
+        // }
 
         // Initialize FPDF
         $fpdf = new Fpdf();
         $fpdf->AddPage();
-        $fpdf->SetFont('Arial', 'B', 16);
+        $fpdf->SetFont('Arial', '', 12);
 
         // Design header
         $fpdf->Image(public_path('bpsl_imgs/purple-logo-bpsl.png'), 10, 10, 30); // Company logo
+        $fpdf->SetFont('Arial', 'B', 16);
         $fpdf->Cell(190, 10, 'Employee Appraisal Report', 0, 1, 'C');
         $fpdf->SetFont('Arial', '', 12);
         $fpdf->Cell(190, 10, now()->format('D M d Y g:i A'), 0, 1, 'C');
         $fpdf->Ln(10);
 
-        // dd($employeeData);
-        // Display Employee Information
-        foreach ($employeeData[0]['employees'] as $employee) {
-            $fpdf->SetFont('Arial', 'B', 14);
-            $fpdf->Cell(190, 10, "Employee: {$employee['employeeName']}", 0, 1, 'L');
-            $fpdf->Ln(5);
-
-            $fpdf->SetFont('Arial', '', 12);
-            $fpdf->Cell(95, 10, "Employee ID: {444}", 0, 0, 'L');
-            $fpdf->Cell(95, 10, "Role: {$employee['roleName']}", 0, 1, 'L');
-            $fpdf->Cell(95, 10, "Department: {$employee['departmentName']}", 0, 0, 'L');
-            $fpdf->Cell(95, 10, "Branch: Head Office", 0, 1, 'L');
-            $fpdf->Ln(5);
-
-            $fpdf->Cell(95, 10, "Grade: " . (isset($employee['totalScore']['grade']) ? $employee['totalScore']['grade'] : '___'), 0, 0, 'L');
-            $fpdf->Cell(95, 10, "Score: " . (isset($employee['totalScore']['totalKpiScore']) ? $employee['totalScore']['totalKpiScore'] : '___'), 0, 1, 'L');
-            $fpdf->Cell(190, 10, "Remark: " . (isset($employee['totalScore']['remark']) ? $employee['totalScore']['remark'] : '___'), 0, 1, 'L');
-            $fpdf->Ln(10);
-
-            // Appraisal Questions and Scores
-            foreach ($employee['scores'] as $index => $score) {
-                $fpdf->SetFont('Arial', 'B', 12);
-                $fpdf->Cell(190, 10, "Question " . ($index + 1) . ": {$score['questionName']}", 0, 1, 'L');
-                $fpdf->SetFont('Arial', '', 10);
-                $fpdf->MultiCell(190, 10, $score['questionDescription'] ?? '___', 0, 'L');
+        // Iterate through employees using arrow syntax
+        foreach($employeeResponseData as $employeeData){
+            foreach ($employeeData->employees as $employee) {
+                // Employee Details Header
+                $fpdf->SetFont('Arial', 'B', 14);
+                $fpdf->Cell(190, 10, "Batch: {$employeeData->batchName}", 0, 1, 'C');
                 $fpdf->Ln(5);
 
-                $fpdf->Cell(95, 10, "Employee Section Score: " . (isset($score['metricEmpScore']) ? $score['metricEmpScore'] : '___'), 0, 0, 'L');
-                $fpdf->Cell(95, 10, "Employee Metric Score: " . (isset($score['sectionEmpScore']) ? $score['sectionEmpScore'] : '___'), 0, 1, 'L');
-                $fpdf->Cell(95, 10, "Supervisor Section Score: " . (isset($score['sectionSupScore']) ? $score['sectionSupScore'] : '___'), 0, 0, 'L');
-                $fpdf->Cell(95, 10, "Supervisor Metric Score: " . (isset($score['metricSupScore']) ? $score['metricSupScore'] : '___'), 0, 1, 'L');
+                // Employee Information
+                $fpdf->SetFont('Arial', '', 12);
+                $fpdf->Cell(95, 10, "Name: {$employee->employeeName}", 0, 0, 'L');
+                $fpdf->Cell(95, 10, "Employee ID: " . ($employee->staffNumber ?? '444'), 0, 1, 'L');
+                $fpdf->Cell(95, 10, "Role: {$employee->roleName}", 0, 0, 'L');
+                $fpdf->Cell(95, 10, "Branch: Head Office", 0, 1, 'L');
+                $fpdf->Cell(95, 10, "Department: {$employee->departmentName}", 0, 0, 'L');
+                $fpdf->Cell(95, 10, "Grade: " . ($employee->totalScore->grade ?? '___'), 0, 1, 'L');
+                $fpdf->Cell(95, 10, "Score: " . ($employee->totalScore->totalKpiScore ?? '___'), 0, 0, 'L');
+                $fpdf->Cell(95, 10, "Remark: " . ($employee->totalScore->remark ?? '___'), 0, 1, 'L');
+                $fpdf->Ln(10);
+
+                // Appraisal Questions and Scores
+                foreach ($employee->scores as $index => $score) {
+                    $fpdf->SetFont('Arial', 'B', 12);
+                    $fpdf->Cell(190, 10, "Question " . ($index + 1) . ": {$score->questionName}", 0, 1, 'L');
+                    $fpdf->SetFont('Arial', '', 10);
+                    $fpdf->MultiCell(190, 10, $score->questionDescription ?? '___', 0, 'L');
+                    $fpdf->Ln(5);
+
+                    $fpdf->Cell(95, 10, "Employee Section Score: " . ($score->sectionEmpScore ?? '___'), 0, 0, 'L');
+                    $fpdf->Cell(95, 10, "Supervisor Section Score: " . ($score->sectionSupScore ?? '___'), 0, 1, 'L');
+
+                    if ($score->metricEmpScore === null && isset($score->prob) && $score->prob) {
+                        $fpdf->Cell(95, 10, "Probe Supervisor Score: " . ($score->sectionProbScore ?? '___'), 0, 1, 'L');
+                    }
+
+                    // Comments
+                    $fpdf->SetFont('Arial', '', 10);
+                    $fpdf->MultiCell(190, 10, "Employee Comment: " . ($score->employeeComment ?? '___'), 0, 'L');
+                    $fpdf->MultiCell(190, 10, "Supervisor Comment: " . ($score->supervisorComment ?? '___'), 0, 'L');
+                    if ($score->metricEmpScore === null && isset($score->prob) && $score->prob) {
+                        $fpdf->MultiCell(190, 10, "Probe Supervisor Comment: " . ($score->probComment ?? '___'), 0, 'L');
+                    }
+
+                    $fpdf->Ln(10);
+                }
+
+                // Separator between employees
                 $fpdf->Ln(5);
+                $fpdf->Cell(190, 0, '', 'T', 1, 'C'); // Horizontal line
+                $fpdf->Ln(10);
             }
-
-            // Add a separator
-            $fpdf->Ln(5);
-            $fpdf->Cell(190, 0, '', 'T', 1, 'C'); // Horizontal line
-            $fpdf->Ln(10);
         }
 
         // Output PDF
         $fpdf->Output('I', 'Employee_Appraisal_Report.pdf');
     }
+
 
 
 
