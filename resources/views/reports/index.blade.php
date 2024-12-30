@@ -24,7 +24,8 @@
                                             data-placeholder="Choose ...">
                                             <option value="">Select batch....</option>
                                             @foreach ($batches as $batch)
-                                                <option value="{{ $batch['batchId'] }}">{{ $batch['batchName'] }} - {{ $batch['batchStatus'] }}
+                                                <option value="{{ $batch['batchId'] }}">{{ $batch['batchName'] }} -
+                                                    {{ $batch['batchStatus'] }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -63,16 +64,19 @@
                                         </select>
                                     </div>
 
-                                    <button id="filterButton" type="submit" class="btn btn-success"><i
-                                            class="bx bx-filter-alt"></i> Filter</button>
+                                    <div>
+                                        <button id="filterButton" type="submit" class="btn btn-success"><i
+                                                class="bx bx-filter-alt"></i> Filter</button>
+                                    </div>
+
                                 </div>
                         </form>
-                        {{--  <div class="d-flex gap-3">
-                            <button type="button" class="btn btn-primary"><i class="bx bx-spreadsheet"></i>
-                                Print-Excel</button>
-                            <button type="button" class="btn btn-success"><i class="bx bx-file"></i>
-                                Print-PDF</button>
-                        </div>  --}}
+
+                        <div class="">
+                            <a href="{{ route('report.index') }}" class="btn btn-primary"><i style="font-size: x-large"
+                                    class="bx bx-rotate-left"></i></a>
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -114,7 +118,6 @@
                                 @if ($reports && $reports->isNotEmpty())
                                     @forelse ($reports as $report)
                                         @foreach ($report->employees as $employee)
-                                            
                                             @php
                                                 // Collect all supervisorName and probeName, then get unique values
                                                 $supervisorName = collect($employee->scores)
@@ -129,7 +132,7 @@
                                                     ->filter()
                                                     ->implode(' ');
 
-                                                    $status = collect($employee->scores)
+                                                $status = collect($employee->scores)
                                                     ->pluck('status')
                                                     ->unique()
                                                     ->filter()
@@ -146,7 +149,8 @@
                                                 <td>{{ $employee->roleName ?? 'N/A' }}</td>
                                                 <td>{{ $supervisorName ?? 'N/A' }}</td>
                                                 <td>{{ $probeName ?? 'N/A' }}</td>
-                                                <td><a href="{{ route('reports.employee.summary', $employee->employeeId) }}"><span
+                                                <td><a
+                                                        href="{{ route('reports.employee.summary', $employee->employeeId) }}"><span
                                                             class="badge rounded-pill bg-primary">View</span></a></td>
                                             </tr>
                                         @endforeach

@@ -52,7 +52,7 @@ class AuthController extends Controller
                 // Store access token and user profile data in the session
                 session([
                     'api_token' => $data->access_token,
-                    'token_issued_at' => time(), // Initialize last activity time
+                    // 'token_issued_at' => time(), // Initialize last activity time
                     'user_name' => $data->profile->fullName,
                     'user_email' => $data->profile->email,
                     'employee_id' => $data->profile->id,
