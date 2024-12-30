@@ -34,9 +34,9 @@ Route::get('/', function () {
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 
-Route::group(
-    ['middleware' => ['session.notfound']],
-    function () {
+// Route::group(
+//     ['middleware' => ['session.notfound']],
+//     function () {
 
         //Employee KPI Setup
         Route::get("dashboard/index", [DashboardController::class, "index"])->name("dashboard.index");
@@ -168,5 +168,5 @@ Route::group(
 
 
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    }
-);
+//     }
+// );
