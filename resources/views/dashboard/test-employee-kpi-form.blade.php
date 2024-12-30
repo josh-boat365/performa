@@ -96,6 +96,7 @@
                                                                             <input class="form-control mb-3 score-input"
                                                                                 type="number" name="sectionEmpScore"
                                                                                 required placeholder="Enter Score"
+                                                                                min="0"
                                                                                 max="{{ $section->sectionScore }}"
                                                                                 title="The Score cannot be more than the section score {{ $section->sectionScore }}"
                                                                                 @disabled(isset($section->sectionEmpScore) &&
@@ -221,6 +222,7 @@
                                                                                                 name="metricEmpScore"
                                                                                                 required
                                                                                                 placeholder="Enter Score"
+                                                                                                min="0"
                                                                                                 max="{{ $metric->metricScore }}"
                                                                                                 title="The Score cannot be more than the section score {{ $metric->metricScore }}"
                                                                                                 @disabled(

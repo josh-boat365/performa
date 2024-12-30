@@ -225,11 +225,17 @@ class SupervisorScoreController extends Controller
                     'supervisorComment' => 'nullable|string',
                 ]);
 
+                // Ensure employeeComment is not an empty string
+                $supervisorComment = $request->input('supervisorComment', '');
+                if (trim($supervisorComment) === '') {
+                    return back()->with('toast_error', 'Supervisor comment cannot be empty.');
+                }
+
                 // Prepare the payload for the API request
                 $payload = [
                     'scoreId' => (int) $request->input('scoreId') ?? null,
                     'metricSupScore' => (float) $request->input('metricSupScore'),
-                    'supervisorComment' => $request->input('supervisorComment', ''),
+                    'supervisorComment' => $supervisorComment,
                 ];
 
                 // dd($payload);
@@ -245,11 +251,16 @@ class SupervisorScoreController extends Controller
                     'supervisorComment' => 'nullable|string',
                 ]);
 
+                $supervisorComment = $request->input('supervisorComment', '');
+                if (trim($supervisorComment) === '') {
+                    return back()->with('toast_error', 'Supervisor comment cannot be empty.');
+                }
+
                 // Prepare the payload for the API request
                 $payload = [
                     'scoreId' => (int) $request->input('scoreId') ?? null,
                     'sectionSupScore' => (float) $request->input('sectionSupScore'),
-                    'supervisorComment' => $request->input('supervisorComment', ''),
+                    'supervisorComment' => $supervisorComment,
                 ];
 
                 $successMessage = 'Section score, section comment submitted successfully!';
@@ -305,11 +316,16 @@ class SupervisorScoreController extends Controller
                     'probComment' => 'nullable|string',
                 ]);
 
+                $probComment = $request->input('probComment', '');
+                if (trim($probComment) === '') {
+                    return back()->with('toast_error', 'Probe Supervisor comment cannot be empty.');
+                }
+
                 // Prepare the payload for the API request
                 $payload = [
                     'scoreId' => (int) $request->input('scoreId') ?? null,
                     'metricProbScore' => (float) $request->input('metricProbScore'),
-                    'probComment' => $request->input('probComment', ''),
+                    'probComment' => $probComment,
                 ];
 
                 // dd($payload);
@@ -325,11 +341,16 @@ class SupervisorScoreController extends Controller
                     'probComment' => 'nullable|string',
                 ]);
 
+                $probComment = $request->input('probComment', '');
+                if (trim($probComment) === '') {
+                    return back()->with('toast_error', 'Probe Supervisor comment cannot be empty.');
+                }
+
                 // Prepare the payload for the API request
                 $payload = [
                     'scoreId' => (int) $request->input('scoreId') ?? null,
                     'sectionProbScore' => (float) $request->input('sectionProbScore'),
-                    'probComment' => $request->input('probComment', ''),
+                    'probComment' => $probComment,
                 ];
 
                 $successMessage = 'Section score, section comment submitted successfully!';

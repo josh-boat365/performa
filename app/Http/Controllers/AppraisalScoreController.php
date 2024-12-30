@@ -11,7 +11,6 @@ class AppraisalScoreController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request);
         try {
             // Initialize a variable for the success message
             $successMessage = '';
@@ -26,12 +25,18 @@ class AppraisalScoreController extends Controller
                     'kpiType' => 'nullable|string',
                 ]);
 
+                // Ensure employeeComment is not an empty string
+                $employeeComment = $request->input('employeeComment', '');
+                if (trim($employeeComment) === '') {
+                    return back()->with('toast_error', 'Employee comment cannot be empty.');
+                }
+
                 // Prepare the payload for the API request
                 $payload = [
                     'id' => $request->input('sectionEmpScoreId') ?? null,
                     'sectionEmpScore' => (float) $request->input('sectionEmpScore', 0),
                     'sectionId' => (int) $request->input('sectionId', 0),
-                    'employeeComment' => $request->input('employeeComment', ''),
+                    'employeeComment' => $employeeComment,
                     'kpiType' => $request->input('kpiType', ''),
                 ];
 
@@ -48,13 +53,19 @@ class AppraisalScoreController extends Controller
                     'kpiType' => 'nullable|string',
                 ]);
 
+                // Ensure employeeComment is not an empty string
+                $employeeComment = $request->input('employeeComment', '');
+                if (trim($employeeComment) === '') {
+                    return back()->with('toast_error', 'Employee comment cannot be empty.');
+                }
+
                 // Prepare the payload for the API request
                 $payload = [
                     'id' => $request->input('metricEmpScoreId') ?? null,
                     'metricEmpScore' => (float) $request->input('metricEmpScore', 0),
                     'metricId' => (int) $request->input('metricId', 0),
                     'sectionId' => (int) $request->input('sectionId', 0),
-                    'employeeComment' => $request->input('employeeComment', ''),
+                    'employeeComment' => $employeeComment,
                     'kpiType' => $request->input('kpiType', ''),
                 ];
 
@@ -86,6 +97,7 @@ class AppraisalScoreController extends Controller
             return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
         }
     }
+
 
     public function submitAppraisalForReview(Request $request)
     {
