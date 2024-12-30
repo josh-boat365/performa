@@ -58,7 +58,7 @@ class GlobalKpiController extends Controller
         $responseBatches = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/batch');
 
         // Extracting data
-        $batch_data = $responseBatches ?? [];
+        $batch_data = collect($responseBatches)->filter(fn($batch) => $batch->status === 'OPEN');
 
         $uniqueDepartments = [];
         // $uniqueRoles = [];

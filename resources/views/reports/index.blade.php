@@ -24,7 +24,7 @@
                                             data-placeholder="Choose ...">
                                             <option value="">Select batch....</option>
                                             @foreach ($batches as $batch)
-                                                <option value="{{ $batch['batchId'] }}">{{ $batch['batchName'] }}
+                                                <option value="{{ $batch['batchId'] }}">{{ $batch['batchName'] }} - {{ $batch['batchStatus'] }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -102,6 +102,7 @@
                                     <th>Grade</th>
                                     <th>Score</th>
                                     <th>Remark</th>
+                                    <th>Status</th>
                                     <th>Department</th>
                                     <th>Role</th>
                                     <th>Supervisor Name</th>
@@ -113,6 +114,7 @@
                                 @if ($reports && $reports->isNotEmpty())
                                     @forelse ($reports as $report)
                                         @foreach ($report->employees as $employee)
+                                            
                                             @php
                                                 // Collect all supervisorName and probeName, then get unique values
                                                 $supervisorName = collect($employee->scores)
@@ -126,6 +128,12 @@
                                                     ->unique()
                                                     ->filter()
                                                     ->implode(' ');
+
+                                                    $status = collect($employee->scores)
+                                                    ->pluck('status')
+                                                    ->unique()
+                                                    ->filter()
+                                                    ->implode(' ');
                                             @endphp
                                             <tr>
                                                 <td>{{ $report->batchName ?? 'N/A' }}</td>
@@ -133,6 +141,7 @@
                                                 <td>{{ $employee->totalScore->grade ?? 'N/A' }}</td>
                                                 <td>{{ $employee->totalScore->totalKpiScore ?? 'N/A' }}</td>
                                                 <td>{{ $employee->totalScore->remark ?? 'N/A' }}</td>
+                                                <td>{{ $status ?? 'N/A' }}</td>
                                                 <td>{{ $employee->departmentName ?? 'N/A' }}</td>
                                                 <td>{{ $employee->roleName ?? 'N/A' }}</td>
                                                 <td>{{ $supervisorName ?? 'N/A' }}</td>
