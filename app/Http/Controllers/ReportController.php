@@ -54,11 +54,27 @@ class ReportController extends Controller
         // Process employees data to avoid redundant operations
         $employeesData = $reports->flatMap(fn($report) => $report->employees ?? []);
 
-        // Extract and group batch data
-        $batches = $reports->map(fn($report) => [
-            'batchId' => $report->batchId ?? 'N/A',
-            'batchName' => $report->batchName ?? 'N/A',
-        ])->unique('batchId')->values();
+        // Fetch departments data
+        $responseBatches = Http::withToken($accessToken)
+        ->get("http://192.168.1.200:5123/Appraisal/Batch");
+
+        // Handle unsuccessful response for departments
+        if (!$responseBatches->successful()) {
+            Log::error('Failed to fetch batches', ['response' => $responseBatches->body()]);
+            $batches = collect(); // Default to empty collection if the request fails
+        } else {
+            $batches = collect($responseBatches->object())->map(fn($batch) => [
+                'batchId' => $batch->id ?? 'N/A',
+                'batchName' => $batch->name ?? 'N/A',
+                'batchStatus' => $batch->status ?? 'N/A',
+            ])->values();
+        }
+
+        // // Extract and group batch data
+        // $batches = $reports->map(fn($report) => [
+        //     'batchId' => $report->batchId ?? 'N/A',
+        //     'batchName' => $report->batchName ?? 'N/A',
+        // ])->unique('batchId')->values();
 
         // Fetch departments data
         $responseDepartments = Http::withToken($accessToken)
@@ -70,8 +86,8 @@ class ReportController extends Controller
             $departments = collect(); // Default to empty collection if the request fails
         } else {
             $departments = collect($responseDepartments->object())->map(fn($department) => [
-                'departmentId' => $department->id,
-                'departmentName' => $department->name,
+                'departmentId' => $department->id ?? 'N/A',
+                'departmentName' => $department->name ?? 'N/A',
             ])->values();
         }
 

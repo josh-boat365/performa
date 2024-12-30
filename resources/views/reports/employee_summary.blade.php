@@ -101,6 +101,27 @@
                                                 </td>
                                                 <td>Remark: <b>{{ $employee->totalScore->remark ?? '___' }}</b></td>
                                             </tr>
+
+
+                                                @php
+                                                    // Collect all supervisorName and probeName, then get unique values
+                                                    $supervisorName = collect($employee->scores)
+                                                        ->pluck('supervisorName')
+                                                        ->unique()
+                                                        ->filter()
+                                                        ->implode(' ');
+
+                                                    $probeName = collect($employee->scores)
+                                                        ->pluck('probName')
+                                                        ->unique()
+                                                        ->filter()
+                                                        ->implode(' ');
+                                                @endphp
+                                                <tr>
+                                                    <td>Supervisor: <b>{{ $supervisorName ?? 'N/A' }}</b></td>
+                                                    <td>Senior Supervisor: <b>{{ $probeName ?? 'N/A' }}</b></td>
+                                                </tr>
+
                                         </tbody>
                                     </table>
                                 </div>
