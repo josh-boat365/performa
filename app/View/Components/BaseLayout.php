@@ -23,13 +23,21 @@ class BaseLayout extends Component
 
         $responseDepartments = Http::withToken($accessToken)->get('http://192.168.1.200:5124/HRMS/Department');
         $responseRoles = Http::withToken($accessToken)->get('http://192.168.1.200:5124/HRMS/EmpRole');
-        $responseUser = Http::withToken($accessToken)->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+        // $responseUser = Http::withToken($accessToken)->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+        // dd($user->id);
+        // dd($responseDepartments->object());
 
         $departments = collect($responseDepartments->object())->pluck('id')->toArray();
         $managers = collect($responseDepartments->object())->pluck('manager')->unique()->toArray();
         $roleManagers = collect($responseRoles->object())->pluck('manager')->unique()->toArray();
         // $roleManagers = dd(collect($responseDepartments->object()));
         // dd($managers, $roleManagers, collect($responseDepartments->object()) );
+        // dd([
+        //     'user'=>$user->id,
+        //     'departments'=>$departments,
+        //     'managers'=> $managers,
+        //     'supervisors'=> $roleManagers,
+        // ]);
 
         session([
             'user' => $user,

@@ -37,7 +37,7 @@
 
 
 
-                @if (isset($user) && $user->department->id == 1)
+                @if (isset($user) && $user->department->id == 10 && ((in_array($user->id, $managers) || in_array($user->id, $roleManagers))))
                     <li>
                         <a href="#" class="has-arrow waves-effect" aria-label="HR Setup Menu">
                             <i class="bx bxs-cog"></i>
@@ -64,11 +64,7 @@
                             <li><a href="{{ route('kpi.index') }}" key="t-default">KPI Setup</a></li>
                         </ul>
                     </li>
-                @else
-                    <li></li>
-                @endif
-
-                @if (isset($user) && (in_array($user->id, $managers) || in_array($user->id, $roleManagers)))
+                @elseif (isset($user) && (in_array($user->id, $managers) || in_array($user->id, $roleManagers)))
                     <li>
                         <a href="#" class="has-arrow waves-effect" aria-label="Department Setup Menu">
                             <i class="bx bxs-cog"></i>
@@ -82,12 +78,26 @@
                     <li></li>
                 @endif
 
+                {{--  @if (isset($user) && (in_array($user->id, $managers) || in_array($user->id, $roleManagers)))
+                    <li>
+                        <a href="#" class="has-arrow waves-effect" aria-label="Department Setup Menu">
+                            <i class="bx bxs-cog"></i>
+                            <span key="t-setup">Department Setup</span>
+                        </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li><a href="{{ route('kpi.index') }}" key="t-default">KPI Setup</a></li>
+                        </ul>
+                    </li>
+                @else
+                    <li></li>
+                @endif  --}}
 
 
 
 
 
-                @if (isset($user) && $user->department->id == 1)
+
+                @if (isset($user) && $user->department->id == 10)
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect" aria-label="Reports Menu">
                             <i class="bx bx-file"></i>

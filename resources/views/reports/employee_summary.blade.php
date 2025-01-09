@@ -71,11 +71,11 @@
 
                             {{--  Employee Information  --}}
 
-                            <div class="d-flex gap-4 justify-content-center">
-                                <div>
-                                    <img @style(['width:8rem']) src="{{ asset('bpsl_imgs/user-1.png') }}"
-                                        alt="Employee Image">
-                                </div>
+                            <div class="mb-4">
+                                <img @style(['width:8rem']) src="{{ asset('bpsl_imgs/user-1.png') }}"
+                                    alt="Employee Image">
+                            </div>
+
                                 <div class="table-responsive">
                                     <table class="table mb-0">
 
@@ -125,7 +125,7 @@
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
+
                         @endforeach
 
                         <div class=""
