@@ -28,9 +28,15 @@ class KpiController extends Controller
         $responseKpis = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/Kpi');
 
         $user = $this->fetchApiData($accessToken, 'http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+        $employeeResponse = $this->fetchApiData($accessToken, 'http://192.168.1.200:5124/HRMS/Employee');
 
         $userDepartmentId = $user->department->id;
         // dd($userDepartmentId, $responseKpis);
+
+        //$employees = $employeeResponse->pluck('id')->toArray(); //error cal to member function on array
+        //new approach
+        $employees = $employeeResponse;
+
 
 
 
@@ -47,7 +53,7 @@ class KpiController extends Controller
 
 
 
-        return view('kpi-setup.index', compact('activeKpis'));
+        return view('kpi-setup.index', compact('activeKpis', 'user', 'employees'));
     }
 
     // Add this method for pagination
@@ -62,18 +68,25 @@ class KpiController extends Controller
         $responseRoles = $this->fetchApiData($accessToken, 'http://192.168.1.200:5124/HRMS/emprole');
         $responseBatches = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/batch');
 
+
+
         // Extracting data
         $batch_data = collect($responseBatches)->filter(fn($batch) => $batch->status === 'OPEN');
 
         $uniqueDepartments = [];
         $uniqueRoles = [];
 
-        if ($responseRoles) {
-            $rolesWithDepartments = collect($responseRoles);
+        // dd(collect($responseRoles)->pluck('name')->unique()->toArray());
 
-            // Extract and deduplicate departments and roles
-            $uniqueDepartments = $rolesWithDepartments->pluck('department')->unique()->toArray();
-            $uniqueRoles = $rolesWithDepartments->map(function ($role) {
+        $user = $this->fetchApiData($accessToken, 'http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+        $userDepartmentId = $user->department->id;
+
+        if ($responseRoles) {
+            $roles = collect($responseRoles);
+            // dd($roles);
+            // Extract and deduplicate  roles
+            //TODO: get all roles related to user department
+            $uniqueRoles = collect($roles)->filter(fn($role) => $role->departmentId === $userDepartmentId)->map(function ($role) {
                 return [
                     'id' => $role->id,
                     'name' => $role->name,
@@ -82,7 +95,7 @@ class KpiController extends Controller
         }
 
 
-        return view('kpi-setup.create', compact('uniqueDepartments', 'batch_data', 'uniqueRoles',));
+        return view('kpi-setup.create', compact( 'batch_data', 'uniqueRoles',));
     }
 
     /**
@@ -183,52 +196,6 @@ class KpiController extends Controller
     }
 
 
-    /**
-     * Store a newly created resource in storage.
-     */
-
-
-
-    private function getManagerById($managerId)
-    {
-        try {
-            // Get the access token from the session
-            $accessToken = session('api_token'); // Ensure this is securely managed
-
-            // Make the GET request to the external API to fetch manager details
-            $response = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5124/HRMS/Employee' . $managerId);
-
-
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                $manager = $response->object();
-                return [
-                    'id' => $manager['id'],
-                    'name' => $manager['name'],
-                    'email' => $manager['email']
-                ];
-            } else {
-                // Handle the case where the manager details could not be fetched
-                return [
-                    'id' => $managerId,
-                    'name' => 'Unknown Manager',
-                    'email' => 'unknown@example.com'
-                ];
-            }
-        } catch (\Exception $e) {
-            // Log the error for debugging purposes
-            Log::error('Error fetching manager details', ['error' => $e->getMessage()]);
-
-            // Return a default response in case of an error
-            return [
-                'id' => $managerId,
-                'name' => 'Unknown Manager',
-                'email' => 'unknown@example.com'
-            ];
-        }
-    }
-
 
     /**
      * Display the specified resource.
@@ -247,14 +214,16 @@ class KpiController extends Controller
             $batch_data = $responseBatches ?? [];
             $kpi_data = $responseKpi ?? null;
 
-            $uniqueDepartments = [];
             $uniqueRoles = [];
 
-            if ($responseRoles) {
-                $rolesWithDepartments = collect($responseRoles);
 
-                $uniqueDepartments = $rolesWithDepartments->pluck('department')->unique()->toArray();
-                $uniqueRoles = $rolesWithDepartments->map(function ($role) {
+            $user = $this->fetchShowApiData( 'http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+            $userDepartmentId = $user->department->id;
+
+            if ($responseRoles) {
+                $roles = collect($responseRoles);
+
+                $uniqueRoles = collect($roles)->filter(fn($role) => $role->departmentId === $userDepartmentId)->map(function ($role) {
                     return [
                         'id' => $role->id,
                         'name' => $role->name,
@@ -263,7 +232,7 @@ class KpiController extends Controller
             }
 
             if ($kpi_data) {
-                return view('kpi-setup.edit', compact('kpi_data', 'uniqueDepartments', 'uniqueRoles', 'batch_data'));
+                return view('kpi-setup.edit', compact('kpi_data',  'uniqueRoles', 'batch_data'));
             }
 
             Log::error('Failed to fetch KPI', [
@@ -457,42 +426,6 @@ class KpiController extends Controller
     }
 
 
-    /**
-     * Helper method to make API requests.
-     *
-     * @param string $method HTTP method (GET, POST, PUT, DELETE)
-     * @param string $url API URL
-     * @param array|null $data Request payload
-     * @return object|null
-     */
-    private function makeApiRequest(string $method, string $url, array $data = null)
-    {
-        $accessToken = session('api_token');
-
-        try {
-            $response = Http::withToken($accessToken)->$method($url, $data);
-
-            if ($response->successful()) {
-                return $response->object();
-            }
-
-            Log::error('API Request Failed', [
-                'method' => $method,
-                'url' => $url,
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ]);
-
-            return null;
-        } catch (\Exception $e) {
-            Log::error('API Request Exception', [
-                'method' => $method,
-                'url' => $url,
-                'error' => $e->getMessage(),
-            ]);
-            return null;
-        }
-    }
 
 
 
