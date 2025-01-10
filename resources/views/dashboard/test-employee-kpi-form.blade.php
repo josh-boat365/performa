@@ -465,7 +465,7 @@
                                 </script>
 
                                 <script>
-                                    document.addEventListener('DOMContentLoaded', function() {
+                                    {{--  document.addEventListener('DOMContentLoaded', function() {
                                         const sections = document.querySelectorAll('.section-tab');
                                         const prevBtn = document.getElementById('prev-btn');
                                         const nextBtn = document.getElementById('next-btn');
@@ -517,6 +517,57 @@
                                                 localStorage.setItem('currentPage',
                                                     currentPage); // Save the current page before form submission
                                             });
+                                        });
+
+                                        // Show the page on load
+                                        showPage(currentPage);
+
+                                    }); --}}
+                                </script>
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const sections = document.querySelectorAll('.section-tab');
+                                        const prevBtn = document.getElementById('prev-btn');
+                                        const nextBtn = document.getElementById('next-btn');
+                                        const submitBtn = document.getElementById('submit-btn');
+                                        const currentPageSpan = document.getElementById('current-page');
+                                        const totalPagesSpan = document.getElementById('total-pages');
+                                        let currentPage = parseInt(sessionStorage.getItem('currentPage') || 0);
+                                        const sectionsPerPage = 3;
+                                        const totalPages = Math.ceil(sections.length / sectionsPerPage);
+
+                                        // Initialize Pagination Count
+                                        totalPagesSpan.textContent = totalPages;
+
+                                        function showPage(page) {
+                                            sections.forEach(section => {
+                                                section.style.display = 'none';
+                                            });
+                                            const start = page * sectionsPerPage;
+                                            const end = start + sectionsPerPage;
+                                            for (let i = start; i < end && i < sections.length; i++) {
+                                                sections[i].style.display = 'block';
+                                            }
+                                            prevBtn.disabled = page === 0;
+                                            nextBtn.disabled = page === totalPages - 1;
+                                            submitBtn.disabled = totalPages > 1 && page !== totalPages - 1;
+
+                                            currentPageSpan.textContent = page + 1; // Update current page display
+                                            sessionStorage.setItem('currentPage', page); // Save the current page to sessionStorage
+                                        }
+
+                                        prevBtn.addEventListener('click', function() {
+                                            if (currentPage > 0) {
+                                                currentPage--;
+                                                showPage(currentPage);
+                                            }
+                                        });
+
+                                        nextBtn.addEventListener('click', function() {
+                                            if (currentPage < totalPages - 1) {
+                                                currentPage++;
+                                                showPage(currentPage);
+                                            }
                                         });
 
                                         // Show the page on load
