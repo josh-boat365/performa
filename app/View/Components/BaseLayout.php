@@ -23,8 +23,7 @@ class BaseLayout extends Component
 
         $responseDepartments = Http::withToken($accessToken)->get('http://192.168.1.200:5124/HRMS/Department');
         $responseRoles = Http::withToken($accessToken)->get('http://192.168.1.200:5124/HRMS/EmpRole');
-        // $responseUser = Http::withToken($accessToken)->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
-        // dd($user->id);
+        
         // dd($responseDepartments->object());
 
         $departments = collect($responseDepartments->object())->pluck('id')->toArray();

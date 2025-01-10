@@ -15,13 +15,12 @@
         </div>
         <!-- end page title -->
 
-
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
         <div class="row">
             <div class="col-md-12">
                 <div class="card card-body">
-                    <h3 class="card-title">Appraisal Batch </h3>
+                    <h3 class="card-title">KPI Information </h3>
 
                     <form action="{{ route('update.kpi', $kpi_data->id) }}" method="POST">
                         @csrf
@@ -39,7 +38,7 @@
                                     value="{{ $kpi_data->description }}" id="example-text-input">
                             </div>
                         </div>
-                        
+
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Select KPI Type</label>
                             <div class="col-md-12">
@@ -60,7 +59,7 @@
 
                                     @foreach ($uniqueRoles as $role)
                                         <option value="{{ $role['id'] }}"
-                                            {{ $role['id'] == $role['id'] ? 'selected' : '' }}>
+                                            {{ $role['id'] == $kpi_data->empRole->id ? 'selected' : '' }}>
                                             {{ $role['name'] }}
                                         </option>
                                     @endforeach

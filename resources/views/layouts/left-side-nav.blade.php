@@ -7,18 +7,20 @@
                 <li class="menu-title" key="t-menu">Menu</li>
 
 
-
                 <li>
                     <a href="#" class="has-arrow waves-effect" aria-label="Dashboard Menu">
                         <i class="bx bx-home"></i>
                         <span key="t-dashboard">Dashboard</span>
                     </a>
                     <ul class="sub-menu" aria-expanded="false">
-                        <li><a href="{{ route('dashboard.index') }}" key="t-default">Overview</a></li>
-                        <li><a href="{{ route('show-batch') }}" key="t-default">My KPIs</a></li>
+                        @if ($user->empRole->id !== 1)
+                            <li><a href="{{ route('dashboard.index') }}" key="t-default">Overview</a></li>
+                            <li><a href="{{ route('show-batch') }}" key="t-default">My KPIs</a></li>
+                        @endif
 
 
-                        @if (isset($user) && (in_array($user->empRole->id, $managers) || in_array($user->id, $roleManagers)))
+                        @if (isset($user) &&
+                                (in_array($user->empRole->id, $managers) || in_array($user->id, $roleManagers) || $user->empRole->id == 1))
                             <li>
                                 <a href="#" class="has-arrow waves-effect" aria-label="Supervisor Menu">
                                     <span key="t-setup">Supervisor</span>
@@ -37,7 +39,9 @@
 
 
 
-                @if (isset($user) && $user->department->id == 10 && ((in_array($user->id, $managers) || in_array($user->id, $roleManagers))))
+                @if (isset($user) &&
+                        ($user->department->id == 10 ) &&
+                        (in_array($user->id, $managers) || in_array($user->id, $roleManagers)))
                     <li>
                         <a href="#" class="has-arrow waves-effect" aria-label="HR Setup Menu">
                             <i class="bx bxs-cog"></i>
@@ -64,7 +68,7 @@
                             <li><a href="{{ route('kpi.index') }}" key="t-default">KPI Setup</a></li>
                         </ul>
                     </li>
-                @elseif (isset($user) && (in_array($user->id, $managers) || in_array($user->id, $roleManagers)))
+                @elseif (isset($user) && $user->empRole->id !== 1 && (in_array($user->id, $managers) || in_array($user->id, $roleManagers)))
                     <li>
                         <a href="#" class="has-arrow waves-effect" aria-label="Department Setup Menu">
                             <i class="bx bxs-cog"></i>
@@ -78,26 +82,8 @@
                     <li></li>
                 @endif
 
-                {{--  @if (isset($user) && (in_array($user->id, $managers) || in_array($user->id, $roleManagers)))
-                    <li>
-                        <a href="#" class="has-arrow waves-effect" aria-label="Department Setup Menu">
-                            <i class="bx bxs-cog"></i>
-                            <span key="t-setup">Department Setup</span>
-                        </a>
-                        <ul class="sub-menu" aria-expanded="false">
-                            <li><a href="{{ route('kpi.index') }}" key="t-default">KPI Setup</a></li>
-                        </ul>
-                    </li>
-                @else
-                    <li></li>
-                @endif  --}}
 
-
-
-
-
-
-                @if (isset($user) && $user->department->id == 10)
+                @if ((isset($user) && $user->department->id == 10) || $user->empRole->id == 1)
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect" aria-label="Reports Menu">
                             <i class="bx bx-file"></i>

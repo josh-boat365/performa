@@ -119,8 +119,7 @@
                                                                                             type="number"
                                                                                             name="metricEmpScore"
                                                                                             placeholder="Enter Score"
-                                                                                            required
-                                                                                            min="0"
+                                                                                            required min="0"
                                                                                             max="{{ $metric->metricScore }}"
                                                                                             @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION', 'PROBLEM']))
                                                                                             title="The Score can not be more than the metric score {{ $metric->metricScore }}"
@@ -279,7 +278,7 @@
                                         const submitBtn = document.getElementById('submit-btn');
                                         const currentPageSpan = document.getElementById('current-page');
                                         const totalPagesSpan = document.getElementById('total-pages');
-                                        let currentPage = parseInt(localStorage.getItem('currentPage') || 0);
+                                        let currentPage = parseInt(sessionStorage.getItem('currentPage') || 0);
                                         const sectionsPerPage = 3;
                                         const totalPages = Math.ceil(sections.length / sectionsPerPage);
 
@@ -300,7 +299,7 @@
                                             submitBtn.disabled = totalPages > 1 && page !== totalPages - 1;
 
                                             currentPageSpan.textContent = page + 1; // Update current page display
-                                            localStorage.setItem('currentPage', page); // Save the current page to localStorage
+                                            sessionStorage.setItem('currentPage', page); // Save the current page to sessionStorage
                                         }
 
                                         prevBtn.addEventListener('click', function() {
@@ -315,15 +314,6 @@
                                                 currentPage++;
                                                 showPage(currentPage);
                                             }
-                                        });
-
-                                        // Attach event listener to forms to keep the page after submission
-                                        const scoreForms = document.querySelectorAll('.score-form');
-                                        scoreForms.forEach(form => {
-                                            form.addEventListener('submit', function() {
-                                                localStorage.setItem('currentPage',
-                                                    currentPage); // Save the current page before form submission
-                                            });
                                         });
 
                                         // Show the page on load
