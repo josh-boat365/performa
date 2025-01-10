@@ -56,7 +56,7 @@
 
                         <tbody>
                             @forelse ($activeKpis as $kpi)
-
+                            {{--  {{ dd($kpi, $user, $employees) }}  --}}
                                 <tr>
                                     <th scope="row">
                                         <a href="{{ url("dashboard/department/section-setup/kpi/{$kpi->score}/index/{$kpi->id}" ) }}">{{ $kpi->name }}</a>
@@ -74,14 +74,16 @@
                                     </td>  --}}
                                     <td>{{ $kpi->batch->name }}</td>
                                     <td>
-                                        <span @style(['cursor: pointer']) class=" badge rounded-pill bg-success">
-                                            {{--  {{ $kpi['department']['manager'] }}  --}}
-                                            Department Head
-                                        </span>
-                                        <span @style(['cursor: pointer']) class=" badge rounded-pill bg-primary">
-                                            {{--  {{ $kpi['empRole']['manager'] }}  --}}
-                                            Department Manager
-                                        </span>
+                                        @foreach ($employees as $employee)
+                                            @if ($employee->id === $kpi->empRole->manager)
+                                                <span class=" badge rounded-pill bg-dark">
+                                                    {{ $employee->firstName }} {{ $employee->surname }}
+                                                </span>
+                                            @endif
+
+                                        @endforeach
+
+
                                     </td>
                                     <td>
                                         <span @style(['cursor: pointer'])
