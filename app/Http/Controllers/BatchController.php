@@ -71,14 +71,32 @@ class BatchController extends Controller
      */
     public function store(Request $request)
     {
+        $accessToken = session('api_token');
+
+        $response = Http::withToken($accessToken)
+            ->get('http://192.168.1.200:5123/Appraisal/batch');
+
+        $batch_data = collect($response->json());
+
+        // Pluck batch by status where pending or open using filter method
+        $batch_data = $batch_data->filter(function ($value, $key) {
+            return $value['status'] == 'PENDING' || $value['status'] == 'OPEN';
+        });
+
+        // Check if there is an existing PENDING or OPEN batch
+        if ($batch_data->count() > 0) {
+            return redirect()->back()->with(
+                'toast_error',
+                'Sorry, you cannot create a new batch while there is an existing PENDING or OPEN batch. <br> Batches: ' .
+                    $batch_data->implode('name', ', ')
+            );
+        }
+
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
             'year' => 'required|integer',
         ]);
-
-        // Get the access token from the request or environment
-        $accessToken = session('api_token'); // Replace with your actual access token
 
         // Prepare the data for the batch creation
         $batchData = [
@@ -111,6 +129,8 @@ class BatchController extends Controller
             return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
+
+
 
     /**
      * Display the specified resource.
