@@ -1,5 +1,4 @@
 <x-base-layout>
-
     <div class="container-fluid px-5">
 
         <!-- start page title -->
@@ -63,8 +62,8 @@
                                             {{ $batch['active'] ? 'Deactivate' : 'Activate' }}</a>
                                     </div>
                                 </span>
-                                <div class="modal fade bs-example-modal-lg-{{ $batch['id'] }}" tabindex="-1" role="dialog"
-                                    aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                <div class="modal fade bs-example-modal-lg-{{ $batch['id'] }}" tabindex="-1"
+                                    role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-sm modal-dialog-centered ">
                                         <div class="modal-content">
                                             <div class="modal-header">
@@ -114,8 +113,8 @@
                                 @endif
 
                                 <!-- Modal for Confirmation -->
-                                <div class="modal fade bs-status-modal-status-{{ $batch['id'] }}" tabindex="-1" role="dialog"
-                                    aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                <div class="modal fade bs-status-modal-status-{{ $batch['id'] }}" tabindex="-1"
+                                    role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-sm modal-dialog-centered">
                                         <div class="modal-content">
                                             <div class="modal-header">
@@ -129,8 +128,11 @@
                                                     <h4 class="text-center mb-4">Are you sure you want to change the
                                                         status
                                                         to {{ $batch['status'] == 'PENDING' ? 'Open' : 'Close' }}?</h4>
-                                                        <p>Closing a <b>batch</b> will entirely close it for everyone in the <b>organization</b>.</p>
-                                                        <p>This means the cycle of this <b>batch</b> has <b>ended</b> and you are ready to create a new <b>batch</b></p>
+                                                    <p>Closing a <b>batch</b> will entirely close it for everyone in the
+                                                        <b>organization</b>.
+                                                    </p>
+                                                    <p>This means the cycle of this <b>batch</b> has <b>ended</b> and
+                                                        you are ready to create a new <b>batch</b></p>
                                                 @else
                                                     <h4 class="text-center mb-4">Are you sure you want to change the
                                                         status
@@ -158,6 +160,7 @@
                                         <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                 class="bx bxs-pencil"></i>edit</span>
                                     </a>
+                                    {{--  DELETE BUTTON  --}}
                                     {{--  <a href="#" data-bs-toggle="modal"
                                         data-bs-target=".bs-delete-modal-lg-{{ $batch['id'] }}">
                                         <span class="badge rounded-pill bg-danger fonte-size-13"><i
@@ -178,7 +181,9 @@
                                                 <div class="modal-body">
                                                     <h4 class="text-center mb-4">Are you sure you want to delete this
                                                         batch?</h4>
-                                                        <p class="text-center">Deleting a <b>batch</b> means removing it from the <b>system entirely</b> and you cannot <b>recover</b> it again</p>
+                                                    <p class="text-center">Deleting a <b>batch</b> means removing it
+                                                        from the <b>system entirely</b> and you cannot <b>recover</b> it
+                                                        again</p>
                                                     <form action="{{ route('delete.batch', $batch['id']) }}"
                                                         method="POST">
                                                         @csrf
