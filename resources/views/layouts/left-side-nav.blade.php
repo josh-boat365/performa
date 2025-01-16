@@ -40,7 +40,7 @@
 
 
                 @if (isset($user) &&
-                        ($user->department->id == 10 ) &&
+                        $user->department->id == 10 &&
                         (in_array($user->id, $managers) || in_array($user->id, $roleManagers)))
                     <li>
                         <a href="#" class="has-arrow waves-effect" aria-label="HR Setup Menu">
@@ -97,8 +97,29 @@
                     <li></li>
                 @endif
 
+                <hr style="margin: 25vh auto 1rem auto; width: 14rem;">
+
+                {{--  Card for displaying support info  --}}
+                <div class="card"
+                    style="width: 14rem; height: fit-content; margin: 0 auto; background-color: #f2f5ff;">
+                    <div class="card-body">
+                        <h5 class="card-title">CONTACT SUPPORT</h5>
+                        <p class="card-text">For any support,
+                            please contact the IT department</p>
+                        <p> <b>EMAIL:</b> <br> <a style="font-size: 12px; font-weight: bolder"
+                                href="mailto:performa@bestpointgh.com">performa@bestpointgh.com</a>
+                        </p>
+                        <p><b>USER GUIDE:</b></p>
+                        <div class="d-grid">
+                            <a href="#" target="_blank"
+                                class="btn btn-primary">Coming Soon</a>
+                        </div>
+                    </div>
+                </div>
             </ul>
+
         </div>
-        <!-- Sidebar -->
     </div>
+    <!-- Sidebar -->
+</div>
 </div>
