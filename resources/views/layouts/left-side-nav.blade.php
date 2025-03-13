@@ -106,8 +106,8 @@
                         <h5 class="card-title">CONTACT SUPPORT</h5>
                         <p class="card-text">For any support,
                             please contact the IT department</p>
-                        <p> <b>EMAIL:</b> <br> <a style="font-size: 12px; font-weight: bolder"
-                                href="mailto:performa@bestpointgh.com">performa@bestpointgh.com</a>
+                        <p> <b>EMAIL:</b> <br> <a style="font-size: 9.22px; font-weight: bolder"
+                                href="mailto:applicationsupport@bestpointgh.com">applicationsupport@bestpointgh.com</a>
                         </p>
                         <p><b>USER GUIDE:</b></p>
                         <div class="d-grid">

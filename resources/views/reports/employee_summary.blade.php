@@ -55,6 +55,7 @@
         <div class="col-xl-12">
             <div class="card shadow-sm">
                 <div class="card-body">
+
                     @foreach ($employee as $employeeData)
                         @foreach ($employeeData->employees as $employee)
                             <div class="d-flex justify-content-between align-items-center mb-5">
@@ -72,60 +73,58 @@
                             {{--  Employee Information  --}}
 
                             <div class="mb-4">
-                                <img @style(['width:8rem']) src="{{ asset('bpsl_imgs/user-1.png') }}"
-                                    alt="Employee Image">
+                                <img @style(['width:8rem']) src="{{ asset('bpsl_imgs/user-1.png') }}" alt="Employee Image">
                             </div>
 
-                                <div class="table-responsive">
-                                    <table class="table mb-0">
+                            <div class="table-responsive">
+                                <table class="table mb-0">
 
-                                        <thead class="table-light">
+                                    <thead class="table-light">
 
-                                            <th>EMPLOYEE INFORMATION</th>
-                                            <th></th>
-                                            <th></th>
-                                            <th></th>
+                                        <th>EMPLOYEE INFORMATION</th>
+                                        <th></th>
+                                        <th></th>
+                                        <th></th>
 
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td> Name: <b>{{ $employee->employeeName }}</b></td>
-                                                <td>Employee ID: <b>{{ $employee->staffNumber ?? '444' }}</b></td>
-                                                <td>Role: <b>{{ $employee->roleName }}</b></td>
-                                                <td>Branch: <b>Head Office</b></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Department: <b>{{ $employee->departmentName }}</b></td>
-                                                <td>Grade: <b>{{ $employee->totalScore->grade ?? '___' }}</b></td>
-                                                <td>Score: <b>{{ $employee->totalScore->totalKpiScore ?? '___' }}</b>
-                                                </td>
-                                                <td>Remark: <b>{{ $employee->totalScore->remark ?? '___' }}</b></td>
-                                            </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td> Name: <b>{{ $employee->employeeName }}</b></td>
+                                            <td>Employee ID: <b>{{ $employee->staffNumber ?? '444' }}</b></td>
+                                            <td>Role: <b>{{ $employee->roleName }}</b></td>
+                                            <td>Branch: <b>Head Office</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Department: <b>{{ $employee->departmentName }}</b></td>
+                                            <td>Grade: <b>{{ $employee->totalScore->grade ?? '___' }}</b></td>
+                                            <td>Score: <b>{{ $employee->totalScore->totalKpiScore ?? '___' }}</b>
+                                            </td>
+                                            <td>Remark: <b>{{ $employee->totalScore->remark ?? '___' }}</b></td>
+                                        </tr>
 
 
-                                                @php
-                                                    // Collect all supervisorName and probeName, then get unique values
-                                                    $supervisorName = collect($employee->scores)
-                                                        ->pluck('supervisorName')
-                                                        ->unique()
-                                                        ->filter()
-                                                        ->implode(' ');
+                                        @php
+                                            // Collect all supervisorName and probeName, then get unique values
+                                            $supervisorName = collect($employee->scores)
+                                                ->pluck('supervisorName')
+                                                ->unique()
+                                                ->filter()
+                                                ->implode(' ');
 
-                                                    $probeName = collect($employee->scores)
-                                                        ->pluck('probName')
-                                                        ->unique()
-                                                        ->filter()
-                                                        ->implode(' ');
-                                                @endphp
-                                                <tr>
-                                                    <td>Supervisor: <b>{{ $supervisorName ?? 'N/A' }}</b></td>
-                                                    <td>Senior Supervisor: <b>{{ $probeName ?? 'N/A' }}</b></td>
-                                                </tr>
+                                            $probeName = collect($employee->scores)
+                                                ->pluck('probName')
+                                                ->unique()
+                                                ->filter()
+                                                ->implode(' ');
+                                        @endphp
+                                        <tr>
+                                            <td>Supervisor: <b>{{ $supervisorName ?? 'N/A' }}</b></td>
+                                            <td>Senior Supervisor: <b>{{ $probeName ?? 'N/A' }}</b></td>
+                                        </tr>
 
-                                        </tbody>
-                                    </table>
-                                </div>
-
+                                    </tbody>
+                                </table>
+                            </div>
                         @endforeach
 
                         <div class=""
