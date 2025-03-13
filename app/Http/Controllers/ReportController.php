@@ -56,7 +56,7 @@ class ReportController extends Controller
 
         // Fetch departments data
         $responseBatches = Http::withToken($accessToken)
-        ->get("http://192.168.1.200:5123/Appraisal/Batch");
+            ->get("http://192.168.1.200:5123/Appraisal/Batch");
 
         // Handle unsuccessful response for departments
         if (!$responseBatches->successful()) {
@@ -134,11 +134,37 @@ class ReportController extends Controller
         $response = Http::withToken($accessToken)
             ->put("http://192.168.1.200:5123/Appraisal/Report", $data);
 
+        $responseEmployeeData = Http::withToken($accessToken)
+            ->get("http://192.168.1.200:5124/HRMS/Employee");
+
+        $empData = $responseEmployeeData->object();
 
         // Fetch employee data based on the employeeId
         $employee = $response->object();
 
         // dd($employee);
+        // Iterate through the employees to find a match
+        // foreach ($employee as $empData_) {
+        //     foreach($empData_->employees as $emp ){
+        dd($employee[0]->employees[0]->employeeId, $empData);
+        dd($empData);
+        if ($employee[0]->employees[0]->employeeId === $empData->id) {
+            // Match found in the first response; now look up the staffNumber in empData
+            // $matchedEmployee = collect($empData)->first(fn($e) => isset($e->id) && $e->id == $employeeId);
+
+
+            $employeeDetails = [
+                'staffNumber' => $empData->staffNumber ?? 'N/A',
+            ];
+
+
+            // Output the details for debugging
+        }
+        dd($employeeDetails);
+
+
+        //     }
+        // }
 
 
 
@@ -347,7 +373,7 @@ class ReportController extends Controller
         $fpdf->Ln(10);
 
         // Iterate through employees using arrow syntax
-        foreach($employeeResponseData as $employeeData){
+        foreach ($employeeResponseData as $employeeData) {
             foreach ($employeeData->employees as $employee) {
                 // Employee Details Header
                 $fpdf->SetFont('Arial', 'B', 14);

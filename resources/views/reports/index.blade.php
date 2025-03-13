@@ -12,75 +12,74 @@
         {{--  {{ dd($reports) }}  --}}
         <div class="row">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <form id="filterForm" method="POST" action="{{ route('reports.filter') }}">
-                            @csrf
-                            <div class="d-flex justify-content-between">
-                                <div class="filters d-flex gap-3">
-                                    <div class="col-3">
-                                        <p class="m-0">Batch</p>
-                                        <select id="batchFilter" class="select2 form-control" name="batchId"
-                                            data-placeholder="Choose ...">
-                                            <option value="">Select batch....</option>
-                                            @foreach ($batches as $batch)
-                                                <option value="{{ $batch['batchId'] }}">{{ $batch['batchName'] }} -
-                                                    {{ $batch['batchStatus'] }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-3">
-                                        <p class="m-0">Department</p>
-                                        <select id="departmentFilter" class="select2 form-control" name="departmentId"
-                                            data-placeholder="Choose ...">
-                                            <option value="">Select department....</option>
-                                            @foreach ($departments as $department)
-                                                <option value="{{ $department['departmentId'] }}">
-                                                    {{ $department['departmentName'] }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    {{--  {{ dd($kpis) }}  --}}
-                                    <div class="col-3">
-                                        <p class="m-0">KPI</p>
-                                        <select id="kpiFilter" name="kpiId" class="select2 form-control"
-                                            data-placeholder="Choose ...">
-                                            <option value="">Select KPI....</option>
-                                            @foreach ($kpis as $kpi)
-                                                <option value="{{ $kpi['kpiId'] }}">{{ $kpi['kpiName'] }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-3">
-                                        <p class="m-0">Employee</p>
-                                        <select id="employeeFilter" name="employeeId" class="select2 form-control"
-                                            data-placeholder="Choose ...">
-                                            <option value="">Select employees....</option>
-                                            @foreach ($employees as $employee)
-                                                <option value="{{ $employee['employeeId'] }}">
-                                                    {{ $employee['employeeName'] }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <button id="filterButton" type="submit" class="btn btn-success"><i
-                                                class="bx bx-filter-alt"></i> Filter</button>
-                                    </div>
-
+                <form id="filterForm" method="POST" action="{{ route('reports.filter') }}">
+                    @csrf
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row align-items-center g-2">
+                                <!-- Batch Filter -->
+                                <div class="col-md-3">
+                                    <label for="batchFilter" class="form-label">Batch</label>
+                                    <select id="batchFilter" class="select2 form-control" name="batchId"
+                                        data-placeholder="Choose ...">
+                                        <option value="">Select batch....</option>
+                                        @foreach ($batches as $batch)
+                                            <option value="{{ $batch['batchId'] }}">{{ $batch['batchName'] }} -
+                                                {{ $batch['batchStatus'] }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                        </form>
-
-                        <div class="">
-                            <a href="{{ route('report.index') }}" class="btn btn-primary"><i style="font-size: x-large"
-                                    class="bx bx-rotate-left"></i></a>
-
+                                <!-- Department Filter -->
+                                <div class="col-md-3">
+                                    <label for="departmentFilter" class="form-label">Department</label>
+                                    <select id="departmentFilter" class="select2 form-control" name="departmentId"
+                                        data-placeholder="Choose ...">
+                                        <option value="">Select department....</option>
+                                        @foreach ($departments as $department)
+                                            <option value="{{ $department['departmentId'] }}">
+                                                {{ $department['departmentName'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <!-- KPI Filter -->
+                                <div class="col-md-3">
+                                    <label for="kpiFilter" class="form-label">KPI</label>
+                                    <select id="kpiFilter" class="select2 form-control" name="kpiId"
+                                        data-placeholder="Choose ...">
+                                        <option value="">Select KPI....</option>
+                                        @foreach ($kpis as $kpi)
+                                            <option value="{{ $kpi['kpiId'] }}">{{ $kpi['kpiName'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <!-- Employee Filter -->
+                                <div class="col-md-3">
+                                    <label for="employeeFilter" class="form-label">Employee</label>
+                                    <select id="employeeFilter" class="select2 form-control" name="employeeId"
+                                        data-placeholder="Choose ...">
+                                        <option value="">Select employees....</option>
+                                        @foreach ($employees as $employee)
+                                            <option value="{{ $employee['employeeId'] }}">
+                                                {{ $employee['employeeName'] }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <!-- Buttons -->
+                                <div class="col-12 mt-3 d-flex justify-content-end gap-2">
+                                    <button id="filterButton" type="submit" class="btn btn-success">
+                                        <i class="bx bx-filter-alt"></i> Filter
+                                    </button>
+                                    <a href="{{ route('report.index') }}" class="btn btn-primary">
+                                        <i class="bx bx-rotate-left"></i> Refresh
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
+
     </div>
 
     <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>

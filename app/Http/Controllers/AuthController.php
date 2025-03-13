@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\RateLimiter;
 
 class AuthController extends Controller
 {
+   
     public function login(Request $request)
     {
         // Define rate limit key and limit threshold

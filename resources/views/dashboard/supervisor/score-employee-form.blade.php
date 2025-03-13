@@ -270,6 +270,7 @@
                                 </script>
 
 
+                                {{--  New script for pagination  --}}
                                 <script>
                                     document.addEventListener('DOMContentLoaded', function() {
                                         const sections = document.querySelectorAll('.section-tab');
@@ -285,6 +286,35 @@
                                         // Initialize Pagination Count
                                         totalPagesSpan.textContent = totalPages;
 
+                                        function checkInputs(page) {
+                                            const start = page * sectionsPerPage;
+                                            const end = start + sectionsPerPage;
+                                            let allFilled = true;
+
+                                            for (let i = start; i < end && i < sections.length; i++) {
+                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="SupScore"]');
+                                                const commentInputs = sections[i].querySelectorAll('textarea[name="supervisorComment"]');
+
+                                                const allScoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                                                const allCommentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');
+
+                                                if (!allScoresFilled || !allCommentsFilled) {
+                                                    allFilled = false;
+                                                    break;
+                                                }
+                                            }
+
+                                            return allFilled;
+                                        }
+
+                                        function updateButtons() {
+                                            prevBtn.disabled = currentPage === 0;
+                                            nextBtn.disabled = !checkInputs(currentPage) || currentPage === totalPages - 1;
+                                            submitBtn.disabled = !Array.from({
+                                                length: totalPages
+                                            }).every((_, page) => checkInputs(page));
+                                        }
+
                                         function showPage(page) {
                                             sections.forEach(section => {
                                                 section.style.display = 'none';
@@ -294,12 +324,11 @@
                                             for (let i = start; i < end && i < sections.length; i++) {
                                                 sections[i].style.display = 'block';
                                             }
-                                            prevBtn.disabled = page === 0;
-                                            nextBtn.disabled = page === totalPages - 1;
-                                            submitBtn.disabled = totalPages > 1 && page !== totalPages - 1;
 
                                             currentPageSpan.textContent = page + 1; // Update current page display
                                             sessionStorage.setItem('currentPage', page); // Save the current page to sessionStorage
+
+                                            updateButtons();
                                         }
 
                                         prevBtn.addEventListener('click', function() {
@@ -315,6 +344,13 @@
                                                 showPage(currentPage);
                                             }
                                         });
+
+                                        // Attach event listeners to all score inputs and comment inputs
+                                        document.querySelectorAll('input[type="number"][name*="SupScore"], textarea[name="supervisorComment"]')
+                                            .forEach(
+                                                input => {
+                                                    input.addEventListener('input', updateButtons);
+                                                });
 
                                         // Show the page on load
                                         showPage(currentPage);
