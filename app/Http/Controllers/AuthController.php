@@ -104,9 +104,60 @@ class AuthController extends Controller
 
 
 
+    // public function getAuthToken(Request $request)
+    // {
+    //     try {
+
+    //         // Validate the query string parameters
+    //         $validatedData = $request->validate([
+    //             'access_token' => 'required|string',
+    //             'fullName'     => 'required|string',
+    //             'email'        => 'required|email',
+    //             'id'           => 'required',
+    //         ]);
+
+    //         // Prepare user data from the validated query data
+    //         $userData = [
+    //             'api_token'   => $validatedData['access_token'],
+    //             'user_name'   => $validatedData['fullName'],
+    //             'user_email'  => $validatedData['email'],
+    //             'employee_id' => $validatedData['id'],
+    //         ];
+
+    //         // Additional logic like user session creation or updating records can go here
+    //         session([
+    //             'api_token'   => $userData['api_token'],
+    //             'user_name'   => $userData['user_name'],
+    //             'user_email'  => $userData['user_email'],
+    //             'employee_id' => $userData['employee_id'],
+    //         ]);
+    //         // Return a JSON response back to the requester
+    //         return response()->json([
+    //             'message' => 'User authenticated successfully',
+    //             'data'    => $userData,
+    //         ], 200);
+    //     } catch (ValidationException $e) {
+    //         // Catch and return validation errors in a structured format
+    //         return response()->json([
+    //             'error'   => 'Validation failed',
+    //             'details' => $e->errors(),
+    //         ], 422);
+    //     } catch (\Exception $e) {
+    //         // Catch any other exceptions and return an error message
+    //         return response()->json([
+    //             'error'   => 'An error occurred',
+    //             'details' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
+
     public function getAuthToken(Request $request)
     {
         try {
+
+            // dd($params);
+            // Decode the URL-encoded parameters
 
             // Validate the query string parameters
             $validatedData = $request->validate([
@@ -130,12 +181,15 @@ class AuthController extends Controller
                 'user_name'   => $userData['user_name'],
                 'user_email'  => $userData['user_email'],
                 'employee_id' => $userData['employee_id'],
+                'empRole' => 4,
             ]);
+
+            return redirect()->route('dashboard.index')->with('toast_success', 'Logged in successfully');
             // Return a JSON response back to the requester
-            return response()->json([
-                'message' => 'User authenticated successfully',
-                'data'    => $userData,
-            ], 200);
+            // return response()->json([
+            //     'message' => 'User authenticated successfully',
+            //     'data'    => $userData,
+            // ], 200);
         } catch (ValidationException $e) {
             // Catch and return validation errors in a structured format
             return response()->json([
