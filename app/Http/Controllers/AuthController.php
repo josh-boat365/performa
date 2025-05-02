@@ -5,14 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use RealRashid\SweetAlert\Facades\Alert;
-
 use Illuminate\Support\Facades\Http;
+
+use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-   
+
     public function login(Request $request)
     {
         // Define rate limit key and limit threshold
@@ -42,7 +43,7 @@ class AuthController extends Controller
 
         try {
             // Send the POST request to the API
-            $response = Http::withoutVerifying()->post('http://bp-ho-gcupdate.Bestpointgh.com:8093/verification/LocalAccount/UserNameOrPhoneOrEmailAndPassword', $data);
+            $response = Http::withoutVerifying()->post('http://192.168.1.200:5123/Appraisal/Login', $data);
 
             // Check for a successful response and the presence of access token
             if ($response->ok() && isset($response['access_token'])) {
@@ -98,6 +99,55 @@ class AuthController extends Controller
 
             // Return a generic error message to the user
             return back()->with('toast_error', 'An error occurred. Please try again later.');
+        }
+    }
+
+
+
+    public function getAuthToken(Request $request)
+    {
+        try {
+
+            // Validate the query string parameters
+            $validatedData = $request->validate([
+                'access_token' => 'required|string',
+                'fullName'     => 'required|string',
+                'email'        => 'required|email',
+                'id'           => 'required',
+            ]);
+
+            // Prepare user data from the validated query data
+            $userData = [
+                'api_token'   => $validatedData['access_token'],
+                'user_name'   => $validatedData['fullName'],
+                'user_email'  => $validatedData['email'],
+                'employee_id' => $validatedData['id'],
+            ];
+
+            // Additional logic like user session creation or updating records can go here
+            session([
+                'api_token'   => $userData['api_token'],
+                'user_name'   => $userData['user_name'],
+                'user_email'  => $userData['user_email'],
+                'employee_id' => $userData['employee_id'],
+            ]);
+            // Return a JSON response back to the requester
+            return response()->json([
+                'message' => 'User authenticated successfully',
+                'data'    => $userData,
+            ], 200);
+        } catch (ValidationException $e) {
+            // Catch and return validation errors in a structured format
+            return response()->json([
+                'error'   => 'Validation failed',
+                'details' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            // Catch any other exceptions and return an error message
+            return response()->json([
+                'error'   => 'An error occurred',
+                'details' => $e->getMessage(),
+            ], 500);
         }
     }
 
