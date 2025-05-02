@@ -28,6 +28,8 @@ use App\Http\Controllers\SupervisorScoreController;
 |
 */
 
+Route::get('/getAuthAPIToken', [AuthController::class, 'getAuthToken']);
+
 Route::get('/', function () {
     return view('auth.auth-login');
 })->name('login');
