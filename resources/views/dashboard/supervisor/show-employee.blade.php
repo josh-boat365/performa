@@ -20,24 +20,27 @@
             @if (!empty($employeeSupDetails))
 
                 @forelse ($employeeSupDetails as $employee)
-                    <div class="card card-body">
-                        <div class="d-flex justify-content-between items-center">
+                    <a
+                        href="{{ url('dashboard/supervisor/show-employee-kpi-form/kpi/' . $employee->kpis[0]->kpiId . '/batch' . '/' . $employee->kpis[0]->batchId) }}">
+                        <div class="card card-body">
+                            <div class="d-flex justify-content-between items-center">
 
-                            <a
-                                href="{{ url('dashboard/supervisor/show-employee-kpi-form/kpi/' . $employee->kpis[0]->kpiId . '/batch' . '/' . $employee->kpis[0]->batchId) }}">
-                                <span> {{ $employee->employee->employeeFullName }}</span> : <span
-                                    class="badge rounded-pill bg-dark font-size-13">{{ $employee->kpis[0]->kpiType }}</span>
-                            </a>
+                                <a href="#">
+                                    <span> {{ $employee->employee->employeeFullName }}</span> : <span
+                                        class="badge rounded-pill bg-dark font-size-13">{{ $employee->kpis[0]->kpiType }}</span>
+                                </a>
 
-                            <div>
-                                <span
-                                    class="badge rounded-pill bg-warning font-size-13">{{ $employee->kpis[0]->kpiName }}</span>
-                            </div>
-                            <div>
-                                <span class="badge rounded-pill bg-primary font-size-13">Submitted For Review</span>
+                                <div>
+                                    <span
+                                        class="badge rounded-pill bg-warning font-size-13">{{ $employee->kpis[0]->kpiName }}</span>
+                                </div>
+                                <div>
+                                    <span class="badge rounded-pill bg-primary font-size-13">Submitted For Review</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
+
                 @empty
                     <div class="card card-body">
                         <div class="justify-content-between">
@@ -47,24 +50,27 @@
                 @endforelse
             @else
                 @forelse ($employeeProbDetails as $employee)
-                    <div class="card card-body">
-                        <div class="d-flex justify-content-between items-center">
+                    <a
+                        href="{{ url('dashboard/supervisor/show-employee-kpi-prob-form/kpi/' . $employee->kpis[0]->kpiId . '/batch' . '/' . $employee->kpis[0]->batchId) }}">
+                        <div class="card card-body">
+                            <div class="d-flex justify-content-between items-center">
 
-                            <a
-                                href="{{ url('dashboard/supervisor/show-employee-kpi-prob-form/kpi/' . $employee->kpis[0]->kpiId . '/batch' . '/' . $employee->kpis[0]->batchId) }}">
-                                <span> {{ $employee->employee->employeeFullName }}</span> : <span
-                                    class="badge rounded-pill bg-dark font-size-13">{{ $employee->kpis[0]->kpiType }}</span>
-                            </a>
+                                <a href="#">
+                                    <span> {{ $employee->employee->employeeFullName }}</span> : <span
+                                        class="badge rounded-pill bg-dark font-size-13">{{ $employee->kpis[0]->kpiType }}</span>
+                                </a>
 
-                            <div>
-                                <span
-                                    class="badge rounded-pill bg-warning font-size-13">{{ $employee->kpis[0]->kpiName }}</span>
-                            </div>
-                            <div>
-                                <span class="badge rounded-pill bg-dark font-size-13">Submitted For Probing</span>
+                                <div>
+                                    <span
+                                        class="badge rounded-pill bg-warning font-size-13">{{ $employee->kpis[0]->kpiName }}</span>
+                                </div>
+                                <div>
+                                    <span class="badge rounded-pill bg-dark font-size-13">Submitted For Probing</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </a>
+
                 @empty
                     <div class="card card-body">
                         <div class="justify-content-between">
