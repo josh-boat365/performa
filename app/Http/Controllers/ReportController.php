@@ -131,6 +131,7 @@ class ReportController extends Controller
         $data = ['employeeId' => $employeeId];
 
         // Make the API request
+        // Fetch employee data based on the employeeId
         $response = Http::withToken($accessToken)
             ->put("http://192.168.1.200:5123/Appraisal/Report", $data);
 
@@ -139,36 +140,18 @@ class ReportController extends Controller
 
         $empData = $responseEmployeeData->object();
 
-        // Fetch employee data based on the employeeId
         $employee = $response->object();
 
-        // dd($employee);
-        // Iterate through the employees to find a match
-        // foreach ($employee as $empData_) {
-        //     foreach($empData_->employees as $emp ){
-        // dd($employee[0]->employees[0]->employeeId, $empData);
-        // dd($empData);
-        if ($employee[0]->employees[0]->employeeId === $empData->id) {
-            // Match found in the first response; now look up the staffNumber in empData
-            // $matchedEmployee = collect($empData)->first(fn($e) => isset($e->id) && $e->id == $employeeId);
-
-
-            $employeeDetails = [
-                'staffNumber' => $empData->staffNumber ?? 'N/A',
-            ];
-
-
-            // Output the details for debugging
-        }
-        // dd($employeeDetails);
-
-
-        //     }
-        // }
+        //Get employee staff number
+        $employeeData = collect($empData)->firstWhere('id', $employeeId);
+        $employeeStaffNumber = $employeeData->staffNumber ?? 'N/A';
+        $employeeBranch = $employeeData->branch->name ?? 'N/A';
 
 
 
-        return view('reports.employee_summary', compact('employee', 'employeeId'));
+
+
+        return view('reports.employee_summary', compact('employee', 'employeeId', 'employeeStaffNumber', 'employeeBranch'));
     }
 
 

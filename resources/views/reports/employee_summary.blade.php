@@ -90,9 +90,9 @@
                                     <tbody>
                                         <tr>
                                             <td> Name: <b>{{ $employee->employeeName }}</b></td>
-                                            <td>Employee ID: <b>{{ $employee->staffNumber ?? '444' }}</b></td>
+                                            <td>Employee Staff ID: <b>{{ $employeeStaffNumber }}</b></td>
                                             <td>Role: <b>{{ $employee->roleName }}</b></td>
-                                            <td>Branch: <b>Head Office</b></td>
+                                            <td>Branch: <b>{{ $employeeBranch }}</b></td>
                                         </tr>
                                         <tr>
                                             <td>Department: <b>{{ $employee->departmentName }}</b></td>
