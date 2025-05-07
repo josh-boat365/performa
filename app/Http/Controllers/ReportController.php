@@ -160,7 +160,7 @@ class ReportController extends Controller
 
             // Output the details for debugging
         }
-        dd($employeeDetails);
+        // dd($employeeDetails);
 
 
         //     }
