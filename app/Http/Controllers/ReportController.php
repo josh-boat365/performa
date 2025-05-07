@@ -147,7 +147,7 @@ class ReportController extends Controller
         // foreach ($employee as $empData_) {
         //     foreach($empData_->employees as $emp ){
         // dd($employee[0]->employees[0]->employeeId, $empData);
-        dd($empData);
+        // dd($empData);
         if ($employee[0]->employees[0]->employeeId === $empData->id) {
             // Match found in the first response; now look up the staffNumber in empData
             // $matchedEmployee = collect($empData)->first(fn($e) => isset($e->id) && $e->id == $employeeId);
