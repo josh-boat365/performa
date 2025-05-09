@@ -44,7 +44,7 @@
                                                                         <input class="form-control mb-3 score-input"
                                                                             type="number" name="sectionEmpScore"
                                                                             required placeholder="Enter Score"
-                                                                            min="0"
+                                                                            min="0" step="0.01"
                                                                             max="{{ $section->sectionScore }}" readonly
                                                                             title="The Score can not be more than the section score {{ $section->sectionScore }}"
                                                                             @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'PROBLEM')
@@ -73,7 +73,7 @@
                                                                         <input class="form-control mb-3 score-input"
                                                                             type="number" name="sectionSupScore"
                                                                             required placeholder="Enter Score"
-                                                                            min="0"
+                                                                            min="0" step="0.01"
                                                                             max="{{ $section->sectionScore }}"
                                                                             @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                             title="The Score can not be more than the section score {{ $section->sectionScore }}"
@@ -126,7 +126,7 @@
                                                                                     type="number"
                                                                                     name="sectionProbScore" required
                                                                                     placeholder="Enter Score"
-                                                                                    min="0"
+                                                                                    min="0" step="0.01"
                                                                                     max="{{ $section->sectionScore }}"
                                                                                     @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['COMPLETED']))
                                                                                     title="The Score can not be more than the section score {{ $section->sectionScore }}"
@@ -172,7 +172,7 @@
                                                                                             name="metricEmpScore"
                                                                                             placeholder="Enter Score"
                                                                                             required
-                                                                                            min="0"
+                                                                                            min="0" step="0.01"
                                                                                             max="{{ $metric->metricScore }}"
                                                                                             readonly
                                                                                             @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
@@ -205,7 +205,7 @@
                                                                                             class="form-control mb-3"
                                                                                             type="number"
                                                                                             name="metricSupScore"
-                                                                                            min="0"
+                                                                                            min="0" step="0.01"
                                                                                             max="{{ $metric->metricScore }}"
                                                                                             @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                                             title="The Score can not be more than the metric score {{ $metric->metricScore }}"
@@ -267,7 +267,7 @@
                                                                                                     class="form-control mb-3"
                                                                                                     type="number"
                                                                                                     name="metricProbScore"
-                                                                                                    min="0"
+                                                                                                    min="0" step="0.01"
                                                                                                     max="{{ $metric->metricScore }}"
                                                                                                     @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['COMPLETED']))
                                                                                                     title="The Score can not be more than the metric score {{ $metric->metricScore }}"

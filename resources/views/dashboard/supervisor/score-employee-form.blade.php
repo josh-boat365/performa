@@ -6,7 +6,8 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('supervisor.index') }}">Employee KPIs</a> > Score Employee
+                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('supervisor.index') }}">Employee KPIs</a> > Score
+                        Employee
                     </h4>
                 </div>
             </div>
@@ -78,7 +79,7 @@
                                                                             <input class="form-control mb-3 score-input"
                                                                                 type="number" name="sectionSupScore"
                                                                                 required placeholder="Enter Score"
-                                                                                min="0"
+                                                                                min="0" step="0.01"
                                                                                 max="{{ $section->sectionScore }}"
                                                                                 @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                                 title="The Score can not be more than the section score {{ $section->sectionScore }}"
@@ -120,6 +121,7 @@
                                                                                             name="metricEmpScore"
                                                                                             placeholder="Enter Score"
                                                                                             required min="0"
+                                                                                            step="0.01"
                                                                                             max="{{ $metric->metricScore }}"
                                                                                             @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION', 'PROBLEM']))
                                                                                             title="The Score can not be more than the metric score {{ $metric->metricScore }}"
@@ -149,6 +151,7 @@
                                                                                                 type="number"
                                                                                                 name="metricSupScore"
                                                                                                 min="0"
+                                                                                                step="0.01"
                                                                                                 max="{{ $metric->metricScore }}"
                                                                                                 @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                                                 title="The Score can not be more than the metric score {{ $metric->metricScore }}"
