@@ -58,7 +58,7 @@ class UpdateKpiScoringState extends Controller
                 }
 
                 // Display success message using SweetAlert
-                return redirect()->back()->with('toast_success', $successMessage);
+                return redirect()->route('supervisor.index')->with('toast_success', $successMessage);
             } else {
                 // Log the error if the response is not successful
                 Log::error('API Submit, Review Response Error', [
