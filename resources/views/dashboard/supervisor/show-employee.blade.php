@@ -25,10 +25,12 @@
                         <div class="card card-body">
                             <div class="d-flex justify-content-between items-center">
 
-                                <a href="#">
+
+                                <div>
                                     <span> {{ $employee->employee->employeeFullName }}</span> : <span
                                         class="badge rounded-pill bg-dark font-size-13">{{ $employee->kpis[0]->kpiType }}</span>
-                                </a>
+                                </div>
+
 
                                 <div>
                                     <span
@@ -55,10 +57,12 @@
                         <div class="card card-body">
                             <div class="d-flex justify-content-between items-center">
 
-                                <a href="#">
+
+                                <div>
                                     <span> {{ $employee->employee->employeeFullName }}</span> : <span
                                         class="badge rounded-pill bg-dark font-size-13">{{ $employee->kpis[0]->kpiType }}</span>
-                                </a>
+                                </div>
+
 
                                 <div>
                                     <span
