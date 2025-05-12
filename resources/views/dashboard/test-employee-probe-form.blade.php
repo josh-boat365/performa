@@ -49,7 +49,7 @@
                                                                             <input class="form-control mb-3 score-input"
                                                                                 type="number" name="sectionEmpScore"
                                                                                 required placeholder="Enter Score"
-                                                                                min="0" step="0.01"
+                                                                                min="0" step="0.01" pattern="\d+(\.\d{1,2})?"
                                                                                 max="{{ $section->sectionScore }}"
                                                                                 @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
                                                                                 title="The Score cannot be more than the section score {{ $section->sectionScore }}"
