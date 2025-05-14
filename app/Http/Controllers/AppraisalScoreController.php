@@ -82,19 +82,34 @@ class AppraisalScoreController extends Controller
             // Check if the response is successful
             if ($response->status() === 200) {
                 // Return success message
-                return back()->with('toast_success', $successMessage);
+                // return back()->with('toast_success', $successMessage);
+                return response()->json([
+                    'success' => true,
+                    'message' => $successMessage,
+                ]);
             } else {
                 // Log the error if the response is not successful
                 Log::error('API Response Error', [
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
-                return back()->with('toast_error', 'Failed to submit score. Please check the logs for details.');
+                // return back()->with('toast_error', 'Failed to submit score. Please check the logs for details.');
+                return response()->json(
+                    [
+                        'success' => false,
+                        'message' => 'Employee comment cannot be empty.'
+                    ],
+                    422
+                );
             }
         } catch (\Exception $e) {
             // Log exception and notify the user
             Log::error('API Exception', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
+            // return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
+            return response()->json([
+                'success' => false,
+                'message' => 'An unexpected error occurred. Please try again.',
+            ], 400);
         }
     }
 
