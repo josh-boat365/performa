@@ -17,6 +17,12 @@ class ReportController extends Controller
      */
     public function index(Request $request)
     {
+        $accessToken = session('api_token');
+        
+        if(!$accessToken) {
+            return redirect()->route('login')->with('toast_error', 'Session expired, please login again.');
+        }
+
         // Validate the request parameters
         $request->validate([
             'batchId' => 'nullable',
@@ -24,9 +30,6 @@ class ReportController extends Controller
             'kpiId' => 'nullable',
             'employeeId' => 'nullable',
         ]);
-
-        // Retrieve access token from session
-        $accessToken = session('api_token');
 
         // Filter non-empty parameters for the API request
         $filters = array_filter($request->only(['batchId', 'departmentId', 'kpiId', 'employeeId']));

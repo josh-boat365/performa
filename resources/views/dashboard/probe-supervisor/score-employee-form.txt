@@ -13,17 +13,12 @@
         </div>
         <!-- end page title -->
 
-        <div class="progress fixed-top" style="height: 10px;">
-            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-        </div>
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
-
                     <div class="card-body">
                         <h4 class="card-title mb-4">Probe Supervisor Evaluation Form</h4>
 
@@ -34,10 +29,7 @@
                                         <div class="kpi">
 
                                             @foreach ($kpi->activeSections as $section)
-                                                <div class="card border border-primary section-tab"
-                                                    style="border-radius: 10px; ">
-                                                    <!-- Progress Bar -->
-
+                                                <div class="card border border-primary" style="border-radius: 10px; ">
                                                     <div class="card-body"
                                                         style=" {{ $section->metrics->isEmpty() ? 'background-color: #0000ff0d;' : '' }}">
                                                         <div class="section-card" style="margin-top: 2rem;">
@@ -52,8 +44,7 @@
                                                                         <input class="form-control mb-3 score-input"
                                                                             type="number" name="sectionEmpScore"
                                                                             required placeholder="Enter Score"
-                                                                            min="0" step="0.01"
-                                                                            pattern="\d+(\.\d{1,2})?"
+                                                                            min="0" step="0.01" pattern="\d+(\.\d{1,2})?"
                                                                             max="{{ $section->sectionScore }}" readonly
                                                                             title="The Score can not be more than the section score {{ $section->sectionScore }}"
                                                                             @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'PROBLEM')
@@ -82,16 +73,18 @@
                                                                         <input class="form-control mb-3 score-input"
                                                                             type="number" name="sectionSupScore"
                                                                             required placeholder="Enter Score"
-                                                                            min="0" step="0.01"
-                                                                            pattern="\d+(\.\d{1,2})?"
+                                                                            min="0" step="0.01" pattern="\d+(\.\d{1,2})?"
                                                                             max="{{ $section->sectionScore }}"
                                                                             @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                             title="The Score can not be more than the section score {{ $section->sectionScore }}"
                                                                             value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? '' }}">
                                                                     </div>
                                                                     <div class="col-md-9">
-                                                                        <textarea class="form-control mb-3 comment-input" type="text" name="supervisorComment"
-                                                                            placeholder="Enter your comments" @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM'])) rows="3">{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
+                                                                        <textarea class="form-control mb-3 comment-input"
+                                                                            type="text" name="supervisorComment"
+                                                                            placeholder="Enter your comments"
+                                                                            @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
+                                                                            rows="3">{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
                                                                     </div>
                                                                     <div class="form-check form-check-dark mb-3">
                                                                         <input @style(['width:1.8rem; height:2rem'])
@@ -116,7 +109,7 @@
                                                                 {{--  ==== PROBING  SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
 
                                                                 <form action="{{ route('prob.store') }}" method="POST"
-                                                                    class="section-form ajax-sup-eval-form">
+                                                                    class="section-form">
                                                                     @csrf
                                                                     @if (isset($section->sectionEmpScore) && $section->sectionEmpScore->prob === false)
                                                                         <div></div>
@@ -133,16 +126,19 @@
                                                                                     type="number"
                                                                                     name="sectionProbScore" required
                                                                                     placeholder="Enter Score"
-                                                                                    min="0" step="0.01"
-                                                                                    pattern="\d+(\.\d{1,2})?"
+                                                                                    min="0" step="0.01" pattern="\d+(\.\d{1,2})?"
                                                                                     max="{{ $section->sectionScore }}"
                                                                                     @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['COMPLETED']))
                                                                                     title="The Score can not be more than the section score {{ $section->sectionScore }}"
                                                                                     value="{{ optional($section->sectionEmpScore)->sectionProbScore == 0 ? '' : optional($section->sectionEmpScore)->sectionProbScore }}">
                                                                             </div>
                                                                             <div class="col-md-9">
-                                                                                <textarea class="form-control mb-3 comment-input" type="text" name="probComment" placeholder="Enter your comments"
-                                                                                    @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['COMPLETED'])) rows="3">{{ $section->sectionEmpScore->probComment ?? '' }}</textarea>
+                                                                                <textarea
+                                                                                    class="form-control mb-3 comment-input"
+                                                                                    type="text" name="probComment"
+                                                                                    placeholder="Enter your comments"
+                                                                                    @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['COMPLETED']))
+                                                                                    rows="3">{{ $section->sectionEmpScore->probComment ?? '' }}</textarea>
                                                                             </div>
                                                                             @if (isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['COMPLETED']))
                                                                                 <div></div>
@@ -175,9 +171,8 @@
                                                                                             type="number"
                                                                                             name="metricEmpScore"
                                                                                             placeholder="Enter Score"
-                                                                                            required min="0"
-                                                                                            step="0.01"
-                                                                                            pattern="\d+(\.\d{1,2})?"
+                                                                                            required
+                                                                                            min="0" step="0.01" pattern="\d+(\.\d{1,2})?"
                                                                                             max="{{ $metric->metricScore }}"
                                                                                             readonly
                                                                                             @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
@@ -185,8 +180,14 @@
                                                                                             value="{{ $metric->metricEmpScore->metricEmpScore ?? '' }}">
                                                                                     </div>
                                                                                     <div class="col-md-9">
-                                                                                        <textarea class="form-control mb-3 comment-input" type="text" name="employeeComment"
-                                                                                            placeholder="Enter your comments" readonly @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM'])) rows="3">{{ $metric->metricEmpScore->employeeComment ?? '' }}</textarea>
+                                                                                        <textarea
+                                                                                            class="form-control mb-3 comment-input"
+                                                                                            type="text"
+                                                                                            name="employeeComment"
+                                                                                            placeholder="Enter your comments"
+                                                                                            readonly
+                                                                                            @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
+                                                                                            rows="3">{{ $metric->metricEmpScore->employeeComment ?? '' }}</textarea>
                                                                                     </div>
 
                                                                                 </div>
@@ -204,9 +205,7 @@
                                                                                             class="form-control mb-3"
                                                                                             type="number"
                                                                                             name="metricSupScore"
-                                                                                            min="0"
-                                                                                            step="0.01"
-                                                                                            pattern="\d+(\.\d{1,2})?"
+                                                                                            min="0" step="0.01" pattern="\d+(\.\d{1,2})?"
                                                                                             max="{{ $metric->metricScore }}"
                                                                                             @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                                             title="The Score can not be more than the metric score {{ $metric->metricScore }}"
@@ -215,8 +214,13 @@
                                                                                             value="{{ optional($metric->metricEmpScore)->metricSupScore ?? '' }}">
                                                                                     </div>
                                                                                     <div class="col-md-9">
-                                                                                        <textarea class="form-control mb-3" type="text" name="supervisorComment" @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
-                                                                                            placeholder="Enter your comments" rows="3">{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
+                                                                                        <textarea
+                                                                                            class="form-control mb-3"
+                                                                                            type="text"
+                                                                                            name="supervisorComment"
+                                                                                            @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
+                                                                                            placeholder="Enter your comments"
+                                                                                            rows="3">{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
                                                                                     </div>
                                                                                     <div
                                                                                         class="form-check form-check-dark mb-3">
@@ -247,8 +251,7 @@
 
                                                                                 <form
                                                                                     action="{{ route('prob.store') }}"
-                                                                                    method="POST"
-                                                                                    class="section-form ajax-sup-eval-form">
+                                                                                    method="POST">
                                                                                     @csrf
                                                                                     @if (isset($metric->metricEmpScore) && $metric->metricEmpScore->prob === false)
                                                                                         <div></div>
@@ -264,9 +267,7 @@
                                                                                                     class="form-control mb-3"
                                                                                                     type="number"
                                                                                                     name="metricProbScore"
-                                                                                                    min="0"
-                                                                                                    step="0.01"
-                                                                                                    pattern="\d+(\.\d{1,2})?"
+                                                                                                    min="0" step="0.01" pattern="\d+(\.\d{1,2})?"
                                                                                                     max="{{ $metric->metricScore }}"
                                                                                                     @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['COMPLETED']))
                                                                                                     title="The Score can not be more than the metric score {{ $metric->metricScore }}"
@@ -276,8 +277,13 @@
                                                                                                     value="{{ optional($metric->metricEmpScore)->metricProbScore ?: '' }}">
                                                                                             </div>
                                                                                             <div class="col-md-9">
-                                                                                                <textarea class="form-control mb-3" type="text" name="probComment" @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['COMPLETED']))
-                                                                                                    placeholder="Enter your comments" rows="3">{{ $metric->metricEmpScore->probComment ?? '' }}</textarea>
+                                                                                                <textarea
+                                                                                                    class="form-control mb-3"
+                                                                                                    type="text"
+                                                                                                    name="probComment"
+                                                                                                    @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['COMPLETED']))
+                                                                                                    placeholder="Enter your comments"
+                                                                                                    rows="3">{{ $metric->metricEmpScore->probComment ?? '' }}</textarea>
                                                                                             </div>
 
                                                                                             @if (isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['COMPLETED']))
@@ -379,115 +385,6 @@
                                 // Initial check in case inputs are pre-filled
                                 checkInputs();
                             </script>
-
-                            @push('scripts')
-                                <script>
-                                    document.addEventListener('DOMContentLoaded', function() {
-                                        const sections = document.querySelectorAll('.section-tab');
-                                        const progressBar = document.getElementById('progress-bar');
-
-                                        function validateField(field) {
-                                            const value = field.value.trim();
-                                            if (value === '') {
-                                                field.classList.add('is-invalid');
-                                                field.classList.remove('is-valid');
-                                                field.closest('.section-tab')?.classList.add('border-danger');
-                                                return false;
-                                            } else {
-                                                field.classList.remove('is-invalid');
-                                                field.classList.add('is-valid');
-                                                field.closest('.section-tab')?.classList.remove('border-danger');
-                                                return true;
-                                            }
-                                        }
-
-                                        function updateProgressBar() {
-                                            let totalValid = 0;
-                                            sections.forEach(section => {
-                                                const scoreInput = section.querySelector('input[name*="ProbScore"]');
-                                                const commentInput = section.querySelector('textarea[name="probComment"]');
-                                                const scoreFilled = scoreInput?.value.trim() !== '';
-                                                const commentFilled = commentInput?.value.trim() !== '';
-                                                if (scoreFilled && commentFilled) totalValid++;
-                                            });
-                                            const percent = Math.round((totalValid / sections.length) * 100);
-                                            progressBar.style.width = percent + '%';
-                                            progressBar.setAttribute('aria-valuenow', percent);
-                                            progressBar.textContent = percent + '%';
-                                        }
-
-                                        function attachListeners() {
-                                            sections.forEach(section => {
-                                                const scoreInput = section.querySelector('input[name*="ProbScore"]');
-                                                const commentInput = section.querySelector('textarea[name="probComment"]');
-                                                [scoreInput, commentInput].forEach(input => {
-                                                    if (input) {
-                                                        input.addEventListener('input', () => {
-                                                            validateField(input);
-                                                            updateProgressBar();
-                                                        });
-                                                    }
-                                                });
-                                            });
-                                        }
-
-                                        document.querySelectorAll('form.ajax-sup-eval-form').forEach(form => {
-                                            form.addEventListener('submit', function(e) {
-                                                e.preventDefault();
-                                                const scrollPos = window.scrollY;
-                                                const formData = new FormData(form);
-                                                const saveBtn = form.querySelector('button[type="submit"]');
-                                                const originalText = saveBtn.innerHTML;
-
-                                                saveBtn.innerHTML =
-                                                    '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
-                                                saveBtn.disabled = true;
-
-                                                fetch(form.action, {
-                                                        method: 'POST',
-                                                        headers: {
-                                                            'X-Requested-With': 'XMLHttpRequest',
-                                                            'X-CSRF-TOKEN': document.querySelector(
-                                                                'meta[name="csrf-token"]').getAttribute('content')
-                                                        },
-                                                        body: formData
-                                                    })
-                                                    .then(response => response.json())
-                                                    .then(data => {
-                                                        Swal.fire({
-                                                            toast: true,
-                                                            position: 'top-end',
-                                                            icon: 'success',
-                                                            title: 'Saved successfully',
-                                                            showConfirmButton: false,
-                                                            timer: 2000
-                                                        });
-                                                    })
-                                                    .catch(error => {
-                                                        console.error('Error:', error);
-                                                        Swal.fire({
-                                                            toast: true,
-                                                            position: 'top-end',
-                                                            icon: 'error',
-                                                            title: 'Failed to save',
-                                                            showConfirmButton: false,
-                                                            timer: 3000
-                                                        });
-                                                    })
-                                                    .finally(() => {
-                                                        window.scrollTo(0, scrollPos);
-                                                        saveBtn.innerHTML = originalText;
-                                                        saveBtn.disabled = false;
-                                                        updateProgressBar();
-                                                    });
-                                            });
-                                        });
-
-                                        attachListeners();
-                                        updateProgressBar();
-                                    });
-                                </script>
-                            @endpush
 
 
 

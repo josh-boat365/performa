@@ -14,11 +14,6 @@
         </div>
         <!-- end page title -->
 
-        <div class="progress fixed-top" style="height: 10px;">
-            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-        </div>
-
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
@@ -26,11 +21,11 @@
             <div class="col-lg-12">
                 <div class="card">
                     <!-- Progress Bar -->
-                    {{--  <div class="progress" style="height: 20px;">
+                    <div class="progress">
                         <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
                             role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
                             aria-valuemax="100">0%</div>
-                    </div>  --}}
+                    </div>
                     <div class="card-body">
                         <h4 class="card-title mb-4">Supervisor Evaluation Form</h4>
 
@@ -155,8 +150,7 @@
                                                                                 {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
                                                                                 <form
                                                                                     action="{{ route('supervisor.rating') }}"
-                                                                                    method="POST"
-                                                                                    class="ajax-sup-eval-form">
+                                                                                    method="POST" class="ajax-sup-eval-form">
                                                                                     @csrf
                                                                                     <div class="d-flex gap-3">
                                                                                         <div class="col-md-2">
@@ -300,9 +294,8 @@
                                             let allFilled = true;
 
                                             for (let i = start; i < end && i < sections.length; i++) {
-                                                const scoreInputs = sections[i].querySelectorAll(
-                                                    'input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]');
-                                                const commentInputs = sections[i].querySelectorAll('textarea[name*="Comment"]');
+                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"]');
+                                                const commentInputs = sections[i].querySelectorAll('textarea[name="employeeComment"]');
 
                                                 const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
                                                 const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');
@@ -321,10 +314,8 @@
                                         function updateProgressBar() {
                                             let totalValid = 0;
                                             sections.forEach(section => {
-                                                const scoreInputs = section.querySelectorAll(
-                                                    'input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]'
-                                                );
-                                                const commentInputs = section.querySelectorAll('textarea[name*="Comment"]');
+                                                const scoreInputs = section.querySelectorAll('input[type="number"][name*="EmpScore"]');
+                                                const commentInputs = section.querySelectorAll('textarea[name="employeeComment"]');
                                                 const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
                                                 const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !==
                                                     '');
@@ -337,9 +328,9 @@
                                         }
 
                                         function updateButtons() {
-                                            if (prevBtn) prevBtn.disabled = currentPage === 0;
-                                            if (nextBtn) nextBtn.disabled = currentPage === totalPages - 1 || !checkInputs(currentPage);
-                                            if (submitBtn) submitBtn.disabled = !Array.from({
+                                            prevBtn.disabled = currentPage === 0;
+                                            nextBtn.disabled = currentPage === totalPages - 1 || !checkInputs(currentPage);
+                                            submitBtn.disabled = !Array.from({
                                                 length: totalPages
                                             }).every((_, i) => checkInputs(i));
                                             updateProgressBar();
@@ -355,7 +346,7 @@
                                                 sections[i].style.display = 'block';
                                             }
 
-                                            if (currentPageSpan) currentPageSpan.textContent = page + 1;
+                                            currentPageSpan.textContent = page + 1;
                                             sessionStorage.setItem('currentPage', page);
                                             updateButtons();
                                             window.scrollTo({
@@ -364,33 +355,29 @@
                                             });
                                         }
 
-                                        if (prevBtn) {
-                                            prevBtn.addEventListener('click', function() {
-                                                if (currentPage > 0) {
-                                                    currentPage--;
-                                                    showPage(currentPage);
-                                                }
-                                            });
-                                        }
-
-                                        if (nextBtn) {
-                                            nextBtn.addEventListener('click', function() {
-                                                if (currentPage < totalPages - 1 && checkInputs(currentPage)) {
-                                                    currentPage++;
-                                                    showPage(currentPage);
-                                                }
-                                            });
-                                        }
-
-                                        document.querySelectorAll('input[type="number"], textarea').forEach(input => {
-                                            input.addEventListener('input', function() {
-                                                validateField(this);
-                                                updateButtons();
-                                            });
+                                        prevBtn.addEventListener('click', function() {
+                                            if (currentPage > 0) {
+                                                currentPage--;
+                                                showPage(currentPage);
+                                            }
                                         });
 
-                                        // Only handle AJAX for supervisor scoring forms
-                                        document.querySelectorAll('form.ajax-sup-eval-form, form.section-form').forEach(form => {
+                                        nextBtn.addEventListener('click', function() {
+                                            if (currentPage < totalPages - 1 && checkInputs(currentPage)) {
+                                                currentPage++;
+                                                showPage(currentPage);
+                                            }
+                                        });
+
+                                        document.querySelectorAll('input[type="number"][name*="EmpScore"], textarea[name="employeeComment"]')
+                                            .forEach(input => {
+                                                input.addEventListener('input', function() {
+                                                    validateField(this);
+                                                    updateButtons();
+                                                });
+                                            });
+
+                                        document.querySelectorAll('form.ajax-sup-eval-form').forEach(form => {
                                             form.addEventListener('submit', function(e) {
                                                 e.preventDefault();
                                                 const scrollPos = window.scrollY;

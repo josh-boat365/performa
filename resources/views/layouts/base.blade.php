@@ -59,7 +59,6 @@
 
     </div>
     <!-- END layout-wrapper -->
-
     @include('layouts.footer')
     @stack('scripts')
 </body>

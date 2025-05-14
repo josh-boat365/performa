@@ -32,6 +32,8 @@
     <script src="{{ asset('/assets/js/plugin.js') }}"></script>
     <link href="{{ asset('assets/libs/select2/css/select2.min.css') }}" rel="stylesheet" type="text/css" />
 
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.21.0/dist/sweetalert2.min.css" rel="stylesheet">
+
 
 
 </head>
