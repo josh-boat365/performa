@@ -14,12 +14,23 @@
         </div>
         <!-- end page title -->
 
+        <div class="progress fixed-top" style="height: 10px;">
+            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+        </div>
+
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
+                    <!-- Progress Bar -->
+                    {{--  <div class="progress" style="height: 20px;">
+                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+                            role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
+                            aria-valuemax="100">0%</div>
+                    </div>  --}}
                     <div class="card-body">
                         <h4 class="card-title mb-4">Supervisor Evaluation Form</h4>
 
@@ -79,7 +90,8 @@
                                                                             <input class="form-control mb-3 score-input"
                                                                                 type="number" name="sectionSupScore"
                                                                                 required placeholder="Enter Score"
-                                                                                min="0" step="0.01" pattern="\d+(\.\d{1,2})?"
+                                                                                min="0" step="0.01"
+                                                                                pattern="\d+(\.\d{1,2})?"
                                                                                 max="{{ $section->sectionScore }}"
                                                                                 @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                                 title="The Score can not be more than the section score {{ $section->sectionScore }}"
@@ -121,7 +133,8 @@
                                                                                             name="metricEmpScore"
                                                                                             placeholder="Enter Score"
                                                                                             required min="0"
-                                                                                            step="0.01" pattern="\d+(\.\d{1,2})?"
+                                                                                            step="0.01"
+                                                                                            pattern="\d+(\.\d{1,2})?"
                                                                                             max="{{ $metric->metricScore }}"
                                                                                             @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION', 'PROBLEM']))
                                                                                             title="The Score can not be more than the metric score {{ $metric->metricScore }}"
@@ -142,7 +155,8 @@
                                                                                 {{--  ==== SUPERVISOR SCORING WITH COMMENT INPUT ====  --}}
                                                                                 <form
                                                                                     action="{{ route('supervisor.rating') }}"
-                                                                                    method="POST">
+                                                                                    method="POST"
+                                                                                    class="ajax-sup-eval-form">
                                                                                     @csrf
                                                                                     <div class="d-flex gap-3">
                                                                                         <div class="col-md-2">
@@ -151,7 +165,8 @@
                                                                                                 type="number"
                                                                                                 name="metricSupScore"
                                                                                                 min="0"
-                                                                                                step="0.01" pattern="\d+(\.\d{1,2})?"
+                                                                                                step="0.01"
+                                                                                                pattern="\d+(\.\d{1,2})?"
                                                                                                 max="{{ $metric->metricScore }}"
                                                                                                 @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                                                 title="The Score can not be more than the metric score {{ $metric->metricScore }}"
@@ -250,31 +265,6 @@
 
                             @push('scripts')
                                 <script>
-                                    // Function to check if all score inputs and comments are filled
-                                    function checkInputs() {
-                                        const scoreInputs = document.querySelectorAll('input[type="number"][name*="SupScore"]');
-                                        const commentInputs = document.querySelectorAll('textarea[name="employeeComment"]');
-
-                                        const allScoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                        const allCommentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');
-
-                                        // Enable or disable the submit button based on input values
-                                        document.getElementById('submit-btn').disabled = !(allScoresFilled && allCommentsFilled);
-                                    }
-
-                                    // Attach event listeners to all score inputs and comment inputs
-                                    document.querySelectorAll('input[type="number"][name*="SupScore"], textarea[name="employeeComment"]').forEach(
-                                        input => {
-                                            input.addEventListener('input', checkInputs);
-                                        });
-
-                                    // Initial check in case inputs are pre-filled
-                                    checkInputs();
-                                </script>
-
-
-                                {{--  New script for pagination  --}}
-                                <script>
                                     document.addEventListener('DOMContentLoaded', function() {
                                         const sections = document.querySelectorAll('.section-tab');
                                         const prevBtn = document.getElementById('prev-btn');
@@ -282,12 +272,27 @@
                                         const submitBtn = document.getElementById('submit-btn');
                                         const currentPageSpan = document.getElementById('current-page');
                                         const totalPagesSpan = document.getElementById('total-pages');
+                                        const progressBar = document.getElementById('progress-bar');
                                         let currentPage = parseInt(sessionStorage.getItem('currentPage') || 0);
                                         const sectionsPerPage = 3;
                                         const totalPages = Math.ceil(sections.length / sectionsPerPage);
 
-                                        // Initialize Pagination Count
                                         totalPagesSpan.textContent = totalPages;
+
+                                        function validateField(field) {
+                                            const value = field.value.trim();
+                                            if (value === '') {
+                                                field.classList.add('is-invalid');
+                                                field.classList.remove('is-valid');
+                                                field.closest('.section-tab')?.classList.add('border-danger');
+                                                return false;
+                                            } else {
+                                                field.classList.remove('is-invalid');
+                                                field.classList.add('is-valid');
+                                                field.closest('.section-tab')?.classList.remove('border-danger');
+                                                return true;
+                                            }
+                                        }
 
                                         function checkInputs(page) {
                                             const start = page * sectionsPerPage;
@@ -295,27 +300,49 @@
                                             let allFilled = true;
 
                                             for (let i = start; i < end && i < sections.length; i++) {
-                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="SupScore"]');
-                                                const commentInputs = sections[i].querySelectorAll('textarea[name="supervisorComment"]');
+                                                const scoreInputs = sections[i].querySelectorAll(
+                                                    'input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]');
+                                                const commentInputs = sections[i].querySelectorAll('textarea[name*="Comment"]');
 
-                                                const allScoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                const allCommentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');
+                                                const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                                                const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');
 
-                                                if (!allScoresFilled || !allCommentsFilled) {
+                                                if (!scoresFilled || !commentsFilled) {
                                                     allFilled = false;
-                                                    break;
+                                                    sections[i].classList.add('border-danger');
+                                                } else {
+                                                    sections[i].classList.remove('border-danger');
                                                 }
                                             }
 
                                             return allFilled;
                                         }
 
+                                        function updateProgressBar() {
+                                            let totalValid = 0;
+                                            sections.forEach(section => {
+                                                const scoreInputs = section.querySelectorAll(
+                                                    'input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]'
+                                                );
+                                                const commentInputs = section.querySelectorAll('textarea[name*="Comment"]');
+                                                const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                                                const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !==
+                                                    '');
+                                                if (scoresFilled && commentsFilled) totalValid++;
+                                            });
+                                            const percent = Math.round((totalValid / sections.length) * 100);
+                                            progressBar.style.width = percent + '%';
+                                            progressBar.setAttribute('aria-valuenow', percent);
+                                            progressBar.textContent = percent + '%';
+                                        }
+
                                         function updateButtons() {
-                                            prevBtn.disabled = currentPage === 0;
-                                            nextBtn.disabled = !checkInputs(currentPage) || currentPage === totalPages - 1;
-                                            submitBtn.disabled = !Array.from({
+                                            if (prevBtn) prevBtn.disabled = currentPage === 0;
+                                            if (nextBtn) nextBtn.disabled = currentPage === totalPages - 1 || !checkInputs(currentPage);
+                                            if (submitBtn) submitBtn.disabled = !Array.from({
                                                 length: totalPages
-                                            }).every((_, page) => checkInputs(page));
+                                            }).every((_, i) => checkInputs(i));
+                                            updateProgressBar();
                                         }
 
                                         function showPage(page) {
@@ -328,39 +355,86 @@
                                                 sections[i].style.display = 'block';
                                             }
 
-                                            currentPageSpan.textContent = page + 1; // Update current page display
-                                            sessionStorage.setItem('currentPage', page); // Save the current page to sessionStorage
-
+                                            if (currentPageSpan) currentPageSpan.textContent = page + 1;
+                                            sessionStorage.setItem('currentPage', page);
                                             updateButtons();
+                                            window.scrollTo({
+                                                top: sections[start].offsetTop,
+                                                behavior: 'smooth'
+                                            });
                                         }
 
-                                        prevBtn.addEventListener('click', function() {
-                                            if (currentPage > 0) {
-                                                currentPage--;
-                                                showPage(currentPage);
-                                            }
+                                        if (prevBtn) {
+                                            prevBtn.addEventListener('click', function() {
+                                                if (currentPage > 0) {
+                                                    currentPage--;
+                                                    showPage(currentPage);
+                                                }
+                                            });
+                                        }
+
+                                        if (nextBtn) {
+                                            nextBtn.addEventListener('click', function() {
+                                                if (currentPage < totalPages - 1 && checkInputs(currentPage)) {
+                                                    currentPage++;
+                                                    showPage(currentPage);
+                                                }
+                                            });
+                                        }
+
+                                        document.querySelectorAll('input[type="number"], textarea').forEach(input => {
+                                            input.addEventListener('input', function() {
+                                                validateField(this);
+                                                updateButtons();
+                                            });
                                         });
 
-                                        nextBtn.addEventListener('click', function() {
-                                            if (currentPage < totalPages - 1) {
-                                                currentPage++;
-                                                showPage(currentPage);
-                                            }
+                                        // Only handle AJAX for supervisor scoring forms
+                                        document.querySelectorAll('form.ajax-sup-eval-form, form.section-form').forEach(form => {
+                                            form.addEventListener('submit', function(e) {
+                                                e.preventDefault();
+                                                const scrollPos = window.scrollY;
+                                                const formData = new FormData(form);
+                                                const saveBtn = form.querySelector('button[type="submit"]');
+                                                const originalText = saveBtn.innerHTML;
+
+                                                saveBtn.innerHTML =
+                                                    '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+                                                saveBtn.disabled = true;
+
+                                                fetch(form.action, {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'X-Requested-With': 'XMLHttpRequest',
+                                                            'X-CSRF-TOKEN': document.querySelector(
+                                                                'meta[name="csrf-token"]').getAttribute('content')
+                                                        },
+                                                        body: formData
+                                                    })
+                                                    .then(response => response.json())
+                                                    .then(data => {
+                                                        smoothScroll(form);
+                                                    })
+                                                    .catch(error => console.error('Error:', error))
+                                                    .finally(() => {
+                                                        window.scrollTo(0, scrollPos);
+                                                        saveBtn.innerHTML = originalText;
+                                                        saveBtn.disabled = false;
+                                                        updateButtons();
+                                                    });
+                                            });
                                         });
 
-                                        // Attach event listeners to all score inputs and comment inputs
-                                        document.querySelectorAll('input[type="number"][name*="SupScore"], textarea[name="supervisorComment"]')
-                                            .forEach(
-                                                input => {
-                                                    input.addEventListener('input', updateButtons);
-                                                });
+                                        function smoothScroll(targetForm) {
+                                            $('html, body').animate({
+                                                scrollTop: $(targetForm).offset().top
+                                            }, 500);
+                                        }
 
-                                        // Show the page on load
                                         showPage(currentPage);
                                     });
                                 </script>
                             @endpush
-
 
 
                         </div>
