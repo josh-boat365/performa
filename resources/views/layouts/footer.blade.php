@@ -65,5 +65,6 @@
     <script src="{{ asset('assets/js/pages/datatables.init.js') }}"></script>
 
     <script src="{{ asset('assets/libs/select2/js/select2.min.js') }}"></script>
-   
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.21.0/dist/sweetalert2.all.min.js"></script>
 @endpush
