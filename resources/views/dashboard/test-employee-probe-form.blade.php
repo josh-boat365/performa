@@ -42,26 +42,24 @@
 
                                                             @if ($section->metrics->isEmpty())
                                                                 <form action="{{ route('submit.employee.probe') }}"
-                                                                    method="POST" class="section-form">
+                                                                    method="POST"
+                                                                    class="section-form ajax-emp-prob-eval-form">
                                                                     @csrf
                                                                     <div class="d-flex gap-3">
                                                                         <div class="col-md-2">
                                                                             <input class="form-control mb-3 score-input"
                                                                                 type="number" name="sectionEmpScore"
                                                                                 required placeholder="Enter Score"
-                                                                                min="0" step="0.01" pattern="\d+(\.\d{1,2})?"
+                                                                                min="0" step="0.01"
+                                                                                pattern="\d+(\.\d{1,2})?"
                                                                                 max="{{ $section->sectionScore }}"
                                                                                 @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
                                                                                 title="The Score cannot be more than the section score {{ $section->sectionScore }}"
                                                                                 value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                         </div>
                                                                         <div class="col-md-9">
-                                                                            <textarea
-                                                                                class="form-control mb-3 comment-input"
-                                                                                type="text" name="employeeComment" required
-                                                                                placeholder="Enter your comments"
-                                                                                @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'COMPLETED')
-                                                                                rows="3">{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}</textarea>
+                                                                            <textarea class="form-control mb-3 comment-input" type="text" name="employeeComment" required
+                                                                                placeholder="Enter your comments" @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'COMPLETED') rows="3">{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}</textarea>
                                                                         </div>
                                                                     </div>
 
@@ -78,11 +76,8 @@
                                                                                 value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? '' }}">
                                                                         </div>
                                                                         <div class="col-md-8">
-                                                                            <textarea class="form-control" type="text"
-                                                                                readonly
-                                                                                placeholder="Enter your comments" rows="3"
-                                                                                @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
-                                                                                >{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
+                                                                            <textarea class="form-control" type="text" readonly placeholder="Enter your comments" rows="3"
+                                                                                @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')>{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
                                                                         </div>
                                                                         <div class="form-check form-check-dark mb-3">
                                                                             <input @style(['width:1.8rem; height:2rem'])
@@ -122,7 +117,8 @@
 
                                                                                 <form
                                                                                     action="{{ route('submit.employee.probe') }}"
-                                                                                    method="POST" class="metric-form">
+                                                                                    method="POST"
+                                                                                    class="metric-form ajax-emp-prob-eval-form">
                                                                                     @csrf
                                                                                     <div class="d-flex gap-3">
                                                                                         <div class="col-md-2">
@@ -268,6 +264,90 @@
     </div>
     <!-- end col -->
     </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const saveForms = document.querySelectorAll('form.ajax-emp-prob-eval-form');
+
+                const showToast = (type, message) => {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                    });
+
+                    Toast.fire({
+                        icon: type,
+                        title: message
+                    });
+                };
+
+                saveForms.forEach(form => {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        const scrollPos = window.scrollY;
+                        const formData = new FormData(form);
+                        const saveBtn = form.querySelector(
+                            'button[type="submit"], input[type="submit"]');
+                        const originalText = saveBtn.innerHTML || saveBtn.value;
+
+                        const restoreButton = () => {
+                            if (saveBtn.tagName === 'BUTTON') {
+                                saveBtn.innerHTML = originalText;
+                            } else {
+                                saveBtn.value = originalText;
+                                saveBtn.disabled = false;
+                            }
+                        };
+
+                        if (saveBtn.tagName === 'BUTTON') {
+                            saveBtn.innerHTML =
+                                '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+                        } else {
+                            saveBtn.value = 'Saving...';
+                            saveBtn.disabled = true;
+                        }
+
+                        fetch(form.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                setTimeout(() => window.scrollTo({
+                                    top: scrollPos,
+                                    behavior: 'smooth'
+                                }), 150);
+                                showToast('success', 'Selection saved successfully.');
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                window.scrollTo({
+                                    top: scrollPos,
+                                    behavior: 'smooth'
+                                });
+                                showToast('error', 'Something went wrong while saving.');
+                            })
+                            .finally(() => {
+                                restoreButton();
+                            });
+                    });
+                });
+            });
+        </script>
+    @endpush
 
 
     </div>
