@@ -362,6 +362,10 @@ private function prepareViewData($employeeKpi, $gradeDetails)
         // Get the access token from the session
         $accessToken = session('api_token');
 
+        if(!$accessToken) {
+            return redirect()->back()->with('toast_error', 'Your Session Has Expired. Please log in again.');
+        }
+
         try {
             // Make the GET request to the external API to get KPIs for the specified employee
             $response = Http::withToken($accessToken)
