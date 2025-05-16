@@ -210,10 +210,10 @@ class AuthController extends Controller
         // Clear all session data related to authentication
         $request->session()->forget(['api_token', 'user_name', 'user_email']);
 
-        // Optionally, clear all session data
+        // Clear all session data
         $request->session()->flush();
 
-        // Redirect to the login page with a success message
-        return redirect()->route('login')->with('toast_success', 'You have been logged out successfully.');
+        // Redirect to the external URL with proper formatting
+        return redirect()->away('http://192.168.1.200:5125/');
     }
 }
