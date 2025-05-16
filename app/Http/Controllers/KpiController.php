@@ -24,25 +24,18 @@ class KpiController extends Controller
         }
 
         // Centralized API calls
-
         $responseKpis = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/Kpi');
 
         $user = $this->fetchApiData($accessToken, 'http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
         $employeeResponse = $this->fetchApiData($accessToken, 'http://192.168.1.200:5124/HRMS/Employee');
 
-        $userDepartmentId = $user->department->id;
-        // dd($userDepartmentId, $responseKpis);
+        $userId = $user->id;
 
-        //$employees = $employeeResponse->pluck('id')->toArray(); //error cal to member function on array
-        //new approach
         $employees = $employeeResponse;
 
-
-
-
-        // Filter the KPIs to include only those with active state of true or false
-        $activeKpis = collect($responseKpis)->filter(function ($kpi) use ($userDepartmentId) {
-            return $kpi->type === 'REGULAR' && ($kpi->active == true || $kpi->active == false) && ($kpi->empRole->departmentId === $userDepartmentId);
+        // Filter the KPIs to include only those with active state of true or false, type of regular and filter all kpis for roles the user manages
+        $activeKpis = collect($responseKpis)->filter(function ($kpi) use ($userId) {
+            return $kpi->type === 'REGULAR' && ($kpi->active == true || $kpi->active == false) && ($kpi->empRole->manager === $userId);
         });
 
         // Sort the KPIs to place the newly created one first
@@ -56,8 +49,6 @@ class KpiController extends Controller
         return view('kpi-setup.index', compact('activeKpis', 'user', 'employees'));
     }
 
-    // Add this method for pagination
-
 
 
     public function create()
@@ -70,23 +61,21 @@ class KpiController extends Controller
 
 
 
-        // Extracting data
+        // Extracting data for only open batches
         $batch_data = collect($responseBatches)->filter(fn($batch) => $batch->status === 'OPEN');
 
         $uniqueDepartments = [];
         $uniqueRoles = [];
 
-        // dd(collect($responseRoles)->pluck('name')->unique()->toArray());
 
         $user = $this->fetchApiData($accessToken, 'http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
-        $userDepartmentId = $user->department->id;
+        $userId = $user->id;
 
         if ($responseRoles) {
             $roles = collect($responseRoles);
             // dd($roles);
-            // Extract and deduplicate  roles
-            //TODO: get all roles related to user department
-            $uniqueRoles = collect($roles)->filter(fn($role) => $role->departmentId === $userDepartmentId)->map(function ($role) {
+            // Extract and deduplicate  roles and get all roles the user manages in the department
+            $uniqueRoles = collect($roles)->filter(fn($role) => $role->manager === $userId)->map(function ($role) {
                 return [
                     'id' => $role->id,
                     'name' => $role->name,
@@ -218,12 +207,12 @@ class KpiController extends Controller
 
 
             $user = $this->fetchShowApiData( 'http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
-            $userDepartmentId = $user->department->id;
+            $userId = $user->id;
 
             if ($responseRoles) {
                 $roles = collect($responseRoles);
 
-                $uniqueRoles = collect($roles)->filter(fn($role) => $role->departmentId === $userDepartmentId)->map(function ($role) {
+                $uniqueRoles = collect($roles)->filter(fn($role) => $role->manager === $userId)->map(function ($role) {
                     return [
                         'id' => $role->id,
                         'name' => $role->name,
