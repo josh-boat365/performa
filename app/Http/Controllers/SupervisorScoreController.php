@@ -13,6 +13,13 @@ class SupervisorScoreController extends Controller
      */
     public function index()
     {
+
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         $accessToken = session('api_token');
 
         $responseSup = Http::withToken($accessToken)
@@ -42,6 +49,13 @@ class SupervisorScoreController extends Controller
      */
     public function edit(Request $request, $kpiId, $batchId)
     {
+
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Get the access token from the session
         $accessToken = session('api_token');
 
@@ -127,6 +141,12 @@ class SupervisorScoreController extends Controller
 
     public function editProb(Request $request, $kpiId, $batchId)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Get the access token from the session
         $accessToken = session('api_token');
 
@@ -210,6 +230,13 @@ class SupervisorScoreController extends Controller
      */
     public function store(Request $request)
     {
+
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         try {
             // Initialize a variable for the success message
             $successMessage = '';
@@ -300,6 +327,13 @@ class SupervisorScoreController extends Controller
 
     public function probScore(Request $request)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
+        
         try {
             // dd($request);
             // Initialize a variable for the success message

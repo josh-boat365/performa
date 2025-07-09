@@ -17,11 +17,13 @@ class ReportController extends Controller
      */
     public function index(Request $request)
     {
-        $accessToken = session('api_token');
-        
-        if(!$accessToken) {
-            return redirect()->route('login')->with('toast_error', 'Session expired, please login again.');
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
         }
+
+        $accessToken = session('api_token');
 
         // Validate the request parameters
         $request->validate([
@@ -126,6 +128,12 @@ class ReportController extends Controller
 
     public function showEmployeeSummary($employeeId)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Retrieve access token from session
         $accessToken = session('api_token');
 
@@ -166,6 +174,12 @@ class ReportController extends Controller
      */
     public function filter(Request $request)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+        
         $request->validate(
             [
                 'batchId' => 'nullable|int',
@@ -223,6 +237,12 @@ class ReportController extends Controller
 
     public function generateEmployeePdf($employeeId)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Retrieve employee data
         $accessToken = session('api_token');
         $data = ['employeeId' => $employeeId];
@@ -240,6 +260,12 @@ class ReportController extends Controller
     }
     public function generateEmployeePdfOld($employeeId)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Retrieve employee data
         $accessToken = session('api_token');
         $data = ['employeeId' => $employeeId];
@@ -324,6 +350,12 @@ class ReportController extends Controller
 
     public function generateEmployeePdfReport($employeeId)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Retrieve employee data
         $accessToken = session('api_token');
         $data = ['employeeId' => $employeeId];

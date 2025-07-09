@@ -16,6 +16,12 @@ class MetricController extends Controller
 
     public function index(Request $request, $kpiId, $sectionScore, $id)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         try {
             // Fetch sections data using helper method
 
@@ -57,6 +63,11 @@ class MetricController extends Controller
 
     public function create(string $kpiScore, $sectionMetricScore, $id)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
 
         // $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
 
@@ -77,6 +88,12 @@ class MetricController extends Controller
 
     private function makeApiRequest(string $method, string $url, array $data = null)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         $accessToken = session('api_token');
 
         try {
@@ -114,6 +131,12 @@ class MetricController extends Controller
 
     public function store(Request $request)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
@@ -182,6 +205,12 @@ class MetricController extends Controller
 
     public function show(string $kpiId, $sectionMetricScore, $sectionId, $metricId)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         $accessToken = session('api_token');
         $apiUrl = "http://192.168.1.200:5123/Appraisal/Metric/{$metricId}";
 
@@ -234,6 +263,12 @@ class MetricController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
@@ -328,6 +363,7 @@ class MetricController extends Controller
 
     protected function paginate(array|Collection $items, int $perPage, Request $request): LengthAwarePaginator
     {
+        
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
         if (!$items instanceof Collection) {

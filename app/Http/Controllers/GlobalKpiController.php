@@ -15,6 +15,12 @@ class GlobalKpiController extends Controller
      */
     public function index(Request $request)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         $accessToken = session('api_token');
 
         if (!$accessToken) {
@@ -51,6 +57,12 @@ class GlobalKpiController extends Controller
      */
     public function create()
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
 
         $accessToken = session('api_token');
 
@@ -86,6 +98,12 @@ class GlobalKpiController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
@@ -127,6 +145,12 @@ class GlobalKpiController extends Controller
      * Display the specified resource.
      */  public function show(string $id)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         try {
             $accessToken = session('api_token');
 
@@ -167,19 +191,19 @@ class GlobalKpiController extends Controller
             return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
     }
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
@@ -222,6 +246,12 @@ class GlobalKpiController extends Controller
 
     public function update_state(Request $request, string $id)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Validate the request data
         $request->validate([
             'active' => 'required|integer',
@@ -268,6 +298,12 @@ class GlobalKpiController extends Controller
 
     public function update_status(Request $request, string $id)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         try {
             // Validate the request data
             $request->validate([
@@ -354,6 +390,12 @@ class GlobalKpiController extends Controller
 
     private function fetchApiData(string $accessToken, string $url)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         $response = Http::withToken($accessToken)->get($url);
 
         return $response->successful() ? $response->object() : null;
@@ -361,6 +403,12 @@ class GlobalKpiController extends Controller
 
     private function sendApiRequest(string $url, array $data, string $method = 'POST')
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         $accessToken = session('api_token');
 
         try {
@@ -390,6 +438,7 @@ class GlobalKpiController extends Controller
 
     protected function paginate(array|Collection $items, int $perPage, Request $request): LengthAwarePaginator
     {
+
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
         if (!$items instanceof Collection) {
