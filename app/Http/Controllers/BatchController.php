@@ -14,6 +14,12 @@ class BatchController extends Controller
      */
     public function index()
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         try {
             // Get the access token from the request or environment
             $accessToken = session('api_token'); // Replace with your actual access token
@@ -61,16 +67,18 @@ class BatchController extends Controller
 
 
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(Request $request) {}
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         $accessToken = session('api_token');
 
         $response = Http::withToken($accessToken)
@@ -137,6 +145,13 @@ class BatchController extends Controller
      */
     public function show(string $id)
     {
+
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         $accessToken = session('api_token');
 
         try {
@@ -168,19 +183,20 @@ class BatchController extends Controller
     }
 
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
     {
+
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Validate the request data
         $request->validate([
             'name' => 'required|string',
@@ -233,6 +249,12 @@ class BatchController extends Controller
 
     public function update_state(Request $request, string $id)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Validate the request data
         $request->validate([
             'active' => 'required|integer',
@@ -279,6 +301,12 @@ class BatchController extends Controller
 
     public function update_status(Request $request, string $id)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+        
         // Validate the request data
         $request->validate([
             'status' => 'required|string',

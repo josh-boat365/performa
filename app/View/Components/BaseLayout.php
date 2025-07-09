@@ -5,6 +5,7 @@ namespace App\View\Components;
 use Illuminate\View\View;
 use Illuminate\View\Component;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\ValidateSessionController;
 
 class BaseLayout extends Component
 {
@@ -13,6 +14,7 @@ class BaseLayout extends Component
      */
     public function render(): View
     {
+
         $accessToken = session('api_token');
         // Fetch user information
         $responseUser   = Http::withToken($accessToken)
@@ -23,7 +25,7 @@ class BaseLayout extends Component
 
         $responseDepartments = Http::withToken($accessToken)->get('http://192.168.1.200:5124/HRMS/Department');
         $responseRoles = Http::withToken($accessToken)->get('http://192.168.1.200:5124/HRMS/EmpRole');
-        
+
         // dd($responseDepartments->object());
 
         $departments = collect($responseDepartments->object())->pluck('id')->toArray();

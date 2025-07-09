@@ -13,170 +13,201 @@ use Illuminate\Pagination\LengthAwarePaginator;
 class DashboardController extends Controller
 {
 
-public function index()
-{
-    $accessToken = session('api_token');
-
-    if (!$accessToken) {
-        return redirect()->back()->with('toast_error', 'Access token is missing. Please log in again.');
-    }
-
-    try {
-        $response = $this->fetchDashboardData("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee", $accessToken);
-
-        if (!$response['success']) {
-            return redirect()->back()->with('toast_error', $response['message']);
+    public function index()
+    {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
         }
 
-        $kpis = $response['data'];
+        $accessToken = session('api_token');
 
-        if (empty($kpis)) {
-            return view("dashboard.index", $this->prepareViewData(null, null));
-        }
+        try {
+            $response = $this->fetchDashboardData("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee", $accessToken);
 
-        $firstKpiId = $kpis[0]['kpiId'] ?? null;
+            if (!$response['success']) {
+                return redirect()->back()->with('toast_error', $response['message']);
+            }
 
-        if (!$firstKpiId) {
-            return view("dashboard.index", $this->prepareViewData(null, null));
-        }
+            $kpis = $response['data'];
 
-        $kpiDetailsResponse = $this->fetchDashboardData("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$firstKpiId}", $accessToken);
+            if (empty($kpis)) {
+                return view("dashboard.index", $this->prepareViewData(null, null));
+            }
 
-        if (!$kpiDetailsResponse['success']) {
-            return redirect()->back()->with('toast_error', $kpiDetailsResponse['message']);
-        }
+            $firstKpiId = $kpis[0]['kpiId'] ?? null;
 
-        $kpiDetails = $kpiDetailsResponse['data'];
-        $employeeKpi = $this->processKpiDetails($kpiDetails);
+            if (!$firstKpiId) {
+                return view("dashboard.index", $this->prepareViewData(null, null));
+            }
 
-        $gradeDetails = $this->fetchEmployeeGrade($accessToken, $employeeKpi['batch_id'] ?? '', $employeeKpi['employee_id'] ?? '');
+            $kpiDetailsResponse = $this->fetchDashboardData("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$firstKpiId}", $accessToken);
 
-        return view("dashboard.index", $this->prepareViewData($employeeKpi, $gradeDetails));
-    } catch (\Exception $e) {
-        Log::error('Exception occurred while retrieving Appraisal Overview', [
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
+            if (!$kpiDetailsResponse['success']) {
+                return redirect()->back()->with('toast_error', $kpiDetailsResponse['message']);
+            }
 
-        return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
-    }
-}
+            $kpiDetails = $kpiDetailsResponse['data'];
+            $employeeKpi = $this->processKpiDetails($kpiDetails);
 
-private function fetchDashboardData($url, $token)
-{
-    try {
-        $response = Http::withToken($token)->get($url);
+            $gradeDetails = $this->fetchEmployeeGrade($accessToken, $employeeKpi['batch_id'] ?? '', $employeeKpi['employee_id'] ?? '');
 
-        if ($response->status() === 400) {
-            return ['success' => false, 'message' => 'Invalid request to the server. Please try again later.'];
-        }
-
-        if (!$response->successful()) {
-            Log::error('Failed to fetch data from API', [
-                'url' => $url,
-                'status' => $response->status(),
-                'response' => $response->body()
+            return view("dashboard.index", $this->prepareViewData($employeeKpi, $gradeDetails));
+        } catch (\Exception $e) {
+            Log::error('Exception occurred while retrieving Appraisal Overview', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
-            return ['success' => false, 'message' => 'Failed to retrieve data from the API.'];
+
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
         }
-
-        return ['success' => true, 'data' => $response->json()];
-    } catch (\Exception $e) {
-        Log::error('Exception during API call', [
-            'url' => $url,
-            'message' => $e->getMessage()
-        ]);
-        return ['success' => false, 'message' => 'An error occurred while fetching data.'];
-    }
-}
-
-private function processKpiDetails($kpiDetails)
-{
-    $globalSectionCount = 0;
-    $regularSectionCount = 0;
-    $kpiStatus = 'PENDING';
-    $batchId = $batchName = $employeeId = '';
-
-    foreach ($kpiDetails as $kpi) {
-        $sections = $kpi['sections'] ?? [];
-        $sectionCount = count($sections);
-
-        if ($kpi['kpiType'] === 'GLOBAL') {
-            $globalSectionCount += $sectionCount;
-        } elseif ($kpi['kpiType'] === 'REGULAR') {
-            $regularSectionCount += $sectionCount;
-        }
-
-        if (!empty($sections)) {
-            $firstSection = $sections[0];
-            $kpiStatus = $firstSection['sectionEmpScore']['status'] ?? $kpiStatus;
-        }
-
-        $batchId = $kpi['batchId'] ?? $batchId;
-        $batchName = $kpi['batchName'] ?? $batchName;
-        $employeeId = $kpi['employeeId'] ?? $employeeId;
     }
 
-    return [
-        'id' => $kpiDetails[0]['kpiId'] ?? '---',
-        'batch_id' => $batchId,
-        'kpi_name' => $kpiDetails[0]['kpiName'] ?? '---',
-        'batch_name' => $batchName,
-        'section_count' => $globalSectionCount + $regularSectionCount,
-        'employee_id' => $employeeId
-    ];
-}
+    private function fetchDashboardData($url, $token)
+    {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
 
-private function fetchEmployeeGrade($token, $batchId, $employeeId)
-{
-    $gradeData = [
-        'batchId' => $batchId,
-        'employeeId' => $employeeId
-    ];
+        try {
+            $response = Http::withToken($token)->get($url);
 
-    $response = Http::withToken($token)->put("http://192.168.1.200:5123/Appraisal/Score/employee-total-kpiscore", $gradeData);
+            if ($response->status() === 400) {
+                return ['success' => false, 'message' => 'Invalid request to the server. Please try again later.'];
+            }
 
-    if ($response->successful() && $grade = $response->object()) {
+            if (!$response->successful()) {
+                Log::error('Failed to fetch data from API', [
+                    'url' => $url,
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+                return ['success' => false, 'message' => 'Failed to retrieve data from the API.'];
+            }
+
+            return ['success' => true, 'data' => $response->json()];
+        } catch (\Exception $e) {
+            Log::error('Exception during API call', [
+                'url' => $url,
+                'message' => $e->getMessage()
+            ]);
+            return ['success' => false, 'message' => 'An error occurred while fetching data.'];
+        }
+    }
+
+    private function processKpiDetails($kpiDetails)
+    {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
+        $globalSectionCount = 0;
+        $regularSectionCount = 0;
+        $kpiStatus = 'PENDING';
+        $batchId = $batchName = $employeeId = '';
+
+        foreach ($kpiDetails as $kpi) {
+            $sections = $kpi['sections'] ?? [];
+            $sectionCount = count($sections);
+
+            if ($kpi['kpiType'] === 'GLOBAL') {
+                $globalSectionCount += $sectionCount;
+            } elseif ($kpi['kpiType'] === 'REGULAR') {
+                $regularSectionCount += $sectionCount;
+            }
+
+            if (!empty($sections)) {
+                $firstSection = $sections[0];
+                $kpiStatus = $firstSection['sectionEmpScore']['status'] ?? $kpiStatus;
+            }
+
+            $batchId = $kpi['batchId'] ?? $batchId;
+            $batchName = $kpi['batchName'] ?? $batchName;
+            $employeeId = $kpi['employeeId'] ?? $employeeId;
+        }
+
         return [
-            'kpiScore' => $grade->totalKpiScore ?? null,
-            'grade' => $grade->grade ?? null,
-            'remark' => $grade->remark ?? null,
-            'status' => $grade->status ?? '---'
+            'id' => $kpiDetails[0]['kpiId'] ?? '---',
+            'batch_id' => $batchId,
+            'kpi_name' => $kpiDetails[0]['kpiName'] ?? '---',
+            'batch_name' => $batchName,
+            'section_count' => $globalSectionCount + $regularSectionCount,
+            'employee_id' => $employeeId
         ];
     }
 
-    return [
-        'kpiScore' => null,
-        'grade' => null,
-        'remark' => null,
-        'status' => '---'
-    ];
-}
+    private function fetchEmployeeGrade($token, $batchId, $employeeId)
+    {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
 
-private function prepareViewData($employeeKpi, $gradeDetails)
-{
-    return [
-        'employeeKpi' => $employeeKpi ?? [
-            'id' => '---',
-            'batch_id' => '---',
-            'kpi_name' => '---',
-            'batch_name' => '---',
-            'section_count' => '---'
-        ],
-        'gradeDetails' => $gradeDetails ?? [
+        $gradeData = [
+            'batchId' => $batchId,
+            'employeeId' => $employeeId
+        ];
+
+        $response = Http::withToken($token)->put("http://192.168.1.200:5123/Appraisal/Score/employee-total-kpiscore", $gradeData);
+
+        if ($response->successful() && $grade = $response->object()) {
+            return [
+                'kpiScore' => $grade->totalKpiScore ?? null,
+                'grade' => $grade->grade ?? null,
+                'remark' => $grade->remark ?? null,
+                'status' => $grade->status ?? '---'
+            ];
+        }
+
+        return [
             'kpiScore' => null,
             'grade' => null,
             'remark' => null,
             'status' => '---'
-        ]
-    ];
-}
+        ];
+    }
+
+    private function prepareViewData($employeeKpi, $gradeDetails)
+    {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
+        return [
+            'employeeKpi' => $employeeKpi ?? [
+                'id' => '---',
+                'batch_id' => '---',
+                'kpi_name' => '---',
+                'batch_name' => '---',
+                'section_count' => '---'
+            ],
+            'gradeDetails' => $gradeDetails ?? [
+                'kpiScore' => null,
+                'grade' => null,
+                'remark' => null,
+                'status' => '---'
+            ]
+        ];
+    }
 
 
 
 
     public function show()
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
 
         $accessToken = session('api_token');
 
@@ -231,6 +262,12 @@ private function prepareViewData($employeeKpi, $gradeDetails)
 
     public function editEmployeeKpi(Request $request, $id)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Get the access token from the session
         $accessToken = session('api_token');
 
@@ -359,10 +396,16 @@ private function prepareViewData($employeeKpi, $gradeDetails)
 
     public function showEmployeeKpi()
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Get the access token from the session
         $accessToken = session('api_token');
 
-        if(!$accessToken) {
+        if (!$accessToken) {
             return redirect()->back()->with('toast_error', 'Your Session Has Expired. Please log in again.');
         }
 
@@ -493,6 +536,12 @@ private function prepareViewData($employeeKpi, $gradeDetails)
 
     public function showEmployeeSupervisorKpiScore(Request $request, $id)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // dd($id);
         // Get the access token from the session
         $accessToken = session('api_token');
@@ -570,6 +619,12 @@ private function prepareViewData($employeeKpi, $gradeDetails)
 
     public function showEmployeeProbe(Request $request, $id)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Get the access token from the session
         $accessToken = session('api_token');
 
@@ -652,16 +707,34 @@ private function prepareViewData($employeeKpi, $gradeDetails)
 
     public function my_kpis()
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         return view("dashboard.my-kpis");
     }
 
 
     public function kpi_setup()
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         return view("kpi-setup.kpi-setup");
     }
     public function score_setup()
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+        
         return view("kpi-setup.score-setup");
     }
 }

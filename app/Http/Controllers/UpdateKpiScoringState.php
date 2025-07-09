@@ -10,6 +10,12 @@ class UpdateKpiScoringState extends Controller
 {
     public function store(Request $request)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+        
         // Validate the incoming request data
         $request->validate([
             'kpiId' => 'required|integer',

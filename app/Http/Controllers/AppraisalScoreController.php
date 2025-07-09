@@ -11,6 +11,12 @@ class AppraisalScoreController extends Controller
 
     public function store(Request $request)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         try {
             // Initialize a variable for the success message
             $successMessage = '';
@@ -116,6 +122,12 @@ class AppraisalScoreController extends Controller
 
     public function submitAppraisalForReview(Request $request)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Validate the incoming request data
         $request->validate([
             'kpiId' => 'required|integer',
@@ -164,6 +176,12 @@ class AppraisalScoreController extends Controller
     }
     public function acceptAppraisalReview(Request $request)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
         // Validate the incoming request data
         $request->validate([
             'kpiId' => 'required|integer',
@@ -216,6 +234,12 @@ class AppraisalScoreController extends Controller
 
     public function submitProbing(Request $request)
     {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
 
         // dd($request);
         // Validate the incoming request data
@@ -317,5 +341,4 @@ class AppraisalScoreController extends Controller
     }
 
 
-    public function submitFinalProbing() {}
 }
