@@ -1,6 +1,37 @@
 <x-base-layout>
+    {{--  @push('styles')  --}}
+        <style>
+            /* Custom styles for appraisal form */
+            .section-tab {
+                border-radius: 10px;
+                display: none;
+            }
+
+            .metric-card {
+                background-color: #1eff000d;
+            }
+
+            .empty-section {
+                background-color: #0000ff0d;
+            }
+
+            .progress-container {
+                height: 10px;
+            }
+
+            /* Validation states */
+            .is-valid {
+                border-color: #198754;
+            }
+
+            .is-invalid {
+                border-color: #dc3545;
+            }
+        </style>
+    {{--  @endpush  --}}
+
     <div class="container-fluid px-1">
-        <!-- start page title -->
+        <!-- Page Title Section -->
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
@@ -11,427 +42,63 @@
             </div>
         </div>
 
-        <div class="progress fixed-top" style="height: 10px;">
+        <!-- Progress Bar -->
+        <div class="progress fixed-top progress-container">
             <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-        </div>
-
-        <!-- end page title -->
-        <div class="col-md-12">
-            <div class="card card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4>Appraisal Grade</h4>
-                    </div>
-                </div>
-                @php
-                    function getBadgeDetails($status)
-                    {
-                        return match ($status) {
-                            'PENDING' => ['class' => 'bg-dark', 'text' => 'PENDING'],
-                            'REVIEW' => ['class' => 'bg-warning', 'text' => 'REVIEW'],
-                            'CONFIRMATION' => ['class' => 'bg-primary', 'text' => 'CONFIRMATION'],
-                            'COMPLETED' => ['class' => 'bg-success', 'text' => 'COMPLETED'],
-                            'PROBLEM' => ['class' => 'bg-danger', 'text' => 'PROBE'],
-                            default => ['class' => 'bg-secondary', 'text' => 'PENDING'],
-                        };
-                    }
-                    $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
-
-                    // Centralized logic for determining if forms should be editable
-                    $isEditable = $kpiStatus === 'PENDING';
-                    $showPagination = $isEditable;
-                    $showSubmitButton = $isEditable;
-                    $showConfirmationButtons = $kpiStatus === 'CONFIRMATION';
-                @endphp
-
-                <div class="mt-3">
-                    <div class="d-flex gap-5">
-                        <h5>Grade: <b>{{ $gradeDetails['grade'] ?? '___' }}</b></h5>
-                        <h5>Score: <b>{{ $gradeDetails['kpiScore'] ?? '___' }}</b></h5>
-                        <h5>Remark: <b>{{ $gradeDetails['remark'] ?? '___' }}</b></h5>
-                        <h5>Status: <b><span class="badge rounded-pill {{ $badgeDetails['class'] }}">
-                                    {{ $badgeDetails['text'] }}
-                                </span></b>
-                        </h5>
-                    </div>
-                </div>
+                style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                0%
             </div>
         </div>
 
-        <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
+        <!-- Appraisal Grade Summary -->
+        @include('partials.employee.grade-summary', [
+            'gradeDetails' => $gradeDetails ?? [],
+            'batchId' => $batchId,
+        ])
 
+        <div class="mt-4 mb-4 divider"></div>
+
+        <!-- Main Appraisal Form -->
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title mb-4">Employee Evaluation Form</h4>
 
-                        @if ($showPagination)
+                        <!-- Pagination Info (only shown when editable) -->
+                        @if (in_array($kpiStatus, ['PENDING','REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))
                             <div id="pagination-count" class="text-center mb-3">
                                 <span><b>Current Page</b></span>
-                                <span class="badge rounded-pill bg-primary" id="current-page">1</span>/
+                                <span class="badge rounded-pill bg-primary" id="current-page">1</span>
                                 <span><b>Last Page</b></span>
                                 <span class="badge rounded-pill bg-dark" id="total-pages">1</span>
                             </div>
                         @endif
 
+                        <!-- Form Content -->
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
                                     @foreach ($appraisal as $index => $kpi)
-                                        <div class="kpi">
-                                            @foreach ($kpi->activeSections as $sectionIndex => $section)
-                                                <div class="card border border-primary section-tab"
-                                                    style="border-radius: 10px; {{ !$showPagination ? '' : 'display: none;' }}"
-                                                    data-section-page="{{ floor($sectionIndex / 3) }}">
-                                                    <div class="card-body"
-                                                        style="{{ $section->metrics->isEmpty() ? 'background-color: #0000ff0d;' : '' }}">
-                                                        <div class="section-card" style="margin-top: 1rem;">
-                                                            <h4 class="card-title">{{ $section->sectionName }}
-                                                                (<span
-                                                                    style="color: #c80f0f">{{ $section->sectionScore }}</span>)
-                                                            </h4>
-                                                            <p>{{ $section->sectionDescription }}</p>
-
-                                                            @if ($section->metrics->isEmpty())
-                                                                {{-- Section-level evaluation --}}
-                                                                @if ($isEditable)
-                                                                    <form action="{{ route('self.rating') }}"
-                                                                        method="POST"
-                                                                        class="ajax-eval-form section-form">
-                                                                        @csrf
-                                                                        <div class="d-flex gap-3">
-                                                                            <div class="col-md-2">
-                                                                                <input
-                                                                                    class="form-control mb-3 score-input"
-                                                                                    type="number"
-                                                                                    name="sectionEmpScore" required
-                                                                                    placeholder="Enter Score"
-                                                                                    min="0" step="0.01"
-                                                                                    pattern="\d+(\.\d{1,2})?"
-                                                                                    max="{{ $section->sectionScore }}"
-                                                                                    title="The Score cannot be more than the section score {{ $section->sectionScore }}"
-                                                                                    value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
-                                                                            </div>
-                                                                            <div class="col-md-9">
-                                                                                <textarea class="form-control mb-3 comment-input" name="employeeComment" required placeholder="Enter your comments"
-                                                                                    rows="3">{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}</textarea>
-                                                                            </div>
-                                                                            <input type="hidden" name="kpiType"
-                                                                                value="{{ $kpi->kpi->kpiType }}">
-                                                                            <input type="hidden"
-                                                                                name="sectionEmpScoreId"
-                                                                                value="{{ $section->sectionEmpScore->id ?? '' }}">
-                                                                            <input type="hidden" name="sectionId"
-                                                                                value="{{ $section->sectionId }}">
-                                                                            <input type="hidden" name="kpiId"
-                                                                                value="{{ $kpi->kpi->kpiId }}">
-                                                                            <button type="submit"
-                                                                                style="height: fit-content"
-                                                                                class="btn btn-success">Save</button>
-                                                                            <div id="ajax-loader" style="display:none;">
-                                                                                <div class="spinner-border text-primary"
-                                                                                    role="status">
-                                                                                    <span
-                                                                                        class="visually-hidden">Loading...</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </form>
-                                                                @else
-                                                                    {{-- Read-only view for non-editable states --}}
-                                                                    <div class="d-flex gap-3">
-                                                                        <div class="col-md-2">
-                                                                            <input class="form-control mb-3"
-                                                                                type="number" readonly
-                                                                                value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}"
-                                                                                placeholder="Your Score">
-                                                                        </div>
-                                                                        <div class="col-md-9">
-                                                                            <textarea class="form-control mb-3" readonly rows="3" placeholder="Your Comments">{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}</textarea>
-                                                                        </div>
-                                                                    </div>
-                                                                @endif
-
-                                                                {{-- Supervisor Comment and Score Display --}}
-                                                                @if (isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'COMPLETED']))
-                                                                    <span class="mb-2 badge rounded-pill bg-success">
-                                                                        <strong>Supervisor Score and Comment</strong>
-                                                                    </span>
-                                                                    <div class="d-flex gap-3">
-                                                                        <div class="col-md-2">
-                                                                            <input class="form-control mb-3"
-                                                                                type="number" readonly
-                                                                                value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? '' }}"
-                                                                                placeholder="Supervisor Score">
-                                                                        </div>
-                                                                        <div class="col-md-9">
-                                                                            <textarea class="form-control mb-3" readonly rows="3" placeholder="Supervisor Comments">{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {{-- Probing Score and Comment if applicable --}}
-                                                                    @if ($section->sectionEmpScore->prob == true)
-                                                                        <span class="mb-2 badge rounded-pill bg-dark">
-                                                                            <strong>Probing Score and Comment</strong>
-                                                                        </span>
-                                                                        <div class="d-flex gap-3">
-                                                                            <div class="col-md-2">
-                                                                                <input class="form-control mb-3"
-                                                                                    type="number" readonly
-                                                                                    value="{{ optional($section->sectionEmpScore)->sectionProbScore ?? '' }}"
-                                                                                    placeholder="Probing Score">
-                                                                            </div>
-                                                                            <div class="col-md-9">
-                                                                                <textarea class="form-control mb-3" readonly rows="3" placeholder="Probing Comments">{{ $section->sectionEmpScore->probComment ?? '' }}</textarea>
-                                                                            </div>
-                                                                        </div>
-                                                                    @endif
-                                                                @endif
-                                                            @else
-                                                                {{-- Metric-level evaluation --}}
-                                                                @foreach ($section->metrics as $metric)
-                                                                    <div class="card border border-success"
-                                                                        style="border-radius: 10px;">
-                                                                        <div class="card-body"
-                                                                            style="background-color: #1eff000d">
-                                                                            <div class="metric-card">
-                                                                                <h5>{{ $metric->metricName }}
-                                                                                    (<span
-                                                                                        style="color: #c80f0f">{{ $metric->metricScore }}</span>)
-                                                                                </h5>
-                                                                                <p>{{ $metric->metricDescription }}</p>
-
-                                                                                @if ($isEditable)
-                                                                                    <form
-                                                                                        action="{{ route('self.rating') }}"
-                                                                                        method="POST"
-                                                                                        class="ajax-eval-form metric-form">
-                                                                                        @csrf
-                                                                                        <div class="d-flex gap-3">
-                                                                                            <input type="hidden"
-                                                                                                name="metricId"
-                                                                                                value="{{ $metric->metricId }}">
-                                                                                            <input type="hidden"
-                                                                                                name="kpiType"
-                                                                                                value="{{ $kpi->kpi->kpiType }}">
-                                                                                            <input type="hidden"
-                                                                                                name="kpiId"
-                                                                                                value="{{ $kpi->kpi->kpiId }}">
-                                                                                            <input type="hidden"
-                                                                                                name="sectionId"
-                                                                                                value="{{ $section->sectionId }}">
-                                                                                            <div class="col-md-2">
-                                                                                                <input
-                                                                                                    class="form-control mb-3"
-                                                                                                    type="number"
-                                                                                                    name="metricEmpScore"
-                                                                                                    required
-                                                                                                    placeholder="Enter Score"
-                                                                                                    min="0"
-                                                                                                    step="0.01"
-                                                                                                    pattern="\d+(\.\d{1,2})?"
-                                                                                                    max="{{ $metric->metricScore }}"
-                                                                                                    title="The Score cannot be more than the metric score {{ $metric->metricScore }}"
-                                                                                                    value="{{ optional($metric->metricEmpScore)->metricEmpScore ?? '' }}">
-                                                                                            </div>
-                                                                                            <div class="col-md-9">
-                                                                                                <textarea class="form-control mb-3" name="employeeComment" required placeholder="Enter your comments"
-                                                                                                    rows="3">{{ optional($metric->metricEmpScore)->employeeComment ?? '' }}</textarea>
-                                                                                            </div>
-                                                                                            <button type="submit"
-                                                                                                style="height: fit-content"
-                                                                                                class="btn btn-success">Save</button>
-                                                                                            <div id="ajax-loader"
-                                                                                                style="display:none;">
-                                                                                                <div class="spinner-border text-primary"
-                                                                                                    role="status">
-                                                                                                    <span
-                                                                                                        class="visually-hidden">Loading...</span>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </form>
-                                                                                @else
-                                                                                    {{-- Read-only view for non-editable states --}}
-                                                                                    <div class="d-flex gap-3">
-                                                                                        <div class="col-md-2">
-                                                                                            <input
-                                                                                                class="form-control mb-3"
-                                                                                                type="number" readonly
-                                                                                                value="{{ optional($metric->metricEmpScore)->metricEmpScore ?? '' }}"
-                                                                                                placeholder="Your Score">
-                                                                                        </div>
-                                                                                        <div class="col-md-9">
-                                                                                            <textarea class="form-control mb-3" readonly rows="3" placeholder="Your Comments">{{ optional($metric->metricEmpScore)->employeeComment ?? '' }}</textarea>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                @endif
-
-                                                                                {{-- Supervisor Comment and Score Display --}}
-                                                                                @if (isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'COMPLETED']))
-                                                                                    <span
-                                                                                        class="mb-2 badge rounded-pill bg-success">
-                                                                                        <strong>Supervisor Score and
-                                                                                            Comment</strong>
-                                                                                    </span>
-                                                                                    <div class="d-flex gap-3">
-                                                                                        <div class="col-md-2">
-                                                                                            <input
-                                                                                                class="form-control mb-3"
-                                                                                                type="number" readonly
-                                                                                                value="{{ optional($metric->metricEmpScore)->metricSupScore ?? '' }}"
-                                                                                                placeholder="Supervisor Score">
-                                                                                        </div>
-                                                                                        <div class="col-md-9">
-                                                                                            <textarea class="form-control mb-3" readonly rows="3" placeholder="Supervisor Comments">{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
-                                                                                        </div>
-                                                                                    </div>
-
-                                                                                    {{-- Probing Score and Comment if applicable --}}
-                                                                                    @if ($metric->metricEmpScore->prob == true)
-                                                                                        <span
-                                                                                            class="mb-2 badge rounded-pill bg-dark">
-                                                                                            <strong>Probing Score and
-                                                                                                Comment</strong>
-                                                                                        </span>
-                                                                                        <div class="d-flex gap-3">
-                                                                                            <div class="col-md-2">
-                                                                                                <input
-                                                                                                    class="form-control mb-3"
-                                                                                                    type="number"
-                                                                                                    readonly
-                                                                                                    value="{{ optional($metric->metricEmpScore)->metricProbScore ?? '' }}"
-                                                                                                    placeholder="Probing Score">
-                                                                                            </div>
-                                                                                            <div class="col-md-9">
-                                                                                                <textarea class="form-control mb-3" readonly rows="3" placeholder="Probing Comments">{{ $metric->metricEmpScore->probComment ?? '' }}</textarea>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    @endif
-                                                                                @endif
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                @endforeach
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
+                                        @include('partials.employee.kpi-section', [
+                                            'kpi' => $kpi,
+                                            'kpiStatus' => $kpiStatus,
+                                        ])
                                     @endforeach
                                 @else
-                                    <p>No KPIs available for this employee.</p>
+                                    <div class="alert alert-info">
+                                        No KPIs available for this employee.
+                                    </div>
                                 @endif
                             </div>
 
-                            <hr class="mt-10">
+                            <hr class="mt-5">
 
-                            {{-- Navigation and Action Buttons --}}
-                            @if ($showPagination)
-                                <div class="float-end">
-                                    <div class="d-flex gap-3 pagination-controls">
-                                        <button id="prev-btn" class="btn btn-dark" disabled>Previous</button>
-                                        <button id="next-btn" class="btn btn-primary">Next</button>
-                                        <button id="submit-btn" type="button" data-bs-toggle="modal"
-                                            class="btn btn-success" data-bs-target=".bs-delete-modal-lg" disabled>
-                                            Submit Appraisal
-                                        </button>
-                                    </div>
-                                </div>
-                            @endif
-
-                            {{-- Confirmation Buttons (Accept/Probe) --}}
-                            @if ($showConfirmationButtons)
-                                <div class="float-end">
-                                    <div class="d-flex gap-3">
-                                        <button type="button" data-bs-toggle="modal" class="btn btn-primary"
-                                            style="width: 8rem; height: fit-content"
-                                            data-bs-target=".bs-accept-modal-lg">
-                                            Accept
-                                        </button>
-                                        <a href="{{ route('show.employee.probe', $kpi->kpi->kpiId) }}"
-                                            class="btn btn-warning" style="width: 8rem; height: fit-content">
-                                            Probe
-                                        </a>
-                                    </div>
-                                </div>
-                            @endif
-
-                            {{-- Submit Appraisal Modal --}}
-                            @if ($showSubmitButton)
-                                <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
-                                    aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-md modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="myLargeModalLabel">Confirm Appraisal
-                                                    Submit</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <h4 class="text-center mb-4">
-                                                    Are you sure you want to <b>Submit</b> your <b>Appraisal</b> to your
-                                                    <b>Supervisor</b> for <b>Review?</b>
-                                                </h4>
-                                                <form action="{{ route('submit.appraisal') }}" method="POST"
-                                                    id="appraisalForm">
-                                                    @csrf
-                                                    <input type="hidden" name="kpiId"
-                                                        value="{{ $kpi->kpi->kpiId }}">
-                                                    <input type="hidden" name="batchId"
-                                                        value="{{ $kpi->kpi->batchId }}">
-                                                    <input type="hidden" name="status" value="REVIEW">
-                                                    <div class="d-grid">
-                                                        <button type="submit" id="submitReviewButton"
-                                                            class="btn btn-success">
-                                                            Submit Appraisal For Review
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-
-                            {{-- Accept Confirmation Modal --}}
-                            @if ($showConfirmationButtons)
-                                <div class="modal fade bs-accept-modal-lg" tabindex="-1" role="dialog"
-                                    aria-labelledby="myLargeModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog modal-md modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="myLargeModalLabel">Confirm Supervisor
-                                                    Score</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <h4 class="text-center mb-4">
-                                                    Are you sure you want to <b>Accept</b> this scores from your
-                                                    <b>Supervisor?</b>
-                                                </h4>
-                                                <form action="{{ route('submit.appraisal') }}" method="POST">
-                                                    @csrf
-                                                    <input type="hidden" name="kpiId"
-                                                        value="{{ $kpi->kpi->kpiId }}">
-                                                    <input type="hidden" name="batchId"
-                                                        value="{{ $kpi->kpi->batchId }}">
-                                                    <input type="hidden" name="status" value="COMPLETED">
-                                                    <div class="d-grid">
-                                                        <button type="submit" class="btn btn-success">Yes,
-                                                            Accept</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
+                            <!-- Action Buttons -->
+                            @include('partials.employee.action-buttons', [
+                                'kpiStatus' => $kpiStatus ?? null,
+                                'kpi' => $kpi ?? null,
+                            ])
                         </div>
                     </div>
                 </div>
@@ -440,208 +107,234 @@
     </div>
 
     @push('scripts')
+        <!-- CSRF Token Meta Tag -->
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <!-- Appraisal Form Script -->
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Only initialize pagination if forms are editable
-                @if ($showPagination)
-                    const sections = document.querySelectorAll('.section-tab');
-                    const prevBtn = document.getElementById('prev-btn');
-                    const nextBtn = document.getElementById('next-btn');
-                    const submitBtn = document.getElementById('submit-btn');
-                    const currentPageSpan = document.getElementById('current-page');
-                    const totalPagesSpan = document.getElementById('total-pages');
-                    const progressBar = document.getElementById('progress-bar');
-                    let currentPage = parseInt(sessionStorage.getItem('currentPage') || 0);
-                    const sectionsPerPage = 3;
-                    const totalPages = Math.ceil(sections.length / sectionsPerPage);
+                // Initialize CSRF token for AJAX requests
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-                    totalPagesSpan.textContent = totalPages;
+                // DOM Elements
+                const sections = document.querySelectorAll('.section-tab');
+                const prevBtn = document.getElementById('prev-btn');
+                const nextBtn = document.getElementById('next-btn');
+                const submitBtn = document.getElementById('submit-btn');
+                const currentPageSpan = document.getElementById('current-page');
+                const totalPagesSpan = document.getElementById('total-pages');
+                const progressBar = document.getElementById('progress-bar');
 
-                    function validateField(field) {
-                        const value = field.value.trim();
-                        if (value === '') {
-                            field.classList.add('is-invalid');
-                            field.classList.remove('is-valid');
-                            field.closest('.section-tab')?.classList.add('border-danger');
-                            return false;
+                // State Management
+                let currentPage = parseInt(sessionStorage.getItem('currentPage') || 0);
+                const sectionsPerPage = 3;
+                const totalPages = Math.ceil(sections.length / sectionsPerPage);
+                totalPagesSpan.textContent = totalPages;
+
+                /**
+                 * Validate a single form field
+                 */
+                function validateField(field) {
+                    const value = field.value.trim();
+                    const isValid = value !== '';
+
+                    field.classList.toggle('is-invalid', !isValid);
+                    field.classList.toggle('is-valid', isValid);
+                    field.closest('.section-tab')?.classList.toggle('border-danger', !isValid);
+
+                    return isValid;
+                }
+
+                /**
+                 * Check all inputs on current page
+                 */
+                function checkInputs(page) {
+                    const start = page * sectionsPerPage;
+                    const end = start + sectionsPerPage;
+                    let allFilled = true;
+
+                    for (let i = start; i < end && i < sections.length; i++) {
+                        const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"]');
+                        const commentInputs = sections[i].querySelectorAll('textarea[name="employeeComment"]');
+
+                        const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                        const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');
+
+                        if (!scoresFilled || !commentsFilled) {
+                            allFilled = false;
+                            sections[i].classList.add('border-danger');
                         } else {
-                            field.classList.remove('is-invalid');
-                            field.classList.add('is-valid');
-                            field.closest('.section-tab')?.classList.remove('border-danger');
-                            return true;
+                            sections[i].classList.remove('border-danger');
                         }
                     }
 
-                    function checkInputs(page) {
-                        const start = page * sectionsPerPage;
-                        const end = start + sectionsPerPage;
-                        let allFilled = true;
+                    return allFilled;
+                }
 
-                        for (let i = start; i < end && i < sections.length; i++) {
-                            const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"]');
-                            const commentInputs = sections[i].querySelectorAll('textarea[name="employeeComment"]');
+                /**
+                 * Update progress bar based on completion
+                 */
+                function updateProgressBar() {
+                    let totalValid = 0;
+                    sections.forEach(section => {
+                        const scoreInputs = section.querySelectorAll('input[type="number"][name*="EmpScore"]');
+                        const commentInputs = section.querySelectorAll('textarea[name="employeeComment"]');
+                        const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                        const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !==
+                            '');
+                        if (scoresFilled && commentsFilled) totalValid++;
+                    });
 
-                            const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                            const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');
+                    const percent = Math.round((totalValid / sections.length) * 100);
+                    progressBar.style.width = percent + '%';
+                    progressBar.setAttribute('aria-valuenow', percent);
+                    progressBar.textContent = percent + '%';
+                }
 
-                            if (!scoresFilled || !commentsFilled) {
-                                allFilled = false;
-                                sections[i].classList.add('border-danger');
-                            } else {
-                                sections[i].classList.remove('border-danger');
+                /**
+                 * Update button states based on current page and completion
+                 */
+                function updateButtons() {
+                    prevBtn.disabled = currentPage === 0;
+                    nextBtn.disabled = currentPage === totalPages - 1 || !checkInputs(currentPage);
+                    submitBtn.disabled = !Array.from({
+                        length: totalPages
+                    }).every((_, i) => checkInputs(i));
+                    updateProgressBar();
+                }
+
+                /**
+                 * Show a specific page of sections
+                 */
+                function showPage(page) {
+                    // Hide all sections first
+                    sections.forEach(section => {
+                        section.style.display = 'none';
+                    });
+
+                    // Show sections for current page
+                    const start = page * sectionsPerPage;
+                    const end = start + sectionsPerPage;
+                    for (let i = start; i < end && i < sections.length; i++) {
+                        sections[i].style.display = 'block';
+                    }
+
+                    // Update UI state
+                    currentPageSpan.textContent = page + 1;
+                    sessionStorage.setItem('currentPage', page);
+                    updateButtons();
+
+                    // Smooth scroll to first section
+                    window.scrollTo({
+                        top: sections[start].offsetTop - 20,
+                        behavior: 'smooth'
+                    });
+                }
+
+                /**
+                 * Handle AJAX form submission
+                 */
+                function handleFormSubmission(form, e) {
+                    e.preventDefault();
+                    const scrollPos = window.scrollY;
+                    const formData = new FormData(form);
+                    const saveBtn = form.querySelector('button[type="submit"]');
+                    const originalText = saveBtn.innerHTML;
+
+                    // Show loading state
+                    saveBtn.innerHTML =
+                        '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+                    saveBtn.disabled = true;
+
+                    // Add CSRF token to headers
+                    const headers = {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken
+                    };
+
+                    fetch(form.action, {
+                            method: 'POST',
+                            headers: headers,
+                            body: formData
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
                             }
-                        }
-
-                        return allFilled;
-                    }
-
-                    function updateProgressBar() {
-                        let totalValid = 0;
-                        sections.forEach(section => {
-                            const scoreInputs = section.querySelectorAll(
-                                'input[type="number"][name*="EmpScore"]');
-                            const commentInputs = section.querySelectorAll('textarea[name="employeeComment"]');
-                            const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !==
-                                '');
-                            const commentsFilled = Array.from(commentInputs).every(input => input.value
-                                .trim() !== '');
-                            if (scoresFilled && commentsFilled) totalValid++;
-                        });
-                        const percent = Math.round((totalValid / sections.length) * 100);
-                        progressBar.style.width = percent + '%';
-                        progressBar.setAttribute('aria-valuenow', percent);
-                        progressBar.textContent = percent + '%';
-                    }
-
-                    function updateButtons() {
-                        prevBtn.disabled = currentPage === 0;
-                        nextBtn.disabled = currentPage === totalPages - 1 || !checkInputs(currentPage);
-                        submitBtn.disabled = !Array.from({
-                            length: totalPages
-                        }).every((_, i) => checkInputs(i));
-                        updateProgressBar();
-                    }
-
-                    function showPage(page) {
-                        sections.forEach(section => {
-                            section.style.display = 'none';
-                        });
-                        const start = page * sectionsPerPage;
-                        const end = start + sectionsPerPage;
-                        for (let i = start; i < end && i < sections.length; i++) {
-                            sections[i].style.display = 'block';
-                        }
-
-                        currentPageSpan.textContent = page + 1;
-                        sessionStorage.setItem('currentPage', page);
-                        updateButtons();
-                        if (sections[start]) {
-                            window.scrollTo({
-                                top: sections[start].offsetTop,
-                                behavior: 'smooth'
-                            });
-                        }
-                    }
-
-                    prevBtn.addEventListener('click', function() {
-                        if (currentPage > 0) {
-                            currentPage--;
-                            showPage(currentPage);
-                        }
-                    });
-
-                    nextBtn.addEventListener('click', function() {
-                        if (currentPage < totalPages - 1 && checkInputs(currentPage)) {
-                            currentPage++;
-                            showPage(currentPage);
-                        }
-                    });
-
-                    document.querySelectorAll(
-                            'input[type="number"][name*="EmpScore"], textarea[name="employeeComment"]')
-                        .forEach(input => {
-                            input.addEventListener('input', function() {
-                                validateField(this);
-                                updateButtons();
-                            });
-                        });
-
-                    showPage(currentPage);
-                @endif
-
-                // AJAX form submission (only for editable forms)
-                @if ($isEditable)
-                    document.querySelectorAll('form.ajax-eval-form').forEach(form => {
-                        form.addEventListener('submit', function(e) {
-                            e.preventDefault();
-                            const scrollPos = window.scrollY;
-                            const formData = new FormData(form);
-                            const saveBtn = form.querySelector('button[type="submit"]');
-                            const originalText = saveBtn.innerHTML;
-
-                            saveBtn.innerHTML =
-                                '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
-                            saveBtn.disabled = true;
-
-                            fetch(form.action, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-Requested-With': 'XMLHttpRequest',
-                                        'X-CSRF-TOKEN': document.querySelector(
-                                            'meta[name="csrf-token"]').getAttribute('content')
-                                    },
-                                    body: formData
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        Swal.fire({
-                                            toast: true,
-                                            icon: 'success',
-                                            title: data.message || 'Saved successfully',
-                                            position: 'top-end',
-                                            showConfirmButton: false,
-                                            timer: 3000,
-                                            timerProgressBar: true
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            toast: true,
-                                            icon: 'error',
-                                            title: data.message || 'An error occurred',
-                                            position: 'top-end',
-                                            showConfirmButton: false,
-                                            timer: 3000,
-                                            timerProgressBar: true
-                                        });
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    Swal.fire({
-                                        toast: true,
-                                        icon: 'error',
-                                        title: 'An unexpected error occurred',
-                                        position: 'top-end',
-                                        showConfirmButton: false,
-                                        timer: 3000,
-                                        timerProgressBar: true
-                                    });
-                                })
-                                .finally(() => {
-                                    window.scrollTo(0, scrollPos);
-                                    saveBtn.innerHTML = originalText;
-                                    saveBtn.disabled = false;
-                                    @if ($showPagination)
-                                        updateButtons();
-                                    @endif
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    toast: true,
+                                    icon: 'success',
+                                    title: data.message || 'Saved successfully',
+                                    position: 'top-end',
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
                                 });
+                            } else {
+                                throw new Error(data.message || 'An error occurred');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                toast: true,
+                                icon: 'error',
+                                title: error.message || 'An unexpected error occurred',
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                        })
+                        .finally(() => {
+                            // Restore original state
+                            window.scrollTo(0, scrollPos);
+                            saveBtn.innerHTML = originalText;
+                            saveBtn.disabled = false;
+                            updateButtons();
+                        });
+                }
+
+                // Event Listeners
+                prevBtn?.addEventListener('click', function() {
+                    if (currentPage > 0) {
+                        currentPage--;
+                        showPage(currentPage);
+                    }
+                });
+
+                nextBtn?.addEventListener('click', function() {
+                    if (currentPage < totalPages - 1 && checkInputs(currentPage)) {
+                        currentPage++;
+                        showPage(currentPage);
+                    }
+                });
+
+                // Field validation on input
+                document.querySelectorAll('input[type="number"][name*="EmpScore"], textarea[name="employeeComment"]')
+                    .forEach(input => {
+                        input.addEventListener('input', function() {
+                            validateField(this);
+                            updateButtons();
                         });
                     });
-                @endif
+
+                // AJAX form submission handling
+                document.querySelectorAll('form.ajax-eval-form').forEach(form => {
+                    form.addEventListener('submit', function(e) {
+                        handleFormSubmission(form, e);
+                    });
+                });
+
+                // Initialize the view
+                if (sections.length > 0) {
+                    showPage(currentPage);
+                }
             });
         </script>
     @endpush
 </x-base-layout>
-
-{{-- Include SweetAlert2 for notifications --}}
