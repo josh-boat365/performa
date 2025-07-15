@@ -66,14 +66,14 @@
                         <h4 class="card-title mb-4">Employee Evaluation Form</h4>
 
                         <!-- Pagination Info (only shown when editable) -->
-                        @if (in_array($kpiStatus, ['PENDING','REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))
+                        {{--  @if (in_array($kpiStatus, ['PENDING','REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))  --}}
                             <div id="pagination-count" class="text-center mb-3">
                                 <span><b>Current Page</b></span>
                                 <span class="badge rounded-pill bg-primary" id="current-page">1</span>
                                 <span><b>Last Page</b></span>
                                 <span class="badge rounded-pill bg-dark" id="total-pages">1</span>
                             </div>
-                        @endif
+                        {{--  @endif  --}}
 
                         <!-- Form Content -->
                         <div class="p-3 text-muted">
