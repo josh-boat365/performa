@@ -22,15 +22,12 @@
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
+
+
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
-                    <!-- Progress Bar -->
-                    {{--  <div class="progress" style="height: 20px;">
-                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
-                            role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
-                            aria-valuemax="100">0%</div>
-                    </div>  --}}
+
                     <div class="card-body">
                         <h4 class="card-title mb-4">Supervisor Evaluation Form</h4>
 
@@ -39,7 +36,7 @@
                             <span class="badge rounded-pill bg-primary" id="current-page">1</span>/ <span><b>Last
                                     Page</b></span><span class="badge rounded-pill bg-dark" id="total-pages">1</span>
                         </div>
-
+                        
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
@@ -243,6 +240,8 @@
                                                 </h4>
                                                 <form action="{{ route('submit.appraisal') }}" method="POST">
                                                     @csrf
+                                                    <input type="hidden" name="employeeId"
+                                                        value="{{ $employeeId }}">
                                                     <input type="hidden" name="kpiId"
                                                         value="{{ $kpi->kpi->kpiId }}">
                                                     <input type="hidden" name="batchId"
