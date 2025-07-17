@@ -55,7 +55,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
         Route::get("dashboard/employee-probe/{id}", [DashboardController::class, "showEmployeeProbe"])->name("show.employee.probe");
         Route::post("dashboard/employee-probe/submit", [AppraisalScoreController::class, "submitProbing"])->name("submit.employee.probe");
         Route::get("dashboard/supervisor/show-employee-kpis", [SupervisorScoreController::class, "index"])->name("supervisor.index");
-        Route::get("dashboard/supervisor/show-employee-kpi-form/kpi/{kpiId}/batch/{batchId}", [SupervisorScoreController::class, "edit"])->name("supervisor.edit");
+        Route::get("dashboard/supervisor/show-employee-kpi-form/kpi/{kpiId}/batch/{batchId}/employee-id/{employeeId}", [SupervisorScoreController::class, "edit"])->name("supervisor.edit");
         Route::post("dashboard/supervisor/rating", [SupervisorScoreController::class, "store"])->name("supervisor.rating");
 
 
