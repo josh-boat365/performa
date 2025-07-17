@@ -374,11 +374,19 @@ class DashboardController extends Controller
             }
 
             // dd($appraisal);
+            $responseUser   = Http::withToken($accessToken)
+                ->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+
+            // Handle responses
+            $user = $responseUser->successful() ? $responseUser->object() : null;
+
+            // dd($user);
+            $employeeId = $user->id ?? null;
 
 
 
             // Return the KPI names and section counts to the view
-            return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails', 'kpiStatus'));
+            return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails', 'kpiStatus', 'employeeId'));
         } catch (\Exception $e) {
             // Log the exception
             Log::error(
@@ -734,7 +742,7 @@ class DashboardController extends Controller
         if ($sessionValidation) {
             return $sessionValidation;
         }
-        
+
         return view("kpi-setup.score-setup");
     }
 }
