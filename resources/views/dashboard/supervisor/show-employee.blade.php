@@ -20,8 +20,9 @@
             @if (!empty($employeeSupDetails))
 
                 @forelse ($employeeSupDetails as $employee)
+
                     <a
-                        href="{{ url('dashboard/supervisor/show-employee-kpi-form/kpi/' . $employee->kpis[0]->kpiId . '/batch' . '/' . $employee->kpis[0]->batchId) }}">
+                        href="{{ url('dashboard/supervisor/show-employee-kpi-form/kpi/' . $employee->kpis[0]->kpiId . '/batch' . '/' . $employee->kpis[0]->batchId .'/employee-id'. '/'. $employee->employee->employeeId) }}">
                         <div class="card card-body">
                             <div class="d-flex justify-content-between items-center">
 
@@ -53,7 +54,7 @@
             @else
                 @forelse ($employeeProbDetails as $employee)
                     <a
-                        href="{{ url('dashboard/supervisor/show-employee-kpi-prob-form/kpi/' . $employee->kpis[0]->kpiId . '/batch' . '/' . $employee->kpis[0]->batchId) }}">
+                        href="{{ url('dashboard/supervisor/show-employee-kpi-prob-form/kpi/' . $employee->kpis[0]->kpiId . '/batch' . '/' . $employee->kpis[0]->batchId .'/employee-id'. '/'. $employee->employee->employeeId) }}">
                         <div class="card card-body">
                             <div class="d-flex justify-content-between items-center">
 
