@@ -376,7 +376,9 @@ class DashboardController extends Controller
 
 
             // dd($user);
-            $employeeId = $this->getLoggedInUserInformation->id ?? null;
+            $employeeId = $this->getLoggedInUserInformation()->id ?? null;
+
+
 
 
 
@@ -761,6 +763,7 @@ class DashboardController extends Controller
 
         // Handle responses
         $user = $responseUser->successful() ? $responseUser->object() : null;
+
 
         return $user;
     }
