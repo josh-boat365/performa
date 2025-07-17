@@ -47,9 +47,191 @@ class SupervisorScoreController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Request $request, $kpiId, $batchId)
-    {
+    // public function edit(Request $request, $kpiId, $batchId)
+    // {
 
+    //     // Validate session
+    //     $sessionValidation = ValidateSessionController::validateSession();
+    //     if ($sessionValidation) {
+    //         return $sessionValidation;
+    //     }
+
+    //     // Get the access token from the session
+    //     $accessToken = session('api_token');
+
+    //     $data = [
+    //         'kpiId' => (int) $kpiId,
+    //         'batchId' => (int) $batchId
+    //     ];
+
+
+    //     try {
+
+    //         $response = Http::withToken($accessToken)
+    //             ->put("http://192.168.1.200:5123/Appraisal/Kpi/GetSupervisorScoringKpi", $data);
+
+    //         // dd($response);
+
+    //         if ($response->successful()) {
+
+    //             $kpis = $response->object();
+
+
+    //             $appraisal = collect();
+
+    //             // Process each KPI
+    //             foreach ($kpis as $kpi) {
+    //                 if ($kpi->kpiActive) {
+    //                     // Filter active sections
+    //                     $activeSections = collect($kpi->sections)->filter(function ($section) {
+    //                         return $section->sectionActive;
+    //                     });
+
+    //                     // Transform sections to include metrics, even if none are active
+    //                     $activeSections->transform(function ($section) {
+    //                         // Filter metrics within the section
+    //                         $section->metrics = collect($section->metrics)->filter(function ($metric) {
+    //                             return $metric->metricActive;
+    //                         });
+    //                         // Return the section regardless of whether it has active metrics
+    //                         return $section;
+    //                     });
+
+    //                     // Add the KPI and its sections to the appraisal
+    //                     $appraisal->push((object) [
+    //                         'kpi' => $kpi,
+    //                         'activeSections' => $activeSections
+    //                     ]);
+
+    //                     // Get the status of the first section safely
+    //                     if (!empty($kpi->sections)) {
+    //                         $firstSection = $kpi->sections[0];
+    //                         $status = $firstSection->sectionEmpScore->status ?? 'PENDING';
+    //                         $kpiStatus = $status;
+    //                     } else {
+    //                         $kpiStatus = 'PENDING'; // Handle the case where there are no sections
+    //                     }
+    //                 }
+    //             }
+
+
+
+
+
+    //             return view("dashboard.supervisor.score-employee-form", compact('appraisal', 'kpiStatus'));
+    //         } else {
+    //             // Log the error response
+    //             Log::error('Failed to retrieve KPIs', [
+    //                 'status' => $response->status(),
+    //                 'response' => $response->body()
+    //             ]);
+    //             return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve Employee Appraisal, <b>Contact Application Support for Assistance</b>');
+    //         }
+    //     } catch (\Exception $e) {
+
+    //         Log::error('Exception occurred while retrieving KPIs', [
+    //             'message' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString()
+    //         ]);
+    //         return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+    //     }
+    // }
+
+
+
+    // public function editProb(Request $request, $kpiId, $batchId)
+    // {
+    //     // Validate session
+    //     $sessionValidation = ValidateSessionController::validateSession();
+    //     if ($sessionValidation) {
+    //         return $sessionValidation;
+    //     }
+
+    //     // Get the access token from the session
+    //     $accessToken = session('api_token');
+
+    //     $data = [
+    //         'kpiId' => (int) $kpiId,
+    //         'batchId' => (int) $batchId
+    //     ];
+
+
+    //     try {
+
+    //         $response = Http::withToken($accessToken)
+    //             ->put("http://192.168.1.200:5123/Appraisal/Kpi/GetProbScoringKpi", $data);
+
+
+    //         if ($response->successful()) {
+
+    //             $kpis = $response->object();
+
+
+    //             $appraisal = collect();
+
+    //             // Process each KPI
+    //             foreach ($kpis as $kpi) {
+    //                 if ($kpi->kpiActive) {
+    //                     // Filter active sections
+    //                     $activeSections = collect($kpi->sections)->filter(function ($section) {
+    //                         return $section->sectionActive;
+    //                     });
+
+    //                     // Transform sections to include metrics, even if none are active
+    //                     $activeSections->transform(function ($section) {
+    //                         // Filter metrics within the section
+    //                         $section->metrics = collect($section->metrics)->filter(function ($metric) {
+    //                             return $metric->metricActive;
+    //                         });
+    //                         // Return the section regardless of whether it has active metrics
+    //                         return $section;
+    //                     });
+
+    //                     // Add the KPI and its sections to the appraisal
+    //                     $appraisal->push((object) [
+    //                         'kpi' => $kpi,
+    //                         'activeSections' => $activeSections
+    //                     ]);
+    //                 }
+    //             }
+
+    //             // dd($appraisal);
+
+
+
+    //             // Return the KPI names and section counts to the view
+    //             return view("dashboard.probe-supervisor.score-employee-form", compact('appraisal'));
+    //         } else {
+    //             // Log the error response
+    //             Log::error('Failed to retrieve KPIs', [
+    //                 'status' => $response->status(),
+    //                 'response' => $response->body()
+    //             ]);
+    //             return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
+    //         }
+    //     } catch (\Exception $e) {
+    //         // Log the exception
+    //         Log::error('Exception occurred while retrieving KPIs', [
+    //             'message' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString()
+    //         ]);
+    //         return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+    //     }
+    // }
+
+    public function edit(Request $request, $kpiId, $batchId){
+        return $this->editKpi($request, $kpiId, $batchId, 'supervisor');
+    }
+
+
+    public function editProb(Request $request, $kpiId, $batchId){
+        return $this->editKpi($request, $kpiId, $batchId, 'prob');
+    }
+
+
+
+    public function editKpi(Request $request, $kpiId, $batchId, $type)
+    {
         // Validate session
         $sessionValidation = ValidateSessionController::validateSession();
         if ($sessionValidation) {
@@ -64,19 +246,16 @@ class SupervisorScoreController extends Controller
             'batchId' => (int) $batchId
         ];
 
+        // Determine endpoint based on type
+        $endpoint = $type === 'prob'
+            ? "http://192.168.1.200:5123/Appraisal/Kpi/GetProbScoringKpi"
+            : "http://192.168.1.200:5123/Appraisal/Kpi/GetSupervisorScoringKpi";
 
         try {
-
-            $response = Http::withToken($accessToken)
-                ->put("http://192.168.1.200:5123/Appraisal/Kpi/GetSupervisorScoringKpi", $data);
-
-            // dd($response);
+            $response = Http::withToken($accessToken)->put($endpoint, $data);
 
             if ($response->successful()) {
-
                 $kpis = $response->object();
-
-
                 $appraisal = collect();
 
                 // Process each KPI
@@ -93,7 +272,6 @@ class SupervisorScoreController extends Controller
                             $section->metrics = collect($section->metrics)->filter(function ($metric) {
                                 return $metric->metricActive;
                             });
-                            // Return the section regardless of whether it has active metrics
                             return $section;
                         });
 
@@ -103,24 +281,26 @@ class SupervisorScoreController extends Controller
                             'activeSections' => $activeSections
                         ]);
 
-                        // Get the status of the first section safely
-                        if (!empty($kpi->sections)) {
+                        // Only check status for supervisor type
+                        if ($type !== 'prob' && !empty($kpi->sections)) {
                             $firstSection = $kpi->sections[0];
-                            $status = $firstSection->sectionEmpScore->status ?? 'PENDING';
-                            $kpiStatus = $status;
-                        } else {
-                            $kpiStatus = 'PENDING'; // Handle the case where there are no sections
+                            $kpiStatus = $firstSection->sectionEmpScore->status ?? 'PENDING';
                         }
                     }
                 }
 
+                // Determine view based on type
+                $view = $type === 'prob'
+                    ? "dashboard.probe-supervisor.score-employee-form"
+                    : "dashboard.supervisor.score-employee-form";
 
+                // Prepare view data
+                $viewData = $type === 'prob'
+                    ? compact('appraisal')
+                    : compact('appraisal', 'kpiStatus');
 
-
-
-                return view("dashboard.supervisor.score-employee-form", compact('appraisal', 'kpiStatus'));
+                return view($view, $viewData);
             } else {
-                // Log the error response
                 Log::error('Failed to retrieve KPIs', [
                     'status' => $response->status(),
                     'response' => $response->body()
@@ -128,7 +308,6 @@ class SupervisorScoreController extends Controller
                 return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve Employee Appraisal, <b>Contact Application Support for Assistance</b>');
             }
         } catch (\Exception $e) {
-
             Log::error('Exception occurred while retrieving KPIs', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
@@ -137,87 +316,6 @@ class SupervisorScoreController extends Controller
         }
     }
 
-
-
-    public function editProb(Request $request, $kpiId, $batchId)
-    {
-        // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
-
-        // Get the access token from the session
-        $accessToken = session('api_token');
-
-        $data = [
-            'kpiId' => (int) $kpiId,
-            'batchId' => (int) $batchId
-        ];
-
-
-        try {
-
-            $response = Http::withToken($accessToken)
-                ->put("http://192.168.1.200:5123/Appraisal/Kpi/GetProbScoringKpi", $data);
-
-
-            if ($response->successful()) {
-
-                $kpis = $response->object();
-
-
-                $appraisal = collect();
-
-                // Process each KPI
-                foreach ($kpis as $kpi) {
-                    if ($kpi->kpiActive) {
-                        // Filter active sections
-                        $activeSections = collect($kpi->sections)->filter(function ($section) {
-                            return $section->sectionActive;
-                        });
-
-                        // Transform sections to include metrics, even if none are active
-                        $activeSections->transform(function ($section) {
-                            // Filter metrics within the section
-                            $section->metrics = collect($section->metrics)->filter(function ($metric) {
-                                return $metric->metricActive;
-                            });
-                            // Return the section regardless of whether it has active metrics
-                            return $section;
-                        });
-
-                        // Add the KPI and its sections to the appraisal
-                        $appraisal->push((object) [
-                            'kpi' => $kpi,
-                            'activeSections' => $activeSections
-                        ]);
-                    }
-                }
-
-                // dd($appraisal);
-
-
-
-                // Return the KPI names and section counts to the view
-                return view("dashboard.probe-supervisor.score-employee-form", compact('appraisal'));
-            } else {
-                // Log the error response
-                Log::error('Failed to retrieve KPIs', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
-            }
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while retrieving KPIs', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
-        }
-    }
 
 
 
@@ -333,7 +431,7 @@ class SupervisorScoreController extends Controller
             return $sessionValidation;
         }
 
-        
+
         try {
             // dd($request);
             // Initialize a variable for the success message
