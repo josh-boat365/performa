@@ -82,7 +82,6 @@
                         @endif
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
-
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
                                     @foreach ($appraisal as $index => $kpi)
                                         <div class="kpi">
@@ -130,9 +129,9 @@
                                                                                 name="sectionEmpScoreId"
                                                                                 value="{{ $section->sectionEmpScore->id ?? '' }}">
                                                                             <input type="hidden" name="sectionId"
-                                                                                value="{{ $section->sectionId }}">
+                                                                                value="{{ $section->sectionId ?? '' }}">
                                                                             <input type="hidden" name="kpiId"
-                                                                                value="{{ $kpi->kpi->kpiId }}">
+                                                                                value="{{ $kpi->kpi->kpiId ?? '' }}">
                                                                             <button type="submit" @style(['height: fit-content'])
                                                                                 class="btn btn-success">Save</button>
                                                                             <div id="ajax-loader" style="display:none;">
@@ -223,6 +222,9 @@
                                                                                     class="ajax-eval-form metric-form">
                                                                                     @csrf
                                                                                     <div class="d-flex gap-3">
+                                                                                        <input type="hidden"
+                                                                                            name="metricEmpScoreId"
+                                                                                            value="{{ $metric->metricEmpScore->id ?? '' }}">
                                                                                         <input type="hidden"
                                                                                             name="metricId"
                                                                                             value="{{ $metric->metricId }}">
