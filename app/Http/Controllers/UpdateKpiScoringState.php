@@ -31,7 +31,7 @@ class UpdateKpiScoringState extends Controller
             'batchId' => (int) $request->input('batchId'),
             'status' => $request->input('status'),
         ];
-
+        // dd($data);
         try {
             // Retrieve the access token
             $accessToken = session('api_token');
