@@ -219,18 +219,18 @@ class SupervisorScoreController extends Controller
     //     }
     // }
 
-    public function edit(Request $request, $kpiId, $batchId){
-        return $this->editKpi($request, $kpiId, $batchId, 'supervisor');
+    public function edit(Request $request, $kpiId, $batchId, $employeeId ){
+        return $this->editKpi($request, $kpiId, $batchId, $employeeId, 'supervisor');
     }
 
 
-    public function editProb(Request $request, $kpiId, $batchId){
-        return $this->editKpi($request, $kpiId, $batchId, 'prob');
+    public function editProb(Request $request, $kpiId, $batchId, $employeeId){
+        return $this->editKpi($request, $kpiId, $batchId, $employeeId, 'prob');
     }
 
 
 
-    public function editKpi(Request $request, $kpiId, $batchId, $type)
+    public function editKpi(Request $request, $kpiId, $batchId, $employeeId, $type)
     {
         // Validate session
         $sessionValidation = ValidateSessionController::validateSession();
@@ -242,6 +242,7 @@ class SupervisorScoreController extends Controller
         $accessToken = session('api_token');
 
         $data = [
+            // 'employeeId' => (int) $employeeId,
             'kpiId' => (int) $kpiId,
             'batchId' => (int) $batchId
         ];
@@ -296,8 +297,8 @@ class SupervisorScoreController extends Controller
 
                 // Prepare view data
                 $viewData = $type === 'prob'
-                    ? compact('appraisal')
-                    : compact('appraisal', 'kpiStatus');
+                    ? compact('appraisal', 'employeeId')
+                    : compact('appraisal', 'kpiStatus', 'employeeId');
 
                 return view($view, $viewData);
             } else {

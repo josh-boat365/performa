@@ -16,7 +16,7 @@
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
         <div class="col-md-12">
-
+            
             {{--  ===== KPI FOR EMPLOYEE - CARD =====  --}}
             @if ($employeeKpi !== null)
                 <div class="card card-body mb-10">
