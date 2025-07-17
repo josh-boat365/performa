@@ -238,6 +238,8 @@
                                                 </h4>
                                                 <form action="{{ route('submit.appraisal') }}" method="POST">
                                                     @csrf
+                                                    <input type="hidden" name="employeeId"
+                                                        value="{{ $employeeId }}">
                                                     <input type="hidden" name="kpiId"
                                                         value="{{ $kpi->kpi->kpiId }}">
                                                     <input type="hidden" name="batchId"
