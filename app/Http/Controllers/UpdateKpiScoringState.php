@@ -15,9 +15,10 @@ class UpdateKpiScoringState extends Controller
         if ($sessionValidation) {
             return $sessionValidation;
         }
-        
+
         // Validate the incoming request data
         $request->validate([
+            'employeeId' => 'required|integer',
             'kpiId' => 'required|integer',
             'batchId' => 'required|integer',
             'status' => 'required|string',
@@ -25,6 +26,7 @@ class UpdateKpiScoringState extends Controller
 
         // Prepare the data to be sent to the API
         $data = [
+            'employeeId' => (int) $request->input('employeeId'),
             'kpiId' => (int) $request->input('kpiId'),
             'batchId' => (int) $request->input('batchId'),
             'status' => $request->input('status'),
