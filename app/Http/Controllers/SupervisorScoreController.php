@@ -242,10 +242,12 @@ class SupervisorScoreController extends Controller
         $accessToken = session('api_token');
 
         $data = [
-            // 'employeeId' => (int) $employeeId,
+            'employeeId' => (int) $employeeId,
             'kpiId' => (int) $kpiId,
             'batchId' => (int) $batchId
         ];
+
+        // dd($data);
 
         // Determine endpoint based on type
         $endpoint = $type === 'prob'
