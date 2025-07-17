@@ -373,15 +373,10 @@ class DashboardController extends Controller
                 ];
             }
 
-            // dd($appraisal);
-            $responseUser   = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
 
-            // Handle responses
-            $user = $responseUser->successful() ? $responseUser->object() : null;
 
             // dd($user);
-            $employeeId = $user->id ?? null;
+            $employeeId = $this->getLoggedInUserInformation->id ?? null;
 
 
 
@@ -693,10 +688,12 @@ class DashboardController extends Controller
             // Get the batch ID from the first KPI if available
             $batchId = $appraisal->isNotEmpty() ? $appraisal->first()->kpi->batchId : null;
 
+            $employeeId = $this->getLoggedInUserInformation->id ?? null;
+
             // dd($appraisal);
 
             // Return the KPI names and section counts to the view
-            return view("dashboard.test-employee-probe-form", compact('appraisal', 'batchId', 'kpiStatus'));
+            return view("dashboard.test-employee-probe-form", compact('appraisal', 'batchId', 'kpiStatus', 'employeeId'));
         } catch (\Exception $e) {
             // Log the exception
             Log::error(
@@ -745,4 +742,27 @@ class DashboardController extends Controller
 
         return view("kpi-setup.score-setup");
     }
+
+
+    public function getLoggedInUserInformation()
+    {
+        // Validate session
+        $sessionValidation = ValidateSessionController::validateSession();
+        if ($sessionValidation) {
+            return $sessionValidation;
+        }
+
+        // Get the access token from the session
+        $accessToken = session('api_token');
+
+        // dd($appraisal);
+        $responseUser   = Http::withToken($accessToken)
+            ->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+
+        // Handle responses
+        $user = $responseUser->successful() ? $responseUser->object() : null;
+
+        return $user;
+    }
+
 }
