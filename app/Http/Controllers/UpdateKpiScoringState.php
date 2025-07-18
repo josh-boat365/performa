@@ -16,78 +16,109 @@ class UpdateKpiScoringState extends Controller
             return $sessionValidation;
         }
 
-        // Validate the incoming request data
+        // Enhanced validation with specific status values
         $request->validate([
             'employeeId' => 'required|integer',
             'kpiId' => 'required|integer',
             'batchId' => 'required|integer',
-            'status' => 'required|string',
+            'status' => 'required|string|in:REVIEW,COMPLETED,CONFIRMATION,PROBLEM',
         ]);
 
-        // Prepare the data to be sent to the API
-        $data = [
-            'employeeId' => (int) $request->input('employeeId'),
-            'kpiId' => (int) $request->input('kpiId'),
-            'batchId' => (int) $request->input('batchId'),
-            'status' => $request->input('status'),
-        ];
-        // dd($data);
-        try {
-            // Retrieve the access token
-            $accessToken = session('api_token');
+        // Prepare the data
+        $data = $request->only(['employeeId', 'kpiId', 'batchId', 'status']);
 
-            // Submit the data to the external API
-            $response = Http::withToken($accessToken)
-                ->put('http://192.168.1.200:5123/Appraisal/Score/update-score-status', $data);
+        try {
+            // Retrieve and validate access token
+            $accessToken = session('api_token');
+            if (!$accessToken) {
+                Log::warning('API token missing from session');
+                return back()->with('toast_error', 'Session expired. Please login again.');
+            }
+
+            // Get API endpoint from config
+            $apiEndpoint ='https://192.168.1.200:5123/Appraisal/Score/update-score-status';
+
+            // Submit the data to the external API with timeout
+            $response = Http::timeout(30)
+                ->withToken($accessToken)
+                ->put($apiEndpoint, $data);
 
             // Check if the response is successful
             if ($response->successful()) {
-                // Tailor the success message based on the status
-                $status = $request->input('status');
-                $successMessage = '';
+                $successMessage = $this->getSuccessMessage($request->input('status'));
 
-                switch ($status) {
-                    case 'REVIEW':
-                        $successMessage = 'Appraisal submitted for review successfully.';
-                        break;
-                    case 'COMPLETED':
-                        $successMessage = 'Appraisal marked as completed successfully.';
-                        break;
-                    case 'CONFIRMATION':
-                        $successMessage = 'Appraisal confirmed successfully.';
-                        break;
-                    case 'PROBLEM':
-                        $successMessage = 'Appraisal status updated to problem successfully.';
-
-                        break;
-                    default:
-                        $successMessage = 'Appraisal status updated successfully.';
-                        break;
+                if( $request->input('status') === 'CONFIRMATION') {
+                    // Additional logic for CONFIRMATION status if needed
+                    return redirect()->route('supervisor.index')->with('toast_success', $successMessage);
                 }
 
-                // Display success message using SweetAlert
-                return redirect()->route('supervisor.index')->with('toast_success', $successMessage);
+                return redirect()->back()->with('toast_success', $successMessage);
             } else {
-                // Log the error if the response is not successful
-                Log::error('API Submit, Review Response Error', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
+                // Enhanced error logging
+                Log::error('API Submit Response Error', [
+                    'status_code' => $response->status(),
+                    'response_body' => $response->body(),
+                    'request_data' => $data,
+                    'user_id' => session('user_id'),
                 ]);
 
-                // Handle the case where the API response is not successful
-                return back()->with('toast_error', 'Failed to submit KPI for review. Please try again.');
+                // Specific error messages based on status code
+                $errorMessage = match ($response->status()) {
+                    400 => 'Invalid data provided. Please check your input and try again.',
+                    401 => 'Authentication failed. Please login again.',
+                    403 => 'You do not have permission to perform this action.',
+                    404 => 'Appraisal record not found.',
+                    422 => 'The provided data is invalid. Please review and try again.',
+                    500, 502, 503, 504 => 'Server error occurred. Please try again later.',
+                    default => 'Failed to update appraisal status. Please try again.',
+                };
+
+                return back()->with('toast_error', $errorMessage);
             }
-        } catch (\Exception $e) {
-            // Handle any exceptions that occur during the API request
-            // Log exception and notify the user
-            Log::error('API Exception, Submit, Review Response Error', [
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            // Handle connection errors
+            Log::error('API Connection Error', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'request_data' => $data,
+                'user_id' => session('user_id'),
             ]);
-            return back()->with('toast_error', 'An error occurred while submitting the KPI. Please try again.');
+            return back()->with('toast_error', 'Network connection failed. Please check your connection and try again.');
+        } catch (\Illuminate\Http\Client\RequestException $e) {
+            // Handle request errors (timeout, etc.)
+            Log::error('API Request Error', [
+                'message' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'request_data' => $data,
+                'user_id' => session('user_id'),
+            ]);
+            return back()->with('toast_error', 'Request failed. Please try again later.');
+        } catch (\Exception $e) {
+            // Handle any other exceptions
+            Log::error('Unexpected Error in Appraisal Update', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'request_data' => $data,
+                'user_id' => session('user_id'),
+            ]);
+            return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
         }
     }
 
+    /**
+     * Get success message based on status
+     */
+    private function getSuccessMessage($status)
+    {
+        $messages =  [
+            'REVIEW' => 'Appraisal submitted for review successfully.',
+            'COMPLETED' => 'Appraisal marked as completed successfully.',
+            'CONFIRMATION' => 'Appraisal pushed to employee for confirmation successfully.',
+            'PROBLEM' => 'Appraisal pushed to higher supervisor for review successfully.',
+        ];
+
+        return $messages[$status] ?? 'Appraisal status updated successfully.';
+    }
 
     // public function store(Request $request)
     // {
