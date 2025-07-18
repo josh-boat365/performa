@@ -110,12 +110,12 @@ class UpdateKpiScoringState extends Controller
      */
     private function getSuccessMessage($status)
     {
-        $messages = config('appraisal.status_messages', [
+        $messages =  [
             'REVIEW' => 'Appraisal submitted for review successfully.',
             'COMPLETED' => 'Appraisal marked as completed successfully.',
-            'CONFIRMATION' => 'Appraisal confirmed successfully.',
-            'PROBLEM' => 'Appraisal status updated to problem successfully.',
-        ]);
+            'CONFIRMATION' => 'Appraisal pushed to employee for confirmation successfully.',
+            'PROBLEM' => 'Appraisal pushed to higher supervisor for review successfully.',
+        ];
 
         return $messages[$status] ?? 'Appraisal status updated successfully.';
     }
