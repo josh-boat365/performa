@@ -311,7 +311,7 @@ class SupervisorScoreController extends Controller
                 return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve Employee Appraisal, <b>Contact Application Support for Assistance</b>');
             }
         } catch (\Exception $e) {
-            Log::error('Exception occurred while retrieving KPIs', [
+            Log::error('Exception occurred while retrieving KPIs : editKpi function', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);

@@ -699,7 +699,7 @@ class DashboardController extends Controller
         } catch (\Exception $e) {
             // Log the exception
             Log::error(
-                'Exception occurred while retrieving KPIs',
+                'Exception occurred while retrieving KPIs : showEmployeeProbe function',
                 [
                     'message' => $e->getMessage(),
                     'trace' => $e->getTraceAsString()
