@@ -15,10 +15,10 @@ class SupervisorScoreController extends Controller
     {
 
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $accessToken = session('api_token');
 
@@ -219,12 +219,14 @@ class SupervisorScoreController extends Controller
     //     }
     // }
 
-    public function edit(Request $request, $kpiId, $batchId, $employeeId ){
+    public function edit(Request $request, $kpiId, $batchId, $employeeId)
+    {
         return $this->editKpi($request, $kpiId, $batchId, $employeeId, 'supervisor');
     }
 
 
-    public function editProb(Request $request, $kpiId, $batchId, $employeeId){
+    public function editProb(Request $request, $kpiId, $batchId, $employeeId)
+    {
         return $this->editKpi($request, $kpiId, $batchId, $employeeId, 'prob');
     }
 
@@ -233,10 +235,10 @@ class SupervisorScoreController extends Controller
     public function editKpi(Request $request, $kpiId, $batchId, $employeeId, $type)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Get the access token from the session
         $accessToken = session('api_token');
@@ -333,10 +335,10 @@ class SupervisorScoreController extends Controller
     {
 
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         try {
             // Initialize a variable for the success message
@@ -429,10 +431,10 @@ class SupervisorScoreController extends Controller
     public function probScore(Request $request)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
 
         try {

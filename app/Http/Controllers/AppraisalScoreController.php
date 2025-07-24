@@ -12,10 +12,10 @@ class AppraisalScoreController extends Controller
     public function store(Request $request)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         try {
             // Initialize a variable for the success message
@@ -123,10 +123,10 @@ class AppraisalScoreController extends Controller
     public function submitAppraisalForReview(Request $request)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Validate the incoming request data
         $request->validate([
@@ -177,10 +177,10 @@ class AppraisalScoreController extends Controller
     public function acceptAppraisalReview(Request $request)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Validate the incoming request data
         $request->validate([
@@ -235,10 +235,10 @@ class AppraisalScoreController extends Controller
     public function submitProbing(Request $request)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
 
         // dd($request);
@@ -339,6 +339,4 @@ class AppraisalScoreController extends Controller
             return back()->with('toast_error', 'An error occurred while updating the score ID .');
         }
     }
-
-
 }

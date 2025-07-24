@@ -16,10 +16,10 @@ class DashboardController extends Controller
     public function index()
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $accessToken = session('api_token');
 
@@ -67,10 +67,10 @@ class DashboardController extends Controller
     private function fetchDashboardData($url, $token)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         try {
             $response = Http::withToken($token)->get($url);
@@ -101,10 +101,10 @@ class DashboardController extends Controller
     private function processKpiDetails($kpiDetails)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $globalSectionCount = 0;
         $regularSectionCount = 0;
@@ -144,10 +144,10 @@ class DashboardController extends Controller
     private function fetchEmployeeGrade($token, $batchId, $employeeId)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $gradeData = [
             'batchId' => $batchId,
@@ -176,10 +176,10 @@ class DashboardController extends Controller
     private function prepareViewData($employeeKpi, $gradeDetails)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         return [
             'employeeKpi' => $employeeKpi ?? [
@@ -204,10 +204,10 @@ class DashboardController extends Controller
     public function show()
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $accessToken = session('api_token');
 
@@ -263,10 +263,10 @@ class DashboardController extends Controller
     public function editEmployeeKpi(Request $request, $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Get the access token from the session
         $accessToken = session('api_token');
@@ -402,10 +402,10 @@ class DashboardController extends Controller
     public function showEmployeeKpi()
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Get the access token from the session
         $accessToken = session('api_token');
@@ -542,10 +542,10 @@ class DashboardController extends Controller
     public function showEmployeeSupervisorKpiScore(Request $request, $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // dd($id);
         // Get the access token from the session
@@ -625,10 +625,10 @@ class DashboardController extends Controller
     public function showEmployeeProbe(Request $request, $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Get the access token from the session
         $accessToken = session('api_token');
@@ -715,10 +715,10 @@ class DashboardController extends Controller
     public function my_kpis()
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         return view("dashboard.my-kpis");
     }
@@ -727,20 +727,20 @@ class DashboardController extends Controller
     public function kpi_setup()
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         return view("kpi-setup.kpi-setup");
     }
     public function score_setup()
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         return view("kpi-setup.score-setup");
     }
@@ -749,10 +749,10 @@ class DashboardController extends Controller
     public function getLoggedInUserInformation()
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Get the access token from the session
         $accessToken = session('api_token');
@@ -767,5 +767,4 @@ class DashboardController extends Controller
 
         return $user;
     }
-
 }

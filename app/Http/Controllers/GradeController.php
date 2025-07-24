@@ -15,10 +15,10 @@ class GradeController extends Controller
     public function index()
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $accessToken = session('api_token');
 
@@ -48,10 +48,10 @@ class GradeController extends Controller
     public function create()
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         return view('grade.create');
     }
@@ -62,10 +62,10 @@ class GradeController extends Controller
     public function store(Request $request)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Validate the request data
         $request->validate([
@@ -112,10 +112,10 @@ class GradeController extends Controller
     public function show(string $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $accessToken = session('api_token');
         $apiUrl = "http://192.168.1.200:5123/Appraisal/Grade/{$id}";
@@ -160,11 +160,11 @@ class GradeController extends Controller
     public function update(Request $request, string $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
-        
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
+
         // dd($request);
         // Validate the request data
         $request->validate([

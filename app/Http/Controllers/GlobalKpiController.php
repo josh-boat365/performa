@@ -16,10 +16,10 @@ class GlobalKpiController extends Controller
     public function index(Request $request)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $accessToken = session('api_token');
 
@@ -58,10 +58,10 @@ class GlobalKpiController extends Controller
     public function create()
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
 
         $accessToken = session('api_token');
@@ -99,10 +99,10 @@ class GlobalKpiController extends Controller
     public function store(Request $request)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Validate the request data
         $request->validate([
@@ -146,10 +146,10 @@ class GlobalKpiController extends Controller
      */  public function show(string $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         try {
             $accessToken = session('api_token');
@@ -199,10 +199,10 @@ class GlobalKpiController extends Controller
     public function update(Request $request, string $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Validate the request data
         $request->validate([
@@ -247,10 +247,10 @@ class GlobalKpiController extends Controller
     public function update_state(Request $request, string $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Validate the request data
         $request->validate([
@@ -299,10 +299,10 @@ class GlobalKpiController extends Controller
     public function update_status(Request $request, string $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         try {
             // Validate the request data
@@ -391,10 +391,10 @@ class GlobalKpiController extends Controller
     private function fetchApiData(string $accessToken, string $url)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $response = Http::withToken($accessToken)->get($url);
 
@@ -404,10 +404,10 @@ class GlobalKpiController extends Controller
     private function sendApiRequest(string $url, array $data, string $method = 'POST')
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $accessToken = session('api_token');
 

@@ -16,10 +16,10 @@ class GlobalMetricController extends Controller
     public function index(Request $request)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         try {
             // Fetch sections data using helper method
@@ -66,10 +66,10 @@ class GlobalMetricController extends Controller
     public function create()
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
 
         $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
@@ -97,10 +97,10 @@ class GlobalMetricController extends Controller
     public function store(Request $request)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Validate the request data
         $request->validate([
@@ -162,10 +162,10 @@ class GlobalMetricController extends Controller
     public function show(string $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $accessToken = session('api_token');
         $apiUrl = "http://192.168.1.200:5123/Appraisal/Metric/{$id}";
@@ -226,10 +226,10 @@ class GlobalMetricController extends Controller
     {
 
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Validate the request data
         $request->validate([
@@ -323,11 +323,11 @@ class GlobalMetricController extends Controller
     private function makeApiRequest(string $method, string $url, array $data = null)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
-        
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
+
         $accessToken = session('api_token');
 
         try {
