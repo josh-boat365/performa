@@ -36,7 +36,7 @@
                             <span class="badge rounded-pill bg-primary" id="current-page">1</span>/ <span><b>Last
                                     Page</b></span><span class="badge rounded-pill bg-dark" id="total-pages">1</span>
                         </div>
-                        
+
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
