@@ -18,11 +18,11 @@ class KpiController extends Controller
     public function index(Request $request)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
-        
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
+
         $accessToken = session('api_token');
 
         if (!$accessToken) {
@@ -60,10 +60,10 @@ class KpiController extends Controller
     public function create()
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $accessToken = session('api_token');
 
@@ -95,7 +95,7 @@ class KpiController extends Controller
         }
 
 
-        return view('kpi-setup.create', compact( 'batch_data', 'uniqueRoles',));
+        return view('kpi-setup.create', compact('batch_data', 'uniqueRoles',));
     }
 
     /**
@@ -108,10 +108,10 @@ class KpiController extends Controller
     private function fetchApiData(string $accessToken, string $url)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $response = Http::withToken($accessToken)->get($url);
 
@@ -125,10 +125,10 @@ class KpiController extends Controller
     public function store(Request $request)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Validate the request data
         $request->validate([
@@ -182,10 +182,10 @@ class KpiController extends Controller
     private function sendApiRequest(string $url, array $data, string $method = 'POST')
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $accessToken = session('api_token');
 
@@ -223,10 +223,10 @@ class KpiController extends Controller
     public function show(string $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         try {
             // Fetch data using helper method
@@ -241,7 +241,7 @@ class KpiController extends Controller
             $uniqueRoles = [];
 
 
-            $user = $this->fetchShowApiData( 'http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+            $user = $this->fetchShowApiData('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
             $userId = $user->id;
 
             if ($responseRoles) {
@@ -282,10 +282,10 @@ class KpiController extends Controller
     private function fetchShowApiData(string $url)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         $accessToken = session('api_token');
 
@@ -306,10 +306,10 @@ class KpiController extends Controller
     public function update_state(Request $request, string $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Validate the request data
         $request->validate([
@@ -358,10 +358,10 @@ class KpiController extends Controller
     public function update_status(Request $request, string $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Validate the request data
         $request->validate([
@@ -414,10 +414,10 @@ class KpiController extends Controller
     public function update(Request $request, $id)
     {
         // Validate session
-        $sessionValidation = ValidateSessionController::validateSession();
-        if ($sessionValidation) {
-            return $sessionValidation;
-        }
+        // $sessionValidation = ValidateSessionController::validateSession();
+        // if ($sessionValidation) {
+        //     return $sessionValidation;
+        // }
 
         // Validate the request data
         $request->validate([
