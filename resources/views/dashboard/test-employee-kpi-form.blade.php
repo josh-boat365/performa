@@ -598,6 +598,7 @@
                                                 });
                                             });
 
+                                        // Modified AJAX form handler with page refresh and scroll preservation
                                         document.querySelectorAll('form.ajax-eval-form').forEach(form => {
                                             form.addEventListener('submit', function(e) {
                                                 e.preventDefault();
@@ -605,6 +606,10 @@
                                                 const formData = new FormData(form);
                                                 const saveBtn = form.querySelector('button[type="submit"]');
                                                 const originalText = saveBtn.innerHTML;
+
+                                                // Store scroll position and current page state before submission
+                                                sessionStorage.setItem('preserveScrollPosition', scrollPos.toString());
+                                                sessionStorage.setItem('currentPage', currentPage.toString());
 
                                                 saveBtn.innerHTML =
                                                     '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
@@ -621,46 +626,28 @@
                                                     })
                                                     .then(response => response.json())
                                                     .then(data => {
-                                                        smoothScroll(form);
+                                                        // Store the response data for after refresh
                                                         if (data.success) {
-                                                            Swal.fire({
-                                                                toast: true,
-                                                                icon: 'success',
-                                                                title: data.message || 'Saved successfully',
-                                                                position: 'top-end',
-                                                                showConfirmButton: false,
-                                                                timer: 3000,
-                                                                timerProgressBar: true
-                                                            });
+                                                            sessionStorage.setItem('showSuccessToast', JSON.stringify({
+                                                                message: data.message || 'Saved successfully'
+                                                            }));
                                                         } else {
-                                                            Swal.fire({
-                                                                toast: true,
-                                                                icon: 'error',
-                                                                title: data.message || 'An error occurred',
-                                                                position: 'top-end',
-                                                                showConfirmButton: false,
-                                                                timer: 3000,
-                                                                timerProgressBar: true
-                                                            });
+                                                            sessionStorage.setItem('showErrorToast', JSON.stringify({
+                                                                message: data.message || 'An error occurred'
+                                                            }));
                                                         }
+
+                                                        // Force page refresh to get updated data
+                                                        window.location.reload();
                                                     })
                                                     .catch(error => {
                                                         console.error('Error:', error);
-                                                        Swal.fire({
-                                                            toast: true,
-                                                            icon: 'error',
-                                                            title: 'An unexpected error occurred',
-                                                            position: 'top-end',
-                                                            showConfirmButton: false,
-                                                            timer: 3000,
-                                                            timerProgressBar: true
-                                                        });
-                                                    })
-                                                    .finally(() => {
-                                                        window.scrollTo(0, scrollPos);
-                                                        saveBtn.innerHTML = originalText;
-                                                        saveBtn.disabled = false;
-                                                        updateButtons();
+                                                        sessionStorage.setItem('showErrorToast', JSON.stringify({
+                                                            message: 'An unexpected error occurred'
+                                                        }));
+
+                                                        // Force page refresh even on error
+                                                        window.location.reload();
                                                     });
                                             });
                                         });
@@ -671,7 +658,60 @@
                                             }, 500);
                                         }
 
+                                        // Show the initial page
                                         showPage(currentPage);
+
+                                        // Check for toast messages after page refresh and restore scroll position
+                                        setTimeout(() => {
+                                            // First, restore scroll position
+                                            const savedScrollPos = sessionStorage.getItem('preserveScrollPosition');
+                                            if (savedScrollPos) {
+                                                const scrollPos = parseInt(savedScrollPos);
+                                                if (!isNaN(scrollPos)) {
+                                                    window.scrollTo({
+                                                        top: scrollPos,
+                                                        behavior: 'instant'
+                                                    });
+                                                    console.log(`Scroll position restored to: ${scrollPos}`);
+                                                }
+                                                sessionStorage.removeItem('preserveScrollPosition');
+                                            }
+
+                                            // Then show toast messages
+                                            const successToast = sessionStorage.getItem('showSuccessToast');
+                                            if (successToast) {
+                                                const toastData = JSON.parse(successToast);
+                                                if (typeof Swal !== 'undefined') {
+                                                    Swal.fire({
+                                                        toast: true,
+                                                        icon: 'success',
+                                                        title: toastData.message,
+                                                        position: 'top-end',
+                                                        showConfirmButton: false,
+                                                        timer: 3000,
+                                                        timerProgressBar: true
+                                                    });
+                                                }
+                                                sessionStorage.removeItem('showSuccessToast');
+                                            }
+
+                                            const errorToast = sessionStorage.getItem('showErrorToast');
+                                            if (errorToast) {
+                                                const toastData = JSON.parse(errorToast);
+                                                if (typeof Swal !== 'undefined') {
+                                                    Swal.fire({
+                                                        toast: true,
+                                                        icon: 'error',
+                                                        title: toastData.message,
+                                                        position: 'top-end',
+                                                        showConfirmButton: false,
+                                                        timer: 3000,
+                                                        timerProgressBar: true
+                                                    });
+                                                }
+                                                sessionStorage.removeItem('showErrorToast');
+                                            }
+                                        }, 100);
                                     });
                                 </script>
                             @endpush
