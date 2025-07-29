@@ -157,7 +157,7 @@
                                                                                                 type="number"
                                                                                                 name="metricSupScore"
                                                                                                 min="0"
-                                                                                                
+                                                                                                step="0.01"
                                                                                                 pattern="\d+(\.\d{1,2})?"
                                                                                                 max="{{ $metric->metricScore }}"
                                                                                                 @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
