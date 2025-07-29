@@ -36,7 +36,7 @@
                             <span class="badge rounded-pill bg-primary" id="current-page">1</span>/ <span><b>Last
                                     Page</b></span><span class="badge rounded-pill bg-dark" id="total-pages">1</span>
                         </div>
-                        
+
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
@@ -56,19 +56,20 @@
                                                             <p>{{ $section->sectionDescription }}</p>
 
                                                             @if ($section->metrics->isEmpty())
-                                                                <div class="d-flex gap-3">
+                                                                <div class="d-flex gap-3 bg-white p-3 mb-2">
                                                                     <div class="col-md-2">
-                                                                        <input class="form-control mb-3 score-input"
-                                                                            type="number" name="sectionEmpScore"
-                                                                            required placeholder="Enter Score"
-                                                                            @disabled(isset($section->sectionEmpScore) &&
-                                                                                    in_array($section->sectionEmpScore->status, ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))
-                                                                            value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
+                                                                        <span
+                                                                            class="mb-2 badge rounded-pill bg-secondary">Employee
+                                                                            Score
+                                                                        </span>
+                                                                        <span><strong>{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}</strong></span>
                                                                     </div>
                                                                     <div class="col-md-9">
-                                                                        <textarea class="form-control mb-3 comment-input" type="text" name="employeeComment"
-                                                                            placeholder="Enter your comments" rows="3" @disabled(isset($section->sectionEmpScore) &&
-                                                                                    in_array($section->sectionEmpScore->status, ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))>{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}</textarea>
+                                                                        <span
+                                                                            class="mb-2 badge rounded-pill bg-secondary">Employee
+                                                                            Comment
+                                                                        </span>
+                                                                        <span><strong>{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}</strong></span>
                                                                     </div>
                                                                 </div>
 
@@ -87,7 +88,7 @@
                                                                             <input class="form-control mb-3 score-input"
                                                                                 type="number" name="sectionSupScore"
                                                                                 required placeholder="Enter Score"
-                                                                                min="0" step="0.01"
+                                                                                min="0"
                                                                                 pattern="\d+(\.\d{1,2})?"
                                                                                 max="{{ $section->sectionScore }}"
                                                                                 @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
@@ -121,27 +122,21 @@
                                                                                 </h5>
                                                                                 <p>{{ $metric->metricDescription }}</p>
 
-
-                                                                                <div class="d-flex gap-3">
+                                                                                <div class="d-flex gap-3 bg-white p-3 mb-2">
                                                                                     <div class="col-md-2">
-                                                                                        <input
-                                                                                            class="form-control mb-3 score-input"
-                                                                                            type="number"
-                                                                                            name="metricEmpScore"
-                                                                                            placeholder="Enter Score"
-                                                                                            required min="0"
-                                                                                            step="0.01"
-                                                                                            pattern="\d+(\.\d{1,2})?"
-                                                                                            max="{{ $metric->metricScore }}"
-                                                                                            @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION', 'PROBLEM']))
-                                                                                            title="The Score can not be more than the metric score {{ $metric->metricScore }}"
-                                                                                            value="{{ $metric->metricEmpScore->metricEmpScore ?? '' }}">
+                                                                                        <span
+                                                                                            class="mb-2 badge rounded-pill bg-secondary">Employee
+                                                                                            Score
+                                                                                        </span>
+                                                                                        <span><strong>{{ $metric->metricEmpScore->metricEmpScore ?? '' }}</strong></span>
                                                                                     </div>
                                                                                     <div class="col-md-9">
-                                                                                        <textarea class="form-control mb-3 comment-input" type="text" name="employeeComment" rows="3"
-                                                                                            placeholder="Enter your comments" @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION', 'PROBLEM']))>{{ $metric->metricEmpScore->employeeComment ?? '' }}</textarea>
+                                                                                        <span
+                                                                                            class="mb-2 badge rounded-pill bg-secondary">Employee
+                                                                                            Comment
+                                                                                        </span>
+                                                                                        <span><strong>{{ $metric->metricEmpScore->employeeComment ?? '' }}</strong></span>
                                                                                     </div>
-
                                                                                 </div>
 
                                                                                 <span
@@ -162,7 +157,7 @@
                                                                                                 type="number"
                                                                                                 name="metricSupScore"
                                                                                                 min="0"
-                                                                                                step="0.01"
+                                                                                                
                                                                                                 pattern="\d+(\.\d{1,2})?"
                                                                                                 max="{{ $metric->metricScore }}"
                                                                                                 @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
