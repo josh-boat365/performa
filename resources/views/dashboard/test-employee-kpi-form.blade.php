@@ -83,7 +83,7 @@
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
                                     @foreach ($appraisal as $index => $kpi)
                                         <div class="kpi">
-                                            {{--  {{ dd($appraisal)}}  --}}
+
                                             @foreach ($kpi->activeSections as $sectionIndex => $section)
                                                 <div class="card border border-primary section-tab" @style(['border-radius: 10px;'])
                                                     @style(['border-radius: 10px; display: none;'])
@@ -476,8 +476,6 @@
 
 
 
-
-
                             @push('scripts')
                                 <script>
                                     document.addEventListener('DOMContentLoaded', function() {
@@ -492,145 +490,21 @@
                                         const sectionsPerPage = 3;
                                         const totalPages = Math.ceil(sections.length / sectionsPerPage);
 
-                                        // Save button states and form data - stored in sessionStorage to persist across page refreshes
-                                        let saveButtonStates = JSON.parse(sessionStorage.getItem('saveButtonStates') || '{}');
-                                        let formData = JSON.parse(sessionStorage.getItem('formData') || '{}');
-
                                         totalPagesSpan.textContent = totalPages;
 
-                                        // Initialize save buttons with unique IDs and states
-                                        function initializeSaveButtons() {
-                                            sections.forEach((section, index) => {
-                                                const saveBtn = section.querySelector('button[type="submit"]');
-                                                if (saveBtn) {
-                                                    const btnId = `save-btn-${index}`;
-                                                    saveBtn.setAttribute('data-save-id', btnId);
-                                                    saveBtn.setAttribute('data-section-index', index);
-
-                                                    // Initialize state if not exists
-                                                    if (!(btnId in saveButtonStates)) {
-                                                        saveButtonStates[btnId] = 0;
-                                                    }
-
-                                                    updateSaveButtonAppearance(saveBtn, saveButtonStates[btnId]);
-                                                }
-                                            });
-                                            sessionStorage.setItem('saveButtonStates', JSON.stringify(saveButtonStates));
-                                        }
-
-                                        // Restore form data from sessionStorage
-                                        function restoreFormData() {
-                                            sections.forEach((section, sectionIndex) => {
-                                                const scoreInputs = section.querySelectorAll('input[type="number"][name*="EmpScore"]');
-                                                const commentInputs = section.querySelectorAll('textarea[name="employeeComment"]');
-
-                                                scoreInputs.forEach(input => {
-                                                    const key = `${sectionIndex}_${input.name}`;
-                                                    if (formData[key]) {
-                                                        input.value = formData[key];
-                                                        validateField(input, false); // Validate without triggering state change
-                                                    }
-                                                });
-
-                                                commentInputs.forEach(input => {
-                                                    const key = `${sectionIndex}_${input.name}`;
-                                                    if (formData[key]) {
-                                                        input.value = formData[key];
-                                                        validateField(input, false); // Validate without triggering state change
-                                                    }
-                                                });
-                                            });
-                                        }
-
-                                        // Save form data to sessionStorage
-                                        function saveFormData(input, sectionIndex) {
-                                            const key = `${sectionIndex}_${input.name}`;
-                                            formData[key] = input.value;
-                                            sessionStorage.setItem('formData', JSON.stringify(formData));
-                                        }
-
-                                        function updateSaveButtonAppearance(button, state) {
-                                            if (state === 1) {
-                                                // Saved state - green appearance
-                                                button.classList.remove('btn-primary', 'btn-warning');
-                                                button.classList.add('btn-success');
-                                                button.innerHTML = 'Saved';
-                                            } else {
-                                                // Check if section has any data to determine if it's "not saved" or "save changes"
-                                                const sectionIndex = parseInt(button.getAttribute('data-section-index'));
-                                                const section = sections[sectionIndex];
-                                                const hasData = checkSectionHasData(section, sectionIndex);
-
-                                                if (hasData) {
-                                                    // Has data but not saved - yellow warning
-                                                    button.classList.remove('btn-success', 'btn-primary');
-                                                    button.classList.add('btn-warning');
-                                                    button.innerHTML = 'Save Changes';
-                                                } else {
-                                                    // No data - blue primary
-                                                    button.classList.remove('btn-success', 'btn-warning');
-                                                    button.classList.add('btn-primary');
-                                                    button.innerHTML = 'Not Saved';
-                                                }
-                                            }
-                                        }
-
-                                        function checkSectionHasData(section, sectionIndex) {
-                                            const scoreInputs = section.querySelectorAll('input[type="number"][name*="EmpScore"]');
-                                            const commentInputs = section.querySelectorAll('textarea[name="employeeComment"]');
-
-                                            const hasScores = Array.from(scoreInputs).some(input => input.value.trim() !== '');
-                                            const hasComments = Array.from(commentInputs).some(input => input.value.trim() !== '');
-
-                                            return hasScores || hasComments;
-                                        }
-
-                                        function validateField(field, triggerStateChange = true) {
+                                        function validateField(field) {
                                             const value = field.value.trim();
-                                            const section = field.closest('.section-tab');
-                                            const sectionIndex = Array.from(sections).indexOf(section);
-                                            const saveBtn = section?.querySelector('button[type="submit"]');
-                                            const btnId = saveBtn?.getAttribute('data-save-id');
-
-                                            // Save field data
-                                            if (triggerStateChange) {
-                                                saveFormData(field, sectionIndex);
-                                            }
-
                                             if (value === '') {
                                                 field.classList.add('is-invalid');
-                                                field.classList.remove('is-valid', 'field-modified');
-                                                section?.classList.add('border-danger');
+                                                field.classList.remove('is-valid');
+                                                field.closest('.section-tab')?.classList.add('border-danger');
+                                                return false;
                                             } else {
                                                 field.classList.remove('is-invalid');
                                                 field.classList.add('is-valid');
-                                                section?.classList.remove('border-danger');
+                                                field.closest('.section-tab')?.classList.remove('border-danger');
+                                                return true;
                                             }
-
-                                            // Update save button state only for the specific section
-                                            if (btnId && triggerStateChange) {
-                                                const currentSavedState = saveButtonStates[btnId] || 0;
-                                                const hasData = checkSectionHasData(section, sectionIndex);
-
-                                                if (currentSavedState === 1 && hasData) {
-                                                    // Field was previously saved, now it's modified - mark as needing save
-                                                    field.classList.add('field-modified');
-                                                    saveButtonStates[btnId] = 0; // Mark as needing save
-                                                    updateSaveButtonAppearance(saveBtn, 0);
-                                                    sessionStorage.setItem('saveButtonStates', JSON.stringify(saveButtonStates));
-                                                } else if (!hasData) {
-                                                    // No data in section
-                                                    field.classList.remove('field-modified');
-                                                    saveButtonStates[btnId] = 0;
-                                                    updateSaveButtonAppearance(saveBtn, 0);
-                                                    sessionStorage.setItem('saveButtonStates', JSON.stringify(saveButtonStates));
-                                                } else if (hasData && currentSavedState === 0) {
-                                                    // Has data but not saved
-                                                    updateSaveButtonAppearance(saveBtn, 0);
-                                                }
-                                            }
-
-                                            return value !== '';
                                         }
 
                                         function checkInputs(page) {
@@ -656,44 +530,17 @@
                                             return allFilled;
                                         }
 
-                                        function checkAllSaveButtonsOnPage(page) {
-                                            const start = page * sectionsPerPage;
-                                            const end = start + sectionsPerPage;
-
-                                            for (let i = start; i < end && i < sections.length; i++) {
-                                                const saveBtn = sections[i].querySelector('button[type="submit"]');
-                                                const btnId = saveBtn?.getAttribute('data-save-id');
-
-                                                if (btnId && saveButtonStates[btnId] !== 1) {
-                                                    return false;
-                                                }
-                                            }
-                                            return true;
-                                        }
-
-                                        function checkAllSaveButtonsGlobally() {
-                                            for (let page = 0; page < totalPages; page++) {
-                                                if (!checkAllSaveButtonsOnPage(page)) {
-                                                    return false;
-                                                }
-                                            }
-                                            return true;
-                                        }
-
                                         function updateProgressBar() {
-                                            let totalSaved = 0;
-                                            let totalSections = sections.length;
-
-                                            sections.forEach((section, index) => {
-                                                const saveBtn = section.querySelector('button[type="submit"]');
-                                                const btnId = saveBtn?.getAttribute('data-save-id');
-
-                                                if (btnId && saveButtonStates[btnId] === 1) {
-                                                    totalSaved++;
-                                                }
+                                            let totalValid = 0;
+                                            sections.forEach(section => {
+                                                const scoreInputs = section.querySelectorAll('input[type="number"][name*="EmpScore"]');
+                                                const commentInputs = section.querySelectorAll('textarea[name="employeeComment"]');
+                                                const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                                                const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !==
+                                                    '');
+                                                if (scoresFilled && commentsFilled) totalValid++;
                                             });
-
-                                            const percent = Math.round((totalSaved / totalSections) * 100);
+                                            const percent = Math.round((totalValid / sections.length) * 100);
                                             progressBar.style.width = percent + '%';
                                             progressBar.setAttribute('aria-valuenow', percent);
                                             progressBar.textContent = percent + '%';
@@ -701,19 +548,10 @@
 
                                         function updateButtons() {
                                             prevBtn.disabled = currentPage === 0;
-
-                                            // Enable next button only if all save buttons on current page have been clicked
-                                            const currentPageSaved = checkAllSaveButtonsOnPage(currentPage);
-                                            const currentPageFilled = checkInputs(currentPage);
-                                            nextBtn.disabled = currentPage === totalPages - 1 || !currentPageFilled || !currentPageSaved;
-
-                                            // Enable submit button only if all save buttons globally have been clicked
-                                            const allPagesSaved = checkAllSaveButtonsGlobally();
-                                            const allPagesFilled = Array.from({
+                                            nextBtn.disabled = currentPage === totalPages - 1 || !checkInputs(currentPage);
+                                            submitBtn.disabled = !Array.from({
                                                 length: totalPages
                                             }).every((_, i) => checkInputs(i));
-                                            submitBtn.disabled = !allPagesFilled || !allPagesSaved;
-
                                             updateProgressBar();
                                         }
 
@@ -744,37 +582,27 @@
                                         });
 
                                         nextBtn.addEventListener('click', function() {
-                                            if (currentPage < totalPages - 1 && checkInputs(currentPage) && checkAllSaveButtonsOnPage(
-                                                    currentPage)) {
+                                            if (currentPage < totalPages - 1 && checkInputs(currentPage)) {
                                                 currentPage++;
                                                 showPage(currentPage);
                                             }
                                         });
 
-                                        // Enhanced input event listeners
                                         document.querySelectorAll('input[type="number"][name*="EmpScore"], textarea[name="employeeComment"]')
                                             .forEach(input => {
                                                 input.addEventListener('input', function() {
-                                                    validateField(this, true);
-                                                    updateButtons();
-                                                });
-
-                                                // Also trigger validation on blur to catch paste operations
-                                                input.addEventListener('blur', function() {
-                                                    validateField(this, true);
+                                                    validateField(this);
                                                     updateButtons();
                                                 });
                                             });
 
-                                        // Enhanced AJAX form handler with save button state management
+                                        // Modified AJAX form handler with page refresh and scroll preservation
                                         document.querySelectorAll('form.ajax-eval-form').forEach(form => {
                                             form.addEventListener('submit', function(e) {
                                                 e.preventDefault();
                                                 const scrollPos = window.scrollY;
                                                 const formData = new FormData(form);
                                                 const saveBtn = form.querySelector('button[type="submit"]');
-                                                const btnId = saveBtn?.getAttribute('data-save-id');
-                                                const sectionIndex = parseInt(saveBtn?.getAttribute('data-section-index'));
                                                 const originalText = saveBtn.innerHTML;
 
                                                 // Store scroll position and current page state before submission
@@ -796,27 +624,11 @@
                                                     })
                                                     .then(response => response.json())
                                                     .then(data => {
+                                                        // Store the response data for after refresh
                                                         if (data.success) {
-                                                            // Update save button state to saved (1) for this specific button only
-                                                            if (btnId) {
-                                                                saveButtonStates[btnId] = 1;
-                                                                sessionStorage.setItem('saveButtonStates', JSON.stringify(
-                                                                    saveButtonStates));
-                                                            }
-
                                                             sessionStorage.setItem('showSuccessToast', JSON.stringify({
                                                                 message: data.message || 'Saved successfully'
                                                             }));
-
-                                                            // Mark fields as saved (remove modified state) for this section only
-                                                            const section = form.closest('.section-tab');
-                                                            const fields = section.querySelectorAll(
-                                                                'input[type="number"][name*="EmpScore"], textarea[name="employeeComment"]'
-                                                                );
-                                                            fields.forEach(field => {
-                                                                field.classList.remove('field-modified');
-                                                            });
-
                                                         } else {
                                                             sessionStorage.setItem('showErrorToast', JSON.stringify({
                                                                 message: data.message || 'An error occurred'
@@ -843,12 +655,6 @@
                                                 scrollTop: $(targetForm).offset().top
                                             }, 500);
                                         }
-
-                                        // Initialize save buttons
-                                        initializeSaveButtons();
-
-                                        // Restore form data
-                                        restoreFormData();
 
                                         // Show the initial page
                                         showPage(currentPage);
@@ -905,22 +711,6 @@
                                             }
                                         }, 100);
                                     });
-
-                                    // Add CSS for modified field styling
-                                    const style = document.createElement('style');
-                                    style.textContent = `
-                                            .field-modified {
-                                                border-color: #0d6efd !important;
-                                                box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25) !important;
-                                            }
-
-                                            .btn-warning {
-                                                background-color: #ffc107 !important;
-                                                border-color: #ffc107 !important;
-                                                color: #000 !important;
-                                            }
-                                        `;
-                                    document.head.appendChild(style);
                                 </script>
                             @endpush
 
