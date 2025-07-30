@@ -690,7 +690,7 @@ class DashboardController extends Controller
             // Get the batch ID from the first KPI if available
             $batchId = $appraisal->isNotEmpty() ? $appraisal->first()->kpi->batchId : null;
 
-            $employeeId = $this->getLoggedInUserInformation->id ?? null;
+            $employeeId = $this->getLoggedInUserInformation()->id ?? null;
 
             // dd($appraisal);
 
