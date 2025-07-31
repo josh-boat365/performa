@@ -83,7 +83,7 @@
                 @endif
 
 
-                @if ((isset($user) && $user->department->id == 10) || $user->empRole->id == 1)
+                @if ((isset($user) && $user->department->id == 10) || $user->empRole->id == 1 || $user->empRole->id == 148)
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect" aria-label="Reports Menu">
                             <i class="bx bx-file"></i>
