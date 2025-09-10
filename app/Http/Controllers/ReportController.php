@@ -31,10 +31,11 @@ class ReportController extends Controller
             'departmentId' => 'nullable',
             'kpiId' => 'nullable',
             'employeeId' => 'nullable',
+            'branchId' => 'nullable|string',
         ]);
 
         // Filter non-empty parameters for the API request
-        $filters = array_filter($request->only(['batchId', 'departmentId', 'kpiId', 'employeeId']));
+        $filters = array_filter($request->only(['batchId', 'departmentId', 'kpiId', 'employeeId', 'branchId']));
         $data = empty($filters) ? ['batchId' => ''] : $filters;
 
         // Make the API request to fetch appraisal reports
@@ -46,10 +47,11 @@ class ReportController extends Controller
             Log::error('Failed to fetch appraisal reports', ['response' => $response->body()]);
             return view('reports.index', [
                 'reports' => collect(),
-                'batches' => [],
-                'departments' => [],
-                'employees' => [],
-                'kpis' => [],
+                'batches' => collect(),
+                'departments' => collect(),
+                'employees' => collect(),
+                'kpis' => collect(),
+                'branches' => collect(),
             ]);
         }
 
@@ -59,14 +61,13 @@ class ReportController extends Controller
         // Process employees data to avoid redundant operations
         $employeesData = $reports->flatMap(fn($report) => $report->employees ?? []);
 
-        // Fetch departments data
+        // Fetch batches data
         $responseBatches = Http::withToken($accessToken)
             ->get("http://192.168.1.200:5123/Appraisal/Batch");
 
-        // Handle unsuccessful response for departments
         if (!$responseBatches->successful()) {
             Log::error('Failed to fetch batches', ['response' => $responseBatches->body()]);
-            $batches = collect(); // Default to empty collection if the request fails
+            $batches = collect();
         } else {
             $batches = collect($responseBatches->object())->map(fn($batch) => [
                 'batchId' => $batch->id ?? 'N/A',
@@ -75,20 +76,13 @@ class ReportController extends Controller
             ])->values();
         }
 
-        // // Extract and group batch data
-        // $batches = $reports->map(fn($report) => [
-        //     'batchId' => $report->batchId ?? 'N/A',
-        //     'batchName' => $report->batchName ?? 'N/A',
-        // ])->unique('batchId')->values();
-
         // Fetch departments data
         $responseDepartments = Http::withToken($accessToken)
             ->get("http://192.168.1.200:5124/HRMS/Department");
 
-        // Handle unsuccessful response for departments
         if (!$responseDepartments->successful()) {
             Log::error('Failed to fetch departments', ['response' => $responseDepartments->body()]);
-            $departments = collect(); // Default to empty collection if the request fails
+            $departments = collect();
         } else {
             $departments = collect($responseDepartments->object())->map(fn($department) => [
                 'departmentId' => $department->id ?? 'N/A',
@@ -96,20 +90,34 @@ class ReportController extends Controller
             ])->values();
         }
 
+        // Fetch branches data
+        $responseBranches = Http::withToken($accessToken)
+            ->get("http://192.168.1.200:5124/HRMS/Branch");
+
+        if (!$responseBranches->successful()) {
+            Log::error('Failed to fetch branches', ['response' => $responseBranches->body()]);
+            $branches = collect();
+        } else {
+            $branches = collect($responseBranches->object())->map(fn($branch) => [
+                'branchId' => $branch->id ?? 'N/A',
+                'branchName' => $branch->name ?? 'N/A',
+            ])->values();
+        }
+
         // Fetch employees data
         $responseEmployees = Http::withToken($accessToken)
             ->get("http://192.168.1.200:5124/HRMS/Employee");
 
-        // Handle unsuccessful response for employees
         if (!$responseEmployees->successful()) {
             Log::error('Failed to fetch employees', ['response' => $responseEmployees->body()]);
-            $employees = collect(); // Default to empty collection if the request fails
+            $employees = collect();
         } else {
             $employees = collect($responseEmployees->object())->map(fn($employee) => [
-                'employeeId' => $employee->id ?? 'N/A', // Use null coalescing to provide a default value
-                'employeeStaffID' => $employee->staffNumber ?? 'N/A', // Use null coalescing to provide a default value
+                'employeeId' => $employee->id ?? 'N/A',
+                'employeeStaffID' => $employee->staffNumber ?? 'N/A',
+                'employeeBranchId' => $employee->branch->id ?? 'N/A',
+                'employeeBranchName' => $employee->branch->name ?? 'N/A',
                 'employeeName' => trim(($employee->firstName ?? '') . ' ' . ($employee->surname ?? '')) ?: 'N/A',
-                // Ensure both firstName and surname are checked
             ])->values();
         }
 
@@ -120,8 +128,49 @@ class ReportController extends Controller
                 'kpiName' => $score->kpiName ?? 'N/A',
             ])->unique('kpiId')->values();
 
+        // Create mappings for quick lookup
+        $employeeBranchIdMap = $employees->pluck('employeeBranchId', 'employeeId')->toArray();
+        $employeeBranchNameMap = $employees->pluck('employeeBranchName', 'employeeId')->toArray();
+        $selectedBranchId = $request->input('branchId');
+
+        // Enrich reports with branch information and apply filtering if needed
+        $reports = $reports->map(function ($report) use ($employeeBranchIdMap, $employeeBranchNameMap, $selectedBranchId) {
+            if (!isset($report->employees)) {
+                return $report;
+            }
+
+            $filteredEmployees = collect($report->employees);
+
+            // Apply branch filtering if branchId is provided
+            if ($selectedBranchId) {
+                $filteredEmployees = $filteredEmployees->filter(function ($employee) use ($employeeBranchIdMap, $selectedBranchId) {
+                    $employeeBranchId = $employeeBranchIdMap[$employee->employeeId] ?? null;
+                    return $employeeBranchId == $selectedBranchId;
+                });
+            }
+
+            // Enrich all employees with branch information
+            $report->employees = $filteredEmployees->map(function ($employee) use ($employeeBranchIdMap, $employeeBranchNameMap) {
+                $employee->branchId = $employeeBranchIdMap[$employee->employeeId] ?? 'N/A';
+                $employee->branchName = $employeeBranchNameMap[$employee->employeeId] ?? 'N/A';
+                return $employee;
+            })->values()->toArray();
+
+            return $report;
+        });
+
+        // Remove reports that have no employees after filtering (only when branch filter is applied)
+        if ($selectedBranchId) {
+            $reports = $reports->filter(function ($report) {
+                return isset($report->employees) && count($report->employees) > 0;
+            })->values();
+        }
+
+        // Remove dd() for production use
+        // dd($reports);
+
         // Pass data to the view
-        return view('reports.index', compact('reports', 'batches', 'departments', 'employees', 'kpis'));
+        return view('reports.index', compact('reports', 'batches', 'departments', 'employees', 'kpis', 'branches'));
     }
 
 
