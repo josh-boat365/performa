@@ -24,13 +24,12 @@ class ReportController extends Controller
         $request->validate([
             'batchId' => 'nullable',
             'departmentId' => 'nullable',
-            'kpiId' => 'nullable',
             'employeeId' => 'nullable',
             'branchId' => 'nullable',
         ]);
 
         // Filter non-empty parameters for the API request
-        $filters = array_filter($request->only(['batchId', 'branchId', 'departmentId', 'kpiId', 'employeeId']));
+        $filters = array_filter($request->only(['batchId', 'branchId', 'departmentId', 'employeeId']));
         $data = empty($filters) ? ['batchId' => ''] : $filters;
 
         // Use concurrent requests to fetch data in parallel

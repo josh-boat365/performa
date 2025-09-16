@@ -26,7 +26,7 @@
                                         @foreach ($batches as $batch)
                                             <option value="{{ $batch['batchId'] }}"
                                                 {{ request('batchId') == $batch['batchId'] ? 'selected' : '' }}>
-                                                {{ $batch['batchName'] }} - {{ $batch['batchStatus'] }}
+                                                {{ $batch['batchName'] }}
                                             </option>
                                         @endforeach
                                     </select>
