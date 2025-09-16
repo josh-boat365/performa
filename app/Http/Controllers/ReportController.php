@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Codedge\Fpdf\Fpdf\Fpdf;
 use Illuminate\Http\Request;
+use Illuminate\Http\Client\Pool;
+
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
-
-use Codedge\Fpdf\Fpdf\Fpdf;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 class ReportController extends Controller
@@ -17,12 +18,6 @@ class ReportController extends Controller
      */
     public function index(Request $request)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
         $accessToken = session('api_token');
 
         // Validate the request parameters
@@ -31,148 +26,87 @@ class ReportController extends Controller
             'departmentId' => 'nullable',
             'kpiId' => 'nullable',
             'employeeId' => 'nullable',
-            'branchId' => 'nullable|string',
+            'branchId' => 'nullable',
         ]);
 
         // Filter non-empty parameters for the API request
-        $filters = array_filter($request->only(['batchId', 'departmentId', 'kpiId', 'employeeId', 'branchId']));
+        $filters = array_filter($request->only(['batchId', 'branchId', 'departmentId', 'kpiId', 'employeeId']));
         $data = empty($filters) ? ['batchId' => ''] : $filters;
 
-        // Make the API request to fetch appraisal reports
-        $response = Http::withToken($accessToken)
-            ->put("http://192.168.1.200:5123/Appraisal/Report", $data);
+        // Use concurrent requests to fetch data in parallel
+        $responses = Http::pool(fn(Pool $pool) => [
+            $pool->withToken($accessToken)->timeout(30)->put("http://192.168.1.200:5123/Appraisal/Report", $data),
+            $pool->withToken($accessToken)->timeout(15)->get("http://192.168.1.200:5123/Appraisal/Batch"),
+            $pool->withToken($accessToken)->timeout(15)->get("http://192.168.1.200:5124/HRMS/Department"),
+            $pool->withToken($accessToken)->timeout(15)->get("http://192.168.1.200:5124/HRMS/Branch"),
+            $pool->withToken($accessToken)->timeout(15)->get("http://192.168.1.200:5124/HRMS/Employee"),
+        ]);
 
-        // Handle unsuccessful response
-        if (!$response->successful()) {
-            Log::error('Failed to fetch appraisal reports', ['response' => $response->body()]);
-            return view('reports.index', [
-                'reports' => collect(),
-                'batches' => collect(),
-                'departments' => collect(),
-                'employees' => collect(),
-                'kpis' => collect(),
-                'branches' => collect(),
-            ]);
+        // Handle main reports response
+        if (!$responses[0]->successful()) {
+            Log::error('Failed to fetch appraisal reports', ['response' => $responses[0]->body()]);
+            $reports = collect();
+        } else {
+            $reports = collect($responses[0]->object() ?? []);
         }
 
-        // Collect response data
-        $reports = collect($response->object() ?? []);
-
-        // Process employees data to avoid redundant operations
-        $employeesData = $reports->flatMap(fn($report) => $report->employees ?? []);
-
-        // Fetch batches data
-        $responseBatches = Http::withToken($accessToken)
-            ->get("http://192.168.1.200:5123/Appraisal/Batch");
-
-        if (!$responseBatches->successful()) {
-            Log::error('Failed to fetch batches', ['response' => $responseBatches->body()]);
+        // Process batch data
+        if (!$responses[1]->successful()) {
+            Log::error('Failed to fetch batches', ['response' => $responses[1]->body()]);
             $batches = collect();
         } else {
-            $batches = collect($responseBatches->object())->map(fn($batch) => [
+            $batches = collect($responses[1]->object())->map(fn($batch) => [
                 'batchId' => $batch->id ?? 'N/A',
                 'batchName' => $batch->name ?? 'N/A',
                 'batchStatus' => $batch->status ?? 'N/A',
             ])->values();
         }
 
-        // Fetch departments data
-        $responseDepartments = Http::withToken($accessToken)
-            ->get("http://192.168.1.200:5124/HRMS/Department");
-
-        if (!$responseDepartments->successful()) {
-            Log::error('Failed to fetch departments', ['response' => $responseDepartments->body()]);
+        // Process department data
+        if (!$responses[2]->successful()) {
+            Log::error('Failed to fetch departments', ['response' => $responses[2]->body()]);
             $departments = collect();
         } else {
-            $departments = collect($responseDepartments->object())->map(fn($department) => [
+            $departments = collect($responses[2]->object())->map(fn($department) => [
                 'departmentId' => $department->id ?? 'N/A',
                 'departmentName' => $department->name ?? 'N/A',
             ])->values();
         }
 
-        // Fetch branches data
-        $responseBranches = Http::withToken($accessToken)
-            ->get("http://192.168.1.200:5124/HRMS/Branch");
-
-        if (!$responseBranches->successful()) {
-            Log::error('Failed to fetch branches', ['response' => $responseBranches->body()]);
+        // Process branch data
+        if (!$responses[3]->successful()) {
+            Log::error('Failed to fetch branches', ['response' => $responses[3]->body()]);
             $branches = collect();
         } else {
-            $branches = collect($responseBranches->object())->map(fn($branch) => [
+            $branches = collect($responses[3]->object())->map(fn($branch) => [
                 'branchId' => $branch->id ?? 'N/A',
                 'branchName' => $branch->name ?? 'N/A',
             ])->values();
         }
 
-        // Fetch employees data
-        $responseEmployees = Http::withToken($accessToken)
-            ->get("http://192.168.1.200:5124/HRMS/Employee");
-
-        if (!$responseEmployees->successful()) {
-            Log::error('Failed to fetch employees', ['response' => $responseEmployees->body()]);
+        // Process employee data
+        if (!$responses[4]->successful()) {
+            Log::error('Failed to fetch employees', ['response' => $responses[4]->body()]);
             $employees = collect();
         } else {
-            $employees = collect($responseEmployees->object())->map(fn($employee) => [
+            $employees = collect($responses[4]->object())->map(fn($employee) => [
                 'employeeId' => $employee->id ?? 'N/A',
                 'employeeStaffID' => $employee->staffNumber ?? 'N/A',
-                'employeeBranchId' => $employee->branch->id ?? 'N/A',
-                'employeeBranchName' => $employee->branch->name ?? 'N/A',
                 'employeeName' => trim(($employee->firstName ?? '') . ' ' . ($employee->surname ?? '')) ?: 'N/A',
             ])->values();
         }
 
-        // Extract unique KPIs from employees data
-        $kpis = $employeesData->flatMap(fn($employee) => $employee->scores ?? [])
+        // Extract unique KPIs from reports data
+        $kpis = $reports->flatMap(fn($report) => $report->employees ?? [])
+            ->flatMap(fn($employee) => $employee->scores ?? [])
             ->map(fn($score) => [
                 'kpiId' => $score->kpiId ?? 'N/A',
                 'kpiName' => $score->kpiName ?? 'N/A',
             ])->unique('kpiId')->values();
 
-        // Create mappings for quick lookup
-        $employeeBranchIdMap = $employees->pluck('employeeBranchId', 'employeeId')->toArray();
-        $employeeBranchNameMap = $employees->pluck('employeeBranchName', 'employeeId')->toArray();
-        $selectedBranchId = $request->input('branchId');
-
-        // Enrich reports with branch information and apply filtering if needed
-        $reports = $reports->map(function ($report) use ($employeeBranchIdMap, $employeeBranchNameMap, $selectedBranchId) {
-            if (!isset($report->employees)) {
-                return $report;
-            }
-
-            $filteredEmployees = collect($report->employees);
-
-            // Apply branch filtering if branchId is provided
-            if ($selectedBranchId) {
-                $filteredEmployees = $filteredEmployees->filter(function ($employee) use ($employeeBranchIdMap, $selectedBranchId) {
-                    $employeeBranchId = $employeeBranchIdMap[$employee->employeeId] ?? null;
-                    return $employeeBranchId == $selectedBranchId;
-                });
-            }
-
-            // Enrich all employees with branch information
-            $report->employees = $filteredEmployees->map(function ($employee) use ($employeeBranchIdMap, $employeeBranchNameMap) {
-                $employee->branchId = $employeeBranchIdMap[$employee->employeeId] ?? 'N/A';
-                $employee->branchName = $employeeBranchNameMap[$employee->employeeId] ?? 'N/A';
-                return $employee;
-            })->values()->toArray();
-
-            return $report;
-        });
-
-        // Remove reports that have no employees after filtering (only when branch filter is applied)
-        if ($selectedBranchId) {
-            $reports = $reports->filter(function ($report) {
-                return isset($report->employees) && count($report->employees) > 0;
-            })->values();
-        }
-
-        // Remove dd() for production use
-        // dd($reports);
-
         // Pass data to the view
-        return view('reports.index', compact('reports', 'batches', 'departments', 'employees', 'kpis', 'branches'));
+        return view('reports.index', compact('reports', 'batches', 'branches', 'departments', 'employees', 'kpis'));
     }
-
 
 
     public function showEmployeeSummary($employeeId)
