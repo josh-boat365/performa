@@ -291,6 +291,7 @@ class DashboardController extends Controller
             // Initialize an empty collection for active appraisals
             $appraisal = collect();
 
+            $kpiId = $kpis[0]->kpiId ?? null;
 
             // Process each KPI
             foreach ($kpis as $kpi) {
@@ -378,12 +379,16 @@ class DashboardController extends Controller
             // dd($user);
             $employeeId = $this->getLoggedInUserInformation()->id ?? null;
 
+            //Get Employee Grades and Supervisor Grades for Employee
+            $submittedEmployeeGrade = GetKpiGradeController::getGrade($kpiId, $batchId, $employeeId)->submittedEmployeeGrade;
+            $supervisorGradeForEmployee = GetKpiGradeController::getGrade($kpiId, $batchId, $employeeId)->supervisorGradeForEmployee;
+
 
 
 
 
             // Return the KPI names and section counts to the view
-            return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails', 'kpiStatus', 'employeeId'));
+            return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails', 'kpiStatus', 'employeeId', 'submittedEmployeeGrade', 'supervisorGradeForEmployee'));
         } catch (\Exception $e) {
             // Log the exception
             Log::error(
