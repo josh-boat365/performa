@@ -294,6 +294,11 @@ class SupervisorScoreController extends Controller
                     }
                 }
 
+                //Employee Grade and Supervisor Grade for Employee
+                $submittedEmployeeGrade = GetKpiGradeController::getGrade($kpiId, $batchId, $employeeId)->submittedEmployeeGrade;
+                $supervisorGradeForEmployee = GetKpiGradeController::getGrade($kpiId, $batchId, $employeeId)->supervisorGradeForEmployee;
+
+
                 // Determine view based on type
                 $view = $type === 'prob'
                     ? "dashboard.probe-supervisor.score-employee-form"
@@ -301,8 +306,8 @@ class SupervisorScoreController extends Controller
 
                 // Prepare view data
                 $viewData = $type === 'prob'
-                    ? compact('appraisal', 'employeeId')
-                    : compact('appraisal', 'kpiStatus', 'employeeId');
+                    ? compact('appraisal', 'employeeId', 'submittedEmployeeGrade', 'supervisorGradeForEmployee')
+                    : compact('appraisal', 'kpiStatus', 'employeeId', 'submittedEmployeeGrade', 'supervisorGradeForEmployee');
 
                 return view($view, $viewData);
             } else {
@@ -422,6 +427,8 @@ class SupervisorScoreController extends Controller
             }
         } catch (\Exception $e) {
             // Log exception and notify the user
+
+
             Log::error('API Exception', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
         }
