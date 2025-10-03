@@ -413,23 +413,52 @@ class SupervisorScoreController extends Controller
             $response = Http::withToken($accessToken)
                 ->put('http://192.168.1.200:5123/Appraisal/Score/supervisor-score', $payload);
 
-            // Check if the response is successful
-            if ($response->status() === 200) {
-                // Return success message
+           // Check if the API call was successful
+            if ($response->successful()) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => $successMessage,
+                    ]);
+                }
                 return back()->with('toast_success', $successMessage);
             } else {
-                // Log the error if the response is not successful
+                // Log the error if the API response is not successful
                 Log::error('API Response Error', [
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
-                return back()->with('toast_error', 'Failed to submit score. Please check the logs for details.');
+
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to submit score. Please try again.'
+                    ], $response->status());
+                }
+                return back()->with('toast_error', 'Failed to submit score. Please try again.');
             }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Handle validation errors
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed: ' . implode(', ', $e->validator->errors()->all())
+                ], 422);
+            }
+            return back()->withErrors($e->validator)->withInput();
         } catch (\Exception $e) {
             // Log exception and notify the user
+            Log::error('API Exception', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
-
-            Log::error('API Exception', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An unexpected error occurred. Please try again.',
+                ], 500);
+            }
             return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
         }
     }
