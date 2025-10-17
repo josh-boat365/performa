@@ -153,7 +153,7 @@
                                                                         </div>
                                                                         <div class="col-md-9">
                                                                             <textarea class="form-control mb-3 comment-input"
-                                                                                type="text" name="supervisorComment" required
+                                                                                type="text" name="supervisorComment"
                                                                                 placeholder="Enter your comments" rows="3"
                                                                                 @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))>{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
                                                                         </div>
@@ -216,7 +216,7 @@
                                                                                         </div>
                                                                                         <div class="col-md-9">
                                                                                             <textarea class="form-control mb-3" type="text"
-                                                                                                required name="supervisorComment"
+                                                                                               name="supervisorComment"
                                                                                                 @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                                                 placeholder="Enter your comments"
                                                                                                 rows="3">{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
