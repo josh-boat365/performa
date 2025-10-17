@@ -33,9 +33,7 @@ class AppraisalScoreController extends Controller
 
                 // Ensure employeeComment is not an empty string
                 $employeeComment = $request->input('employeeComment', '');
-                if (trim($employeeComment) === '') {
-                    return back()->with('toast_error', 'Employee comment cannot be empty.');
-                }
+
 
                 // Prepare the payload for the API request
                 $payload = [
@@ -61,9 +59,7 @@ class AppraisalScoreController extends Controller
 
                 // Ensure employeeComment is not an empty string
                 $employeeComment = $request->input('employeeComment', '');
-                if (trim($employeeComment) === '') {
-                    return back()->with('toast_error', 'Employee comment cannot be empty.');
-                }
+
 
                 // Prepare the payload for the API request
                 $payload = [
@@ -256,7 +252,7 @@ class AppraisalScoreController extends Controller
         // Retrieve the score ID and employee comment from the request
         $scoreId = $request->input('scoreId');
         $prob = $request->has('prob') ? true : false;
-        $employeeComment = $request->input('employeeComment');
+        $employeeComment = $request->input('employeeComment', '');
 
         // Prepare the access token
         $accessToken = session('api_token'); // Retrieve the access tok
