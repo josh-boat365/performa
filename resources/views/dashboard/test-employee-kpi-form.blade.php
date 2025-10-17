@@ -162,7 +162,7 @@
                                                                                 value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                         </div>
                                                                         <div class="col-md-9">
-                                                                            <textarea class="form-control mb-3 comment-input" type="text" name="employeeComment" required
+                                                                            <textarea class="form-control mb-3 comment-input" type="text" name="employeeComment"
                                                                                 placeholder="Enter your comments" @disabled(isset($section->sectionEmpScore) &&
                                                                                         in_array($section->sectionEmpScore->status, ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM'])) rows="3">{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}</textarea>
                                                                         </div>
@@ -210,7 +210,7 @@
                                                                             </div>
                                                                             <div class="col-md-9">
                                                                                 <textarea class="form-control mb-3" type="text" readonly name="supervisorComment" placeholder="Enter your comments"
-                                                                                    required rows="3">{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
+                                                                                     rows="3">{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
                                                                             </div>
                                                                         </div>
                                                                     @elseif(
@@ -229,7 +229,7 @@
                                                                             </div>
                                                                             <div class="col-md-9">
                                                                                 <textarea class="form-control mb-3" type="text" readonly name="supervisorComment"
-                                                                                    placeholder="Enter your comments" required rows="3">{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
+                                                                                    placeholder="Enter your comments" rows="3">{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
                                                                             </div>
                                                                         </div>
 
@@ -246,7 +246,7 @@
                                                                             </div>
                                                                             <div class="col-md-9">
                                                                                 <textarea class="form-control mb-3" type="text" readonly name="supervisorComment"
-                                                                                    placeholder="Enter your comments" required rows="3">{{ $section->sectionEmpScore->probComment ?? '' }}</textarea>
+                                                                                    placeholder="Enter your comments"  rows="3">{{ $section->sectionEmpScore->probComment ?? '' }}</textarea>
                                                                             </div>
                                                                         </div>
                                                                     @endif
@@ -301,7 +301,7 @@
                                                                                                 value="{{ optional($metric->metricEmpScore)->metricEmpScore ?? '' }}">
                                                                                         </div>
                                                                                         <div class="col-md-9">
-                                                                                            <textarea class="form-control mb-3" type="text" name="employeeComment" required placeholder="Enter your comments"
+                                                                                            <textarea class="form-control mb-3" type="text" name="employeeComment"  placeholder="Enter your comments"
                                                                                                 rows="3" @disabled(
                                                                                                     (isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['REVIEW', 'CONFIRMATION'])) ||
                                                                                                         (isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['COMPLETED', 'PROBLEM'])))>{{ optional($metric->metricEmpScore)->employeeComment ?? '' }}</textarea>
@@ -347,7 +347,7 @@
                                                                                             </div>
                                                                                             <div class="col-md-9">
                                                                                                 <textarea class="form-control mb-3" type="text" readonly name="supervisorComment"
-                                                                                                    placeholder="Enter your comments" required rows="3">{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
+                                                                                                    placeholder="Enter your comments"  rows="3">{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
                                                                                             </div>
                                                                                         </div>
                                                                                         {{--  @elseif((isset($metric->metricEmpScore) || $metric->metricEmpScore->status === 'COMPLETED') && $metric->metricEmpScore->prob == true)  --}}
@@ -371,7 +371,7 @@
                                                                                             </div>
                                                                                             <div class="col-md-9">
                                                                                                 <textarea class="form-control mb-3" type="text" readonly name="supervisorComment"
-                                                                                                    placeholder="Enter your comments" required rows="3">{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
+                                                                                                    placeholder="Enter your comments"  rows="3">{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
                                                                                             </div>
                                                                                         </div>
                                                                                         <span
@@ -391,7 +391,7 @@
                                                                                             </div>
                                                                                             <div class="col-md-9">
                                                                                                 <textarea class="form-control mb-3" type="text" readonly name="supervisorComment"
-                                                                                                    placeholder="Enter your comments" required rows="3">{{ $metric->metricEmpScore->probComment ?? '' }}</textarea>
+                                                                                                    placeholder="Enter your comments"  rows="3">{{ $metric->metricEmpScore->probComment ?? '' }}</textarea>
                                                                                             </div>
                                                                                         </div>
                                                                                     @endif
