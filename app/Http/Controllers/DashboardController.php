@@ -363,6 +363,7 @@ class DashboardController extends Controller
                     'kpiScore' => $grade->totalKpiScore,
                     'grade' => $grade->grade,
                     'remark' => $grade->remark,
+                    'recommendation' => $grade->recommendation,
                     'status' => $kpiStatus
                 ];
             } else {
@@ -499,6 +500,7 @@ class DashboardController extends Controller
                                 'kpiScore' => $grade->totalKpiScore,
                                 'grade' => $grade->grade,
                                 'remark' => $grade->remark,
+                                'recommendation' => $grade->recommendation,
                                 'status' => $kpiStatus
                             ];
                         } else {
