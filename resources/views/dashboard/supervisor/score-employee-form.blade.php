@@ -1,5 +1,19 @@
 <x-base-layout>
 
+    @php
+
+        $accessToken = session('api_token');
+        // Fetch user information
+        $responseUser = Http::withToken($accessToken)
+            ->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+
+        // Handle responses
+        $user = $responseUser->successful() ? $responseUser->object() : null;
+
+        $supervisorId = $user->id;
+
+    @endphp
+
     <div class="container-fluid px-1">
 
         <!-- start page title -->
@@ -262,12 +276,12 @@
                                         <button id="next-btn" class="btn btn-primary">Next</button>
 
                                         <button id="submit-btn" type="button" data-bs-toggle="modal" class="btn btn-success"
-                                            data-bs-target=".bs-delete-modal-lg" id="submitAppraisalButton" disabled>Submit
+                                            data-bs-target=".bs-submit-appraisal-modal-lg" id="submitAppraisalButton" disabled>Submit
                                             Appraisal</button>
                                     </div>
                                 </div>
 
-                                <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
+                                <div class="modal fade bs-submit-appraisal-modal-lg" tabindex="-1" role="dialog"
                                     aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-md modal-dialog-centered">
                                         <div class="modal-content">
@@ -289,7 +303,18 @@
                                                     <input type="hidden" name="employeeId" value="{{ $employeeId }}">
                                                     <input type="hidden" name="kpiId" value="{{ $kpi->kpi->kpiId }}">
                                                     <input type="hidden" name="batchId" value="{{ $kpi->kpi->batchId }}">
+                                                    <input type="hidden" name="supervisorId" value="{{ $supervisorId }}">
                                                     <input type="hidden" name="status" value="CONFIRMATION">
+
+                                                    {{--  Textarea for supervisor recommendation (optional recommendation comment)  --}}
+                                                    <div class="mb-3">
+                                                        <label for="supervisorRecommendation" class="form-label">Supervisor
+                                                            Recommendation (Optional)</label>
+                                                        <textarea class="form-control" id="supervisorRecommendation"
+                                                            name="supervisorRecommendation" rows="4"
+                                                            placeholder="Enter your recommendation here..."></textarea>
+                                                    </div>
+
                                                     <div class="d-grid">
 
                                                         <button type="submit" id="submitReviewButton"
@@ -361,10 +386,13 @@
                                             let allFilled = true;
 
                                             for (let i = start; i < end && i < sections.length; i++) {
-                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]'); const commentInputs = sections[i].querySelectorAll('textarea[name*="Comment" ]'); const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');
+                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]');
+                                                {{--  const commentInputs = sections[i].querySelectorAll('textarea[name*="Comment" ]');  --}}
+                                                const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                                                {{--  const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');  --}}
 
-                                                if (!scoresFilled || !commentsFilled) {
+                                                {{--  if (!scoresFilled || !commentsFilled) {  --}}
+                                                if (!scoresFilled ) {
                                                     allFilled = false;
                                                     sections[i].classList.add('border-danger');
                                                 } else {
@@ -381,10 +409,11 @@
                                                 const scoreInputs = section.querySelectorAll(
                                                     'input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]'
                                                 );
-                                                const commentInputs = section.querySelectorAll('textarea[name*="Comment"]');
+                                                {{--  const commentInputs = section.querySelectorAll('textarea[name*="Comment"]');  --}}
                                                 const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');
-                                                if (scoresFilled && commentsFilled) totalValid++;
+                                                {{--  const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');  --}}
+                                                {{--  if (scoresFilled && commentsFilled) totalValid++;  --}}
+                                                if (scoresFilled) totalValid++;
                                             });
                                             const percent = Math.round((totalValid / sections.length) * 100);
                                             progressBar.style.width = percent + '%';
@@ -407,7 +436,9 @@
                                             });
                                             const start = page * sectionsPerPage;
                                             const end = start + sectionsPerPage;
-                                            for (let i = start; i < end && i < sections.length; i++) { sections[i].style.display = 'block'; } if (currentPageSpan) currentPageSpan.textContent = page + 1; sessionStorage.setItem('currentPage', page); updateButtons(); window.scrollTo({ top: sections[start].offsetTop, behavior: 'smooth' });
+                                            for (let i = start; i < end && i < sections.length; i++) {
+                                                sections[i].style.display = 'block';
+                                            } if (currentPageSpan) currentPageSpan.textContent = page + 1; sessionStorage.setItem('currentPage', page); updateButtons(); window.scrollTo({ top: sections[start].offsetTop, behavior: 'smooth' });
                                         } if (prevBtn) {
                                             prevBtn.addEventListener('click', function () {
                                                 if (currentPage > 0) {
@@ -431,7 +462,7 @@
                                         // Enhanced AJAX form handler with proper error handling
                                         document.querySelectorAll('form.ajax-sup-eval-form, form.section-form, form.ajax-eval-form').forEach(form => {
                                             form.addEventListener('submit', function (e) {
-                                                e.preventDefault();
+                                                {{--  e.preventDefault();  --}}
                                                 const scrollPos = window.scrollY;
                                                 const formData = new FormData(form);
                                                 const saveBtn = form.querySelector('button[type="submit"]');

@@ -624,11 +624,11 @@
                                             let totalValid = 0;
                                             sections.forEach(section => {
                                                 const scoreInputs = section.querySelectorAll('input[type="number"][name*="EmpScore"]');
-                                                const commentInputs = section.querySelectorAll('textarea[name="employeeComment"]');
+                                                {{--  const commentInputs = section.querySelectorAll('textarea[name="employeeComment"]');  --}}
                                                 const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !==
-                                                    '');
-                                                if (scoresFilled && commentsFilled) totalValid++;
+                                                {{--  const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !=='');  --}}
+                                                {{--  if (scoresFilled && commentsFilled) totalValid++;  --}}
+                                                if (scoresFilled) totalValid++;
                                             });
                                             const percent = Math.round((totalValid / sections.length) * 100);
                                             progressBar.style.width = percent + '%';
