@@ -44,9 +44,7 @@ class UpdateKpiScoringState extends Controller
                 $recommendationResponse = Http::withToken($apiToken)
                     ->post("{$baseApiUrl}/Recommendation", $recommendationData);
 
-                if (!$recommendationResponse->successful()) {
-                    throw new \Exception("API request (recommendation) failed with status: {$recommendationResponse->status()}");
-                }
+                
             }
 
             // Always submit status update (for all statuses)
@@ -57,14 +55,11 @@ class UpdateKpiScoringState extends Controller
                 'status' => $validated['status'],
             ];
 
-    
+
 
             $statusResponse = Http::withToken($apiToken)
                 ->put("{$baseApiUrl}/Score/update-score-status", $statusData);
 
-            if (!$statusResponse->successful()) {
-                throw new \Exception("API request (status update) failed with status: {$statusResponse->status()}");
-            }
 
             // Success messages for each status
             $messages = [
