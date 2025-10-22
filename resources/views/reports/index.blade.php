@@ -100,10 +100,10 @@
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
         @php
-            $reports = $reports ?? collect();
-            $totalEmployees = $reports->sum(function ($report) {
-                return count($report->employees ?? []);
-            });
+$reports = $reports ?? collect();
+$totalEmployees = $reports->sum(function ($report) {
+    return count($report->employees ?? []);
+});
         @endphp
 
         <div class="row">
@@ -159,50 +159,50 @@
                                     @if ($reports && $reports->isNotEmpty())
                                         @forelse ($reports as $report)
                                             @foreach ($report->employees as $employee)
-                                                @php
-                                                    $supervisorName = collect($employee->scores)
-                                                        ->pluck('supervisorName')
-                                                        ->unique()
-                                                        ->filter()
-                                                        ->implode(', ');
+                                                                                                                        @php
+                                                $supervisorName = collect($employee->scores)
+                                                    ->pluck('supervisorName')
+                                                    ->unique()
+                                                    ->filter()
+                                                    ->implode(', ');
 
-                                                    $probeName = collect($employee->scores)
-                                                        ->pluck('probName')
-                                                        ->unique()
-                                                        ->filter()
-                                                        ->implode(', ');
+                                                $probeName = collect($employee->scores)
+                                                    ->pluck('probName')
+                                                    ->unique()
+                                                    ->filter()
+                                                    ->implode(', ');
 
-                                                    $status = collect($employee->scores)
-                                                        ->pluck('status')
-                                                        ->unique()
-                                                        ->filter()
-                                                        ->implode(', ');
-                                                @endphp
-                                                
-                                                <tr>
-                                                    <td>{{ $report->batchName ?? 'N/A' }}</td>
-                                                    <td>{{ $employee->employeeName ?? 'N/A' }}</td>
-                                                    <td>{{ $employee->totalScore->grade ?? 'N/A' }}</td>
-                                                    <td>{{ $employee->totalScore->recommendation ?? 'N/A' }}</td>
-                                                    <td>{{ $employee->totalScore->totalKpiScore ?? 'N/A' }}</td>
-                                                    <td>{{ $employee->totalScore->remark ?? 'N/A' }}</td>
-                                                    <td>
-                                                        <span class="badge {{ $status == 'Completed' ? 'bg-success' : ($status == 'Pending' ? 'bg-warning' : 'bg-secondary') }}">
-                                                            {{ $status ?? 'N/A' }}
-                                                        </span>
-                                                    </td>
-                                                    <td>{{ $employee->branchName ?? 'N/A' }}</td>
-                                                    <td>{{ $employee->departmentName ?? 'N/A' }}</td>
-                                                    <td>{{ $employee->roleName ?? 'N/A' }}</td>
-                                                    <td>{{ $supervisorName ?? 'N/A' }}</td>
-                                                    <td>{{ $probeName ?? 'N/A' }}</td>
-                                                    <td>
-                                                        <a
-                                                            href="{{ route('reports.employee.summary', $employee->employeeId) }}">
-                                                            <span class="badge rounded-pill bg-primary">View</span>
-                                                        </a>
-                                                    </td>
-                                                </tr>
+                                                $status = collect($employee->scores)
+                                                    ->pluck('status')
+                                                    ->unique()
+                                                    ->filter()
+                                                    ->implode(', ');
+                                                                                                                        @endphp
+
+                                                                                                                        <tr>
+                                                                                                                            <td>{{ $report->batchName ?? 'N/A' }}</td>
+                                                                                                                            <td>{{ $employee->employeeName ?? 'N/A' }}</td>
+                                                                                                                            <td>{{ $employee->totalScore->grade ?? 'N/A' }}</td>
+                                                                                                                            <td>{{ ($employee->totalScore?->recommendation ?? 'No Recommendation') === 'No Recommendation' ? '___' : $employee->totalScore?->recommendation }}</td>
+                                                                                                                            <td>{{ $employee->totalScore->totalKpiScore ?? 'N/A' }}</td>
+                                                                                                                            <td>{{ $employee->totalScore->remark ?? 'N/A' }}</td>
+                                                                                                                            <td>
+                                                                                                                                <span class="badge {{ $status == 'Completed' ? 'bg-success' : ($status == 'Pending' ? 'bg-warning' : 'bg-secondary') }}">
+                                                                                                                                    {{ $status ?? 'N/A' }}
+                                                                                                                                </span>
+                                                                                                                            </td>
+                                                                                                                            <td>{{ $employee->branchName ?? 'N/A' }}</td>
+                                                                                                                            <td>{{ $employee->departmentName ?? 'N/A' }}</td>
+                                                                                                                            <td>{{ $employee->roleName ?? 'N/A' }}</td>
+                                                                                                                            <td>{{ $supervisorName ?? 'N/A' }}</td>
+                                                                                                                            <td>{{ $probeName ?? 'N/A' }}</td>
+                                                                                                                            <td>
+                                                                                                                                <a
+                                                                                                                                    href="{{ route('reports.employee.summary', $employee->employeeId) }}">
+                                                                                                                                    <span class="badge rounded-pill bg-primary">View</span>
+                                                                                                                                </a>
+                                                                                                                            </td>
+                                                                                                                        </tr>
                                             @endforeach
                                         @empty
                                             <tr>
