@@ -78,7 +78,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
 
                                             <div class="p-3 mb-2 bg-light text-dark border rounded">
                                                 @if (isset($gradeDetails['recommendation']) && !empty($gradeDetails['recommendation']))
-                                                    <p>{{ $gradeDetails['recommendation']}}</p>
+                                                    <p>{{ ($gradeDetails['recommendation'] ?? 'No Recommendation') === 'No Recommendation' ? '___' : $gradeDetails['recommendation'] }}</p>
                                                 @else
                                                     <p class="text-center">No Recommendation Available</p>
                                                 @endif
