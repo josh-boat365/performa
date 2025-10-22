@@ -43,10 +43,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                     <div class="card-body">
                         <div class="card-title">
                             <span>Appraisal Grades Summary</span> &nbsp; &nbsp;
-                            <a href="#" data-bs-toggle="modal" data-bs-target=".bs-recommendation-modal-lg">
-                                <span class="small btn-soft-info" >View Supervisor
-                                    Recommendation</span>
-                            </a>
+
                         </div>
                         <div class="d-flex justify-content-around align-items-start gap-4 p-3">
                             <!-- Appraisal Grades Summary and Status -->
@@ -59,6 +56,10 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                             {{ $badgeDetails['text'] }}
                                         </span></b>
                                 </h5>
+                                <h5><a href="#" data-bs-toggle="modal" data-bs-target=".bs-recommendation-modal-lg">
+                                    <span class="small btn-soft-info">View Supervisor
+                                        Recommendation</span>
+                                </a></h5>
                             </div>
 
                              {{--  Recommendation Modal   --}}
