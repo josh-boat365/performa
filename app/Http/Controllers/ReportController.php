@@ -45,6 +45,7 @@ class ReportController extends Controller
         if (!$responses[0]->successful()) {
             Log::error('Failed to fetch appraisal reports', ['response' => $responses[0]->body()]);
             $reports = collect();
+
         } else {
             $reports = collect($responses[0]->object() ?? []);
         }
@@ -94,6 +95,8 @@ class ReportController extends Controller
                 'employeeName' => trim(($employee->firstName ?? '') . ' ' . ($employee->surname ?? '')) ?: 'N/A',
             ])->values();
         }
+
+        // dd($reports);
 
         // Extract unique KPIs from reports data
         $kpis = $reports->flatMap(fn($report) => $report->employees ?? [])

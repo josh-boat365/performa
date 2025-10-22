@@ -143,6 +143,7 @@
                                         <th>Batch</th>
                                         <th>Employee Full Name</th>
                                         <th>Grade</th>
+                                        <th>Recommendation</th>
                                         <th>Score</th>
                                         <th>Remark</th>
                                         <th>Status</th>
@@ -177,10 +178,12 @@
                                                         ->filter()
                                                         ->implode(', ');
                                                 @endphp
+                                                
                                                 <tr>
                                                     <td>{{ $report->batchName ?? 'N/A' }}</td>
                                                     <td>{{ $employee->employeeName ?? 'N/A' }}</td>
                                                     <td>{{ $employee->totalScore->grade ?? 'N/A' }}</td>
+                                                    <td>{{ $employee->totalScore->recommendation ?? 'N/A' }}</td>
                                                     <td>{{ $employee->totalScore->totalKpiScore ?? 'N/A' }}</td>
                                                     <td>{{ $employee->totalScore->remark ?? 'N/A' }}</td>
                                                     <td>

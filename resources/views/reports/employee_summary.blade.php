@@ -127,6 +127,15 @@
                             </div>
                         @endforeach
 
+                        {{--  Recommendation from supervisor  --}}
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Supervisor Recommendation</h5>
+                                <p class="card-text">
+                                    {{ $employee->totalScore->recommendation ?? '___' }}
+                                </p>
+                        </div>
+
                         <div class=""
                             style="background-color: rgb(183, 183, 183); height: 1px; margin-top:4rem; margin-bottom:3rem">
                         </div>
