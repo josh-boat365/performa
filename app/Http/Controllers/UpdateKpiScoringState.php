@@ -4,10 +4,18 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
+use App\Services\AppraisalApiService;
+use App\Exceptions\ApiException;
 
 class UpdateKpiScoringState extends Controller
 {
+    private AppraisalApiService $appraisalService;
+
+    public function __construct(AppraisalApiService $appraisalService)
+    {
+        $this->appraisalService = $appraisalService;
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -22,16 +30,7 @@ class UpdateKpiScoringState extends Controller
         $batchId = $validated['batchId'];
 
         try {
-            // Validate session
-            $sessionValidation = ValidateSessionController::validateSession();
-            if ($sessionValidation) {
-                return $sessionValidation;
-            }
-
-            $apiToken = session('api_token');
-            $baseApiUrl = 'http://192.168.1.200:5123/Appraisal';
-
-            // Submit supervisor recommendation if comment is provided (regardless of status)
+            // Submit supervisor recommendation if comment is provided
             if (!empty($validated['supervisorRecommendation']) && !empty($validated['supervisorId'])) {
                 $recommendationData = [
                     'employeeId' => (int) $validated['employeeId'],
@@ -41,13 +40,10 @@ class UpdateKpiScoringState extends Controller
                     'supervisorComment' => $validated['supervisorRecommendation'],
                 ];
 
-                $recommendationResponse = Http::withToken($apiToken)
-                    ->post("{$baseApiUrl}/Recommendation", $recommendationData);
-
-                
+                $this->appraisalService->submitRecommendation($recommendationData);
             }
 
-            // Always submit status update (for all statuses)
+            // Always submit status update
             $statusData = [
                 'employeeId' => (int) $validated['employeeId'],
                 'kpiId' => (int) $validated['kpiId'],
@@ -55,11 +51,7 @@ class UpdateKpiScoringState extends Controller
                 'status' => $validated['status'],
             ];
 
-
-
-            $statusResponse = Http::withToken($apiToken)
-                ->put("{$baseApiUrl}/Score/update-score-status", $statusData);
-
+            $this->appraisalService->updateScoreStatus($statusData);
 
             // Success messages for each status
             $messages = [
@@ -94,28 +86,16 @@ class UpdateKpiScoringState extends Controller
                         ->back()
                         ->with('toast_success', $successMessage);
             }
-        } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            Log::error('API Connection Error : UpdateKpiScoringState', [
-                'message' => $e->getMessage(),
-                'request_data' => $statusData ?? $recommendationData ?? [],
-            ]);
-            return back()->with('toast_error', 'Network connection failed. Please check your connection and try again.');
-        } catch (\Illuminate\Http\Client\RequestException $e) {
-            Log::error('API Request Error', [
-                'message' => $e->getMessage(),
-                'code' => $e->getCode(),
-                'request_data' => $statusData ?? $recommendationData ?? [],
-            ]);
-            return back()->with('toast_error', 'Request failed. Please try again later.');
+        } catch (ApiException $e) {
+            Log::error('Failed to update KPI scoring state', ['message' => $e->getMessage()]);
+            return back()->with('toast_error', 'Failed to update appraisal status. Please try again.');
         } catch (\Exception $e) {
-            Log::error('Unexpected Error in Appraisal Update', [
+            Log::error('Unexpected error updating KPI scoring state', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'request_data' => $statusData ?? $recommendationData ?? [],
             ]);
             return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
         }
     }
-
 }
