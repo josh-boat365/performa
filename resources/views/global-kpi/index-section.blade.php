@@ -9,7 +9,7 @@
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18"><a href="#">Setup For Global KPIs</a> > Global Section
                         Setup
-                        {{--  > <a href="#">{{ session('kpi_section_name') }}</a>  --}}
+                        {{-- > <a href="#">{{ session('kpi_section_name') }}</a> --}}
                     </h4>
                 </div>
             </div>
@@ -34,8 +34,8 @@
                             <div class="col-sm-8">
                                 <div class="search-box me-2 mb-2 d-inline-block" @style(['width: 50%'])>
                                     <div class="position-relative">
-                                        <input type="text" class="form-control" autocomplete="off"
-                                            id="searchTableList" placeholder="Search...">
+                                        <input type="text" class="form-control" autocomplete="off" id="searchTableList"
+                                            placeholder="Search...">
                                         <i class="bx bx-search-alt search-icon"></i>
                                     </div>
                                 </div>
@@ -56,39 +56,39 @@
                                         <th class="align-middle">Section Score</th>
                                         <th class="align-middle">Section Description</th>
                                         <th class="align-middle">Section State</th>
-                                        {{--  <th class="align-middle">Created At</th>  --}}
+                                        {{-- <th class="align-middle">Created At</th> --}}
                                         <th class="align-middle">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse ($sections as $section)
                                         <tr>
-                                            <td><a href="#">{{ $section->kpi->name }}</a></td>
-                                            <td><a href="#" @style(['text-wrap: auto'])>{{ $section->name }}</a></td>
-                                            <td>{{ $section->score }}</td>
-                                            <td><span @style(['text-wrap: auto'])>{{ $section->description }}</span></td>
+                                            <td><a href="#">{{ $section['kpi']['name'] }}</a></td>
+                                            <td><a href="#" @style(['text-wrap: auto'])>{{ $section['name'] }}</a></td>
+                                            <td>{{ $section['score'] }}</td>
+                                            <td><span @style(['text-wrap: auto'])>{{ $section['description'] }}</span></td>
                                             <td>
                                                 <span
-                                                    class="dropdown badge rounded-pill {{ $section->active ? 'bg-success' : 'bg-dark' }}">
-                                                    {{ $section->active ? 'Activated' : 'Deactivated' }}
+                                                    class="dropdown badge rounded-pill {{ $section['active'] ? 'bg-success' : 'bg-dark' }}">
+                                                    {{ $section['active'] ? 'Activated' : 'Deactivated' }}
 
                                                 </span>
                                             </td>
-                                            {{--  <td>{{ Carbon\Carbon::parse($section->createdAt)->diffForHumans() }}
-                                            </td>  --}}
+                                            {{-- <td>{{ Carbon\Carbon::parse($section->createdAt)->diffForHumans() }}
+                                            </td> --}}
                                             <td>
-                                                <a href="{{ route('show.global.section', $section->id) }}">
+                                                <a href="{{ route('show.global.section', $section['id']) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i> Edit</span>
                                                 </a>
-                                                {{--  <a href="#" data-bs-toggle="modal"
+                                                {{-- <a href="#" data-bs-toggle="modal"
                                                     data-bs-target=".bs-delete-modal-xl-{{ $section->id }}">
                                                     <span class="badge rounded-pill bg-danger fonte-size-13"><i
                                                             class="bx bxs-trash"></i> Delete</span>
-                                                </a>  --}}
+                                                </a> --}}
 
                                                 <!-- Modal for Delete Confirmation -->
-                                                <div class="modal fade bs-delete-modal-xl-{{ $section->id }}"
+                                                <div class="modal fade bs-delete-modal-xl-{{ $section['id'] }}"
                                                     tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
                                                     aria-hidden="true">
                                                     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -104,13 +104,13 @@
                                                                     delete this Global Section
                                                                     ?</h4>
                                                                 <form
-                                                                    action="{{ route('delete.global.section', $section->id) }}"
+                                                                    action="{{ route('delete.global.section', $section['id']) }}"
                                                                     method="POST">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <div class="d-grid">
-                                                                        <button type="submit"
-                                                                            class="btn btn-danger">Yes, Delete</button>
+                                                                        <button type="submit" class="btn btn-danger">Yes,
+                                                                            Delete</button>
                                                                     </div>
                                                                 </form>
                                                             </div>
@@ -139,7 +139,7 @@
 
         @push('scripts')
             <script>
-                document.getElementById('searchTableList').addEventListener('input', function() {
+                document.getElementById('searchTableList').addEventListener('input', function () {
                     const searchTerm = this.value.toLowerCase();
                     const tableRows = document.querySelectorAll('#order-list tbody tr');
 

@@ -9,7 +9,7 @@
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18"><a href="{{ route('global.metric.index') }}">Setup For Global
                             Section</a> > Global Metrics
-                        {{--  > <a href="#">{{ session('section_metric_name') }}</a>  --}}
+                        {{-- > <a href="#">{{ session('section_metric_name') }}</a> --}}
                     </h4>
                 </div>
             </div>
@@ -17,8 +17,8 @@
         <!-- end page title -->
 
         <div>
-            <a href="{{ route('create.global.metric') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
-                    class="bx bxs-plus"></i>Create
+            <a href="{{ route('create.global.metric') }}"
+                class="btn btn-success btn-rounded waves-effect waves-light "><i class="bx bxs-plus"></i>Create
                 Global Metric</a>
         </div>
 
@@ -34,8 +34,8 @@
                             <div class="col-sm-8">
                                 <div class="search-box me-2 mb-2 d-inline-block" @style(['width: 50%'])>
                                     <div class="position-relative">
-                                        <input type="text" class="form-control" autocomplete="off"
-                                            id="searchTableList" placeholder="Search...">
+                                        <input type="text" class="form-control" autocomplete="off" id="searchTableList"
+                                            placeholder="Search...">
                                         <i class="bx bx-search-alt search-icon"></i>
                                     </div>
                                 </div>
@@ -56,40 +56,39 @@
                                         <th class="align-middle">Metric Score</th>
                                         <th class="align-middle">Metric Description</th>
                                         <th class="align-middle">Metric State</th>
-                                        {{--  <th class="align-middle">Created At</th>  --}}
+                                        {{-- <th class="align-middle">Created At</th> --}}
                                         <th class="align-middle">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse ($metrics as $metric)
                                         <tr>
-                                            <td><a href="#">{{ $metric->section->name }}</a></td>
-                                            <td><a href="#">{{ $metric->name }}</a></td>
-                                            <td>{{ $metric->score }}</td>
-                                            <td>{{ $metric->description }}</td>
-                                            {{--  <td>{{ Carbon\Carbon::parse($metric->createdAt)->diffForHumans() }}
-                                            </td>  --}}
+                                            <td><a href="#">{{ $metric['section']['name'] }}</a></td>
+                                            <td><a href="#">{{ $metric['name'] }}</a></td>
+                                            <td>{{ $metric['score'] }}</td>
+                                            <td>{{ $metric['description'] }}</td>
+                                            {{-- <td>{{ Carbon\Carbon::parse($metric->createdAt)->diffForHumans() }}
+                                            </td> --}}
                                             <td>
                                                 <span
-                                                    class="badge rounded-pill {{ $metric->active ? 'bg-success' : 'bg-dark' }}">
-                                                    {{ $metric->active ? 'Activated' : 'Deactivated' }}
+                                                    class="badge rounded-pill {{ $metric['active'] ? 'bg-success' : 'bg-dark' }}">
+                                                    {{ $metric['active'] ? 'Activated' : 'Deactivated' }}
                                                 </span>
                                             </td>
                                             <td>
-                                                <a href="{{ route('show.global.metric', $metric->id) }}">
+                                                <a href="{{ route('show.global.metric', $metric['id']) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i> Edit</span>
                                                 </a>
                                                 <a href="#" data-bs-toggle="modal"
-                                                    data-bs-target=".bs-delete-modal-lg-{{ $metric->id }}">
+                                                    data-bs-target=".bs-delete-modal-lg-{{ $metric['id'] }}">
                                                     <span class="badge rounded-pill bg-danger fonte-size-13"><i
                                                             class="bx bxs-trash"></i> Delete</span>
                                                 </a>
 
                                                 <!-- Modal for Delete Confirmation -->
-                                                <div class="modal fade bs-delete-modal-lg-{{ $metric->id }}"
-                                                    tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
-                                                    aria-hidden="true">
+                                                <div class="modal fade bs-delete-modal-lg-{{ $metric['id'] }}" tabindex="-1"
+                                                    role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                                     <div class="modal-dialog modal-lg modal-dialog-centered">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
@@ -102,13 +101,13 @@
                                                                 <h4 class="text-center mb-4">Are you sure you want to
                                                                     delete this Global Metric?</h4>
                                                                 <form
-                                                                    action="{{ route('delete.global.metric', $metric->id) }}"
+                                                                    action="{{ route('delete.global.metric', $metric['id']) }}"
                                                                     method="POST">
                                                                     @csrf
-                                                                    {{--  @method('DELETE')  --}}
+                                                                    {{-- @method('DELETE') --}}
                                                                     <div class="d-grid">
-                                                                        <button type="submit"
-                                                                            class="btn btn-danger">Yes, Delete</button>
+                                                                        <button type="submit" class="btn btn-danger">Yes,
+                                                                            Delete</button>
                                                                     </div>
                                                                 </form>
                                                             </div>
@@ -137,7 +136,7 @@
 
         @push('scripts')
             <script>
-                document.getElementById('searchTableList').addEventListener('input', function() {
+                document.getElementById('searchTableList').addEventListener('input', function () {
                     const searchTerm = this.value.toLowerCase();
                     const tableRows = document.querySelectorAll('#order-list tbody tr');
 
