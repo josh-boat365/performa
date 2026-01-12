@@ -7,7 +7,7 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18">
-                        <a href="{{ url("dashboard/department/section-setup/kpi/100/index/{$kpiId}") }}">{{ $sectionData->name }}</a> >
+                        <a href="{{ url("dashboard/department/section-setup/kpi/100/index/{$kpiId}") }}">{{ $sectionData['name'] }}</a> >
                         Update Section Details
 
                     </h4>
@@ -23,14 +23,14 @@
             <div class="col-md-12">
                 <div class="card card-body">
                     <h3 class="card-title">KPI Section </h3>
-                    <form action="{{ url("dashboard/department/kpi/{$kpiId}/section-update/{$sectionData->id}") }}"
+                    <form action="{{ url("dashboard/department/kpi/{$kpiId}/section-update/{$sectionData['id']}") }}"
                         method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Name</label>
                             <div class="col-md-12">
 
-                                <textarea class="form-control" name="name" required rows="3" id="example-text-input">{{ $sectionData->name }}</textarea>
+                                <textarea class="form-control" name="name" required rows="3" id="example-text-input">{{ $sectionData['name'] }}</textarea>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -39,14 +39,14 @@
 
                                 <input class="form-control" type="text" name="score" max="{{ $totalSectionScore }}"
                                     title="The Score cannot be more than the section score {{ $totalSectionScore }}" required
-                                    value="{{ $sectionData->score }}" id="example-text-input">
+                                    value="{{ $sectionData['score'] }}" id="example-text-input">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Description</label>
                             <div class="col-md-12">
 
-                                <textarea class="form-control" name="description" required rows="3" id="example-text-input">{{ $sectionData->description }}</textarea>
+                                <textarea class="form-control" name="description" required rows="3" id="example-text-input">{{ $sectionData['description'] }}</textarea>
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -54,13 +54,13 @@
                             <div class="col-md-12">
                                 <select class="form-control" id="stateSelect" name="active" onchange="updateState()">
 
-                                    <option value="1" @selected($sectionData->active === true)>Active</option>
-                                    <option value="0" @selected($sectionData->active === false)>Deactivate
+                                    <option value="1" @selected($sectionData['active'] === true)>Active</option>
+                                    <option value="0" @selected($sectionData['active'] === false)>Deactivate
                                     </option>
                                 </select>
 
                                 <input type="hidden" name="stateHidden" id="stateHidden"
-                                    value="{{ $sectionData->active ? '1' : '0' }}">
+                                    value="{{ $sectionData['active'] ? '1' : '0' }}">
                             </div>
                         </div>
 
@@ -71,7 +71,7 @@
                                 hiddenInput.value = select.value; // Set the hidden input value to the selected option's value
                             }
                         </script>
-                        <input type="hidden" name="kpiId" value="{{ $sectionData->kpi->id }}">
+                        <input type="hidden" name="kpiId" value="{{ $sectionData['kpi']['id'] }}">
                         <button type="submit"
                             class="btn btn-success waves-effect waves-light col-md-12 mt-4">Update</button>
                     </form>
