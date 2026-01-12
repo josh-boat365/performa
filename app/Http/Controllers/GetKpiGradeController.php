@@ -2,56 +2,54 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
+use App\Services\AppraisalApiService;
+use App\Exceptions\ApiException;
 
 class GetKpiGradeController extends Controller
 {
-    public static function getGrade($kpiId, $batchId, $employeeId){
-        // Get the access token from the session
-        $accessToken = session('api_token');
+    private AppraisalApiService $appraisalService;
 
-        $submittedEmployeeGradeData = [
-            'employeeId' => (int) $employeeId,
-            'kpiId' => (int) $kpiId,
-            'batchId' => (int) $batchId,
-            'status' => 'SCORING'
-        ];
+    public function __construct(AppraisalApiService $appraisalService)
+    {
+        $this->appraisalService = $appraisalService;
+    }
 
-        $supervisorGradeForEmployeeData = [
-            'employeeId' => (int) $employeeId,
-            'kpiId' => (int) $kpiId,
-            'batchId' => (int) $batchId,
-            'status' => 'REVIEW'
-        ];
+    public function getGrade($kpiId, $batchId, $employeeId)
+    {
+        try {
+            $submittedEmployeeGradeData = [
+                'employeeId' => (int) $employeeId,
+                'kpiId' => (int) $kpiId,
+                'batchId' => (int) $batchId,
+                'status' => 'SCORING'
+            ];
 
-        $responseEmployeeGrade = Http::withToken($accessToken)->put('http://192.168.1.200:5123/Appraisal/Score/get-employee-total-grade', $submittedEmployeeGradeData);
-        $responseSupervisorGradeForEmployee =  Http::withToken($accessToken)->put('http://192.168.1.200:5123/Appraisal/Score/get-employee-total-grade', $supervisorGradeForEmployeeData);
+            $supervisorGradeForEmployeeData = [
+                'employeeId' => (int) $employeeId,
+                'kpiId' => (int) $kpiId,
+                'batchId' => (int) $batchId,
+                'status' => 'REVIEW'
+            ];
 
-        if ($responseEmployeeGrade->successful()) {
-            $submittedEmployeeGrade = $responseEmployeeGrade->object();
-        } else {
-            Log::error('Failed to retrieve Submitted Employee Grade', [
-                'status' => $responseEmployeeGrade->status(),
-                'response' => $responseEmployeeGrade->body()
+            $submittedEmployeeGrade = $this->appraisalService->getEmployeeTotalGrade($submittedEmployeeGradeData);
+            $supervisorGradeForEmployee = $this->appraisalService->getEmployeeTotalGrade($supervisorGradeForEmployeeData);
+
+            return (object)[
+                'submittedEmployeeGrade' => $submittedEmployeeGrade,
+                'supervisorGradeForEmployee' => $supervisorGradeForEmployee
+            ];
+        } catch (ApiException $e) {
+            Log::error('Failed to retrieve employee grades', [
+                'kpiId' => $kpiId,
+                'batchId' => $batchId,
+                'employeeId' => $employeeId,
+                'message' => $e->getMessage()
             ]);
-            $submittedEmployeeGrade = [];
+            return (object)[
+                'submittedEmployeeGrade' => [],
+                'supervisorGradeForEmployee' => []
+            ];
         }
-
-        if ($responseSupervisorGradeForEmployee->successful()) {
-            $supervisorGradeForEmployee = $responseSupervisorGradeForEmployee->object();
-        } else {
-            Log::error('Failed to retrieve Supervisor Grade For Employee', [
-                'status' => $responseSupervisorGradeForEmployee->status(),
-                'response' => $responseSupervisorGradeForEmployee->body()
-            ]);
-            $supervisorGradeForEmployee = [];
-        }
-
-        return (object)[
-            'submittedEmployeeGrade' => $submittedEmployeeGrade,
-            'supervisorGradeForEmployee' => $supervisorGradeForEmployee
-        ];
     }
 }
