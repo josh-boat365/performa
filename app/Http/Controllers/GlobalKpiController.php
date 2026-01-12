@@ -194,9 +194,11 @@ class GlobalKpiController extends Controller
                 'id' => $id,
                 'name' => $request->input('name'),
                 'description' => $request->input('description'),
+                'score' => $request->input('score'),
                 'type' => $request->input('type'),
                 'active' => (bool) $request->input('active'),
                 'batchId' => (int) $request->input('batchId'),
+                'departmentId' => (int) $request->input('departmentId'),
                 'empRoleId' => (int) $request->input('empRoleId'),
             ];
 

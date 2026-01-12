@@ -335,9 +335,11 @@ class KpiController extends Controller
                 'id' => $id,
                 'name' => $request->input('name'),
                 'description' => $request->input('description') ?? '',
+                'score' => $request->input('score'),
                 'type' => $request->input('type'),
                 'active' => (bool) $request->input('active'),
                 'batchId' => $request->input('batchId'),
+                'departmentId' => (int) $request->input('departmentId'),
                 'empRoleId' => $request->input('empRoleId'),
             ];
 

@@ -120,7 +120,7 @@ class AppraisalApiService extends BaseApiService
      */
     public function updateKpi($kpiId, array $data): array
     {
-        return $this->put($this->getEndpoint('kpi') . "/{$kpiId}", $data);
+        return $this->put($this->getEndpoint('kpi') . "/", $data);
     }
 
     /**
