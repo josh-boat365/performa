@@ -6,7 +6,8 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('global.section.index') }}">SECTIONS  </a> > Setup For Global Sections
+                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('global.section.index') }}">SECTIONS </a> >
+                        Setup For Global Sections
 
                     </h4>
                 </div>
@@ -27,15 +28,16 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Name</label>
                             <div class="col-md-12">
-                                <textarea class="form-control" name="name" required placeholder="Enter Name for Section" rows="3"
-                                    id="example-text-input">{{ old('name') }}</textarea>
+                                <textarea class="form-control" name="name" required placeholder="Enter Name for Section"
+                                    rows="3" id="example-text-input">{{ old('name') }}</textarea>
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Description</label>
                             <div class="col-md-12">
-                                <textarea class="form-control" name="description" required placeholder="Enter Description for Section" rows="3"
+                                <textarea class="form-control" name="description" required
+                                    placeholder="Enter Description for Section" rows="3"
                                     id="example-text-input">{{ old('description') }}</textarea>
                             </div>
                         </div>
@@ -55,9 +57,8 @@
                                     <option>Select KPI</option>
 
                                     @foreach ($activeKpis as $kpi)
-                                        <option value="{{ $kpi->id }}"
-                                            {{ old('kpiId') == $kpi->id ? 'selected' : '' }}>
-                                            {{ $kpi->name }} 
+                                        <option value="{{ $kpi['id'] }}" {{ old('kpiId') == $kpi['id'] ? 'selected' : '' }}>
+                                            {{ $kpi['name'] }}
                                         </option>
                                     @endforeach
                                 </select>

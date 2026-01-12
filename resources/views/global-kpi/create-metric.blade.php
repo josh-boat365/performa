@@ -58,9 +58,9 @@
                                     <option>Select Section</option>
 
                                     @foreach ($activeSections as $section)
-                                        <option value="{{ $section->id }}"
-                                            {{ old('sectionId') == $section->id ? 'selected' : '' }}>
-                                            {{ $section->name }} - {{ $section->kpi->name }}
+                                        <option value="{{ $section['id'] }}"
+                                            {{ old('sectionId') == $section['id'] ? 'selected' : '' }}>
+                                            {{ $section['name'] }} - {{ $section['kpi']['name'] }}
                                         </option>
                                     @endforeach
                                 </select>
