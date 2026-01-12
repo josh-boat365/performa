@@ -2,54 +2,86 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreKpiRequest;
+use App\Http\Requests\UpdateKpiRequest;
+use App\Services\AppraisalApiService;
+use App\Services\HrmsApiService;
+use App\Exceptions\ApiException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class GlobalKpiController extends Controller
 {
+    private AppraisalApiService $appraisalService;
+    private HrmsApiService $hrmsService;
+
+    public function __construct(AppraisalApiService $appraisalService, HrmsApiService $hrmsService)
+    {
+        $this->appraisalService = $appraisalService;
+        $this->hrmsService = $hrmsService;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
+        try {
+            // Get all KPIs
+            $response = $this->appraisalService->getAllKpis();
 
-        $accessToken = session('api_token');
+            // Log raw response for debugging
+            Log::info('Global KPI Index - Raw response', [
+                'response_type' => gettype($response),
+                'response_keys' => is_array($response) ? array_keys($response) : 'N/A'
+            ]);
 
-        if (!$accessToken) {
-            return redirect()->route('login')->with('toast_error', 'We can not find session, please login again'); // Redirect to login if token is missing
+            // Handle both wrapped and unwrapped responses
+            if (is_array($response) && isset($response['data']) && is_array($response['data'])) {
+                $kpis = $response['data'];
+            } elseif (is_array($response)) {
+                $kpis = $response;
+            } else {
+                $kpis = [];
+            }
+
+            // Log for debugging
+            Log::info('Global KPI Index - All KPIs count', ['count' => count($kpis)]);
+
+            // Log first KPI to see structure if there are any
+            if (!empty($kpis)) {
+                Log::info('Global KPI Index - First KPI structure', [
+                    'first_kpi' => array_slice(array_keys($kpis[0]), 0, 10), // First 10 keys
+                    'type_value' => $kpis[0]['type'] ?? 'NOT_FOUND'
+                ]);
+            }
+
+            // Filter KPIs to include only those with type GLOBAL or PROBATION
+            $activeKpis = collect($kpis)->filter(function ($kpi) {
+                $type = $kpi['type'] ?? null;
+                return $type === 'GLOBAL' || $type === 'PROBATION';
+            });
+
+            Log::info('Global KPI Index - Filtered KPIs count', [
+                'count' => $activeKpis->count(),
+                'filter_logic' => 'type === GLOBAL || type === PROBATION'
+            ]);
+
+            // Sort by creation date descending
+            $activeKpis = $activeKpis->sortByDesc('createdAt');
+
+            // Paginate
+            $activeKpis = $this->paginate($activeKpis, 25, $request);
+
+            return view('global-kpi.index-kpi', compact('activeKpis'));
+        } catch (ApiException $e) {
+            Log::error('Failed to retrieve KPIs', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
-
-        // Centralized API calls
-
-        $responseKpis = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/Kpi');
-
-        // dd($responseKpis);
-
-
-        // Filter the KPIs to include only those with active state of true or false
-        $activeKpis = collect($responseKpis)->filter(function ($kpi) {
-            return $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION';
-        });
-
-        // dd($activeKpis);
-
-        // Sort the KPIs to place the newly created one first
-        $activeKpis = $activeKpis->sortByDesc('createdAt');
-
-        // Paginate the KPIs to display 25 per page
-        $activeKpis = $this->paginate($activeKpis, 25, $request);
-
-
-
-        return view('global-kpi.index-kpi', compact('activeKpis'));
     }
 
     /**
@@ -57,138 +89,97 @@ class GlobalKpiController extends Controller
      */
     public function create()
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
+        try {
+            // Get batches and roles
+            $batchesResponse = $this->appraisalService->getAllBatches();
+            $rolesResponse = $this->hrmsService->getAllRoles();
 
+            // Handle wrapped and unwrapped responses
+            $batches = collect(
+                (isset($batchesResponse['data']) && is_array($batchesResponse['data']))
+                    ? $batchesResponse['data']
+                    : $batchesResponse
+            );
+            $roles = collect(
+                (isset($rolesResponse['data']) && is_array($rolesResponse['data']))
+                    ? $rolesResponse['data']
+                    : $rolesResponse
+            );
 
-        $accessToken = session('api_token');
+            // Filter batches with OPEN status
+            $batch_data = $batches->filter(fn($batch) => ($batch['status'] ?? null) === 'OPEN');
 
-        $responseRoles = $this->fetchApiData($accessToken, 'http://192.168.1.200:5124/HRMS/emprole');
-        $responseBatches = $this->fetchApiData($accessToken, 'http://192.168.1.200:5123/Appraisal/batch');
+            // Extract unique departments
+            $uniqueDepartments = $roles->pluck('department')->unique()->toArray();
 
-        // Extracting data
-        $batch_data = collect($responseBatches)->filter(fn($batch) => $batch->status === 'OPEN');
-
-        $uniqueDepartments = [];
-        // $uniqueRoles = [];
-
-        if ($responseRoles) {
-            $rolesWithDepartments = collect($responseRoles);
-
-            // Extract and deduplicate departments and roles
-            $uniqueDepartments = $rolesWithDepartments->pluck('department')->unique()->toArray();
-            // $uniqueRoles = $rolesWithDepartments->map(function ($role) {
-            //     return [
-            //         'id' => $role->id,
-            //         'name' => $role->name,
-            //     ];
-            // })->unique('id')->values()->toArray();
+            return view('global-kpi.create-kpi', compact('batch_data', 'uniqueDepartments'));
+        } catch (ApiException $e) {
+            Log::error('Failed to retrieve create form data', [
+                'message' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
-
-        // dd($uniqueDepartments);
-
-        return view('global-kpi.create-kpi', compact('batch_data', 'uniqueDepartments'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreKpiRequest $request)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
+        try {
+            $kpiData = [
+                'name' => $request->input('name'),
+                'description' => $request->input('description'),
+                'type' => $request->input('type'),
+                'active' => (bool) $request->input('active'),
+                'batchId' => (int) $request->input('batchId'),
+                'empRoleId' => (int) $request->input('empRoleId'),
+            ];
 
-        // Validate the request data
-        $request->validate([
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'type' => 'required|string',
-            'active' => 'required|integer',
-            'batchId' => 'required|integer',
-            'empRoleId' => 'required|integer',
-        ]);
+            $this->appraisalService->createKpi($kpiData);
 
-        // Prepare the data for KPI creation
-        $kpiData = $request->only([
-            'name',
-            'description',
-            'type',
-            'batchId',
-            'empRoleId'
-        ]);
-        $kpiData['active'] = (bool) $request->input('active'); // Cast to boolean
-
-        // Send the request to the API
-        $response = $this->sendApiRequest('http://192.168.1.200:5123/Appraisal/Kpi', $kpiData, 'POST');
-
-        // Check the response and redirect
-        if ($response->success) {
             return redirect()->route('global.index')->with('toast_success', 'Global KPI created successfully');
+        } catch (ApiException $e) {
+            Log::error('Failed to create KPI', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
-
-        // Log errors (if any)
-        Log::error('Failed to create Global KPI', [
-            'status' => $response->status ?? 'N/A',
-            'response' => $response->data ?? 'No response received',
-        ]);
-
-        return redirect()->back()->with('toast_error', 'Sorry, failed to create KPI' . $response->body());
     }
 
     /**
      * Display the specified resource.
-     */  public function show(string $id)
+     */
+    public function show(string $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
         try {
-            $accessToken = session('api_token');
+            $batchesResponse = $this->appraisalService->getAllBatches();
+            $kpiResponse = $this->appraisalService->getKpi($id);
 
-            // Fetch data using helper method
-            // $responseRoles = Http::withToken($accessToken)
-            //     ->get('http://192.168.1.200:5124/HRMS/emprole');
+            // Handle wrapped and unwrapped batches response
+            $batch_data = (isset($batchesResponse['data']) && is_array($batchesResponse['data']))
+                ? $batchesResponse['data']
+                : $batchesResponse;
 
-            $responseBatches = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5123/Appraisal/batch');
-
-
-            $responseKpi = Http::withToken($accessToken)
-                ->get("http://192.168.1.200:5123/Appraisal/Kpi/{$id}");
-
-            // Extract and process data
-            $batch_data = $responseBatches->object() ?? [];
-            $kpi_data = $responseKpi->object() ?? null;
-
-
-            // $uniqueRoles = $responseRoles->object();
-
-
-
-            if ($kpi_data) {
-                return view('global-kpi.edit-kpi', compact('kpi_data',  'batch_data'));
+            // Handle wrapped and unwrapped KPI response
+            if (isset($kpiResponse['data'])) {
+                $kpi_data = is_array($kpiResponse['data']) ? $kpiResponse['data'] : $kpiResponse['data'];
+            } else {
+                $kpi_data = is_array($kpiResponse) && !isset($kpiResponse['data']) ? $kpiResponse : null;
             }
 
-            Log::error('Failed to fetch Global KPI', [
+            if (!$kpi_data) {
+                return redirect()->back()->with('toast_error', 'Global KPI does not exist');
+            }
+
+            return view('global-kpi.edit-kpi', compact('kpi_data', 'batch_data'));
+        } catch (ApiException $e) {
+            Log::error('Failed to retrieve KPI', [
                 'id' => $id,
-                'response' => $responseKpi,
-            ]);
-            return redirect()->back()->with('toast_error', 'Global KPI does not exist');
-        } catch (\Exception $e) {
-            Log::error('Exception occurred while fetching Global KPI', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
@@ -196,158 +187,77 @@ class GlobalKpiController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateKpiRequest $request, string $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
+        try {
+            $kpiData = [
+                'id' => $id,
+                'name' => $request->input('name'),
+                'description' => $request->input('description'),
+                'type' => $request->input('type'),
+                'active' => (bool) $request->input('active'),
+                'batchId' => (int) $request->input('batchId'),
+                'empRoleId' => (int) $request->input('empRoleId'),
+            ];
 
-        // Validate the request data
-        $request->validate([
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'type' => 'required|string',
-            'active' => 'required|integer',
-            'batchId' => 'required|integer',
-            'empRoleId' => 'required|integer',
-        ]);
+            $this->appraisalService->updateKpi($id, $kpiData);
 
-        // Prepare the data for KPI update
-        $kpiData = [
-            'id' => $id,
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'type' => $request->input('type'),
-            'active' => $request->input('active') == 1 ? true : false,
-            'batchId' => $request->input('batchId'),
-            'empRoleId' => $request->input('empRoleId'),
-        ];
-
-        // Send the request to the API to update the KPI
-        $apiUrl = "http://192.168.1.200:5123/Appraisal/Kpi";
-        $response = $this->sendApiRequest($apiUrl, $kpiData, 'PUT');
-
-        // Check the response and redirect
-        if ($response->success) {
             return redirect()->route('global.index')->with('toast_success', 'Global KPI updated successfully');
+        } catch (ApiException $e) {
+            Log::error('Failed to update KPI', [
+                'id' => $id,
+                'message' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
-
-        // Log errors (if any)
-        Log::error('Failed to update Global KPI', [
-            'status' => $response->status ?? 'N/A',
-            'response' => $response->data ?? 'No response received',
-        ]);
-
-        return redirect()->back()->with('toast_error', 'Sorry, failed to update Global KPI' . $response->body());
     }
 
 
     public function update_state(Request $request, string $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // Validate the request data
-        $request->validate([
-            'active' => 'required|integer',
-        ]);
-
-        // dd($request);
-
-        // Get the access token from the request or environment
-        $accessToken = session('api_token');
-
-        // Prepare the data for the batch state update
-        $batchData = [
-            'id' => $id,
-            'active' => $request->input('active') == 1 ? true : false, // Convert to boolean
-        ];
-
-        // dd($batchData);
-
         try {
-            // Make the PUT request to the external API
-            $response = Http::withToken($accessToken)
-                ->put('http://192.168.1.200:5123/Appraisal/kpi/update-activation', $batchData);
-
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->route('global.index')->with('toast_success', 'Global Kpi state updated successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to update batch', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to update batch state');
-            }
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while updating batch', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            $request->validate([
+                'active' => 'required|integer',
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+
+            $data = [
+                'id' => $id,
+                'active' => (bool) $request->input('active'),
+            ];
+
+            $this->appraisalService->updateKpi($id, $data);
+
+            return redirect()->route('global.index')->with('toast_success', 'Global KPI state updated successfully');
+        } catch (ApiException $e) {
+            Log::error('Failed to update KPI state', [
+                'id' => $id,
+                'message' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
     public function update_status(Request $request, string $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
         try {
-            // Validate the request data
             $request->validate([
-
                 'status' => 'required|string',
             ]);
 
-            // dd($id);
-
-            // Get the access token from the request or environment
-            $accessToken = session('api_token'); // Replace with your actual access token
-
-            // Prepare the data for the batch update
-            $batchData = [
-                'id' => (int) $id,
+            $data = [
+                'id' => $id,
                 'type' => $request->input('status'),
-
             ];
 
-            // dd($batchData);
+            $this->appraisalService->updateKpi($id, $data);
 
-
-            // Make the PUT request to the external API
-            $response = Http::withToken($accessToken)
-                ->put("http://192.168.1.200:5123/Appraisal/Kpi/update-type/", $batchData);
-            // dd($response);
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->route('global.index')->with('toast_success', 'Global Kpi status updated successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to update Global KPI Status', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to update Global KPI Status');
-            }
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while updating batch', [
+            return redirect()->route('global.index')->with('toast_success', 'Global KPI status updated successfully');
+        } catch (ApiException $e) {
+            Log::error('Failed to update KPI status', [
+                'id' => $id,
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
@@ -358,87 +268,21 @@ class GlobalKpiController extends Controller
      */
     public function destroy($id)
     {
-        // Get the access token from the session
-        $accessToken = session('api_token'); // Replace with your actual access token
-
         try {
-            // Make the DELETE request to the external API
-            $response = Http::withToken($accessToken)
-                ->delete("http://192.168.1.200:5123/Appraisal/Kpi/{$id}");
+            $this->appraisalService->deleteKpi($id);
 
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->back()->with('toast_success', 'Global Kpi deleted successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to delete Section', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Global Kpi, there are Section <br> dependent on this Metric and can not be deleted, <b>DEACTIVATE INSTEAD</b>');
-            }
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while deleting Global Kpi', [
+            return redirect()->back()->with('toast_success', 'Global KPI deleted successfully');
+        } catch (ApiException $e) {
+            Log::error('Failed to delete KPI', [
+                'id' => $id,
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
-
-
-    private function fetchApiData(string $accessToken, string $url)
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $response = Http::withToken($accessToken)->get($url);
-
-        return $response->successful() ? $response->object() : null;
-    }
-
-    private function sendApiRequest(string $url, array $data, string $method = 'POST')
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $accessToken = session('api_token');
-
-        try {
-            $response = Http::withToken($accessToken)->{$method}($url, $data);
-
-            return (object) [
-                'success' => $response->successful(),
-                'status' => $response->status(),
-                'data' => $response->successful() ? $response->object() : $response->body(),
-            ];
-        } catch (\Exception $e) {
-            Log::error('API Request Error', [
-                'url' => $url,
-                'method' => $method,
-                'data' => $data,
-                'error' => $e->getMessage(),
-            ]);
-
-            return (object) [
-                'success' => false,
-                'status' => null,
-                'data' => null,
-            ];
-        }
-    }
-
 
     protected function paginate(array|Collection $items, int $perPage, Request $request): LengthAwarePaginator
     {
-
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
         if (!$items instanceof Collection) {
