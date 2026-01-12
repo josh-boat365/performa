@@ -14,8 +14,8 @@
 
 
         <div class="d-flex gap-3">
-            <a href="{{ route('create.global.weight') }}" class="btn btn-success btn-rounded waves-effect waves-light "><i
-                    class="bx bxs-plus"></i>Create Weight
+            <a href="{{ route('create.global.weight') }}"
+                class="btn btn-success btn-rounded waves-effect waves-light "><i class="bx bxs-plus"></i>Create Weight
             </a>
 
         </div>
@@ -47,7 +47,7 @@
                                 <th class="align-middle">Department</th>
                                 <th class="align-middle">Type</th>
                                 <th class="align-middle">Weighted Score For Department</th>
-                                {{--  <th class="align-middle">Created At</th>  --}}
+                                {{-- <th class="align-middle">Created At</th> --}}
                                 <th class="align-middle">Action</th>
 
                         </thead>
@@ -55,57 +55,55 @@
                             @forelse ($activeKpis as $kpi)
                                 <tr>
                                     <th scope="row">
-                                        <a href="#">{{ $kpi->kpi->name }}</a>
+                                        <a href="#">{{ $kpi['kpi']['name'] }}</a>
                                     </th>
                                     <td>
-                                        {{ $kpi->department->name }}
+                                        {{ $kpi['department']['name'] }}
                                     </td>
                                     <td>
                                         <span @style(['cursor: pointer']) class="dropdown badge rounded-pill bg-primary"
                                             data-bs-toggle="dropdown" aria-expanded="false">
-                                            {{ $kpi->kpi->type }}
+                                            {{ $kpi['kpi']['type'] }}
                                         </span>
 
                                     </td>
 
                                     </td>
-                                    <td>{{ $kpi->weight }}</td>
+                                    <td>{{ $kpi['weight'] }}</td>
 
-                                    {{--  <td>{{ Carbon\Carbon::parse($kpi->createdAt)->diffForHumans() }}</td>  --}}
+                                    {{-- <td>{{ Carbon\Carbon::parse($kpi->createdAt)->diffForHumans() }}</td> --}}
                                     <td>
                                         <div class="d-flex gap-3">
-                                            <a href="{{ route('show.global.weight', $kpi->id) }}">
+                                            <a href="{{ route('show.global.weight', $kpi['id']) }}">
                                                 <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                         class="bx bxs-pencil"></i>edit</span>
                                             </a>
-                                            {{--  <a href="#" data-bs-toggle="modal"
+                                            {{-- <a href="#" data-bs-toggle="modal"
                                                 data-bs-target=".bs-delete-modal-lg-{{ $kpi->id }}">
                                                 <span class="badge rounded-pill bg-danger fonte-size-13"><i
                                                         class="bx bxs-trash"></i> delete</span>
-                                            </a>  --}}
+                                            </a> --}}
 
                                             <!-- Modal for Delete Confirmation -->
-                                            <div class="modal fade bs-delete-modal-lg-{{ $kpi->id }}"
-                                                tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
-                                                aria-hidden="true">
+                                            <div class="modal fade bs-delete-modal-lg-{{ $kpi['id'] }}" tabindex="-1"
+                                                role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                                 <div class="modal-dialog modal-lg modal-dialog-centered">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title" id="myLargeModalLabel">Confirm
                                                                 Global Weight Department Score Delete</h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                                aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
                                                             <h4 class="text-center mb-4">Are you sure you want to
                                                                 delete this Global <b>Weight Score</b> for
-                                                                <b>{{ $kpi->department->name }} </b> Department?
+                                                                <b>{{ $kpi['department']['name'] }} </b> Department?
                                                             </h4>
-                                                            <form
-                                                                action="{{ route('delete.global.weight', $kpi->id) }}"
+                                                            <form action="{{ route('delete.global.weight', $kpi['id']) }}"
                                                                 method="POST">
                                                                 @csrf
-                                                                {{--  @method('DELETE')  --}}
+                                                                {{-- @method('DELETE') --}}
                                                                 <div class="d-grid">
                                                                     <button type="submit" class="btn btn-danger">Yes,
                                                                         Delete</button>
@@ -137,7 +135,7 @@
 
         @push('scripts')
             <script>
-                document.getElementById('searchTableList').addEventListener('input', function() {
+                document.getElementById('searchTableList').addEventListener('input', function () {
                     const searchTerm = this.value.toLowerCase();
                     const tableRows = document.querySelectorAll('#order-list tbody tr');
 
@@ -153,7 +151,7 @@
 
                         // Check if any of the fields contain the search term
                         if (kpiName.includes(searchTerm) || type.includes(searchTerm) || role.includes(
-                                searchTerm) ||
+                            searchTerm) ||
                             department.includes(searchTerm) || batch.includes(searchTerm) ||
                             supervisors.includes(searchTerm) || active.includes(searchTerm) ||
                             createdAt.includes(searchTerm)) {
