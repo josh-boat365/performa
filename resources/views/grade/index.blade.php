@@ -12,7 +12,7 @@
         </div>
         <!-- end page title -->
 
-        {{--  <div class="col-md-12">
+        {{-- <div class="col-md-12">
             <div class="card card-body">
                 <div class="d-flex justify-content-between">
                     <div>
@@ -67,7 +67,7 @@
 
                 </div>
             </div>
-        </div>  --}}
+        </div> --}}
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
@@ -79,8 +79,8 @@
                             <div class="col-sm-4">
                                 <div class="search-box me-2 mb-2 d-inline-block">
                                     <div class="position-relative">
-                                        <input type="text" class="form-control" autocomplete="off"
-                                            id="searchTableList" placeholder="Search...">
+                                        <input type="text" class="form-control" autocomplete="off" id="searchTableList"
+                                            placeholder="Search...">
                                         <i class="bx bx-search-alt search-icon"></i>
                                     </div>
                                 </div>
@@ -104,33 +104,32 @@
                                         <th class="align-middle">Grade</th>
                                         <th class="align-middle">Score</th>
                                         <th class="align-middle">Remark</th>
-                                        {{--  <th class="align-middle">Created At</th>  --}}
+                                        {{-- <th class="align-middle">Created At</th> --}}
                                         <th class="align-middle">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse ($grades as $grade)
                                         <tr>
-                                            <td>{{ $grade->grade }}</td>
-                                            <td>{{ $grade->minScore }} - {{ $grade->maxScore }}</td>
-                                            <td>{{ $grade->remark }}</td>
-                                            {{--  <td>{{ Carbon\Carbon::parse($grade->createdAt)->diffForHumans() }}
-                                            </td>  --}}
+                                            <td>{{ $grade['grade'] }}</td>
+                                            <td>{{ $grade['minScore'] }} - {{ $grade['maxScore'] }}</td>
+                                            <td>{{ $grade['remark'] }}</td>
+                                            {{-- <td>{{ Carbon\Carbon::parse($grade['createdAt'])->diffForHumans() }}
+                                            </td> --}}
                                             <td>
-                                                <a href="{{ route('show.grade', $grade->id) }}">
+                                                <a href="{{ route('show.grade', $grade['id']) }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i>edit</span>
                                                 </a>
-                                                {{--  <a href="#" data-bs-toggle="modal"
-                                                    data-bs-target=".bs-delete-modal-lg-{{ $grade->id }}">
+                                                {{-- <a href="#" data-bs-toggle="modal"
+                                                    data-bs-target=".bs-delete-modal-lg-{{ $grade['id'] }}">
                                                     <span class="badge rounded-pill bg-danger fonte-size-13"><i
                                                             class="bx bxs-trash"></i> delete</span>
-                                                </a>  --}}
+                                                </a> --}}
 
                                                 <!-- Modal for Delete Confirmation -->
-                                                <div class="modal fade bs-delete-modal-lg-{{ $grade->id }}"
-                                                    tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
-                                                    aria-hidden="true">
+                                                <div class="modal fade bs-delete-modal-lg-{{ $grade['id'] }}" tabindex="-1"
+                                                    role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                                     <div class="modal-dialog modal-md modal-dialog-centered">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
@@ -144,13 +143,12 @@
                                                                 <h4 class="text-center mb-4">Are you sure you want to
                                                                     delete this
                                                                     Grade?</h4>
-                                                                <form action="{{ route('delete.grade', $grade->id) }}"
+                                                                <form action="{{ route('delete.grade', $grade['id']) }}"
                                                                     method="POST">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <div class="d-grid">
-                                                                        <button type="submit"
-                                                                            class="btn btn-danger">Yes,
+                                                                        <button type="submit" class="btn btn-danger">Yes,
                                                                             Delete</button>
                                                                     </div>
                                                                 </form>

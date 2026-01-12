@@ -28,8 +28,7 @@
                             <label for="example-text-input" class="">KPI Name</label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="name" required
-                                    placeholder="Enter Name for KPI" value="{{ old('name') }}"
-                                    id="example-text-input">
+                                    placeholder="Enter Name for KPI" value="{{ old('name') }}" id="example-text-input">
                             </div>
                         </div>
 
@@ -37,21 +36,22 @@
                             <label for="example-text-input" class="">KPI Description</label>
                             <div class="col-md-12">
 
-                                <textarea class="form-control" required name="description" placeholder="Enter Description for KPI" rows="3"
+                                <textarea class="form-control" required name="description"
+                                    placeholder="Enter Description for KPI" rows="3"
                                     id="example-text-input">{{ old('description') }}</textarea>
                             </div>
                         </div>
 
-                        {{--  <div class="row mb-3">
+                        {{-- <div class="row mb-3">
                             <label for="example-text-input" class="">Select KPI Type</label>
                             <div class="col-md-12">
                                 <select name="type" class="form-select">
                                     <option>Select KPI type</option>
-                                    <option value="REGULAR" {{ old('type') == 'REGULAR' ? 'selected' : '' }}> REGULAR
+                                    <option value="REGULAR" {{ old('type')=='REGULAR' ? 'selected' : '' }}> REGULAR
                                     </option>
                                 </select>
                             </div>
-                        </div>  --}}
+                        </div> --}}
 
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Select Role For KPI to Belong To</label>
@@ -60,8 +60,7 @@
                                     <option>Select Role</option>
 
                                     @foreach ($uniqueRoles as $role)
-                                        <option value="{{ $role['id'] }}"
-                                            {{ old('empRoleId') == $role['id'] ? 'selected' : '' }}>
+                                        <option value="{{ $role['id'] }}" {{ old('empRoleId') == $role['id'] ? 'selected' : '' }}>
                                             {{ $role['name'] }}
                                         </option>
                                     @endforeach
@@ -76,8 +75,7 @@
                                 <select name="batchId" class="form-select">
                                     <option>Select Batch</option>
                                     @foreach ($batch_data as $batch)
-                                        <option value="{{ $batch->id }}"
-                                            {{ old('batchId') == $batch->id ? 'selected' : '' }}>{{ $batch->name }}
+                                        <option value="{{ $batch['id'] }}" {{ old('batchId') == $batch['id'] ? 'selected' : '' }}>{{ $batch['name'] }}
                                         </option>
                                     @endforeach
 
