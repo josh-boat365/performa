@@ -230,7 +230,7 @@
                                                                                         </div>
                                                                                         <div class="col-md-9">
                                                                                             <textarea class="form-control mb-3" type="text"
-                                                                                               name="supervisorComment"
+                                                                                                name="supervisorComment"
                                                                                                 @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                                                 placeholder="Enter your comments"
                                                                                                 rows="3">{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
@@ -276,7 +276,8 @@
                                         <button id="next-btn" class="btn btn-primary">Next</button>
 
                                         <button id="submit-btn" type="button" data-bs-toggle="modal" class="btn btn-success"
-                                            data-bs-target=".bs-submit-appraisal-modal-lg" id="submitAppraisalButton" disabled>Submit
+                                            data-bs-target=".bs-submit-appraisal-modal-lg" id="submitAppraisalButton"
+                                            disabled>Submit
                                             Appraisal</button>
                                     </div>
                                 </div>
@@ -306,7 +307,8 @@
                                                     <input type="hidden" name="supervisorId" value="{{ $supervisorId }}">
                                                     <input type="hidden" name="status" value="CONFIRMATION">
 
-                                                    {{--  Textarea for supervisor recommendation (optional recommendation comment)  --}}
+                                                    {{-- Textarea for supervisor recommendation (optional recommendation
+                                                    comment) --}}
                                                     <div class="mb-3">
                                                         <label for="supervisorRecommendation" class="form-label">Supervisor
                                                             Recommendation (Optional)</label>
@@ -340,7 +342,25 @@
                                         const currentPageSpan = document.getElementById('current-page');
                                         const totalPagesSpan = document.getElementById('total-pages');
                                         const progressBar = document.getElementById('progress-bar');
-                                        let currentPage = parseInt(sessionStorage.getItem('currentPage') || 0);
+
+                                        // Use unique key per employee to avoid page persistence across different forms
+                                        const currentEmployeeId = '{{ $employeeId }}';
+                                        const pageStorageKey = `currentPage_supervisor_${currentEmployeeId}`;
+                                        const lastEmployeeKey = 'lastViewedEmployeeId_supervisor';
+
+                                        // Check if we're viewing a different employee - if so, reset to page 0
+                                        const lastViewedEmployee = sessionStorage.getItem(lastEmployeeKey);
+                                        let currentPage = 0;
+
+                                        if (lastViewedEmployee === currentEmployeeId) {
+                                            // Same employee, restore the page
+                                            currentPage = parseInt(sessionStorage.getItem(pageStorageKey) || 0);
+                                        } else {
+                                            // Different employee, start from page 0
+                                            sessionStorage.setItem(lastEmployeeKey, currentEmployeeId);
+                                            sessionStorage.setItem(pageStorageKey, '0');
+                                        }
+
                                         const sectionsPerPage = 3;
                                         const totalPages = Math.ceil(sections.length / sectionsPerPage);
 
@@ -387,178 +407,179 @@
 
                                             for (let i = start; i < end && i < sections.length; i++) {
                                                 const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]');
-                                                {{--  const commentInputs = sections[i].querySelectorAll('textarea[name*="Comment" ]');  --}}
+                                                { { --  const commentInputs = sections[i].querySelectorAll('textarea[name*="Comment" ]'); --} }
                                                 const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                {{--  const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');  --}}
+                                                { { --  const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== ''); --} }
 
-                                                {{--  if (!scoresFilled || !commentsFilled) {  --}}
-                                                if (!scoresFilled ) {
-                                                    allFilled = false;
-                                                    sections[i].classList.add('border-danger');
-                                                } else {
-                                                    sections[i].classList.remove('border-danger');
+                                                {
+                                                    { --  if (!scoresFilled || !commentsFilled) { --} }
+                                                    if (!scoresFilled) {
+                                                        allFilled = false;
+                                                        sections[i].classList.add('border-danger');
+                                                    } else {
+                                                        sections[i].classList.remove('border-danger');
+                                                    }
                                                 }
+
+                                                return allFilled;
                                             }
 
-                                            return allFilled;
-                                        }
+                                            function updateProgressBar() {
+                                                let totalValid = 0;
+                                                sections.forEach(section => {
+                                                    const scoreInputs = section.querySelectorAll(
+                                                        'input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]'
+                                                    );
+                                                    { { --  const commentInputs = section.querySelectorAll('textarea[name*="Comment"]'); --} }
+                                                    const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                                                    { { --  const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== ''); --} }
+                                                    { { --  if (scoresFilled && commentsFilled) totalValid++; --} }
+                                                    if (scoresFilled) totalValid++;
+                                                });
+                                                const percent = Math.round((totalValid / sections.length) * 100);
+                                                progressBar.style.width = percent + '%';
+                                                progressBar.setAttribute('aria-valuenow', percent);
+                                                progressBar.textContent = percent + '%';
+                                            }
 
-                                        function updateProgressBar() {
-                                            let totalValid = 0;
-                                            sections.forEach(section => {
-                                                const scoreInputs = section.querySelectorAll(
-                                                    'input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]'
-                                                );
-                                                {{--  const commentInputs = section.querySelectorAll('textarea[name*="Comment"]');  --}}
-                                                const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                {{--  const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');  --}}
-                                                {{--  if (scoresFilled && commentsFilled) totalValid++;  --}}
-                                                if (scoresFilled) totalValid++;
+                                            function updateButtons() {
+                                                if (prevBtn) prevBtn.disabled = currentPage === 0;
+                                                if (nextBtn) nextBtn.disabled = currentPage === totalPages - 1 || !checkInputs(currentPage);
+                                                if (submitBtn) submitBtn.disabled = !Array.from({
+                                                    length: totalPages
+                                                }).every((_, i) => checkInputs(i));
+                                                updateProgressBar();
+                                            }
+
+                                            function showPage(page) {
+                                                sections.forEach(section => {
+                                                    section.style.display = 'none';
+                                                });
+                                                const start = page * sectionsPerPage;
+                                                const end = start + sectionsPerPage;
+                                                for (let i = start; i < end && i < sections.length; i++) {
+                                                    sections[i].style.display = 'block';
+                                                } if (currentPageSpan) currentPageSpan.textContent = page + 1; sessionStorage.setItem(pageStorageKey, page); updateButtons(); window.scrollTo({ top: sections[start].offsetTop, behavior: 'smooth' });
+                                            } if (prevBtn) {
+                                                prevBtn.addEventListener('click', function () {
+                                                    if (currentPage > 0) {
+                                                        currentPage--;
+                                                        showPage(currentPage);
+                                                    }
+                                                });
+                                            }
+
+                                            if (nextBtn) {
+                                                nextBtn.addEventListener('click', function () {
+                                                    if (currentPage < totalPages - 1 && checkInputs(currentPage)) { currentPage++; showPage(currentPage); }
+                                                });
+                                            } document.querySelectorAll('input[type="number" ], textarea').forEach(input => {
+                                                input.addEventListener('input', function () {
+                                                    validateField(this);
+                                                    updateButtons();
+                                                });
                                             });
-                                            const percent = Math.round((totalValid / sections.length) * 100);
-                                            progressBar.style.width = percent + '%';
-                                            progressBar.setAttribute('aria-valuenow', percent);
-                                            progressBar.textContent = percent + '%';
-                                        }
 
-                                        function updateButtons() {
-                                            if (prevBtn) prevBtn.disabled = currentPage === 0;
-                                            if (nextBtn) nextBtn.disabled = currentPage === totalPages - 1 || !checkInputs(currentPage);
-                                            if (submitBtn) submitBtn.disabled = !Array.from({
-                                                length: totalPages
-                                            }).every((_, i) => checkInputs(i));
-                                            updateProgressBar();
-                                        }
+                                            // Enhanced AJAX form handler with proper error handling
+                                            document.querySelectorAll('form.ajax-sup-eval-form, form.section-form, form.ajax-eval-form').forEach(form => {
+                                                form.addEventListener('submit', function (e) {
+                                                    { { --e.preventDefault(); --} }
+                                                    const scrollPos = window.scrollY;
+                                                    const formData = new FormData(form);
+                                                    const saveBtn = form.querySelector('button[type="submit"]');
+                                                    const originalText = saveBtn.innerHTML;
 
-                                        function showPage(page) {
-                                            sections.forEach(section => {
-                                                section.style.display = 'none';
-                                            });
-                                            const start = page * sectionsPerPage;
-                                            const end = start + sectionsPerPage;
-                                            for (let i = start; i < end && i < sections.length; i++) {
-                                                sections[i].style.display = 'block';
-                                            } if (currentPageSpan) currentPageSpan.textContent = page + 1; sessionStorage.setItem('currentPage', page); updateButtons(); window.scrollTo({ top: sections[start].offsetTop, behavior: 'smooth' });
-                                        } if (prevBtn) {
-                                            prevBtn.addEventListener('click', function () {
-                                                if (currentPage > 0) {
-                                                    currentPage--;
-                                                    showPage(currentPage);
-                                                }
-                                            });
-                                        }
+                                                    // Store scroll position and current page state before submission
+                                                    sessionStorage.setItem('preserveScrollPosition', scrollPos.toString());
+                                                    sessionStorage.setItem(pageStorageKey, currentPage.toString());
 
-                                        if (nextBtn) {
-                                            nextBtn.addEventListener('click', function () {
-                                                if (currentPage < totalPages - 1 && checkInputs(currentPage)) { currentPage++; showPage(currentPage); }
-                                            });
-                                        } document.querySelectorAll('input[type="number" ], textarea').forEach(input => {
-                                            input.addEventListener('input', function () {
-                                                validateField(this);
-                                                updateButtons();
-                                            });
-                                        });
+                                                    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+                                                    saveBtn.disabled = true;
 
-                                        // Enhanced AJAX form handler with proper error handling
-                                        document.querySelectorAll('form.ajax-sup-eval-form, form.section-form, form.ajax-eval-form').forEach(form => {
-                                            form.addEventListener('submit', function (e) {
-                                                {{--  e.preventDefault();  --}}
-                                                const scrollPos = window.scrollY;
-                                                const formData = new FormData(form);
-                                                const saveBtn = form.querySelector('button[type="submit"]');
-                                                const originalText = saveBtn.innerHTML;
-
-                                                // Store scroll position and current page state before submission
-                                                sessionStorage.setItem('preserveScrollPosition', scrollPos.toString());
-                                                sessionStorage.setItem('currentPage', currentPage.toString());
-
-                                                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
-                                                saveBtn.disabled = true;
-
-                                                fetch(form.action, {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'X-Requested-With': 'XMLHttpRequest',
-                                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                                        'Accept': 'application/json'
-                                                    },
-                                                    body: formData
-                                                })
-                                                    .then(response => {
-                                                        // Check if response is ok (status 200-299)
-                                                        if (!response.ok) {
-                                                            // Try to parse error message from response
-                                                            return response.json().then(data => {
-                                                                throw new Error(data.message || `HTTP error! status: ${response.status}`);
-                                                            }).catch(() => {
-                                                                throw new Error(`HTTP error! status: ${response.status}`);
-                                                            });
-                                                        }
-                                                        return response.json();
+                                                    fetch(form.action, {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'X-Requested-With': 'XMLHttpRequest',
+                                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                                            'Accept': 'application/json'
+                                                        },
+                                                        body: formData
                                                     })
-                                                    .then(data => {
-                                                        // Store the response data for after refresh
-                                                        if (data.success) {
-                                                            sessionStorage.setItem('showSuccessToast', JSON.stringify({
-                                                                message: data.message || 'Saved successfully'
-                                                            }));
-                                                        } else {
-                                                            sessionStorage.setItem('showErrorToast', JSON.stringify({
-                                                                message: data.message || 'An error occurred'
-                                                            }));
-                                                        }
+                                                        .then(response => {
+                                                            // Check if response is ok (status 200-299)
+                                                            if (!response.ok) {
+                                                                // Try to parse error message from response
+                                                                return response.json().then(data => {
+                                                                    throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                                                                }).catch(() => {
+                                                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                                                });
+                                                            }
+                                                            return response.json();
+                                                        })
+                                                        .then(data => {
+                                                            // Store the response data for after refresh
+                                                            if (data.success) {
+                                                                sessionStorage.setItem('showSuccessToast', JSON.stringify({
+                                                                    message: data.message || 'Saved successfully'
+                                                                }));
+                                                            } else {
+                                                                sessionStorage.setItem('showErrorToast', JSON.stringify({
+                                                                    message: data.message || 'An error occurred'
+                                                                }));
+                                                            }
 
-                                                        // Force page refresh to get updated data
-                                                        window.location.reload();
-                                                    })
-                                                    .catch(error => {
-                                                        console.error('Error:', error);
+                                                            // Force page refresh to get updated data
+                                                            window.location.reload();
+                                                        })
+                                                        .catch(error => {
+                                                            console.error('Error:', error);
 
-                                                        // Restore button state
-                                                        saveBtn.innerHTML = originalText;
-                                                        saveBtn.disabled = false;
+                                                            // Restore button state
+                                                            saveBtn.innerHTML = originalText;
+                                                            saveBtn.disabled = false;
 
-                                                        // Show error toast immediately without reload
-                                                        showToast('error', error.message || 'An unexpected error occurred. Please try again.');
-                                                    });
+                                                            // Show error toast immediately without reload
+                                                            showToast('error', error.message || 'An unexpected error occurred. Please try again.');
+                                                        });
+                                                });
                                             });
-                                        });
 
-                                        // Show the initial page
-                                        showPage(currentPage);
+                                            // Show the initial page
+                                            showPage(currentPage);
 
-                                        // Check for toast messages after page refresh and restore scroll position
-                                        setTimeout(() => {
-                                            // First, restore scroll position
-                                            const savedScrollPos = sessionStorage.getItem('preserveScrollPosition');
-                                            if (savedScrollPos) {
-                                                const scrollPos = parseInt(savedScrollPos);
-                                                if (!isNaN(scrollPos)) {
-                                                    window.scrollTo({
-                                                        top: scrollPos,
-                                                        behavior: 'instant'
-                                                    });
-                                                    console.log(`Scroll position restored to: ${scrollPos}`);
+                                            // Check for toast messages after page refresh and restore scroll position
+                                            setTimeout(() => {
+                                                // First, restore scroll position
+                                                const savedScrollPos = sessionStorage.getItem('preserveScrollPosition');
+                                                if (savedScrollPos) {
+                                                    const scrollPos = parseInt(savedScrollPos);
+                                                    if (!isNaN(scrollPos)) {
+                                                        window.scrollTo({
+                                                            top: scrollPos,
+                                                            behavior: 'instant'
+                                                        });
+                                                        console.log(`Scroll position restored to: ${scrollPos}`);
+                                                    }
+                                                    sessionStorage.removeItem('preserveScrollPosition');
                                                 }
-                                                sessionStorage.removeItem('preserveScrollPosition');
-                                            }
 
-                                            // Then show toast messages
-                                            const successToast = sessionStorage.getItem('showSuccessToast');
-                                            if (successToast) {
-                                                const toastData = JSON.parse(successToast);
-                                                showToast('success', toastData.message);
-                                                sessionStorage.removeItem('showSuccessToast');
-                                            }
+                                                // Then show toast messages
+                                                const successToast = sessionStorage.getItem('showSuccessToast');
+                                                if (successToast) {
+                                                    const toastData = JSON.parse(successToast);
+                                                    showToast('success', toastData.message);
+                                                    sessionStorage.removeItem('showSuccessToast');
+                                                }
 
-                                            const errorToast = sessionStorage.getItem('showErrorToast');
-                                            if (errorToast) {
-                                                const toastData = JSON.parse(errorToast);
-                                                showToast('error', toastData.message);
-                                                sessionStorage.removeItem('showErrorToast');
-                                            }
-                                        }, 100);
-                                    });
+                                                const errorToast = sessionStorage.getItem('showErrorToast');
+                                                if (errorToast) {
+                                                    const toastData = JSON.parse(errorToast);
+                                                    showToast('error', toastData.message);
+                                                    sessionStorage.removeItem('showErrorToast');
+                                                }
+                                            }, 100);
+                                        });
 
 
                                 </script>

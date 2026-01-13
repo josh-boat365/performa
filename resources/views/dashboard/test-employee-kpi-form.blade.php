@@ -622,7 +622,25 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                         const currentPageSpan = document.getElementById('current-page');
                                         const totalPagesSpan = document.getElementById('total-pages');
                                         const progressBar = document.getElementById('progress-bar');
-                                        let currentPage = parseInt(sessionStorage.getItem('currentPage') || 0);
+
+                                        // Use unique key per employee to avoid page persistence across different forms
+                                        const currentEmployeeId = '{{ $employeeId }}';
+                                        const pageStorageKey = `currentPage_employee_${currentEmployeeId}`;
+                                        const lastEmployeeKey = 'lastViewedEmployeeId';
+
+                                        // Check if we're viewing a different employee - if so, reset to page 0
+                                        const lastViewedEmployee = sessionStorage.getItem(lastEmployeeKey);
+                                        let currentPage = 0;
+
+                                        if (lastViewedEmployee === currentEmployeeId) {
+                                            // Same employee, restore the page
+                                            currentPage = parseInt(sessionStorage.getItem(pageStorageKey) || 0);
+                                        } else {
+                                            // Different employee, start from page 0
+                                            sessionStorage.setItem(lastEmployeeKey, currentEmployeeId);
+                                            sessionStorage.setItem(pageStorageKey, '0');
+                                        }
+
                                         const sectionsPerPage = 3;
                                         const totalPages = Math.ceil(sections.length / sectionsPerPage);
 
@@ -701,7 +719,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                             }
 
                                             currentPageSpan.textContent = page + 1;
-                                            sessionStorage.setItem('currentPage', page);
+                                            sessionStorage.setItem(pageStorageKey, page);
                                             updateButtons();
                                             window.scrollTo({
                                                 top: sections[start].offsetTop,
@@ -742,7 +760,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
 
                                                 // Store scroll position and current page state before submission
                                                 sessionStorage.setItem('preserveScrollPosition', scrollPos.toString());
-                                                sessionStorage.setItem('currentPage', currentPage.toString());
+                                                sessionStorage.setItem(pageStorageKey, currentPage.toString());
 
                                                 saveBtn.innerHTML =
                                                     '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
