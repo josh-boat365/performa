@@ -650,12 +650,11 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
 
                                             for (let i = start; i < end && i < sections.length; i++) {
                                                 const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"]');
-                                                const commentInputs = sections[i].querySelectorAll('textarea[name="employeeComment"]');
+                                                {{-- Comments are no longer required, only scores --}}
 
                                                 const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');
 
-                                                if (!scoresFilled || !commentsFilled) {
+                                                if (!scoresFilled) {
                                                     allFilled = false;
                                                     sections[i].classList.add('border-danger');
                                                 } else {
