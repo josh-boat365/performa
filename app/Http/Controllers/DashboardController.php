@@ -8,10 +8,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Pagination\LengthAwarePaginator;
+use App\Traits\HandlesApiResponses;
 
 
 class DashboardController extends Controller
 {
+    use HandlesApiResponses;
 
     public function index()
     {
@@ -27,6 +29,10 @@ class DashboardController extends Controller
             $response = $this->fetchDashboardData("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee", $accessToken);
 
             if (!$response['success']) {
+                // Check if session expired
+                if (isset($response['session_expired']) && $response['session_expired']) {
+                    return $this->sessionExpiredRedirect();
+                }
                 return redirect()->back()->with('toast_error', $response['message']);
             }
 
@@ -74,6 +80,11 @@ class DashboardController extends Controller
 
         try {
             $response = Http::withToken($token)->get($url);
+
+            // Handle expired session (401 Unauthorized)
+            if ($response->status() === 401) {
+                return ['success' => false, 'message' => 'session_expired', 'session_expired' => true];
+            }
 
             if ($response->status() === 400) {
                 return ['success' => false, 'message' => 'Invalid request to the server. Please try again later.'];
@@ -276,6 +287,11 @@ class DashboardController extends Controller
             $response = Http::withToken($accessToken)
                 ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
 
+            // Check for session expiration (401 Unauthorized)
+            if ($response->status() === 401) {
+                return $this->sessionExpiredRedirect();
+            }
+
             // Check if the response is successful
             if (!$response->successful()) {
                 Log::error('Failed to retrieve KPIs', [
@@ -417,13 +433,18 @@ class DashboardController extends Controller
         $accessToken = session('api_token');
 
         if (!$accessToken) {
-            return redirect()->back()->with('toast_error', 'Your Session Has Expired. Please log in again.');
+            return $this->sessionExpiredRedirect();
         }
 
         try {
             // Make the GET request to the external API to get KPIs for the specified employee
             $response = Http::withToken($accessToken)
                 ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee");
+
+            // Check for session expiration (401 Unauthorized)
+            if ($response->status() === 401) {
+                return $this->sessionExpiredRedirect();
+            }
 
             if ($response->successful()) {
                 // Decode the response into an array of KPIs
@@ -525,6 +546,10 @@ class DashboardController extends Controller
                 // Return the view with the data
                 return view("dashboard.show-employee-kpi", compact('employeeKpi', 'gradeDetails'));
             } else {
+                // Check for session expiration (401 Unauthorized)
+                if ($response->status() === 401) {
+                    return $this->sessionExpiredRedirect();
+                }
                 // Log the error response if the API call fails
                 Log::error('Failed to retrieve KPIs', [
                     'status' => $response->status(),
@@ -612,6 +637,10 @@ class DashboardController extends Controller
                 // Return the KPI names and section counts to the view
                 return view("dashboard.employee-supervisor-kpi-score-form", compact('appraisal', 'batchId'));
             } else {
+                // Check for session expiration (401 Unauthorized)
+                if ($response->status() === 401) {
+                    return $this->sessionExpiredRedirect();
+                }
                 // Log the error response
                 Log::error('Failed to retrieve KPIs', [
                     'status' => $response->status(),
@@ -644,6 +673,11 @@ class DashboardController extends Controller
             // Make the GET request to the external API to get KPIs for the specified employee ID
             $response = Http::withToken($accessToken)
                 ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
+
+            // Check for session expiration (401 Unauthorized)
+            if ($response->status() === 401) {
+                return $this->sessionExpiredRedirect();
+            }
 
             // Check if the response is successful
             if (!$response->successful()) {

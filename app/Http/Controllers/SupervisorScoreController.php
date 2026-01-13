@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use App\Traits\HandlesApiResponses;
 
 class SupervisorScoreController extends Controller
 {
+    use HandlesApiResponses;
+
     /**
      * Display a listing of the resource.
      */
@@ -25,6 +28,10 @@ class SupervisorScoreController extends Controller
         $responseSup = Http::withToken($accessToken)
             ->get('http://192.168.1.200:5123/Appraisal/Kpi/PendingSupervisorScoringKpi');
 
+        // Check for session expiration (401 Unauthorized)
+        if ($responseSup->status() === 401) {
+            return $this->sessionExpiredRedirect();
+        }
 
         $responseProb = Http::withToken($accessToken)
             ->get('http://192.168.1.200:5123/Appraisal/Kpi/PendingProbScoringKpi');
@@ -137,6 +144,10 @@ class SupervisorScoreController extends Controller
 
                 return view($view, $viewData);
             } else {
+                // Check for session expiration (401 Unauthorized)
+                if ($response->status() === 401) {
+                    return $this->sessionExpiredRedirect();
+                }
                 Log::error('Failed to retrieve KPIs', [
                     'status' => $response->status(),
                     'response' => $response->body()
@@ -232,7 +243,7 @@ class SupervisorScoreController extends Controller
             $response = Http::withToken($accessToken)
                 ->put('http://192.168.1.200:5123/Appraisal/Score/supervisor-score', $payload);
 
-           // Check if the API call was successful
+            // Check if the API call was successful
             if ($response->successful()) {
                 if ($request->ajax()) {
                     return response()->json([
@@ -375,6 +386,4 @@ class SupervisorScoreController extends Controller
             return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
         }
     }
-
-
 }
