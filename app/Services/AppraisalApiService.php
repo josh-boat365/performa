@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use App\Exceptions\ApiException;
 
 /**
@@ -334,12 +335,32 @@ class AppraisalApiService extends BaseApiService
      * Get employee total KPI score for a batch
      *
      * @param array $data The request data (batchId, employeeId)
-     * @return array Employee total KPI score and grade details
-     * @throws ApiException
+     * @return array Employee total KPI score and grade details or empty array if not found
      */
     public function getEmployeeTotalKpiScore(array $data): array
     {
-        return $this->put($this->getEndpoint('score') . '/employee-total-kpiscore', $data);
+        Log::debug('AppraisalApiService::getEmployeeTotalKpiScore', [
+            'input_data' => $data,
+            'data_keys' => array_keys($data),
+            'data_values' => array_values($data),
+            'json_encoded' => json_encode($data),
+        ]);
+
+        try {
+            return $this->put($this->getEndpoint('score') . '/employee-total-kpiscore', $data);
+        } catch (ApiException $e) {
+            // Handle 400 errors as "data not found" - return empty array instead of throwing
+            if (str_contains($e->getMessage(), 'not found') || str_contains($e->getMessage(), 'Total KPI Score')) {
+                Log::debug('Employee total KPI score not found', [
+                    'data' => $data,
+                    'message' => $e->getMessage(),
+                ]);
+                return [];
+            }
+
+            // Re-throw other ApiExceptions
+            throw $e;
+        }
     }
 
     /**

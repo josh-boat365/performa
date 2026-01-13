@@ -20,8 +20,7 @@
 
         <!-- end page title -->
         @php
-function getBadgeDetails($status)
-{
+$getBadgeDetails = function($status) {
     return match ($status) {
         'PENDING' => ['class' => 'bg-dark', 'text' => 'PENDING'],
         'REVIEW' => ['class' => 'bg-warning', 'text' => 'REVIEW'],
@@ -30,8 +29,8 @@ function getBadgeDetails($status)
         'PROBLEM' => ['class' => 'bg-danger', 'text' => 'PROBE'],
         default => ['class' => 'bg-secondary', 'text' => 'PENDING'],
     };
-}
-$badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
+};
+$badgeDetails = $getBadgeDetails($gradeDetails['status'] ?? null);
         @endphp
 
 

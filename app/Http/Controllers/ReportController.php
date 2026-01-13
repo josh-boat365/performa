@@ -53,6 +53,7 @@ class ReportController extends Controller
             // Fetch reports and convert to objects recursively
             try {
                 $reportsData = $this->appraisalService->getReports($data);
+                
             } catch (ApiException $e) {
                 Log::error('API Error getting reports', ['message' => $e->getMessage()]);
                 $reportsData = [];

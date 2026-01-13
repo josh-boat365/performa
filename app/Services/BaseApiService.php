@@ -156,8 +156,8 @@ abstract class BaseApiService
             // Execute the request based on method
             $response = match ($method) {
                 'GET' => $request->get($url, $payload),
-                'POST' => $request->post($url, $payload),
-                'PUT' => $request->put($url, $payload),
+                'POST' => $request->asJson()->post($url, $payload),
+                'PUT' => $request->withBody(json_encode($payload), 'application/json')->put($url),
                 'DELETE' => $request->delete($url, $payload),
                 default => throw new \InvalidArgumentException("Unsupported HTTP method: {$method}"),
             };
@@ -281,9 +281,11 @@ abstract class BaseApiService
     {
         $sensitiveKeys = ['password', 'token', 'access_token', 'secret'];
 
-        return array_map(function ($key, $value) use ($sensitiveKeys) {
-            return in_array($key, $sensitiveKeys) ? '***' : $value;
-        }, array_keys($payload), $payload);
+        $sanitized = [];
+        foreach ($payload as $key => $value) {
+            $sanitized[$key] = in_array($key, $sensitiveKeys) ? '***' : $value;
+        }
+        return $sanitized;
     }
 
     /**

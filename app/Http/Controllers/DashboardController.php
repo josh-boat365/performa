@@ -40,46 +40,69 @@ class DashboardController extends Controller
                 return redirect()->route('login')->with('toast_error', 'Session not found. Please login again.');
             }
 
-            // Get all KPIs for employee
-            $response = $this->appraisalService->getAllKpisForEmployee();
-            $kpis = $response['data'] ?? $response ?? [];
+            // Get logged in user
+            $loggedInUser = $this->getLoggedInUserInformation();
+            $employeeId = $loggedInUser->id ?? null;
 
-            // dd($kpis);
-
-            if (empty($kpis)) {
-
-                return view("dashboard.index", $this->prepareViewData(null, null));
+            if (!$employeeId) {
+                return redirect()->route('login')->with('toast_error', 'Could not identify user. Please login again.');
             }
 
-            $firstKpiId = $kpis[0]['kpiId'] ?? null;
+            // Get all batches
+            $batchesResponse = $this->appraisalService->getAllBatches();
+            $allBatches = $batchesResponse['data'] ?? $batchesResponse ?? [];
 
-
-            if (!$firstKpiId) {
-
-                return view("dashboard.index", $this->prepareViewData(null, null));
+            if (empty($allBatches)) {
+                return view("dashboard.index", $this->prepareViewData(null, null, []));
             }
 
-            // Get details for first KPI
-            $kpiDetailsResponse = $this->appraisalService->getKpiForEmployee($firstKpiId);
-            $kpiDetails = $kpiDetailsResponse['data'] ?? $kpiDetailsResponse ?? [];
+            // Get current KPI (first KPI for employee)
+            $kpisResponse = $this->appraisalService->getAllKpisForEmployee();
+            $kpis = $kpisResponse['data'] ?? $kpisResponse ?? [];
 
-            if (empty($kpiDetails)) {
-                return view("dashboard.index", $this->prepareViewData(null, null));
+            $currentBatchId = null;
+            $currentKpiDetails = null;
+            $employeeKpi = null;
+
+            if (!empty($kpis) && isset($kpis[0]['kpiId'])) {
+                $firstKpiId = $kpis[0]['kpiId'];
+                $currentBatchId = $kpis[0]['batchId'] ?? null;
+
+                // Get details for first KPI
+                $kpiDetailsResponse = $this->appraisalService->getKpiForEmployee($firstKpiId);
+                $currentKpiDetails = $kpiDetailsResponse['data'] ?? $kpiDetailsResponse ?? [];
+
+                if (!empty($currentKpiDetails)) {
+                    $employeeKpi = $this->processKpiDetails($currentKpiDetails);
+                }
             }
 
-            $employeeKpi = $this->processKpiDetails($kpiDetails);
+            // Build batch scores collection - fetch scores for all batches
+            $batchScores = collect();
 
+            foreach ($allBatches as $batch) {
+                $batchId = $batch['id'] ?? $batch['batchId'] ?? null;
+                if (!$batchId) {
+                    continue;
+                }
 
-            // Get employee grade
-            $gradeDetails = $this->fetchEmployeeGrade(
-                $employeeKpi['batch_id'] ?? '',
-                $employeeKpi['employee_id'] ?? ''
-            );
+                // Fetch employee scores for this batch
+                $gradeDetails = $this->fetchEmployeeTotalKpiScore($batchId, $employeeId);
 
+                $batchScores->push((object) [
+                    'batchId' => $batchId,
+                    'batchName' => $batch['name'] ?? $batch['batchName'] ?? 'Unknown',
+                    'batchYear' => $batch['year'] ?? null,
+                    'isCurrentBatch' => $batchId == $currentBatchId,
+                    'kpiScore' => $gradeDetails['kpiScore'] ?? null,
+                    'grade' => $gradeDetails['grade'] ?? null,
+                    'remark' => $gradeDetails['remark'] ?? null,
+                    'recommendation' => $gradeDetails['recommendation'] ?? null,
+                    'status' => $gradeDetails ? 'COMPLETED' : 'PENDING'
+                ]);
+            }
 
-
-
-            return view("dashboard.index", $this->prepareViewData($employeeKpi, $gradeDetails));
+            return view("dashboard.index", $this->prepareViewData($employeeKpi, null, $batchScores));
         } catch (ApiException $e) {
             Log::error('Failed to retrieve appraisal overview', [
                 'message' => $e->getMessage(),
@@ -154,66 +177,68 @@ class DashboardController extends Controller
         try {
             // Get KPIs for the specified employee
             $response = $this->appraisalService->getKpiForEmployee($id);
-            $kpis = $response['data'] ?? $response ?? [];
+            $kpisData = $response['data'] ?? $response ?? [];
+
+            // Convert all arrays to objects recursively (mimics old project's $response->object())
+            $kpis = $this->arrayToObject($kpisData);
+            // dd($kpis);
 
             if (empty($kpis)) {
                 return redirect()->back()->with('toast_error', 'No KPIs found for this employee');
             }
 
-            // Initialize variables
+            // Initialize an empty collection for active appraisals
             $appraisal = collect();
-            $kpiId = $kpis[0]['kpiId'] ?? null;
-            $batchId = null;
-            $employeeId = null;
-            $kpiStatus = 'PENDING';
+
+            $kpiId = $kpis[0]->kpiId ?? null;
 
             // Process each KPI
             foreach ($kpis as $kpi) {
-                if ($kpi['kpiActive'] ?? false) {
+                if ($kpi->kpiActive) {
                     // Filter active sections
-                    $activeSections = collect($kpi['sections'] ?? [])->filter(function ($section) {
-                        return $section['sectionActive'] ?? false;
+                    $activeSections = collect($kpi->sections)->filter(function ($section) {
+                        return $section->sectionActive;
                     });
 
                     $activeSections->transform(function ($section) {
-                        $section['metrics'] = collect($section['metrics'] ?? [])->filter(function ($metric) {
-                            return $metric['metricActive'] ?? false;
+                        $section->metrics = collect($section->metrics)->filter(function ($metric) {
+                            return $metric->metricActive;
                         });
                         return $section;
                     });
 
                     $appraisal->push((object) [
-                        'kpi' => (object) $kpi,
+                        'kpi' => $kpi,
                         'activeSections' => $activeSections
                     ]);
 
                     // Collect statuses from sections
                     $statuses = [];
-                    if (in_array($kpi['kpiType'] ?? null, ['GLOBAL', 'REGULAR'])) {
-                        foreach ($kpi['sections'] ?? [] as $section) {
-                            $status = $section['sectionEmpScore']['status'] ?? 'PENDING';
+                    if (in_array($kpi->kpiType ?? null, ['GLOBAL', 'REGULAR'])) {
+                        foreach ($kpi->sections as $section) {
+                            $status = $section->sectionEmpScore->status ?? 'PENDING';
                             $statuses[] = $status;
                         }
 
                         $uniqueStatuses = array_unique($statuses);
                         $kpiStatus = count($uniqueStatuses) > 0 ? reset($uniqueStatuses) : 'PENDING';
-                        $batchId = $kpi['batchId'] ?? null;
-                        $employeeId = $kpi['employeeId'] ?? null;
+                        $batchId = $kpi->batchId;
+                        $employeeId = $kpi->employeeId;
                     }
                 }
             }
 
             // Get employee total KPI score
-            $gradeDetails = $this->fetchEmployeeTotalKpiScore($batchId, $employeeId);
+            $gradeDetails = $this->fetchEmployeeTotalKpiScore($batchId ?? null, $employeeId ?? null);
             if ($gradeDetails) {
-                $gradeDetails['status'] = $kpiStatus;
+                $gradeDetails['status'] = $kpiStatus ?? 'PENDING';
             } else {
                 $gradeDetails = [
                     'kpiScore' => null,
                     'grade' => null,
                     'remark' => null,
                     'recommendation' => null,
-                    'status' => $kpiStatus
+                    'status' => $kpiStatus ?? 'PENDING'
                 ];
             }
 
@@ -339,11 +364,16 @@ class DashboardController extends Controller
                 ];
             }
 
+            // Filter for REGULAR KPI type
+            $regularKpiDetails = collect($kpiDetails)->filter(function ($kpi) {
+                return ($kpi['kpiType'] ?? null) === 'REGULAR';
+            })->first();
+
             // Prepare employee KPI information
             $employeeKpi = [
-                'id' => $kpiDetails[0]['kpiId'] ?? null,
-                'batch_id' => $kpiDetails[0]['batchId'] ?? null,
-                'kpi_name' => $kpiDetails[0]['kpiName'] ?? 'N/A',
+                'id' => $regularKpiDetails['kpiId'] ?? null,
+                'batch_id' => $regularKpiDetails['batchId'] ?? null,
+                'kpi_name' => $regularKpiDetails['kpiName'] ?? 'N/A',
                 'section_count' => $totalSectionCount
             ];
 
@@ -353,13 +383,21 @@ class DashboardController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
+            // Return view with empty data instead of redirecting
+            return view("dashboard.show-employee-kpi", [
+                'employeeKpi' => null,
+                'gradeDetails' => null
+            ]);
         } catch (\Exception $e) {
             Log::error('Exception occurred while retrieving employee KPIs', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again');
+            // Return view with empty data instead of redirecting
+            return view("dashboard.show-employee-kpi", [
+                'employeeKpi' => null,
+                'gradeDetails' => null
+            ]);
         }
     }
 
@@ -541,8 +579,18 @@ class DashboardController extends Controller
     {
         try {
             $response = $this->hrmsService->getCurrentEmployeeInformation();
-            $user = $response['data'] ?? null;
-            return (object) $user;
+            $user = $response['data'] ?? $response ?? null;
+
+            if (!$user || empty($user)) {
+                Log::warning('No user data returned from HRMS service');
+                return null;
+            }
+
+            // If user is an array, convert to object; if already object, return as is
+            if (is_array($user)) {
+                return (object) $user;
+            }
+            return $user;
         } catch (ApiException $e) {
             Log::warning('Failed to retrieve logged-in user information', [
                 'message' => $e->getMessage(),
@@ -580,10 +628,17 @@ class DashboardController extends Controller
         try {
 
             // Use getEmployeeTotalKpiScore with PUT request (matches old implementation)
-            $response = $this->appraisalService->getEmployeeTotalKpiScore([
-                'batchId' => $batchId,
-                'employeeId' => $employeeId
+            $payload = [
+                'batchId' => (int) $batchId,
+                'employeeId' => (int) $employeeId
+            ];
+
+            Log::debug('fetchEmployeeGrade - Requesting total KPI score', [
+                'payload' => $payload,
+                'payload_json' => json_encode($payload)
             ]);
+
+            $response = $this->appraisalService->getEmployeeTotalKpiScore($payload);
 
             // Response is already the grade data, not wrapped in ['data']
             $grade = $response;
@@ -628,23 +683,58 @@ class DashboardController extends Controller
      * @param string|int $employeeId The employee ID
      * @return array|null Grade details with total KPI score or null on failure
      */
+    /**
+     * Recursively convert arrays to objects (mimics $response->object())
+     * Keeps arrays as arrays but converts objects/stdClass throughout the structure
+     */
+    private function arrayToObject($data)
+    {
+        if (is_array($data)) {
+            // Check if it's an associative array (should become object)
+            if ($this->isAssociativeArray($data)) {
+                $obj = new \stdClass();
+                foreach ($data as $key => $value) {
+                    $obj->{$key} = $this->arrayToObject($value);
+                }
+                return $obj;
+            }
+            // Sequential array - keep as array but convert items
+            return array_map(fn($item) => $this->arrayToObject($item), $data);
+        } elseif (is_object($data)) {
+            // Convert object properties recursively
+            foreach ($data as $key => $value) {
+                $data->{$key} = $this->arrayToObject($value);
+            }
+            return $data;
+        }
+        return $data;
+    }
+
+    /**
+     * Check if an array is associative (has string keys)
+     */
+    private function isAssociativeArray(array $arr): bool
+    {
+        if (empty($arr)) {
+            return false;
+        }
+        return array_keys($arr) !== range(0, count($arr) - 1);
+    }
+
     private function fetchEmployeeTotalKpiScore($batchId, $employeeId)
     {
         if (empty($batchId) || empty($employeeId)) {
-            return [
-                'kpiScore' => null,
-                'grade' => null,
-                'remark' => null,
-                'recommendation' => null,
-            ];
+            return null;
         }
 
         try {
             // Use the service method to get employee total KPI score
-            $response = $this->appraisalService->getEmployeeTotalKpiScore([
-                'batchId' => $batchId,
-                'employeeId' => $employeeId
-            ]);
+            $payload = [
+                'batchId' => (int) $batchId,
+                'employeeId' => (int) $employeeId
+            ];
+
+            $response = $this->appraisalService->getEmployeeTotalKpiScore($payload);
 
             // Response is already the grade data, not wrapped in ['data']
             $grade = $response;
@@ -657,24 +747,31 @@ class DashboardController extends Controller
                     'recommendation' => $grade['recommendation'] ?? null,
                 ];
             }
-            return [
-                'kpiScore' => null,
-                'grade' => null,
-                'remark' => null,
-                'recommendation' => null,
-            ];
+            return null;
         } catch (ApiException $e) {
+            // Handle 400 errors (no scores processed yet) gracefully
+            if (str_contains($e->getMessage(), 'not found') || str_contains($e->getMessage(), 'Total KPI Score')) {
+                Log::debug('No KPI score found for batch/employee', [
+                    'batchId' => $batchId,
+                    'employeeId' => $employeeId,
+                    'message' => $e->getMessage(),
+                ]);
+                return null;
+            }
+
             Log::warning('Failed to fetch employee total KPI score', [
                 'batchId' => $batchId,
                 'employeeId' => $employeeId,
                 'message' => $e->getMessage(),
             ]);
-            return [
-                'kpiScore' => null,
-                'grade' => null,
-                'remark' => null,
-                'recommendation' => null,
-            ];
+            return null;
+        } catch (\Exception $e) {
+            Log::warning('Exception while fetching employee total KPI score', [
+                'batchId' => $batchId,
+                'employeeId' => $employeeId,
+                'message' => $e->getMessage(),
+            ]);
+            return null;
         }
     }
 
@@ -730,9 +827,10 @@ class DashboardController extends Controller
      *
      * @param array|null $employeeKpi Employee KPI information
      * @param array|null $gradeDetails Grade and score details
+     * @param \Illuminate\Support\Collection|array $batchScores Batch scores collection
      * @return array Formatted view data
      */
-    private function prepareViewData(?array $employeeKpi, ?array $gradeDetails): array
+    private function prepareViewData(?array $employeeKpi, ?array $gradeDetails, $batchScores = null): array
     {
         return [
             'employeeKpi' => $employeeKpi ?? [
@@ -754,6 +852,7 @@ class DashboardController extends Controller
                 'grade' => 'N/A',
                 'score' => 0,
             ],
+            'batchScores' => $batchScores ?? collect(),
         ];
     }
 }
