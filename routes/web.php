@@ -55,214 +55,215 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 | Protected Application Routes
 |--------------------------------------------------------------------------
 | All routes below require authentication middleware
+| Note: Session validation is handled at controller level via 401 API responses
 */
 
-Route::middleware(['check.api.token'])->group(function () {
+// Route::middleware(['check.api.token'])->group(function () {
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Employee Dashboard & KPI Management
 |--------------------------------------------------------------------------
 | Routes for employee dashboard, KPI viewing, and self-rating
 */
 
-    // Main Dashboard Routes
-    Route::get("dashboard/index", [DashboardController::class, "index"])->name("dashboard.index");
-    Route::get("dashboard/view-kpi", [DashboardController::class, "show"])->name("view.kpi");
-    Route::get("dashboard/edit-kpi", [DashboardController::class, "view_kpi"])->name("edit.kpi");
+// Main Dashboard Routes
+Route::get("dashboard/index", [DashboardController::class, "index"])->name("dashboard.index");
+Route::get("dashboard/view-kpi", [DashboardController::class, "show"])->name("view.kpi");
+Route::get("dashboard/edit-kpi", [DashboardController::class, "view_kpi"])->name("edit.kpi");
 
-    // Employee Batch & KPI Routes
-    Route::get("dashboard/active/batch", [DashboardController::class, "show"])->name("show-batch");
-    // Route::get("dashboard/employee-batch-kpi/{id}", [DashboardController::class, "showEmployeeKpi"])->name("show.batch.kpi");
-    Route::get("dashboard/employee-batch-kpi/", [DashboardController::class, "showEmployeeKpi"])->name("show.batch.kpi");
-    Route::get("dashboard/employee-kpi/{id}", [DashboardController::class, "editEmployeeKpi"])->name("show.employee.kpi");
+// Employee Batch & KPI Routes
+Route::get("dashboard/active/batch", [DashboardController::class, "show"])->name("show-batch");
+// Route::get("dashboard/employee-batch-kpi/{id}", [DashboardController::class, "showEmployeeKpi"])->name("show.batch.kpi");
+Route::get("dashboard/employee-batch-kpi/", [DashboardController::class, "showEmployeeKpi"])->name("show.batch.kpi");
+Route::get("dashboard/employee-kpi/{id}", [DashboardController::class, "editEmployeeKpi"])->name("show.employee.kpi");
 
-    // Employee Self Rating
-    Route::post("dashboard/self-rating", [AppraisalScoreController::class, "store"])->name("self.rating");
+// Employee Self Rating
+Route::post("dashboard/self-rating", [AppraisalScoreController::class, "store"])->name("self.rating");
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Supervisor Scoring & Evaluation Routes
 |--------------------------------------------------------------------------
 | Routes for supervisors to score employees and manage probing
 */
 
-    // Supervisor KPI Scoring Routes
-    Route::get("dashboard/employee-supervisor-kpi-score/{id}", [DashboardController::class, "showEmployeeSupervisorKpiScore"])->name("show.employee.supervisor.kpi.score");
-    Route::get("dashboard/supervisor/show-employee-kpis", [SupervisorScoreController::class, "index"])->name("supervisor.index");
-    Route::get("dashboard/supervisor/show-employee-kpi-form/kpi/{kpiId}/batch/{batchId}/employee-id/{employeeId}", [SupervisorScoreController::class, "edit"])->name("supervisor.edit");
-    Route::post("dashboard/supervisor/rating", [SupervisorScoreController::class, "store"])->name("supervisor.rating");
+// Supervisor KPI Scoring Routes
+Route::get("dashboard/employee-supervisor-kpi-score/{id}", [DashboardController::class, "showEmployeeSupervisorKpiScore"])->name("show.employee.supervisor.kpi.score");
+Route::get("dashboard/supervisor/show-employee-kpis", [SupervisorScoreController::class, "index"])->name("supervisor.index");
+Route::get("dashboard/supervisor/show-employee-kpi-form/kpi/{kpiId}/batch/{batchId}/employee-id/{employeeId}", [SupervisorScoreController::class, "edit"])->name("supervisor.edit");
+Route::post("dashboard/supervisor/rating", [SupervisorScoreController::class, "store"])->name("supervisor.rating");
 
-    // Employee Probing Routes
-    Route::get("dashboard/employee-probe/{id}", [DashboardController::class, "showEmployeeProbe"])->name("show.employee.probe");
-    Route::post("dashboard/employee-probe/submit", [AppraisalScoreController::class, "submitProbing"])->name("submit.employee.probe");
+// Employee Probing Routes
+Route::get("dashboard/employee-probe/{id}", [DashboardController::class, "showEmployeeProbe"])->name("show.employee.probe");
+Route::post("dashboard/employee-probe/submit", [AppraisalScoreController::class, "submitProbing"])->name("submit.employee.probe");
 
-    // Supervisor Probe Scoring Routes
-    Route::get("dashboard/supervisor/show-employee-kpi-prob-form/kpi/{kpiId}/batch/{batchId}", [SupervisorScoreController::class, "editProb"])->name("prob.edit");
-    Route::post("dashboard/supervisor/probe-score", [SupervisorScoreController::class, "probScore"])->name("prob.store");
+// Supervisor Probe Scoring Routes
+Route::get("dashboard/supervisor/show-employee-kpi-prob-form/kpi/{kpiId}/batch/{batchId}", [SupervisorScoreController::class, "editProb"])->name("prob.edit");
+Route::post("dashboard/supervisor/probe-score", [SupervisorScoreController::class, "probScore"])->name("prob.store");
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Appraisal Submission Routes
 |--------------------------------------------------------------------------
 | Routes for final appraisal submission and scoring state updates
 */
 
-    Route::post("dashboard/submit-appraisal", [UpdateKpiScoringState::class, "store"])->name("submit.appraisal");
+Route::post("dashboard/submit-appraisal", [UpdateKpiScoringState::class, "store"])->name("submit.appraisal");
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | HR Batch Management Routes
 |--------------------------------------------------------------------------
 | Routes for HR to manage appraisal batches
 */
 
-    Route::get("dashboard/appraisal/hr/batch-setup", [BatchController::class, "index"])->name("batch.setup.index");
-    Route::post('dashboard/appraisal/create-batch', [BatchController::class, 'store'])->name('create.batch');
-    Route::get("dashboard/appraisal/hr/batch/{id}/show", [BatchController::class, "show"])->name("show.batch");
-    Route::post("dashboard/appraisal/hr/batch/update/{id}", [BatchController::class, "update"])->name("update.batch");
-    Route::post("dashboard/appraisal/hr/batch/update-state/{id}", [BatchController::class, "update_state"])->name("update.batch.state");
-    Route::post("dashboard/appraisal/hr/batch/update-status/{id}", [BatchController::class, "update_status"])->name("update.batch.status");
-    Route::post("dashboard/appraisal/hr/batch/delete-batch/{id}", [BatchController::class, "destroy"])->name("delete.batch");
+Route::get("dashboard/appraisal/hr/batch-setup", [BatchController::class, "index"])->name("batch.setup.index");
+Route::post('dashboard/appraisal/create-batch', [BatchController::class, 'store'])->name('create.batch');
+Route::get("dashboard/appraisal/hr/batch/{id}/show", [BatchController::class, "show"])->name("show.batch");
+Route::post("dashboard/appraisal/hr/batch/update/{id}", [BatchController::class, "update"])->name("update.batch");
+Route::post("dashboard/appraisal/hr/batch/update-state/{id}", [BatchController::class, "update_state"])->name("update.batch.state");
+Route::post("dashboard/appraisal/hr/batch/update-status/{id}", [BatchController::class, "update_status"])->name("update.batch.status");
+Route::post("dashboard/appraisal/hr/batch/delete-batch/{id}", [BatchController::class, "destroy"])->name("delete.batch");
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Global KPI Management Routes
 |--------------------------------------------------------------------------
 | HR routes for managing global KPI configurations
 */
 
-    Route::get("dashboard/appraisal/hr/hr/global-kpi-setup", [GlobalKpiController::class, "index"])->name("global.index");
-    Route::get("dashboard/appraisal/hr/global-kpi-setup/create", [GlobalKpiController::class, "create"])->name("create.global.kpi");
-    Route::post("dashboard/appraisal/hr/global-kpi-setup/store", [GlobalKpiController::class, "store"])->name("store.global.kpi");
-    Route::get("dashboard/appraisal/hr/global-kpi/{id}/show", [GlobalKpiController::class, "show"])->name("show.global.kpi");
-    Route::post("dashboard/appraisal/hr/global-kpi/{id}/update", [GlobalKpiController::class, "update"])->name("update.global.kpi");
-    Route::delete("dashboard/appraisal/hr/global-kpi/{id}/delete", [GlobalKpiController::class, "destroy"])->name("delete.global.kpi");
-    Route::post("dashboard/appraisal/hr/global-kpi/update-state/{id}", [GlobalKpiController::class, "update_state"])->name("update.global.kpi.state");
-    Route::post("dashboard/appraisal/hr/global-kpi/update-status/{id}", [GlobalKpiController::class, "update_status"])->name("update.global.kpi.status");
+Route::get("dashboard/appraisal/hr/hr/global-kpi-setup", [GlobalKpiController::class, "index"])->name("global.index");
+Route::get("dashboard/appraisal/hr/global-kpi-setup/create", [GlobalKpiController::class, "create"])->name("create.global.kpi");
+Route::post("dashboard/appraisal/hr/global-kpi-setup/store", [GlobalKpiController::class, "store"])->name("store.global.kpi");
+Route::get("dashboard/appraisal/hr/global-kpi/{id}/show", [GlobalKpiController::class, "show"])->name("show.global.kpi");
+Route::post("dashboard/appraisal/hr/global-kpi/{id}/update", [GlobalKpiController::class, "update"])->name("update.global.kpi");
+Route::delete("dashboard/appraisal/hr/global-kpi/{id}/delete", [GlobalKpiController::class, "destroy"])->name("delete.global.kpi");
+Route::post("dashboard/appraisal/hr/global-kpi/update-state/{id}", [GlobalKpiController::class, "update_state"])->name("update.global.kpi.state");
+Route::post("dashboard/appraisal/hr/global-kpi/update-status/{id}", [GlobalKpiController::class, "update_status"])->name("update.global.kpi.status");
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Global Section Management Routes
 |--------------------------------------------------------------------------
 | HR routes for managing global section configurations
 */
 
-    Route::get("dashboard/appraisal/hr/global-section-setup/", [GlobalSectionController::class, "index"])->name("global.section.index");
-    Route::get("dashboard/appraisal/hr/global-section-setup/create", [GlobalSectionController::class, "create"])->name("create.global.section");
-    Route::post("dashboard/appraisal/hr/global-section-setup/store", [GlobalSectionController::class, "store"])->name("store.global.section");
-    Route::get("dashboard/appraisal/hr/global-section/{id}/show", [GlobalSectionController::class, "show"])->name("show.global.section");
-    Route::post("dashboard/appraisal/hr/global-section/{id}/update", [GlobalSectionController::class, "update"])->name("update.global.section");
-    Route::delete("dashboard/appraisal/hr/global-section/{id}/delete", [GlobalSectionController::class, "destroy"])->name("delete.global.section");
+Route::get("dashboard/appraisal/hr/global-section-setup/", [GlobalSectionController::class, "index"])->name("global.section.index");
+Route::get("dashboard/appraisal/hr/global-section-setup/create", [GlobalSectionController::class, "create"])->name("create.global.section");
+Route::post("dashboard/appraisal/hr/global-section-setup/store", [GlobalSectionController::class, "store"])->name("store.global.section");
+Route::get("dashboard/appraisal/hr/global-section/{id}/show", [GlobalSectionController::class, "show"])->name("show.global.section");
+Route::post("dashboard/appraisal/hr/global-section/{id}/update", [GlobalSectionController::class, "update"])->name("update.global.section");
+Route::delete("dashboard/appraisal/hr/global-section/{id}/delete", [GlobalSectionController::class, "destroy"])->name("delete.global.section");
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Global Metric Management Routes
 |--------------------------------------------------------------------------
 | HR routes for managing global metric configurations
 */
 
-    Route::get("dashboard/appraisal/hr/global-metric-setup", [GlobalMetricController::class, "index"])->name("global.metric.index");
-    Route::get("dashboard/appraisal/hr/global-metric-setup/create", [GlobalMetricController::class, "create"])->name("create.global.metric");
-    Route::post("dashboard/appraisal/hr/global-metric-setup/store", [GlobalMetricController::class, "store"])->name("store.global.metric");
-    Route::get("dashboard/appraisal/hr/global-metric/{id}/show", [GlobalMetricController::class, "show"])->name("show.global.metric");
-    Route::post("dashboard/appraisal/hr/global-metric/{id}/update", [GlobalMetricController::class, "update"])->name("update.global.metric");
-    Route::delete("dashboard/appraisal/hr/global-metric/{id}/delete", [GlobalMetricController::class, "destroy"])->name("delete.global.metric");
+Route::get("dashboard/appraisal/hr/global-metric-setup", [GlobalMetricController::class, "index"])->name("global.metric.index");
+Route::get("dashboard/appraisal/hr/global-metric-setup/create", [GlobalMetricController::class, "create"])->name("create.global.metric");
+Route::post("dashboard/appraisal/hr/global-metric-setup/store", [GlobalMetricController::class, "store"])->name("store.global.metric");
+Route::get("dashboard/appraisal/hr/global-metric/{id}/show", [GlobalMetricController::class, "show"])->name("show.global.metric");
+Route::post("dashboard/appraisal/hr/global-metric/{id}/update", [GlobalMetricController::class, "update"])->name("update.global.metric");
+Route::delete("dashboard/appraisal/hr/global-metric/{id}/delete", [GlobalMetricController::class, "destroy"])->name("delete.global.metric");
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Global Weight & Scoring Management Routes
 |--------------------------------------------------------------------------
 | HR routes for managing global weight and scoring configurations for departments
 */
 
-    Route::get("dashboard/appraisal/hr/global-weight-setup", [GlobalWeightController::class, "index"])->name("global.weight.index");
-    Route::get("dashboard/appraisal/hr/global-weight-setup/create", [GlobalWeightController::class, "create"])->name("create.global.weight");
-    Route::post("dashboard/appraisal/hr/global-weight-setup/store", [GlobalWeightController::class, "store"])->name("store.global.weight");
-    Route::get("dashboard/appraisal/hr/global-weight-setup/{id}/show", [GlobalWeightController::class, "show"])->name("show.global.weight");
-    Route::post("dashboard/appraisal/hr/global-weight-setup/{id}update", [GlobalWeightController::class, "update"])->name("update.global.weight");
-    Route::post("dashboard/appraisal/hr/global-weight-setup{id}/delete", [GlobalWeightController::class, "destroy"])->name("delete.global.weight");
+Route::get("dashboard/appraisal/hr/global-weight-setup", [GlobalWeightController::class, "index"])->name("global.weight.index");
+Route::get("dashboard/appraisal/hr/global-weight-setup/create", [GlobalWeightController::class, "create"])->name("create.global.weight");
+Route::post("dashboard/appraisal/hr/global-weight-setup/store", [GlobalWeightController::class, "store"])->name("store.global.weight");
+Route::get("dashboard/appraisal/hr/global-weight-setup/{id}/show", [GlobalWeightController::class, "show"])->name("show.global.weight");
+Route::post("dashboard/appraisal/hr/global-weight-setup/{id}update", [GlobalWeightController::class, "update"])->name("update.global.weight");
+Route::post("dashboard/appraisal/hr/global-weight-setup{id}/delete", [GlobalWeightController::class, "destroy"])->name("delete.global.weight");
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Grade Management Routes
 |--------------------------------------------------------------------------
 | HR routes for managing employee grade configurations
 */
 
-    Route::get("dashboard/appraisal/hr/grade-setup", [GradeController::class, "index"])->name("grade.index");
-    Route::get("dashboard/appraisal/hr/grade-setup/create", [GradeController::class, "create"])->name("create.grade");
-    Route::post("dashboard/appraisal/hr/grade-setup/store", [GradeController::class, "store"])->name("store.grade");
-    Route::get("dashboard/appraisal/hr/grade-setup/{id}/show", [GradeController::class, "show"])->name("show.grade");
-    Route::post("dashboard/appraisal/hr/grade-setup/{id}update", [GradeController::class, "update"])->name("update.grade");
-    Route::post("dashboard/appraisal/hr/grade-setup/{id}delete", [GradeController::class, "delete"])->name("delete.grade");
+Route::get("dashboard/appraisal/hr/grade-setup", [GradeController::class, "index"])->name("grade.index");
+Route::get("dashboard/appraisal/hr/grade-setup/create", [GradeController::class, "create"])->name("create.grade");
+Route::post("dashboard/appraisal/hr/grade-setup/store", [GradeController::class, "store"])->name("store.grade");
+Route::get("dashboard/appraisal/hr/grade-setup/{id}/show", [GradeController::class, "show"])->name("show.grade");
+Route::post("dashboard/appraisal/hr/grade-setup/{id}update", [GradeController::class, "update"])->name("update.grade");
+Route::post("dashboard/appraisal/hr/grade-setup/{id}delete", [GradeController::class, "delete"])->name("delete.grade");
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Department KPI Management Routes
 |--------------------------------------------------------------------------
 | Routes for department-level KPI setup and management
 */
 
-    Route::get("dashboard/appraisal/department/kpi-setup", [KpiController::class, "index"])->name("kpi.index");
-    Route::get("dashboard/appraisal/department/kpi-setup/create", [KpiController::class, "create"])->name("create.kpi");
-    Route::post("dashboard/appraisal/department/kpi-setup/store", [KpiController::class, "store"])->name("store.kpi");
-    Route::get("dashboard/appraisal/department/kpi/{id}/show", [KpiController::class, "show"])->name("show.kpi");
-    Route::post("dashboard/appraisal/department/kpi/{id}/update", [KpiController::class, "update"])->name("update.kpi");
-    Route::delete("dashboard/appraisal/department/kpi/{id}/delete", [KpiController::class, "destroy"])->name("delete.kpi");
-    Route::post("dashboard/appraisal/department/kpi/update-state/{id}", [KpiController::class, "update_state"])->name("update.kpi.state");
-    Route::post("dashboard/appraisal/department/kpi/update-status/{id}", [KpiController::class, "update_status"])->name("update.kpi.status");
+Route::get("dashboard/appraisal/department/kpi-setup", [KpiController::class, "index"])->name("kpi.index");
+Route::get("dashboard/appraisal/department/kpi-setup/create", [KpiController::class, "create"])->name("create.kpi");
+Route::post("dashboard/appraisal/department/kpi-setup/store", [KpiController::class, "store"])->name("store.kpi");
+Route::get("dashboard/appraisal/department/kpi/{id}/show", [KpiController::class, "show"])->name("show.kpi");
+Route::post("dashboard/appraisal/department/kpi/{id}/update", [KpiController::class, "update"])->name("update.kpi");
+Route::delete("dashboard/appraisal/department/kpi/{id}/delete", [KpiController::class, "destroy"])->name("delete.kpi");
+Route::post("dashboard/appraisal/department/kpi/update-state/{id}", [KpiController::class, "update_state"])->name("update.kpi.state");
+Route::post("dashboard/appraisal/department/kpi/update-status/{id}", [KpiController::class, "update_status"])->name("update.kpi.status");
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Section Management Routes
 |--------------------------------------------------------------------------
 | Routes for managing KPI sections within departments
 */
 
-    Route::get("dashboard/department/section-setup/kpi/{kpiScore}/index/{id}", [SectionController::class, "index"])->name("section.index");
-    Route::get("dashboard/department/kpi/section-setup/create/{id}", [SectionController::class, "create"])->name("create.section");
-    Route::post("dashboard/department/kpi/section-setup/store", [SectionController::class, "store"])->name("store.section");
-    Route::get("dashboard/department/kpi/{kpiId}/section-show/{sectionId}", [SectionController::class, "show"])->name("show.section");
-    Route::post("dashboard/department/kpi/{kpiId}/section-update/{id}", [SectionController::class, "update"])->name("update.section");
-    Route::post("dashboard/department/kpi/{id}/section-delete", [SectionController::class, "destroy"])->name("delete.section");
+Route::get("dashboard/department/section-setup/kpi/{kpiScore}/index/{id}", [SectionController::class, "index"])->name("section.index");
+Route::get("dashboard/department/kpi/section-setup/create/{id}", [SectionController::class, "create"])->name("create.section");
+Route::post("dashboard/department/kpi/section-setup/store", [SectionController::class, "store"])->name("store.section");
+Route::get("dashboard/department/kpi/{kpiId}/section-show/{sectionId}", [SectionController::class, "show"])->name("show.section");
+Route::post("dashboard/department/kpi/{kpiId}/section-update/{id}", [SectionController::class, "update"])->name("update.section");
+Route::post("dashboard/department/kpi/{id}/section-delete", [SectionController::class, "destroy"])->name("delete.section");
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Metric Management Routes
 |--------------------------------------------------------------------------
 | Routes for managing metrics within sections and KPIs
 */
 
-    Route::get("dashboard/department/section/metric-setup/kpi/{kpiId}/section/{sectionMetricScore}/index/{id}", [MetricController::class, "index"])->name("metric.index");
-    Route::get("dashboard/department/section/metric-setup/kpi/{kpiScore}/section/{sectionMetricScore}/create/{id}", [MetricController::class, "create"])->name("create.metric");
-    Route::post("dashboard/department/section/metric-setup/store", [MetricController::class, "store"])->name("store.metric");
-    Route::get("dashboard/department/section/kpi/{kpiId}/section/{sectionMetricScore}/{sectionId}/metric-show/{metricId}", [MetricController::class, "show"])->name("show.metric");
-    Route::post("dashboard/department/section/{id}/metric-update", [MetricController::class, "update"])->name("update.metric");
-    Route::post("dashboard/department/section/{id}/metric-delete", [MetricController::class, "destroy"])->name("delete.metric");
+Route::get("dashboard/department/section/metric-setup/kpi/{kpiId}/section/{sectionMetricScore}/index/{id}", [MetricController::class, "index"])->name("metric.index");
+Route::get("dashboard/department/section/metric-setup/kpi/{kpiScore}/section/{sectionMetricScore}/create/{id}", [MetricController::class, "create"])->name("create.metric");
+Route::post("dashboard/department/section/metric-setup/store", [MetricController::class, "store"])->name("store.metric");
+Route::get("dashboard/department/section/kpi/{kpiId}/section/{sectionMetricScore}/{sectionId}/metric-show/{metricId}", [MetricController::class, "show"])->name("show.metric");
+Route::post("dashboard/department/section/{id}/metric-update", [MetricController::class, "update"])->name("update.metric");
+Route::post("dashboard/department/section/{id}/metric-delete", [MetricController::class, "destroy"])->name("delete.metric");
 
-    /*
+/*
 |--------------------------------------------------------------------------
 | Reports & Analytics Routes
 |--------------------------------------------------------------------------
 | Routes for generating and viewing appraisal reports
 */
 
-    // Main Report Routes
-    Route::get('dashboard/appraisal/report', [ReportController::class, 'index'])->name('report.index');
-    Route::post('dashboard/appraisal/report/filter', [ReportController::class, 'index'])->name('reports.filter');
+// Main Report Routes
+Route::get('dashboard/appraisal/report', [ReportController::class, 'index'])->name('report.index');
+Route::post('dashboard/appraisal/report/filter', [ReportController::class, 'index'])->name('reports.filter');
 
-    // Employee Specific Reports
-    Route::get('dashboard/appraisal/report/show/employee/{employeeId}/summary-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.summary');
-    Route::get('dashboard/appraisal/report/show/employee/{employeeId}/full-report-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.full.details');
+// Employee Specific Reports
+Route::get('dashboard/appraisal/report/show/employee/{employeeId}/summary-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.summary');
+Route::get('dashboard/appraisal/report/show/employee/{employeeId}/full-report-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.full.details');
 
-    // PDF Generation Routes
-    Route::get('/employee/{employeeId}/print-pdf', [ReportController::class, 'generateEmployeePdf'])->name('employee.printPdf');
-    // Route::get('/employee/{employeeId}/print-pdf', [ReportController::class, 'generateEmployeePdfReport'])->name('employee.printPdf');
+// PDF Generation Routes
+Route::get('/employee/{employeeId}/print-pdf', [ReportController::class, 'generateEmployeePdf'])->name('employee.printPdf');
+// Route::get('/employee/{employeeId}/print-pdf', [ReportController::class, 'generateEmployeePdfReport'])->name('employee.printPdf');
 
-    // Test Report Route
-    Route::view('/test-report', 'reports.test-report');
-}); // End of check.api.token middleware group
+// Test Report Route
+Route::view('/test-report', 'reports.test-report');
+// }); // End of check.api.token middleware group
 
 /*
 |--------------------------------------------------------------------------

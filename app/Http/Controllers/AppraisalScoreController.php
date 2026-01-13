@@ -81,6 +81,17 @@ class AppraisalScoreController extends Controller
             $response = Http::withToken($accessToken)
                 ->post('http://192.168.1.200:5123/Appraisal/Score/employee-score', $payload);
 
+            // Check for session expiration (401 Unauthorized)
+            if ($response->status() === 401) {
+                Log::warning('API returned 401 - Token may be expired');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Your session has expired. Please log in again.',
+                    'session_expired' => true,
+                    'redirect' => route('login')
+                ], 401);
+            }
+
             // Check if the response is successful
             if ($response->status() === 200) {
                 // Return success message

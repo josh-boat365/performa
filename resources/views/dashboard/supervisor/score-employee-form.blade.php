@@ -506,6 +506,17 @@
                                                         body: formData
                                                     })
                                                         .then(response => {
+                                                            // Check for 401 status (session expired)
+                                                            if (response.status === 401) {
+                                                                return response.json().then(data => {
+                                                                    if (data.session_expired) {
+                                                                        alert('Your session has expired. Please log in again.');
+                                                                        window.location.href = data.redirect || '{{ route("login") }}';
+                                                                        return null;
+                                                                    }
+                                                                    throw new Error(data.message || 'Session expired');
+                                                                });
+                                                            }
                                                             // Check if response is ok (status 200-299)
                                                             if (!response.ok) {
                                                                 // Try to parse error message from response
@@ -518,6 +529,8 @@
                                                             return response.json();
                                                         })
                                                         .then(data => {
+                                                            if (!data) return; // Session expired, already redirecting
+
                                                             // Store the response data for after refresh
                                                             if (data.success) {
                                                                 sessionStorage.setItem('showSuccessToast', JSON.stringify({

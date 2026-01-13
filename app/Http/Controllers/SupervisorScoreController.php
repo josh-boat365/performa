@@ -243,6 +243,20 @@ class SupervisorScoreController extends Controller
             $response = Http::withToken($accessToken)
                 ->put('http://192.168.1.200:5123/Appraisal/Score/supervisor-score', $payload);
 
+            // Check for session expiration (401 Unauthorized)
+            if ($response->status() === 401) {
+                Log::warning('API returned 401 - Token may be expired');
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Your session has expired. Please log in again.',
+                        'session_expired' => true,
+                        'redirect' => route('login')
+                    ], 401);
+                }
+                return redirect()->route('login')->with('toast_warning', 'Your session has expired. Please log in again.');
+            }
+
             // Check if the API call was successful
             if ($response->successful()) {
                 if ($request->ajax()) {
