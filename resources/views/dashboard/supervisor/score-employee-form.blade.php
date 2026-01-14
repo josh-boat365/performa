@@ -2,17 +2,31 @@
 
     @php
 
-        $accessToken = session('api_token');
-        // Fetch user information
-        $responseUser = Http::withToken($accessToken)
-            ->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+$accessToken = session('api_token');
+// Fetch user information
+$responseUser = Http::withToken($accessToken)
+    ->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
 
-        // Handle responses
-        $user = $responseUser->successful() ? $responseUser->object() : null;
+// Handle responses
+$user = $responseUser->successful() ? $responseUser->object() : null;
 
-        $supervisorId = $user->id;
+$supervisorId = $user->id;
 
     @endphp
+
+    <style>
+        /* Hide number input spinners/arrows */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none !important;
+            margin: 0 !important;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield !important;
+            appearance: textfield !important;
+        }
+    </style>
 
     <div class="container-fluid px-1">
 
@@ -265,9 +279,9 @@
                             <hr class="mt-10">
 
                             @if (
-                                    isset($metric->metricEmpScore) &&
-                                    in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM', 'COMPLETED'])
-                                )
+    isset($metric->metricEmpScore) &&
+    in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM', 'COMPLETED'])
+)
                                 <div></div>
                             @else
                                 <div class="float-end">
