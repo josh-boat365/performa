@@ -2,17 +2,31 @@
 
     @php
 
-        $accessToken = session('api_token');
-        // Fetch user information
-        $responseUser = Http::withToken($accessToken)
-            ->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+$accessToken = session('api_token');
+// Fetch user information
+$responseUser = Http::withToken($accessToken)
+    ->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
 
-        // Handle responses
-        $user = $responseUser->successful() ? $responseUser->object() : null;
+// Handle responses
+$user = $responseUser->successful() ? $responseUser->object() : null;
 
-        $supervisorId = $user->id;
+$supervisorId = $user->id;
 
     @endphp
+
+    <style>
+        /* Hide number input spinners/arrows */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none !important;
+            margin: 0 !important;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield !important;
+            appearance: textfield !important;
+        }
+    </style>
 
     <div class="container-fluid px-1">
 
@@ -158,7 +172,7 @@
                                                                         <div class="col-md-2">
                                                                             <input class="form-control mb-3 score-input" type="number"
                                                                                 name="sectionSupScore" required
-                                                                                placeholder="Enter Score" min="0"
+                                                                                placeholder="Enter Score" min="0" step="0.01"
                                                                                 pattern="\d+(\.\d{1,2})?"
                                                                                 max="{{ $section->sectionScore }}"
                                                                                 @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
@@ -230,7 +244,7 @@
                                                                                         </div>
                                                                                         <div class="col-md-9">
                                                                                             <textarea class="form-control mb-3" type="text"
-                                                                                               name="supervisorComment"
+                                                                                                name="supervisorComment"
                                                                                                 @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                                                 placeholder="Enter your comments"
                                                                                                 rows="3">{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
@@ -265,9 +279,9 @@
                             <hr class="mt-10">
 
                             @if (
-                                    isset($metric->metricEmpScore) &&
-                                    in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM', 'COMPLETED'])
-                                )
+    isset($metric->metricEmpScore) &&
+    in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM', 'COMPLETED'])
+)
                                 <div></div>
                             @else
                                 <div class="float-end">
@@ -276,7 +290,8 @@
                                         <button id="next-btn" class="btn btn-primary">Next</button>
 
                                         <button id="submit-btn" type="button" data-bs-toggle="modal" class="btn btn-success"
-                                            data-bs-target=".bs-submit-appraisal-modal-lg" id="submitAppraisalButton" disabled>Submit
+                                            data-bs-target=".bs-submit-appraisal-modal-lg" id="submitAppraisalButton"
+                                            disabled>Submit
                                             Appraisal</button>
                                     </div>
                                 </div>
@@ -306,7 +321,8 @@
                                                     <input type="hidden" name="supervisorId" value="{{ $supervisorId }}">
                                                     <input type="hidden" name="status" value="CONFIRMATION">
 
-                                                    {{--  Textarea for supervisor recommendation (optional recommendation comment)  --}}
+                                                    {{-- Textarea for supervisor recommendation (optional recommendation
+                                                    comment) --}}
                                                     <div class="mb-3">
                                                         <label for="supervisorRecommendation" class="form-label">Supervisor
                                                             Recommendation (Optional)</label>
@@ -332,7 +348,7 @@
 
                             @push('scripts')
                                 <script>
-                                    document.addEventListener('DOMContentLoaded', function () {
+                                    document.addEventListener('DOMContentLoaded', function() {
                                         const sections = document.querySelectorAll('.section-tab');
                                         const prevBtn = document.getElementById('prev-btn');
                                         const nextBtn = document.getElementById('next-btn');
@@ -340,11 +356,29 @@
                                         const currentPageSpan = document.getElementById('current-page');
                                         const totalPagesSpan = document.getElementById('total-pages');
                                         const progressBar = document.getElementById('progress-bar');
-                                        let currentPage = parseInt(sessionStorage.getItem('currentPage') || 0);
+
+                                        // Use unique key per employee to avoid page persistence across different forms
+                                        const currentEmployeeId = '{{ $employeeId }}';
+                                        const pageStorageKey = `currentPage_supervisor_${currentEmployeeId}`;
+                                        const lastEmployeeKey = 'lastViewedEmployeeId_supervisor';
+
+                                        // Check if we're viewing a different employee - if so, reset to page 0
+                                        const lastViewedEmployee = sessionStorage.getItem(lastEmployeeKey);
+                                        let currentPage = 0;
+
+                                        if (lastViewedEmployee === currentEmployeeId) {
+                                            // Same employee, restore the page
+                                            currentPage = parseInt(sessionStorage.getItem(pageStorageKey) || 0);
+                                        } else {
+                                            // Different employee, start from page 0
+                                            sessionStorage.setItem(lastEmployeeKey, currentEmployeeId);
+                                            sessionStorage.setItem(pageStorageKey, '0');
+                                        }
+
                                         const sectionsPerPage = 3;
                                         const totalPages = Math.ceil(sections.length / sectionsPerPage);
 
-                                        totalPagesSpan.textContent = totalPages;
+                                        if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
 
                                         // Helper function to show toast messages
                                         function showToast(type, message) {
@@ -386,13 +420,12 @@
                                             let allFilled = true;
 
                                             for (let i = start; i < end && i < sections.length; i++) {
-                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]');
-                                                {{--  const commentInputs = sections[i].querySelectorAll('textarea[name*="Comment" ]');  --}}
-                                                const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                {{--  const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');  --}}
+                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="SupScore"]');
+                                                {{-- Comments are no longer required, only scores --}}
 
-                                                {{--  if (!scoresFilled || !commentsFilled) {  --}}
-                                                if (!scoresFilled ) {
+                                                const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+
+                                                if (!scoresFilled) {
                                                     allFilled = false;
                                                     sections[i].classList.add('border-danger');
                                                 } else {
@@ -406,19 +439,16 @@
                                         function updateProgressBar() {
                                             let totalValid = 0;
                                             sections.forEach(section => {
-                                                const scoreInputs = section.querySelectorAll(
-                                                    'input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]'
-                                                );
-                                                {{--  const commentInputs = section.querySelectorAll('textarea[name*="Comment"]');  --}}
+                                                const scoreInputs = section.querySelectorAll('input[type="number"][name*="SupScore"]');
                                                 const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                {{--  const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');  --}}
-                                                {{--  if (scoresFilled && commentsFilled) totalValid++;  --}}
                                                 if (scoresFilled) totalValid++;
                                             });
                                             const percent = Math.round((totalValid / sections.length) * 100);
-                                            progressBar.style.width = percent + '%';
-                                            progressBar.setAttribute('aria-valuenow', percent);
-                                            progressBar.textContent = percent + '%';
+                                            if (progressBar) {
+                                                progressBar.style.width = percent + '%';
+                                                progressBar.setAttribute('aria-valuenow', percent);
+                                                progressBar.textContent = percent + '%';
+                                            }
                                         }
 
                                         function updateButtons() {
@@ -438,9 +468,19 @@
                                             const end = start + sectionsPerPage;
                                             for (let i = start; i < end && i < sections.length; i++) {
                                                 sections[i].style.display = 'block';
-                                            } if (currentPageSpan) currentPageSpan.textContent = page + 1; sessionStorage.setItem('currentPage', page); updateButtons(); window.scrollTo({ top: sections[start].offsetTop, behavior: 'smooth' });
-                                        } if (prevBtn) {
-                                            prevBtn.addEventListener('click', function () {
+                                            }
+
+                                            if (currentPageSpan) currentPageSpan.textContent = page + 1;
+                                            sessionStorage.setItem(pageStorageKey, page);
+                                            updateButtons();
+                                            window.scrollTo({
+                                                top: sections[start].offsetTop,
+                                                behavior: 'smooth'
+                                            });
+                                        }
+
+                                        if (prevBtn) {
+                                            prevBtn.addEventListener('click', function() {
                                                 if (currentPage > 0) {
                                                     currentPage--;
                                                     showPage(currentPage);
@@ -449,20 +489,26 @@
                                         }
 
                                         if (nextBtn) {
-                                            nextBtn.addEventListener('click', function () {
-                                                if (currentPage < totalPages - 1 && checkInputs(currentPage)) { currentPage++; showPage(currentPage); }
+                                            nextBtn.addEventListener('click', function() {
+                                                if (currentPage < totalPages - 1 && checkInputs(currentPage)) {
+                                                    currentPage++;
+                                                    showPage(currentPage);
+                                                }
                                             });
-                                        } document.querySelectorAll('input[type="number" ], textarea').forEach(input => {
-                                            input.addEventListener('input', function () {
-                                                validateField(this);
-                                                updateButtons();
-                                            });
-                                        });
+                                        }
 
-                                        // Enhanced AJAX form handler with proper error handling
-                                        document.querySelectorAll('form.ajax-sup-eval-form, form.section-form, form.ajax-eval-form').forEach(form => {
-                                            form.addEventListener('submit', function (e) {
-                                                {{--  e.preventDefault();  --}}
+                                        document.querySelectorAll('input[type="number"][name*="SupScore"], textarea[name="supervisorComment"]')
+                                            .forEach(input => {
+                                                input.addEventListener('input', function() {
+                                                    validateField(this);
+                                                    updateButtons();
+                                                });
+                                            });
+
+                                        // Modified AJAX form handler with page refresh and scroll preservation
+                                        document.querySelectorAll('form.ajax-sup-eval-form, form.section-form').forEach(form => {
+                                            form.addEventListener('submit', function(e) {
+                                                e.preventDefault();
                                                 const scrollPos = window.scrollY;
                                                 const formData = new FormData(form);
                                                 const saveBtn = form.querySelector('button[type="submit"]');
@@ -470,21 +516,34 @@
 
                                                 // Store scroll position and current page state before submission
                                                 sessionStorage.setItem('preserveScrollPosition', scrollPos.toString());
-                                                sessionStorage.setItem('currentPage', currentPage.toString());
+                                                sessionStorage.setItem(pageStorageKey, currentPage.toString());
 
-                                                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+                                                saveBtn.innerHTML =
+                                                    '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
                                                 saveBtn.disabled = true;
 
                                                 fetch(form.action, {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'X-Requested-With': 'XMLHttpRequest',
-                                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                                        'Accept': 'application/json'
-                                                    },
-                                                    body: formData
-                                                })
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'X-Requested-With': 'XMLHttpRequest',
+                                                            'X-CSRF-TOKEN': document.querySelector(
+                                                                'meta[name="csrf-token"]').getAttribute('content'),
+                                                            'Accept': 'application/json'
+                                                        },
+                                                        body: formData
+                                                    })
                                                     .then(response => {
+                                                        // Check for 401 status (session expired)
+                                                        if (response.status === 401) {
+                                                            return response.json().then(data => {
+                                                                if (data.session_expired) {
+                                                                    alert('Your session has expired. Please log in again.');
+                                                                    window.location.href = data.redirect || '{{ route("login") }}';
+                                                                    return null;
+                                                                }
+                                                                return data;
+                                                            });
+                                                        }
                                                         // Check if response is ok (status 200-299)
                                                         if (!response.ok) {
                                                             // Try to parse error message from response
@@ -497,6 +556,8 @@
                                                         return response.json();
                                                     })
                                                     .then(data => {
+                                                        if (!data) return; // Session expired, already redirecting
+
                                                         // Store the response data for after refresh
                                                         if (data.success) {
                                                             sessionStorage.setItem('showSuccessToast', JSON.stringify({
@@ -523,6 +584,12 @@
                                                     });
                                             });
                                         });
+
+                                        function smoothScroll(targetForm) {
+                                            $('html, body').animate({
+                                                scrollTop: $(targetForm).offset().top
+                                            }, 500);
+                                        }
 
                                         // Show the initial page
                                         showPage(currentPage);
@@ -559,8 +626,6 @@
                                             }
                                         }, 100);
                                     });
-
-
                                 </script>
                             @endpush
 
