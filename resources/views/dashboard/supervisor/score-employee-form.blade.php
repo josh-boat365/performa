@@ -26,6 +26,17 @@ $supervisorId = $user->id;
             -moz-appearance: textfield !important;
             appearance: textfield !important;
         }
+
+        /* Unsaved form warning border */
+        .border-warning {
+            border-color: #ffc107 !important;
+            border-width: 2px !important;
+        }
+
+        /* Saved button styling */
+        .btn-saved {
+            pointer-events: none;
+        }
     </style>
 
     <div class="container-fluid px-1">
@@ -414,34 +425,78 @@ $supervisorId = $user->id;
                                             }
                                         }
 
+                                        // Track saved state for each form
+                                        function initializeSavedState() {
+                                            document.querySelectorAll('form.ajax-sup-eval-form, form.section-form').forEach(form => {
+                                                const scoreInput = form.querySelector('input[type="number"][name*="SupScore"]');
+                                                const saveBtn = form.querySelector('button[type="submit"]');
+
+                                                if (scoreInput && scoreInput.value.trim() !== '') {
+                                                    // Form has pre-filled value (already saved)
+                                                    form.dataset.saved = 'true';
+                                                    if (saveBtn) {
+                                                        saveBtn.textContent = 'Saved';
+                                                        saveBtn.classList.remove('btn-success');
+                                                        saveBtn.classList.add('btn-secondary');
+                                                    }
+                                                } else {
+                                                    form.dataset.saved = 'false';
+                                                }
+                                            });
+                                        }
+
+                                        // Mark form as unsaved when input changes
+                                        function markFormUnsaved(form) {
+                                            form.dataset.saved = 'false';
+                                            const saveBtn = form.querySelector('button[type="submit"]');
+                                            if (saveBtn) {
+                                                saveBtn.textContent = 'Save';
+                                                saveBtn.classList.remove('btn-secondary');
+                                                saveBtn.classList.add('btn-success');
+                                            }
+                                        }
+
                                         function checkInputs(page) {
                                             const start = page * sectionsPerPage;
                                             const end = start + sectionsPerPage;
                                             let allFilled = true;
+                                            let allSaved = true;
 
                                             for (let i = start; i < end && i < sections.length; i++) {
                                                 const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="SupScore"]');
+                                                const form = sections[i].querySelector('form.ajax-sup-eval-form, form.section-form');
                                                 {{-- Comments are no longer required, only scores --}}
 
                                                 const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
 
+                                                // Check if form is saved (must be both filled AND saved)
+                                                const isSaved = form ? form.dataset.saved === 'true' : true;
+
                                                 if (!scoresFilled) {
                                                     allFilled = false;
                                                     sections[i].classList.add('border-danger');
+                                                    sections[i].classList.remove('border-warning');
+                                                } else if (!isSaved) {
+                                                    allSaved = false;
+                                                    sections[i].classList.remove('border-danger');
+                                                    sections[i].classList.add('border-warning');
                                                 } else {
                                                     sections[i].classList.remove('border-danger');
+                                                    sections[i].classList.remove('border-warning');
                                                 }
                                             }
 
-                                            return allFilled;
+                                            return allFilled && allSaved;
                                         }
 
                                         function updateProgressBar() {
                                             let totalValid = 0;
                                             sections.forEach(section => {
                                                 const scoreInputs = section.querySelectorAll('input[type="number"][name*="SupScore"]');
+                                                const form = section.querySelector('form.ajax-sup-eval-form, form.section-form');
                                                 const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                if (scoresFilled) totalValid++;
+                                                const isSaved = form ? form.dataset.saved === 'true' : true;
+                                                if (scoresFilled && isSaved) totalValid++;
                                             });
                                             const percent = Math.round((totalValid / sections.length) * 100);
                                             if (progressBar) {
@@ -501,6 +556,11 @@ $supervisorId = $user->id;
                                             .forEach(input => {
                                                 input.addEventListener('input', function() {
                                                     validateField(this);
+                                                    // Mark the form as unsaved when input changes
+                                                    const form = this.closest('form.ajax-sup-eval-form, form.section-form');
+                                                    if (form) {
+                                                        markFormUnsaved(form);
+                                                    }
                                                     updateButtons();
                                                 });
                                             });
@@ -592,6 +652,7 @@ $supervisorId = $user->id;
                                         }
 
                                         // Show the initial page
+                                        initializeSavedState();
                                         showPage(currentPage);
 
                                         // Check for toast messages after page refresh and restore scroll position

@@ -405,7 +405,7 @@ class DashboardController extends Controller
 
 
             // Return the KPI names and section counts to the view
-            return view("dashboard.test-employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails', 'kpiStatus', 'employeeId', 'submittedEmployeeGrade', 'supervisorGradeForEmployee'));
+            return view("dashboard.employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails', 'kpiStatus', 'employeeId', 'submittedEmployeeGrade', 'supervisorGradeForEmployee'));
         } catch (\Exception $e) {
             // Log the exception
             Log::error(
