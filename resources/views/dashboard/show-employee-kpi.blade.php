@@ -21,8 +21,8 @@
             @if ($employeeKpi !== null)
                                                                             <div class="card card-body mb-10">
                                                                                 <div class="d-flex justify-content-between">
-                                                                                    @if (isset($employeeKpi['id']))
-                                                                                        <a href="{{ route('show.employee.kpi', $employeeKpi['id']) }}">
+                                                                                    @if (isset($employeeKpi['id']) && isset($employeeKpi['batch_id']))
+                                                                                        <a href="{{ route('show.employee.kpi', ['id' => $employeeKpi['id'], 'batchId' => $employeeKpi['batch_id']]) }}">
                                                                                             <h4>{{ $employeeKpi['kpi_name'] }}</h4>
                                                                                         </a>
 
@@ -30,8 +30,8 @@
                                                                                         <h4>{{ $employeeKpi['kpi_name'] }}</h4>
                                                                                     @endif
                                                                                     <div>
-                                                                                        @if (isset($employeeKpi['id']))
-                                                                                            <a href="{{ route('show.employee.kpi', $employeeKpi['id']) }}">
+                                                                                        @if (isset($employeeKpi['id']) && isset($employeeKpi['batch_id']))
+                                                                                            <a href="{{ route('show.employee.kpi', ['id' => $employeeKpi['id'], 'batchId' => $employeeKpi['batch_id']]) }}">
                                                                                                 <span class="badge rounded-pill bg-dark font-size-13"><i class="bx bx-show-alt"></i>Click to
                                                                                                     Open</span>
                                                                                             </a>
