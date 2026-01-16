@@ -69,7 +69,7 @@ class DashboardController extends Controller
                 $currentBatchId = $kpis[0]['batchId'] ?? null;
 
                 // Get details for first KPI
-                $kpiDetailsResponse = $this->appraisalService->getKpiForEmployee($firstKpiId);
+                $kpiDetailsResponse = $this->appraisalService->getKpiForEmployee($firstKpiId, $currentBatchId);
                 $currentKpiDetails = $kpiDetailsResponse['data'] ?? $kpiDetailsResponse ?? [];
 
                 if (!empty($currentKpiDetails)) {
@@ -172,11 +172,11 @@ class DashboardController extends Controller
      * @param int|string $id KPI ID
      * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      */
-    public function editEmployeeKpi(Request $request, $id)
+    public function editEmployeeKpi(Request $request, $id, $batchId)
     {
         try {
             // Get KPIs for the specified employee
-            $response = $this->appraisalService->getKpiForEmployee($id);
+            $response = $this->appraisalService->getKpiForEmployee($id, $batchId);
             $kpisData = $response['data'] ?? $response ?? [];
 
             // Convert all arrays to objects recursively (mimics old project's $response->object())
@@ -305,9 +305,10 @@ class DashboardController extends Controller
             }
 
             $firstKpiId = $kpis[0]['kpiId'];
+            $firstBatchId = $kpis[0]['batchId'] ?? null;
 
             // Get detailed KPI information
-            $kpiResponse = $this->appraisalService->getKpiForEmployee($firstKpiId);
+            $kpiResponse = $this->appraisalService->getKpiForEmployee($firstKpiId, $firstBatchId);
             $kpiDetails = $kpiResponse['data'] ?? $kpiResponse ?? [];
 
             if (empty($kpiDetails)) {
@@ -408,11 +409,11 @@ class DashboardController extends Controller
      * @param int|string $id KPI ID
      * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      */
-    public function showEmployeeSupervisorKpiScore(Request $request, $id)
+    public function showEmployeeSupervisorKpiScore(Request $request, $id, $batchId)
     {
         try {
             // Get KPIs for the specified employee
-            $response = $this->appraisalService->getKpiForEmployee($id);
+            $response = $this->appraisalService->getKpiForEmployee($id, $batchId);
             $kpis = $response['data'] ?? $response ?? [];
 
             if (empty($kpis)) {
@@ -474,11 +475,11 @@ class DashboardController extends Controller
      * @param int|string $id KPI ID
      * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
      */
-    public function showEmployeeProbe(Request $request, $id)
+    public function showEmployeeProbe(Request $request, $id, $batchId)
     {
         try {
             // Get KPIs for the specified employee
-            $response = $this->appraisalService->getKpiForEmployee($id);
+            $response = $this->appraisalService->getKpiForEmployee($id, $batchId);
             $kpis = $response['data'] ?? $response ?? [];
 
             if (empty($kpis)) {
