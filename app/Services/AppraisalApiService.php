@@ -279,7 +279,7 @@ class AppraisalApiService extends BaseApiService
      */
     public function submitSupervisorScore(array $scoreData): array
     {
-        return $this->post($this->getEndpoint('score') . '/supervisor-score', $scoreData);
+        return $this->put($this->getEndpoint('score') . '/supervisor-score', $scoreData);
     }
 
     /**

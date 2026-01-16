@@ -75,8 +75,9 @@ class SupervisorScoreController extends Controller
                 ? $this->appraisalService->getProbScoringKpi($data)
                 : $this->appraisalService->getSupervisorScoringKpi($data);
 
-            $kpis = $response['data'] ?? [];
+            $kpis = $response['data'] ?? $response ?? [];
             $appraisal = collect();
+            $kpiStatus = 'PENDING'; // Initialize with default value
 
             // Process each KPI
             foreach ($kpis as $kpi) {
@@ -86,17 +87,31 @@ class SupervisorScoreController extends Controller
                         return $section['sectionActive'] ?? false;
                     });
 
-                    // Transform sections to include metrics
-                    $activeSections->transform(function ($section) {
-                        $section['metrics'] = collect($section['metrics'] ?? [])->filter(function ($metric) {
+                    // Transform sections to include metrics and convert to objects
+                    $activeSections = $activeSections->map(function ($section) {
+                        // Filter active metrics and convert to objects
+                        $metrics = collect($section['metrics'] ?? [])->filter(function ($metric) {
                             return $metric['metricActive'] ?? false;
+                        })->map(function ($metric) {
+                            // Convert metricEmpScore to object if exists
+                            if (isset($metric['metricEmpScore'])) {
+                                $metric['metricEmpScore'] = (object) $metric['metricEmpScore'];
+                            }
+                            return (object) $metric;
                         });
-                        return $section;
+
+                        // Convert sectionEmpScore to object if exists
+                        if (isset($section['sectionEmpScore'])) {
+                            $section['sectionEmpScore'] = (object) $section['sectionEmpScore'];
+                        }
+
+                        $section['metrics'] = $metrics;
+                        return (object) $section;
                     });
 
                     // Add the KPI and its sections to the appraisal
                     $appraisal->push((object) [
-                        'kpi' => $kpi,
+                        'kpi' => (object) $kpi,
                         'activeSections' => $activeSections
                     ]);
 
@@ -120,8 +135,8 @@ class SupervisorScoreController extends Controller
 
             // Prepare view data
             $viewData = $type === 'prob'
-                ? compact('appraisal', 'employeeId', 'submittedEmployeeGrade', 'supervisorGradeForEmployee')
-                : compact('appraisal', 'kpiStatus', 'employeeId', 'submittedEmployeeGrade', 'supervisorGradeForEmployee');
+                ? compact('appraisal', 'employeeId', 'kpiId', 'batchId', 'submittedEmployeeGrade', 'supervisorGradeForEmployee')
+                : compact('appraisal', 'kpiStatus', 'employeeId', 'kpiId', 'batchId', 'submittedEmployeeGrade', 'supervisorGradeForEmployee');
 
             return view($view, $viewData);
         } catch (ApiException $e) {

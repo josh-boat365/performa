@@ -316,8 +316,8 @@ $supervisorId = $user->id;
                                                 <form action="{{ route('submit.appraisal') }}" method="POST">
                                                     @csrf
                                                     <input type="hidden" name="employeeId" value="{{ $employeeId }}">
-                                                    <input type="hidden" name="kpiId" value="{{ $kpi->kpi->kpiId }}">
-                                                    <input type="hidden" name="batchId" value="{{ $kpi->kpi->batchId }}">
+                                                    <input type="hidden" name="kpiId" value="{{ $kpiId }}">
+                                                    <input type="hidden" name="batchId" value="{{ $batchId }}">
                                                     <input type="hidden" name="supervisorId" value="{{ $supervisorId }}">
                                                     <input type="hidden" name="status" value="CONFIRMATION">
 

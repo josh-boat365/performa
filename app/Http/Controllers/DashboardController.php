@@ -737,10 +737,10 @@ class DashboardController extends Controller
 
             $response = $this->appraisalService->getEmployeeTotalKpiScore($payload);
 
-            // Response is already the grade data, not wrapped in ['data']
-            $grade = $response;
+            // Handle response that might be wrapped in 'data' key
+            $grade = $response['data'] ?? $response;
 
-            if ($grade) {
+            if (!empty($grade)) {
                 return [
                     'kpiScore' => $grade['totalKpiScore'] ?? null,
                     'grade' => $grade['grade'] ?? null,

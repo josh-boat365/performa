@@ -32,12 +32,17 @@ class GetKpiGradeController extends Controller
                 'status' => 'REVIEW'
             ];
 
-            $submittedEmployeeGrade = $this->appraisalService->getEmployeeTotalGrade($submittedEmployeeGradeData);
-            $supervisorGradeForEmployee = $this->appraisalService->getEmployeeTotalGrade($supervisorGradeForEmployeeData);
+            $submittedEmployeeGradeResponse = $this->appraisalService->getEmployeeTotalGrade($submittedEmployeeGradeData);
+            $supervisorGradeForEmployeeResponse = $this->appraisalService->getEmployeeTotalGrade($supervisorGradeForEmployeeData);
 
+            // Handle response that might be wrapped in 'data' key
+            $submittedEmployeeGrade = $submittedEmployeeGradeResponse['data'] ?? $submittedEmployeeGradeResponse;
+            $supervisorGradeForEmployee = $supervisorGradeForEmployeeResponse['data'] ?? $supervisorGradeForEmployeeResponse;
+
+            // Convert arrays to objects for blade template compatibility
             return (object)[
-                'submittedEmployeeGrade' => $submittedEmployeeGrade,
-                'supervisorGradeForEmployee' => $supervisorGradeForEmployee
+                'submittedEmployeeGrade' => !empty($submittedEmployeeGrade) ? (object) $submittedEmployeeGrade : null,
+                'supervisorGradeForEmployee' => !empty($supervisorGradeForEmployee) ? (object) $supervisorGradeForEmployee : null
             ];
         } catch (ApiException $e) {
             Log::error('Failed to retrieve employee grades', [
@@ -47,8 +52,8 @@ class GetKpiGradeController extends Controller
                 'message' => $e->getMessage()
             ]);
             return (object)[
-                'submittedEmployeeGrade' => [],
-                'supervisorGradeForEmployee' => []
+                'submittedEmployeeGrade' => null,
+                'supervisorGradeForEmployee' => null
             ];
         }
     }
