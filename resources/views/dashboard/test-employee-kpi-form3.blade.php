@@ -431,7 +431,7 @@
                                         <button type="button" data-bs-toggle="modal" class="btn btn-primary"
                                             @style(['width: 8rem; height: fit-content']) data-bs-target=".bs-delete-modal-lg">Accept</button>
 
-                                        <a href="{{ route('show.employee.probe', $kpi->kpi->kpiId) }}"
+                                        <a href="{{ route('show.employee.probe', ['id' => $kpi->kpi->kpiId, 'batchId' => $kpi->kpi->batchId]) }}"
                                             class="btn btn-warning" @style(['width: 8rem; height: fit-content'])>Probe</a>
                                     </div>
                                 </div>
