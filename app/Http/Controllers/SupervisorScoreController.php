@@ -30,8 +30,8 @@ class SupervisorScoreController extends Controller
             $responseSup = $this->appraisalService->getPendingSupervisorScoringKpi();
             $responseProb = $this->appraisalService->getPendingProbScoringKpi();
 
-            $employeeSupDetails = $responseSup['data'] ?? [];
-            $employeeProbDetails = $responseProb['data'] ?? [];
+            $employeeSupDetails = $responseSup['data'] ?? $responseSup ?? [];
+            $employeeProbDetails = $responseProb['data'] ?? $responseProb ?? [];
 
             return view('dashboard.supervisor.show-employee', compact('employeeSupDetails', 'employeeProbDetails'));
         } catch (ApiException $e) {
