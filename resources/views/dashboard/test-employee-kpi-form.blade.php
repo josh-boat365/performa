@@ -1,5 +1,19 @@
 <x-base-layout>
 
+    <style>
+        /* Hide number input spinners/arrows */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none !important;
+            margin: 0 !important;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield !important;
+            appearance: textfield !important;
+        }
+    </style>
+
     <div class="container-fluid px-1">
 
         <!-- start page title -->
@@ -20,7 +34,8 @@
 
         <!-- end page title -->
         @php
-$getBadgeDetails = function($status) {
+function getBadgeDetails($status)
+{
     return match ($status) {
         'PENDING' => ['class' => 'bg-dark', 'text' => 'PENDING'],
         'REVIEW' => ['class' => 'bg-warning', 'text' => 'REVIEW'],
@@ -29,8 +44,8 @@ $getBadgeDetails = function($status) {
         'PROBLEM' => ['class' => 'bg-danger', 'text' => 'PROBE'],
         default => ['class' => 'bg-secondary', 'text' => 'PENDING'],
     };
-};
-$badgeDetails = $getBadgeDetails($gradeDetails['status'] ?? null);
+}
+$badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
         @endphp
 
 
@@ -527,7 +542,7 @@ $badgeDetails = $getBadgeDetails($gradeDetails['status'] ?? null);
                                         <button type="button" data-bs-toggle="modal" class="btn btn-dark"
                                             @style(['width: 8rem; height: fit-content']) data-bs-target=".bs-push-review-modal-lg">Push for Review</button>
 
-                                        <a href="{{ route('show.employee.probe', ['id' => $kpi->kpi->kpiId, 'batchId' => $kpi->kpi->batchId]) }}"
+                                        <a href="{{ route('show.employee.probe', $kpi->kpi->kpiId) }}"
                                             class="btn btn-warning" @style(['width: 8rem; height: fit-content'])>Probe</a>
                                     </div>
                                 </div>
@@ -621,7 +636,25 @@ $badgeDetails = $getBadgeDetails($gradeDetails['status'] ?? null);
                                         const currentPageSpan = document.getElementById('current-page');
                                         const totalPagesSpan = document.getElementById('total-pages');
                                         const progressBar = document.getElementById('progress-bar');
-                                        let currentPage = parseInt(sessionStorage.getItem('currentPage') || 0);
+
+                                        // Use unique key per employee to avoid page persistence across different forms
+                                        const currentEmployeeId = '{{ $employeeId }}';
+                                        const pageStorageKey = `currentPage_employee_${currentEmployeeId}`;
+                                        const lastEmployeeKey = 'lastViewedEmployeeId';
+
+                                        // Check if we're viewing a different employee - if so, reset to page 0
+                                        const lastViewedEmployee = sessionStorage.getItem(lastEmployeeKey);
+                                        let currentPage = 0;
+
+                                        if (lastViewedEmployee === currentEmployeeId) {
+                                            // Same employee, restore the page
+                                            currentPage = parseInt(sessionStorage.getItem(pageStorageKey) || 0);
+                                        } else {
+                                            // Different employee, start from page 0
+                                            sessionStorage.setItem(lastEmployeeKey, currentEmployeeId);
+                                            sessionStorage.setItem(pageStorageKey, '0');
+                                        }
+
                                         const sectionsPerPage = 3;
                                         const totalPages = Math.ceil(sections.length / sectionsPerPage);
 
@@ -649,12 +682,11 @@ $badgeDetails = $getBadgeDetails($gradeDetails['status'] ?? null);
 
                                             for (let i = start; i < end && i < sections.length; i++) {
                                                 const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"]');
-                                                const commentInputs = sections[i].querySelectorAll('textarea[name="employeeComment"]');
+                                                {{-- Comments are no longer required, only scores --}}
 
                                                 const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== '');
 
-                                                if (!scoresFilled || !commentsFilled) {
+                                                if (!scoresFilled) {
                                                     allFilled = false;
                                                     sections[i].classList.add('border-danger');
                                                 } else {
@@ -701,7 +733,7 @@ $badgeDetails = $getBadgeDetails($gradeDetails['status'] ?? null);
                                             }
 
                                             currentPageSpan.textContent = page + 1;
-                                            sessionStorage.setItem('currentPage', page);
+                                            sessionStorage.setItem(pageStorageKey, page);
                                             updateButtons();
                                             window.scrollTo({
                                                 top: sections[start].offsetTop,
@@ -742,7 +774,7 @@ $badgeDetails = $getBadgeDetails($gradeDetails['status'] ?? null);
 
                                                 // Store scroll position and current page state before submission
                                                 sessionStorage.setItem('preserveScrollPosition', scrollPos.toString());
-                                                sessionStorage.setItem('currentPage', currentPage.toString());
+                                                sessionStorage.setItem(pageStorageKey, currentPage.toString());
 
                                                 saveBtn.innerHTML =
                                                     '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
@@ -757,8 +789,23 @@ $badgeDetails = $getBadgeDetails($gradeDetails['status'] ?? null);
                                                         },
                                                         body: formData
                                                     })
-                                                    .then(response => response.json())
+                                                    .then(response => {
+                                                        // Check for 401 status (session expired)
+                                                        if (response.status === 401) {
+                                                            return response.json().then(data => {
+                                                                if (data.session_expired) {
+                                                                    alert('Your session has expired. Please log in again.');
+                                                                    window.location.href = data.redirect || '{{ route("login") }}';
+                                                                    return null;
+                                                                }
+                                                                return data;
+                                                            });
+                                                        }
+                                                        return response.json();
+                                                    })
                                                     .then(data => {
+                                                        if (!data) return; // Session expired, already redirecting
+
                                                         // Store the response data for after refresh
                                                         if (data.success) {
                                                             sessionStorage.setItem('showSuccessToast', JSON.stringify({
