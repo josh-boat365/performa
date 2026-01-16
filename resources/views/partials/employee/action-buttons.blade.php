@@ -19,13 +19,13 @@
     <br><br><br>
     <div class="float-end">
         <div class="d-flex gap-3">
-            <button type="button" data-bs-toggle="modal" class="btn btn-primary"
-                style="width: 8rem; height: fit-content" data-bs-target=".bs-confirm-modal-lg">
+            <button type="button" data-bs-toggle="modal" class="btn btn-primary" style="width: 8rem; height: fit-content"
+                data-bs-target=".bs-confirm-modal-lg">
                 Accept
             </button>
 
-            <a href="{{ route('show.employee.probe', $kpi->kpi->kpiId) }}" class="btn btn-warning"
-                style="width: 8rem; height: fit-content">
+            <a href="{{ route('show.employee.probe', ['id' => $kpi->kpi->kpiId, 'batchId' => $kpi->kpi->batchId]) }}"
+                class="btn btn-warning" style="width: 8rem; height: fit-content">
                 Probe
             </a>
         </div>
