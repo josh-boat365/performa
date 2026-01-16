@@ -91,12 +91,17 @@ class AppraisalApiService extends BaseApiService
      * Get KPI for specific employee
      *
      * @param int|string $kpiId The KPI ID
+     * @param int|string|null $batchId The Batch ID
      * @return array KPI details for employee
      * @throws ApiException
      */
-    public function getKpiForEmployee($kpiId): array
+    public function getKpiForEmployee($kpiId, $batchId = null): array
     {
-        return $this->get($this->getEndpoint('kpi') . "/GetKpiForEmployee/{$kpiId}");
+        $endpoint = $this->getEndpoint('kpi') . "/GetKpiForEmployee/{$kpiId}";
+        if ($batchId !== null) {
+            $endpoint .= "/{$batchId}";
+        }
+        return $this->get($endpoint);
     }
 
     /**
