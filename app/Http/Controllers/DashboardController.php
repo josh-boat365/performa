@@ -260,7 +260,7 @@ class DashboardController extends Controller
                 }
             }
 
-            return view("dashboard.test-employee-kpi-form", compact(
+            return view("dashboard.employee-kpi-form", compact(
                 'appraisal',
                 'batchId',
                 'gradeDetails',
