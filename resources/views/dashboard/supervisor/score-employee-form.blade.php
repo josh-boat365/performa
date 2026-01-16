@@ -348,7 +348,7 @@ $supervisorId = $user->id;
 
                             @push('scripts')
                                 <script>
-                                    document.addEventListener('DOMContentLoaded', function () {
+                                    document.addEventListener('DOMContentLoaded', function() {
                                         const sections = document.querySelectorAll('.section-tab');
                                         const prevBtn = document.getElementById('prev-btn');
                                         const nextBtn = document.getElementById('next-btn');
@@ -378,7 +378,7 @@ $supervisorId = $user->id;
                                         const sectionsPerPage = 3;
                                         const totalPages = Math.ceil(sections.length / sectionsPerPage);
 
-                                        totalPagesSpan.textContent = totalPages;
+                                        if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
 
                                         // Helper function to show toast messages
                                         function showToast(type, message) {
@@ -420,195 +420,212 @@ $supervisorId = $user->id;
                                             let allFilled = true;
 
                                             for (let i = start; i < end && i < sections.length; i++) {
-                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]');
-                                                { { --  const commentInputs = sections[i].querySelectorAll('textarea[name*="Comment" ]'); --} }
+                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="SupScore"]');
+                                                {{-- Comments are no longer required, only scores --}}
+
                                                 const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                { { --  const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== ''); --} }
 
-                                                {
-                                                    { --  if (!scoresFilled || !commentsFilled) { --} }
-                                                    if (!scoresFilled) {
-                                                        allFilled = false;
-                                                        sections[i].classList.add('border-danger');
-                                                    } else {
-                                                        sections[i].classList.remove('border-danger');
-                                                    }
+                                                if (!scoresFilled) {
+                                                    allFilled = false;
+                                                    sections[i].classList.add('border-danger');
+                                                } else {
+                                                    sections[i].classList.remove('border-danger');
                                                 }
-
-                                                return allFilled;
                                             }
 
-                                            function updateProgressBar() {
-                                                let totalValid = 0;
-                                                sections.forEach(section => {
-                                                    const scoreInputs = section.querySelectorAll(
-                                                        'input[type="number"][name*="EmpScore"], input[type="number"][name*="SupScore"]'
-                                                    );
-                                                    { { --  const commentInputs = section.querySelectorAll('textarea[name*="Comment"]'); --} }
-                                                    const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
-                                                    { { --  const commentsFilled = Array.from(commentInputs).every(input => input.value.trim() !== ''); --} }
-                                                    { { --  if (scoresFilled && commentsFilled) totalValid++; --} }
-                                                    if (scoresFilled) totalValid++;
-                                                });
-                                                const percent = Math.round((totalValid / sections.length) * 100);
+                                            return allFilled;
+                                        }
+
+                                        function updateProgressBar() {
+                                            let totalValid = 0;
+                                            sections.forEach(section => {
+                                                const scoreInputs = section.querySelectorAll('input[type="number"][name*="SupScore"]');
+                                                const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                                                if (scoresFilled) totalValid++;
+                                            });
+                                            const percent = Math.round((totalValid / sections.length) * 100);
+                                            if (progressBar) {
                                                 progressBar.style.width = percent + '%';
                                                 progressBar.setAttribute('aria-valuenow', percent);
                                                 progressBar.textContent = percent + '%';
                                             }
+                                        }
 
-                                            function updateButtons() {
-                                                if (prevBtn) prevBtn.disabled = currentPage === 0;
-                                                if (nextBtn) nextBtn.disabled = currentPage === totalPages - 1 || !checkInputs(currentPage);
-                                                if (submitBtn) submitBtn.disabled = !Array.from({
-                                                    length: totalPages
-                                                }).every((_, i) => checkInputs(i));
-                                                updateProgressBar();
+                                        function updateButtons() {
+                                            if (prevBtn) prevBtn.disabled = currentPage === 0;
+                                            if (nextBtn) nextBtn.disabled = currentPage === totalPages - 1 || !checkInputs(currentPage);
+                                            if (submitBtn) submitBtn.disabled = !Array.from({
+                                                length: totalPages
+                                            }).every((_, i) => checkInputs(i));
+                                            updateProgressBar();
+                                        }
+
+                                        function showPage(page) {
+                                            sections.forEach(section => {
+                                                section.style.display = 'none';
+                                            });
+                                            const start = page * sectionsPerPage;
+                                            const end = start + sectionsPerPage;
+                                            for (let i = start; i < end && i < sections.length; i++) {
+                                                sections[i].style.display = 'block';
                                             }
 
-                                            function showPage(page) {
-                                                sections.forEach(section => {
-                                                    section.style.display = 'none';
-                                                });
-                                                const start = page * sectionsPerPage;
-                                                const end = start + sectionsPerPage;
-                                                for (let i = start; i < end && i < sections.length; i++) {
-                                                    sections[i].style.display = 'block';
-                                                } if (currentPageSpan) currentPageSpan.textContent = page + 1; sessionStorage.setItem(pageStorageKey, page); updateButtons(); window.scrollTo({ top: sections[start].offsetTop, behavior: 'smooth' });
-                                            } if (prevBtn) {
-                                                prevBtn.addEventListener('click', function () {
-                                                    if (currentPage > 0) {
-                                                        currentPage--;
-                                                        showPage(currentPage);
-                                                    }
-                                                });
-                                            }
+                                            if (currentPageSpan) currentPageSpan.textContent = page + 1;
+                                            sessionStorage.setItem(pageStorageKey, page);
+                                            updateButtons();
+                                            window.scrollTo({
+                                                top: sections[start].offsetTop,
+                                                behavior: 'smooth'
+                                            });
+                                        }
 
-                                            if (nextBtn) {
-                                                nextBtn.addEventListener('click', function () {
-                                                    if (currentPage < totalPages - 1 && checkInputs(currentPage)) { currentPage++; showPage(currentPage); }
-                                                });
-                                            } document.querySelectorAll('input[type="number" ], textarea').forEach(input => {
-                                                input.addEventListener('input', function () {
+                                        if (prevBtn) {
+                                            prevBtn.addEventListener('click', function() {
+                                                if (currentPage > 0) {
+                                                    currentPage--;
+                                                    showPage(currentPage);
+                                                }
+                                            });
+                                        }
+
+                                        if (nextBtn) {
+                                            nextBtn.addEventListener('click', function() {
+                                                if (currentPage < totalPages - 1 && checkInputs(currentPage)) {
+                                                    currentPage++;
+                                                    showPage(currentPage);
+                                                }
+                                            });
+                                        }
+
+                                        document.querySelectorAll('input[type="number"][name*="SupScore"], textarea[name="supervisorComment"]')
+                                            .forEach(input => {
+                                                input.addEventListener('input', function() {
                                                     validateField(this);
                                                     updateButtons();
                                                 });
                                             });
 
-                                            // Enhanced AJAX form handler with proper error handling
-                                            document.querySelectorAll('form.ajax-sup-eval-form, form.section-form, form.ajax-eval-form').forEach(form => {
-                                                form.addEventListener('submit', function (e) {
-                                                    { { --e.preventDefault(); --} }
-                                                    const scrollPos = window.scrollY;
-                                                    const formData = new FormData(form);
-                                                    const saveBtn = form.querySelector('button[type="submit"]');
-                                                    const originalText = saveBtn.innerHTML;
+                                        // Modified AJAX form handler with page refresh and scroll preservation
+                                        document.querySelectorAll('form.ajax-sup-eval-form, form.section-form').forEach(form => {
+                                            form.addEventListener('submit', function(e) {
+                                                e.preventDefault();
+                                                const scrollPos = window.scrollY;
+                                                const formData = new FormData(form);
+                                                const saveBtn = form.querySelector('button[type="submit"]');
+                                                const originalText = saveBtn.innerHTML;
 
-                                                    // Store scroll position and current page state before submission
-                                                    sessionStorage.setItem('preserveScrollPosition', scrollPos.toString());
-                                                    sessionStorage.setItem(pageStorageKey, currentPage.toString());
+                                                // Store scroll position and current page state before submission
+                                                sessionStorage.setItem('preserveScrollPosition', scrollPos.toString());
+                                                sessionStorage.setItem(pageStorageKey, currentPage.toString());
 
-                                                    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
-                                                    saveBtn.disabled = true;
+                                                saveBtn.innerHTML =
+                                                    '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+                                                saveBtn.disabled = true;
 
-                                                    fetch(form.action, {
+                                                fetch(form.action, {
                                                         method: 'POST',
                                                         headers: {
                                                             'X-Requested-With': 'XMLHttpRequest',
-                                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                                            'X-CSRF-TOKEN': document.querySelector(
+                                                                'meta[name="csrf-token"]').getAttribute('content'),
                                                             'Accept': 'application/json'
                                                         },
                                                         body: formData
                                                     })
-                                                        .then(response => {
-                                                            // Check for 401 status (session expired)
-                                                            if (response.status === 401) {
-                                                                return response.json().then(data => {
-                                                                    if (data.session_expired) {
-                                                                        alert('Your session has expired. Please log in again.');
-                                                                        window.location.href = data.redirect || '{{ route("login") }}';
-                                                                        return null;
-                                                                    }
-                                                                    throw new Error(data.message || 'Session expired');
-                                                                });
-                                                            }
-                                                            // Check if response is ok (status 200-299)
-                                                            if (!response.ok) {
-                                                                // Try to parse error message from response
-                                                                return response.json().then(data => {
-                                                                    throw new Error(data.message || `HTTP error! status: ${response.status}`);
-                                                                }).catch(() => {
-                                                                    throw new Error(`HTTP error! status: ${response.status}`);
-                                                                });
-                                                            }
-                                                            return response.json();
-                                                        })
-                                                        .then(data => {
-                                                            if (!data) return; // Session expired, already redirecting
+                                                    .then(response => {
+                                                        // Check for 401 status (session expired)
+                                                        if (response.status === 401) {
+                                                            return response.json().then(data => {
+                                                                if (data.session_expired) {
+                                                                    alert('Your session has expired. Please log in again.');
+                                                                    window.location.href = data.redirect || '{{ route("login") }}';
+                                                                    return null;
+                                                                }
+                                                                return data;
+                                                            });
+                                                        }
+                                                        // Check if response is ok (status 200-299)
+                                                        if (!response.ok) {
+                                                            // Try to parse error message from response
+                                                            return response.json().then(data => {
+                                                                throw new Error(data.message || `HTTP error! status: ${response.status}`);
+                                                            }).catch(() => {
+                                                                throw new Error(`HTTP error! status: ${response.status}`);
+                                                            });
+                                                        }
+                                                        return response.json();
+                                                    })
+                                                    .then(data => {
+                                                        if (!data) return; // Session expired, already redirecting
 
-                                                            // Store the response data for after refresh
-                                                            if (data.success) {
-                                                                sessionStorage.setItem('showSuccessToast', JSON.stringify({
-                                                                    message: data.message || 'Saved successfully'
-                                                                }));
-                                                            } else {
-                                                                sessionStorage.setItem('showErrorToast', JSON.stringify({
-                                                                    message: data.message || 'An error occurred'
-                                                                }));
-                                                            }
+                                                        // Store the response data for after refresh
+                                                        if (data.success) {
+                                                            sessionStorage.setItem('showSuccessToast', JSON.stringify({
+                                                                message: data.message || 'Saved successfully'
+                                                            }));
+                                                        } else {
+                                                            sessionStorage.setItem('showErrorToast', JSON.stringify({
+                                                                message: data.message || 'An error occurred'
+                                                            }));
+                                                        }
 
-                                                            // Force page refresh to get updated data
-                                                            window.location.reload();
-                                                        })
-                                                        .catch(error => {
-                                                            console.error('Error:', error);
+                                                        // Force page refresh to get updated data
+                                                        window.location.reload();
+                                                    })
+                                                    .catch(error => {
+                                                        console.error('Error:', error);
 
-                                                            // Restore button state
-                                                            saveBtn.innerHTML = originalText;
-                                                            saveBtn.disabled = false;
+                                                        // Restore button state
+                                                        saveBtn.innerHTML = originalText;
+                                                        saveBtn.disabled = false;
 
-                                                            // Show error toast immediately without reload
-                                                            showToast('error', error.message || 'An unexpected error occurred. Please try again.');
-                                                        });
-                                                });
+                                                        // Show error toast immediately without reload
+                                                        showToast('error', error.message || 'An unexpected error occurred. Please try again.');
+                                                    });
                                             });
-
-                                            // Show the initial page
-                                            showPage(currentPage);
-
-                                            // Check for toast messages after page refresh and restore scroll position
-                                            setTimeout(() => {
-                                                // First, restore scroll position
-                                                const savedScrollPos = sessionStorage.getItem('preserveScrollPosition');
-                                                if (savedScrollPos) {
-                                                    const scrollPos = parseInt(savedScrollPos);
-                                                    if (!isNaN(scrollPos)) {
-                                                        window.scrollTo({
-                                                            top: scrollPos,
-                                                            behavior: 'instant'
-                                                        });
-                                                        console.log(`Scroll position restored to: ${scrollPos}`);
-                                                    }
-                                                    sessionStorage.removeItem('preserveScrollPosition');
-                                                }
-
-                                                // Then show toast messages
-                                                const successToast = sessionStorage.getItem('showSuccessToast');
-                                                if (successToast) {
-                                                    const toastData = JSON.parse(successToast);
-                                                    showToast('success', toastData.message);
-                                                    sessionStorage.removeItem('showSuccessToast');
-                                                }
-
-                                                const errorToast = sessionStorage.getItem('showErrorToast');
-                                                if (errorToast) {
-                                                    const toastData = JSON.parse(errorToast);
-                                                    showToast('error', toastData.message);
-                                                    sessionStorage.removeItem('showErrorToast');
-                                                }
-                                            }, 100);
                                         });
 
+                                        function smoothScroll(targetForm) {
+                                            $('html, body').animate({
+                                                scrollTop: $(targetForm).offset().top
+                                            }, 500);
+                                        }
 
+                                        // Show the initial page
+                                        showPage(currentPage);
+
+                                        // Check for toast messages after page refresh and restore scroll position
+                                        setTimeout(() => {
+                                            // First, restore scroll position
+                                            const savedScrollPos = sessionStorage.getItem('preserveScrollPosition');
+                                            if (savedScrollPos) {
+                                                const scrollPos = parseInt(savedScrollPos);
+                                                if (!isNaN(scrollPos)) {
+                                                    window.scrollTo({
+                                                        top: scrollPos,
+                                                        behavior: 'instant'
+                                                    });
+                                                    console.log(`Scroll position restored to: ${scrollPos}`);
+                                                }
+                                                sessionStorage.removeItem('preserveScrollPosition');
+                                            }
+
+                                            // Then show toast messages
+                                            const successToast = sessionStorage.getItem('showSuccessToast');
+                                            if (successToast) {
+                                                const toastData = JSON.parse(successToast);
+                                                showToast('success', toastData.message);
+                                                sessionStorage.removeItem('showSuccessToast');
+                                            }
+
+                                            const errorToast = sessionStorage.getItem('showErrorToast');
+                                            if (errorToast) {
+                                                const toastData = JSON.parse(errorToast);
+                                                showToast('error', toastData.message);
+                                                sessionStorage.removeItem('showErrorToast');
+                                            }
+                                        }, 100);
+                                    });
                                 </script>
                             @endpush
 
