@@ -172,7 +172,7 @@ $supervisorId = $user->id;
                                                                         <div class="col-md-2">
                                                                             <input class="form-control mb-3 score-input" type="number"
                                                                                 name="sectionSupScore" required
-                                                                                placeholder="Enter Score" min="0"
+                                                                                placeholder="Enter Score" min="0" step="0.01"
                                                                                 pattern="\d+(\.\d{1,2})?"
                                                                                 max="{{ $section->sectionScore }}"
                                                                                 @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
