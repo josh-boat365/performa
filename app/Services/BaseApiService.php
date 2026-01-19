@@ -221,17 +221,26 @@ abstract class BaseApiService
             if (is_array($data)) {
                 // Check common error message fields
                 if (!empty($data['message'])) {
-                    return $data['message'];
+                    return is_string($data['message']) ? $data['message'] : json_encode($data['message']);
                 }
                 if (!empty($data['error'])) {
-                    return $data['error'];
+                    return is_string($data['error']) ? $data['error'] : json_encode($data['error']);
                 }
                 if (!empty($data['errors']) && is_array($data['errors'])) {
                     $firstError = reset($data['errors']);
                     if (is_string($firstError)) {
                         return $firstError;
+                    } elseif (is_array($firstError)) {
+                        // If the error is an array, check if it has nested error messages
+                        if (isset($firstError[0]) && is_string($firstError[0])) {
+                            return $firstError[0];
+                        }
+                        return json_encode($firstError);
                     }
                 }
+
+                // If we have a data array but couldn't extract a specific error, return JSON
+                return json_encode($data);
             }
 
             // If response is plain text, return it
