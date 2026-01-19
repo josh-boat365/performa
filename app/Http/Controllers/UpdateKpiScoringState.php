@@ -97,12 +97,60 @@ class UpdateKpiScoringState extends Controller
                         ->with('toast_success', $successMessage);
             }
         } catch (ApiException $e) {
+            // Check if this is an email service error - the submission went through but email failed
+            $errorMessage = $e->getMessage();
+            $isEmailServiceError = str_contains($errorMessage, 'IEmailService')
+                || str_contains($errorMessage, 'EmailService')
+                || str_contains($errorMessage, 'email service');
+
+            if ($isEmailServiceError) {
+                // Log the email error but treat as success since the appraisal was submitted
+                Log::warning('Appraisal status updated but email notification failed', [
+                    'message' => $errorMessage,
+                    'data' => $validated ?? [],
+                ]);
+
+                // Success messages for each status
+                $messages = [
+                    'REVIEW' => 'Appraisal submitted for review successfully.',
+                    'COMPLETED' => 'Appraisal marked as completed successfully.',
+                    'CONFIRMATION' => 'Appraisal pushed to employee for confirmation successfully.',
+                    'PROBLEM' => 'Appraisal pushed to higher supervisor for review successfully.',
+                ];
+
+                $successMessage = $messages[$validated['status']] ?? 'Appraisal status updated successfully.';
+
+                // Redirect based on status (same as success flow)
+                switch ($validated['status']) {
+                    case 'CONFIRMATION':
+                        return redirect()
+                            ->route('supervisor.index')
+                            ->with('toast_success', $successMessage);
+
+                    case 'REVIEW':
+                    case 'COMPLETED':
+                        return redirect()
+                            ->route('show.batch.kpi', ['batchId' => $batchId])
+                            ->with('toast_success', $successMessage);
+
+                    case 'PROBLEM':
+                        return redirect()
+                            ->route('supervisor.index')
+                            ->with('toast_success', $successMessage);
+
+                    default:
+                        return redirect()
+                            ->back()
+                            ->with('toast_success', $successMessage);
+                }
+            }
+
             Log::error('Failed to update KPI scoring state', [
                 'message' => $e->getMessage(),
                 'status_code' => $e->getCode(),
                 'data' => $validated ?? [],
             ]);
-            return back()->with('toast_error', 'Failed to update appraisal status: ' . $e->getMessage());
+            return back()->with('toast_error', 'Failed to update appraisal status. Please try again.');
         } catch (\Exception $e) {
             Log::error('Unexpected error updating KPI scoring state', [
                 'message' => $e->getMessage(),
