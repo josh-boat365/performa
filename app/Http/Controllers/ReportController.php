@@ -22,124 +22,140 @@ class ReportController extends Controller
     }
 
     /**
-     * Recursively convert array to object
-     * This converts nested arrays to stdClass objects for view compatibility
+     * Recursively convert associative arrays to objects
+     * Indexed arrays (lists) are preserved as arrays for count() compatibility
      */
     private function arrayToObject($array)
     {
-        if (is_array($array)) {
-            return (object) array_map(fn($item) => $this->arrayToObject($item), $array);
+        if (!is_array($array)) {
+            return $array;
         }
-        return $array;
+
+        // Check if this is an indexed array (sequential numeric keys starting from 0)
+        // These should remain as arrays for count() and foreach to work properly
+        if (array_is_list($array)) {
+            return array_map(fn($item) => $this->arrayToObject($item), $array);
+        }
+
+        // Associative arrays become objects
+        return (object) array_map(fn($item) => $this->arrayToObject($item), $array);
     }
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        // Validate the request parameters
+        $request->validate([
+            'batchId' => 'nullable',
+            'departmentId' => 'nullable',
+            'employeeId' => 'nullable',
+            'branchId' => 'nullable',
+        ]);
+
+        // Filter non-empty parameters for the API request
+        $filters = array_filter($request->only(['batchId', 'branchId', 'departmentId', 'employeeId']));
+        $data = empty($filters) ? ['batchId' => ''] : $filters;
+
+        // Fetch reports and convert to objects recursively
+        $reportsData = [];
         try {
-            // Validate the request parameters
-            $request->validate([
-                'batchId' => 'nullable',
-                'departmentId' => 'nullable',
-                'employeeId' => 'nullable',
-                'branchId' => 'nullable',
-            ]);
+            $reportsData = $this->appraisalService->getReports($data);
+        } catch (ApiException $e) {
+            Log::error('API Error getting reports', ['message' => $e->getMessage()]);
+        }
 
-            // Filter non-empty parameters for the API request
-            $filters = array_filter($request->only(['batchId', 'branchId', 'departmentId', 'employeeId']));
-            $data = empty($filters) ? ['batchId' => ''] : $filters;
+        if (!is_array($reportsData)) {
+            $reportsData = [];
+        }
 
-            // Fetch reports and convert to objects recursively
-            try {
-                $reportsData = $this->appraisalService->getReports($data);
-                
-            } catch (ApiException $e) {
-                Log::error('API Error getting reports', ['message' => $e->getMessage()]);
-                $reportsData = [];
-            }
+        // Handle wrapped response (data key) or direct array
+        if (isset($reportsData['data']) && is_array($reportsData['data'])) {
+            $reportsData = $reportsData['data'];
+        }
 
-            if (!is_array($reportsData)) {
-                $reportsData = [];
-            }
+        // Log the raw response for debugging
+        Log::info('Reports API Response', [
+            'filter_data' => $data,
+            'response_type' => gettype($reportsData),
+            'response_count' => count($reportsData),
+            'first_item' => isset($reportsData[0]) ? (array)$reportsData[0] : 'empty',
+        ]);
 
-            // Handle wrapped response (data key) or direct array
-            if (isset($reportsData['data']) && is_array($reportsData['data'])) {
-                $reportsData = $reportsData['data'];
-            }
+        $reports = collect($reportsData)->map(fn($report) => $this->arrayToObject($report))->values();
 
-            // Log the raw response for debugging
-            Log::info('Reports API Response', [
-                'filter_data' => $data,
-                'response_type' => gettype($reportsData),
-                'response_count' => count($reportsData),
-                'first_item' => isset($reportsData[0]) ? (array)$reportsData[0] : 'empty',
-            ]);
-
-            $reports = collect($reportsData)->map(fn($report) => $this->arrayToObject($report))->values();
-
-            // Fetch all supporting data
+        // Fetch all supporting data with individual error handling
+        $batches = collect();
+        try {
             $batches = collect($this->appraisalService->getAllBatches() ?? [])
                 ->map(fn($batch) => [
                     'batchId' => $batch['id'] ?? 'N/A',
                     'batchName' => $batch['name'] ?? 'N/A',
                     'batchStatus' => $batch['status'] ?? 'N/A',
                 ])->values();
+        } catch (ApiException $e) {
+            Log::warning('Failed to fetch batches for reports filter', ['message' => $e->getMessage()]);
+        }
 
+        $departments = collect();
+        try {
             $departments = collect($this->hrmsService->getAllDepartments() ?? [])
                 ->map(fn($department) => [
                     'departmentId' => $department['id'] ?? 'N/A',
                     'departmentName' => $department['name'] ?? 'N/A',
                 ])->values();
+        } catch (ApiException $e) {
+            Log::warning('Failed to fetch departments for reports filter', ['message' => $e->getMessage()]);
+        }
 
+        $branches = collect();
+        try {
             $branches = collect($this->hrmsService->getAllBranches() ?? [])
                 ->map(fn($branch) => [
                     'branchId' => $branch['id'] ?? 'N/A',
                     'branchName' => $branch['name'] ?? 'N/A',
                 ])->values();
+        } catch (ApiException $e) {
+            Log::warning('Failed to fetch branches for reports filter', ['message' => $e->getMessage()]);
+        }
 
+        $employees = collect();
+        try {
             $employees = collect($this->hrmsService->getAllEmployees() ?? [])
                 ->map(fn($employee) => [
                     'employeeId' => $employee['id'] ?? 'N/A',
                     'employeeStaffID' => $employee['staffNumber'] ?? 'N/A',
                     'employeeName' => trim(($employee['firstName'] ?? '') . ' ' . ($employee['surname'] ?? '')) ?: 'N/A',
                 ])->values();
-
-            // Extract unique KPIs from reports data
-            $kpis = $reports->flatMap(fn($report) => $report->employees ?? [])
-                ->flatMap(fn($employee) => $employee->scores ?? [])
-                ->map(fn($score) => [
-                    'kpiId' => $score->kpiId ?? 'N/A',
-                    'kpiName' => $score->kpiName ?? 'N/A',
-                ])->unique('kpiId')->values();
-
-            // Pass data to the view
-            return view('reports.index', compact('reports', 'batches', 'branches', 'departments', 'employees', 'kpis'));
         } catch (ApiException $e) {
-            Log::error('Failed to fetch appraisal reports', ['message' => $e->getMessage()]);
-            return view('reports.index', [
-                'reports' => collect(),
-                'batches' => collect(),
-                'departments' => collect(),
-                'employees' => collect(),
-                'branches' => collect(),
-                'kpis' => collect(),
-            ])->with('toast_error', 'Failed to fetch reports. Please try again.');
+            Log::warning('Failed to fetch employees for reports filter', ['message' => $e->getMessage()]);
         }
+
+        // Extract unique KPIs from reports data
+        $kpis = $reports->flatMap(fn($report) => $report->employees ?? [])
+            ->flatMap(fn($employee) => $employee->scores ?? [])
+            ->map(fn($score) => [
+                'kpiId' => $score->kpiId ?? 'N/A',
+                'kpiName' => $score->kpiName ?? 'N/A',
+            ])->unique('kpiId')->values();
+
+        // Pass data to the view
+        return view('reports.index', compact('reports', 'batches', 'branches', 'departments', 'employees', 'kpis'));
     }
 
 
-    public function showEmployeeSummary($employeeId)
+    public function showEmployeeSummary($employeeId, $batchId)
     {
         try {
-            // Prepare the request data
-            $data = ['employeeId' => $employeeId];
-
-            // Fetch employee report and employee details
-            $employee = $this->appraisalService->getReports($data);
+            $data = ['employeeId' => $employeeId, 'batchId' => $batchId];
+            $employeeReportData = $this->appraisalService->getReports($data);
             $empData = $this->hrmsService->getAllEmployees();
 
-            // Get employee staff number and branch
+            $employee = collect($employeeReportData ?? [])
+                ->map(fn($report) => $this->arrayToObject($report))
+                ->filter(fn($report) => isset($report->batchId) && $report->batchId == $batchId)
+                ->values();
+
             $employeeData = collect($empData)->map(fn($emp) => $this->arrayToObject($emp))
                 ->firstWhere('id', $employeeId);
             $employeeStaffNumber = $employeeData->staffNumber ?? 'N/A';
