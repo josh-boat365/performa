@@ -169,21 +169,45 @@ class SupervisorScoreController extends Controller
             $scoreData = [];
             $successMessage = '';
 
+            // Check if scoreId is valid
+            $scoreId = $request->input('scoreId');
+            if (empty($scoreId) || $scoreId <= 0) {
+                $errorMessage = 'Cannot submit supervisor score. The employee has not submitted their self-evaluation yet.';
+
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $errorMessage,
+                    ], 422);
+                }
+                return back()->with('toast_error', $errorMessage);
+            }
+
             // Prepare score data based on which type is being submitted
             if ($request->filled('metricSupScore')) {
                 $scoreData = [
-                    'scoreId' => $request->input('scoreId'),
+                    'scoreId' => (int) $scoreId,
                     'metricSupScore' => (float) $request->input('metricSupScore'),
                     'supervisorComment' => $request->input('supervisorComment', ''),
                 ];
                 $successMessage = 'Metric score and comment submitted successfully!';
             } elseif ($request->filled('sectionSupScore')) {
                 $scoreData = [
-                    'scoreId' => $request->input('scoreId'),
+                    'scoreId' => (int) $scoreId,
                     'sectionSupScore' => (float) $request->input('sectionSupScore'),
                     'supervisorComment' => $request->input('supervisorComment', ''),
                 ];
                 $successMessage = 'Section score and comment submitted successfully!';
+            } else {
+                $errorMessage = 'Please enter a score before submitting.';
+
+                if ($request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $errorMessage,
+                    ], 422);
+                }
+                return back()->with('toast_error', $errorMessage);
             }
 
             // Submit the score via the service
@@ -203,14 +227,20 @@ class SupervisorScoreController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
+            // Provide specific error message for "Score not found"
+            $errorMessage = 'Failed to submit score. Please try again.';
+            if (str_contains($e->getMessage(), 'not found') || str_contains($e->getMessage(), 'Score not found')) {
+                $errorMessage = 'Employee score record not found. The employee must submit their self-evaluation first.';
+            }
+
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to submit score. Please try again.'
+                    'message' => $errorMessage
                 ], 422);
             }
 
-            return back()->with('toast_error', 'Failed to submit score. Please try again.');
+            return back()->with('toast_error', $errorMessage);
         } catch (\Exception $e) {
             Log::error('Unexpected error during supervisor score submission', [
                 'message' => $e->getMessage(),
