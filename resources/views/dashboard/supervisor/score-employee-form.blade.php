@@ -31,7 +31,7 @@
             z-index: 1020;
             background: #fff;
             padding: 10px 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 15px;
         }
 
@@ -78,6 +78,34 @@
             opacity: 0.8;
         }
 
+        /* Sticky pagination controls */
+        .pagination-sticky {
+            position: sticky;
+            bottom: 0;
+            background: #fff;
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            border-radius: 10px 10px 0 0;
+            z-index: 100;
+            margin-top: 20px;
+        }
+
+        /* Section cards animation */
+        .section-tab {
+            transition: all 0.3s ease;
+        }
+
+        .section-tab.border-danger {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+        }
+
+        /* Form input focus states */
+        .score-input:focus, .comment-input:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
         /* Grade summary cards - responsive */
         .grade-summary-grid {
             display: grid;
@@ -106,32 +134,9 @@
             font-size: 1.1rem;
         }
 
-        /* Section cards animation */
-        .section-tab {
-            transition: all 0.3s ease;
-        }
-
-        .section-tab.border-danger {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
-        }
-
-        /* Form input focus states */
-        .score-input:focus,
-        .comment-input:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-
-        /* Sticky pagination controls */
-        .pagination-sticky {
-            position: sticky;
-            bottom: 0;
-            background: #fff;
-            padding: 15px;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 10px 10px 0 0;
-            z-index: 100;
+        .grade-card .d-flex.gap-2 .badge {
+            font-size: 0.9rem;
+            padding: 0.4em 0.7em;
         }
     </style>
 
@@ -245,7 +250,7 @@
                                                                 <form action="{{ route('supervisor.rating') }}" method="POST"
                                                                     class="section-form ajax-sup-eval-form mt-2">
                                                                     @csrf
-                                                                    <div class="d-flex gap-3">
+                                                                    <div class="d-flex gap-3 p-4">
                                                                         <div class="col-md-2">
                                                                             <input class="form-control score-input" type="number"
                                                                                 name="sectionSupScore" required placeholder="Score"
@@ -301,7 +306,7 @@
                                                                                 <form action="{{ route('supervisor.rating') }}"
                                                                                     method="POST" class="ajax-sup-eval-form mt-2">
                                                                                     @csrf
-                                                                                    <div class="d-flex gap-3">
+                                                                                    <div class="d-flex gap-3 p-4">
                                                                                         <div class="col-md-2">
                                                                                             <input class="form-control score-input"
                                                                                                 type="number" name="metricSupScore" min="0"
