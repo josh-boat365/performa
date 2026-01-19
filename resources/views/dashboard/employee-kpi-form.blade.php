@@ -284,8 +284,12 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                         <div class="kpi">
 
                                             @foreach ($kpi->activeSections as $sectionIndex => $section)
-                                                <div class="card border border-primary section-tab" @style(['border-radius: 10px;'])
-                                                    @style(['border-radius: 10px; display: none;'])
+                                                @php
+                                                    // Show all sections when COMPLETED, otherwise hide for pagination
+                                                    $isCompleted = isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'COMPLETED';
+                                                    $displayStyle = $isCompleted ? 'display: block;' : 'display: none;';
+                                                @endphp
+                                                <div class="card border border-primary section-tab mb-3" style="border-radius: 10px; {{ $displayStyle }}"
                                                     data-section-page="{{ floor($sectionIndex / 3) }}">
                                                     <div class="card-body"
                                                         style="{{ $section->metrics->isEmpty() ? 'background-color: #0000ff0d;' : '' }}">
@@ -343,6 +347,11 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                                                                     Save
                                                                                 @endif
                                                                             </button>
+                                                                        @else
+                                                                            {{-- Show saved score as read-only badge when completed --}}
+                                                                            @if(optional($section->sectionEmpScore)->sectionEmpScore)
+                                                                                <span class="badge bg-secondary" style="height: fit-content;">Score: {{ $section->sectionEmpScore->sectionEmpScore }}</span>
+                                                                            @endif
                                                                         @endif
                                                                     </div>
                                                                 </form>
@@ -437,6 +446,11 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                                                                                     Save
                                                                                                 @endif
                                                                                             </button>
+                                                                                        @else
+                                                                                            {{-- Show saved score as read-only badge when completed --}}
+                                                                                            @if(optional($metric->metricEmpScore)->metricEmpScore)
+                                                                                                <span class="badge bg-secondary" style="height: fit-content;">Score: {{ $metric->metricEmpScore->metricEmpScore }}</span>
+                                                                                            @endif
                                                                                         @endif
                                                                                     </div>
                                                                                 </form>
@@ -480,12 +494,9 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                     {{-- Card Footer with Pagination Controls --}}
                     @if (
     isset($section->sectionEmpScore) &&
-    ($section->sectionEmpScore->status === 'REVIEW' ||
-        $section->sectionEmpScore->status === 'CONFIRMATION' ||
-        $section->sectionEmpScore->status === 'COMPLETED' ||
-        $section->sectionEmpScore->status === 'PROBLEM')
+    in_array($section->sectionEmpScore->status, ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM'])
 )
-                        {{-- No pagination controls when in review/completed states --}}
+                        {{-- No pagination controls when in review/confirmation/completed/problem states --}}
                     @else
                         <div class="card-footer bg-white">
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -507,7 +518,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                         </div>
                     @endif
 
-                    {{-- WHEN SUPERVISOR HAS SUBMITTED THEIR REVIEW --}}
+                    {{-- WHEN SUPERVISOR HAS SUBMITTED THEIR REVIEW (not COMPLETED) --}}
                     @if (isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
                         <div class="card-footer bg-white">
                             <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
@@ -529,8 +540,18 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                         </div>
                     @endif
 
-                    <!-- Modals -->
-                    @if(isset($kpi))
+                    {{-- WHEN APPRAISAL IS COMPLETED - Show completion message --}}
+                    @if (isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'COMPLETED')
+                        <div class="card-footer bg-success bg-opacity-10">
+                            <div class="d-flex justify-content-center align-items-center gap-2">
+                                <i class="bx bx-check-circle text-success fs-4"></i>
+                                <span class="text-success fw-semibold">Appraisal Completed</span>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Modals - Only show when not COMPLETED -->
+                    @if(isset($kpi) && (!isset($section->sectionEmpScore) || $section->sectionEmpScore->status !== 'COMPLETED'))
                         <x-appraisal.confirmation-modal
                             id="bs-submit-modal-lg"
                             title="Confirm Submission"
@@ -600,6 +621,18 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                         const totalPagesSpan = document.getElementById('total-pages');
                                         const progressBar = document.getElementById('progress-bar');
                                         const progressText = document.getElementById('progress-text');
+
+                                        // Check if appraisal is completed - if so, show all sections
+                                        const kpiStatus = '{{ $kpiStatus ?? '' }}';
+                                        const isCompleted = kpiStatus === 'COMPLETED';
+
+                                        if (isCompleted) {
+                                            // Show all sections when completed
+                                            sections.forEach(section => {
+                                                section.style.display = 'block';
+                                            });
+                                            return; // Exit early - no need for pagination logic
+                                        }
 
                                         // Use unique key per employee to avoid page persistence across different forms
                                         const currentEmployeeId = '{{ $employeeId }}';
