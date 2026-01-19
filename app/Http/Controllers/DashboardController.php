@@ -292,6 +292,16 @@ class DashboardController extends Controller
      */
     public function showEmployeeKpi()
     {
+        // Debug: Log session data to trace toast messages
+        Log::debug('showEmployeeKpi: Session data on page load', [
+            'has_toast_success' => session()->has('toast_success'),
+            'toast_success' => session('toast_success'),
+            'has_toast_error' => session()->has('toast_error'),
+            'toast_error' => session('toast_error'),
+            'has_errors' => session()->has('errors'),
+            'all_flash_keys' => array_keys(session()->all()),
+        ]);
+
         try {
             // Get all KPIs for the employee
             $response = $this->appraisalService->getAllKpisForEmployee();
