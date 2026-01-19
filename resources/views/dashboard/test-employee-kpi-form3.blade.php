@@ -27,16 +27,18 @@
                     </div>
                 </div>
                 @php
-                    function getBadgeDetails($status)
-                    {
-                        return match ($status) {
-                            'PENDING' => ['class' => 'bg-dark', 'text' => 'PENDING'],
-                            'REVIEW' => ['class' => 'bg-warning', 'text' => 'REVIEW'],
-                            'CONFIRMATION' => ['class' => 'bg-primary', 'text' => 'CONFIRMATION'],
-                            'COMPLETED' => ['class' => 'bg-success', 'text' => 'COMPLETED'],
-                            'PROBLEM' => ['class' => 'bg-danger', 'text' => 'PROBE'],
-                            default => ['class' => 'bg-secondary', 'text' => 'PENDING'],
-                        };
+                    if (!function_exists('getBadgeDetails')) {
+                        function getBadgeDetails($status)
+                        {
+                            return match ($status) {
+                                'PENDING' => ['class' => 'bg-dark', 'text' => 'PENDING'],
+                                'REVIEW' => ['class' => 'bg-warning', 'text' => 'REVIEW'],
+                                'CONFIRMATION' => ['class' => 'bg-primary', 'text' => 'CONFIRMATION'],
+                                'COMPLETED' => ['class' => 'bg-success', 'text' => 'COMPLETED'],
+                                'PROBLEM' => ['class' => 'bg-danger', 'text' => 'PROBE'],
+                                default => ['class' => 'bg-secondary', 'text' => 'PENDING'],
+                            };
+                        }
                     }
                     $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                 @endphp
