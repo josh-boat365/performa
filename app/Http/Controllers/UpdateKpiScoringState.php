@@ -51,7 +51,17 @@ class UpdateKpiScoringState extends Controller
                 'status' => $validated['status'],
             ];
 
-            $this->appraisalService->updateScoreStatus($statusData);
+            Log::info('Submitting appraisal status update', [
+                'data' => $statusData,
+                'target_status' => $validated['status']
+            ]);
+
+            $response = $this->appraisalService->updateScoreStatus($statusData);
+
+            Log::info('Appraisal status update successful', [
+                'data' => $statusData,
+                'response' => $response
+            ]);
 
             // Success messages for each status
             $messages = [
@@ -87,13 +97,18 @@ class UpdateKpiScoringState extends Controller
                         ->with('toast_success', $successMessage);
             }
         } catch (ApiException $e) {
-            Log::error('Failed to update KPI scoring state', ['message' => $e->getMessage()]);
-            return back()->with('toast_error', 'Failed to update appraisal status. Please try again.');
+            Log::error('Failed to update KPI scoring state', [
+                'message' => $e->getMessage(),
+                'status_code' => $e->getCode(),
+                'data' => $validated ?? [],
+            ]);
+            return back()->with('toast_error', 'Failed to update appraisal status: ' . $e->getMessage());
         } catch (\Exception $e) {
             Log::error('Unexpected error updating KPI scoring state', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
+                'data' => $validated ?? [],
             ]);
             return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
         }
