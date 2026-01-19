@@ -211,8 +211,11 @@
                                 @foreach ($appraisal as $kpi)
                                     <div class="kpi">
                                         @foreach ($kpi->activeSections as $sectionIndex => $section)
+                                            @php
+                                                $metrics = collect($section->metrics ?? []);
+                                            @endphp
                                             <div class="card border section-tab mb-3" style="border-radius: 10px;">
-                                                <div class="card-body {{ $section->metrics->isEmpty() ? 'bg-light' : '' }}">
+                                                <div class="card-body {{ $metrics->isEmpty() ? 'bg-light' : '' }}">
                                                     <div class="section-card" style="margin-top: 1rem;">
                                                         <h5 class="card-title mb-2">
                                                             {{ $section->sectionName }}
@@ -225,7 +228,7 @@
                                                         </h5>
                                                         <p class="text-muted small">{{ $section->sectionDescription }}</p>
 
-                                                        @if ($section->metrics->isEmpty())
+                                                        @if ($metrics->isEmpty())
                                                             <!-- Employee Score Display (readonly) -->
                                                             <x-appraisal.score-display
                                                                 label="Employee Score and Comment"
@@ -288,7 +291,7 @@
                                                                 </div>
                                                             @endif
                                                         @else
-                                                            @foreach ($section->metrics as $metric)
+                                                            @foreach ($metrics as $metric)
                                                                 <div class="card border border-success mb-3" style="border-radius: 10px;">
                                                                     <div class="card-body" style="background-color: rgba(30, 255, 0, 0.05);">
                                                                         <div class="metric-card">
