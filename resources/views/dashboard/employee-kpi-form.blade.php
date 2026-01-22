@@ -955,6 +955,111 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                         }, 100);
                                     });
                                 </script>
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const nextBtn = document.getElementById('next-btn');
+
+                                        function validatePage(currentPage) {
+                                            const sections = document.querySelectorAll('.section-tab');
+                                            const sectionsPerPage = 3;
+                                            const start = currentPage * sectionsPerPage;
+                                            const end = start + sectionsPerPage;
+
+                                            let allSaved = true;
+                                            let emptyField = null;
+
+                                            for (let i = start; i < end && i < sections.length; i++) {
+                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"]');
+                                                const saveButtons = sections[i].querySelectorAll('button[type="submit"]');
+
+                                                // Check if all score inputs are filled
+                                                scoreInputs.forEach(input => {
+                                                    if (!input.value.trim()) {
+                                                        emptyField = input;
+                                                        input.classList.add('is-invalid');
+                                                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                    } else {
+                                                        input.classList.remove('is-invalid');
+                                                    }
+                                                });
+
+                                                // Check if all save buttons are marked as "Saved"
+                                                saveButtons.forEach(button => {
+                                                    if (!button.classList.contains('btn-secondary')) {
+                                                        allSaved = false;
+                                                    }
+                                                });
+                                            }
+
+                                            if (emptyField) {
+                                                Swal.fire({
+                                                    icon: 'error',
+                                                    title: 'Incomplete Form',
+                                                    text: 'Please fill in all the required score fields before proceeding.',
+                                                });
+                                                return false;
+                                            }
+
+                                            if (!allSaved) {
+                                                Swal.fire({
+                                                    icon: 'warning',
+                                                    title: 'Unsaved Changes',
+                                                    text: 'Please save all changes before proceeding to the next page.',
+                                                });
+                                                return false;
+                                            }
+
+                                            return true;
+                                        }
+
+                                        nextBtn.addEventListener('click', function(event) {
+                                            const currentPage = parseInt(document.getElementById('current-page').textContent) - 1;
+                                            if (!validatePage(currentPage)) {
+                                                event.preventDefault();
+                                            }
+                                        });
+
+                                        function updateNextButtonState() {
+                                            const currentPage = parseInt(document.getElementById('current-page').textContent) - 1;
+                                            const sections = document.querySelectorAll('.section-tab');
+                                            const sectionsPerPage = 3;
+                                            const start = currentPage * sectionsPerPage;
+                                            const end = start + sectionsPerPage;
+
+                                            let allSaved = true;
+                                            let allFilled = true;
+
+                                            for (let i = start; i < end && i < sections.length; i++) {
+                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"]');
+                                                const saveButtons = sections[i].querySelectorAll('button[type="submit"]');
+
+                                                // Check if all score inputs are filled
+                                                scoreInputs.forEach(input => {
+                                                    if (!input.value.trim()) {
+                                                        allFilled = false;
+                                                    }
+                                                });
+
+                                                // Check if all save buttons are marked as "Saved"
+                                                saveButtons.forEach(button => {
+                                                    if (!button.classList.contains('btn-secondary')) {
+                                                        allSaved = false;
+                                                    }
+                                                });
+                                            }
+
+                                            nextBtn.disabled = !(allFilled && allSaved);
+                                        }
+
+                                        document.querySelectorAll('input[type="number"][name*="EmpScore"], button[type="submit"]').forEach(element => {
+                                            element.addEventListener('input', updateNextButtonState);
+                                            element.addEventListener('click', updateNextButtonState);
+                                        });
+
+                                        updateNextButtonState();
+                                    });
+                                </script>
                             @endpush
 
 
