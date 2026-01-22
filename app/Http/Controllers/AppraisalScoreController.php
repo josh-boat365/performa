@@ -51,7 +51,7 @@ class AppraisalScoreController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => $successMessage,
-            ]);
+            ], 200); // Ensure a fast response with a 200 status code
         } catch (ApiException $e) {
             Log::error('Employee score submission failed', [
                 'message' => $e->getMessage(),
@@ -97,21 +97,30 @@ class AppraisalScoreController extends Controller
             // Submit the status update via the service
             $this->appraisalService->updateScoreStatus($data);
 
-            return back()->with('toast_success', 'KPI submitted for review successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'KPI submitted for review successfully.',
+            ], 200); // Ensure a fast response with a 200 status code
         } catch (ApiException $e) {
             Log::error('Failed to submit appraisal for review', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return back()->with('toast_error', 'Failed to submit KPI for review. Please try again.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit KPI for review. Please try again.',
+            ], 422);
         } catch (\Exception $e) {
             Log::error('Unexpected error during appraisal review submission', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
+            return response()->json([
+                'success' => false,
+                'message' => 'An unexpected error occurred. Please try again.',
+            ], 400);
         }
     }
 
@@ -133,21 +142,30 @@ class AppraisalScoreController extends Controller
             // Submit the status update via the service
             $this->appraisalService->updateScoreStatus($data);
 
-            return back()->with('toast_success', 'Appraisal review accepted successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Appraisal review accepted successfully.',
+            ], 200); // Ensure a fast response with a 200 status code
         } catch (ApiException $e) {
             Log::error('Failed to accept appraisal review', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return back()->with('toast_error', 'Failed to accept appraisal review. Please try again.');
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to accept appraisal review. Please try again.',
+            ], 422);
         } catch (\Exception $e) {
             Log::error('Unexpected error during appraisal review acceptance', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return back()->with('toast_error', 'An unexpected error occurred. Please try again.');
+            return response()->json([
+                'success' => false,
+                'message' => 'An unexpected error occurred. Please try again.',
+            ], 400);
         }
     }
 

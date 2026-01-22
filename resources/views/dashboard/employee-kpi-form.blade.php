@@ -944,4 +944,62 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function () {
+                    const form = document.querySelector('form.ajax-eval-form');
+                    if (!form) return;
+
+                    const formData = new FormData(form);
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Submitting...';
+
+                    fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i class="bx bx-send me-1"></i>Submit Appraisal';
+
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Appraisal submitted successfully!',
+                                    showConfirmButton: false,
+                                    timer: 2000
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Submission failed!',
+                                    text: data.message || 'Please try again.',
+                                    showConfirmButton: true
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i class="bx bx-send me-1"></i>Submit Appraisal';
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'An error occurred!',
+                                text: 'Please try again later.',
+                                showConfirmButton: true
+                            });
+                        });
+                });
+            }
+        });
+    </script>
 </x-base-layout>

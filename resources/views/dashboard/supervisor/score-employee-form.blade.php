@@ -596,76 +596,73 @@
                         });
                     });
 
-                // Modified AJAX form handler with page refresh and scroll preservation
+                // Modified AJAX form handler with dynamic UI update
                 document.querySelectorAll('form.ajax-sup-eval-form, form.section-form').forEach(form => {
-                    form.addEventListener('submit', function (e) {
+                    form.addEventListener('submit', async function (e) {
                         e.preventDefault();
                         const scrollPos = window.scrollY;
                         const formData = new FormData(form);
                         const saveBtn = form.querySelector('button[type="submit"]');
                         const originalHTML = saveBtn.innerHTML;
 
-                        // Store scroll position and current page state before submission
+                        // Store scroll position
                         sessionStorage.setItem('preserveScrollPosition', scrollPos.toString());
-                        sessionStorage.setItem(pageStorageKey, currentPage.toString());
 
                         saveBtn.classList.add('btn-saving');
                         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Saving...';
                         saveBtn.disabled = true;
 
-                        fetch(form.action, {
-                            method: 'POST',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                'Accept': 'application/json'
-                            },
-                            body: formData
-                        })
-                            .then(response => {
-                                if (response.status === 401) {
-                                    return response.json().then(data => {
-                                        if (data.session_expired) {
-                                            alert('Your session has expired. Please log in again.');
-                                            window.location.href = data.redirect || '{{ route("login") }}';
-                                            return null;
-                                        }
-                                        return data;
-                                    });
-                                }
-                                if (!response.ok) {
-                                    return response.json().then(data => {
-                                        throw new Error(data.message || `HTTP error! status: ${response.status}`);
-                                    }).catch(() => {
-                                        throw new Error(`HTTP error! status: ${response.status}`);
-                                    });
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                if (!data) return;
-
-                                if (data.success) {
-                                    sessionStorage.setItem('showSuccessToast', JSON.stringify({
-                                        message: data.message || 'Saved successfully'
-                                    }));
-                                } else {
-                                    sessionStorage.setItem('showErrorToast', JSON.stringify({
-                                        message: data.message || 'An error occurred'
-                                    }));
-                                }
-
-                                window.location.reload();
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                saveBtn.classList.remove('btn-saving');
-                                saveBtn.innerHTML = originalHTML;
-                                saveBtn.disabled = false;
-                                showToast('error', error.message || 'An unexpected error occurred. Please try again.');
+                        try {
+                            const response = await fetch(form.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                    'Accept': 'application/json'
+                                },
+                                body: formData
                             });
+
+                            if (!response.ok) {
+                                const errorData = await response.json();
+                                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                            }
+
+                            const data = await response.json();
+
+                            if (data.success) {
+                                showToast('success', data.message || 'Saved successfully');
+                                // Dynamically update the DOM instead of reloading
+                                updateFormUI(form, data);
+                            } else {
+                                showToast('error', data.message || 'An error occurred');
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            showToast('error', error.message || 'An unexpected error occurred. Please try again.');
+                        } finally {
+                            saveBtn.classList.remove('btn-saving');
+                            saveBtn.innerHTML = originalHTML;
+                            saveBtn.disabled = false;
+                        }
                     });
                 });
+
+                function updateFormUI(form, data) {
+                    // Example: Update score and comment fields dynamically
+                    const scoreInput = form.querySelector('input[name*="SupScore"]');
+                    const commentInput = form.querySelector('textarea[name="supervisorComment"]');
+
+                    if (scoreInput && data.updatedScore) {
+                        scoreInput.value = data.updatedScore;
+                    }
+
+                    if (commentInput && data.updatedComment) {
+                        commentInput.value = data.updatedComment;
+                    }
+
+                    // Additional UI updates can be added here
+                }
 
                 // Show the initial page
                 showPage(currentPage);
