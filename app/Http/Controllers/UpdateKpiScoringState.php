@@ -16,7 +16,7 @@ class UpdateKpiScoringState extends Controller
             'batchId' => 'required|integer',
             'supervisorId' => 'nullable|integer',
             'supervisorRecommendation' => 'nullable|string',
-            'status' => 'required|string|in:REVIEW,COMPLETED,CONFIRMATION,PROBLEM',
+            'status' => 'required|string|in:REVIEW,COMPLETED,CONFIRMATION,PROBLEM,SCORING',
         ]);
 
         $batchId = $validated['batchId'];
@@ -44,7 +44,7 @@ class UpdateKpiScoringState extends Controller
                 $recommendationResponse = Http::withToken($apiToken)
                     ->post("{$baseApiUrl}/Recommendation", $recommendationData);
 
-                
+
             }
 
             // Always submit status update (for all statuses)
@@ -67,12 +67,14 @@ class UpdateKpiScoringState extends Controller
                 'COMPLETED' => 'Appraisal marked as completed successfully.',
                 'CONFIRMATION' => 'Appraisal pushed to employee for confirmation successfully.',
                 'PROBLEM' => 'Appraisal pushed to higher supervisor for review successfully.',
+                'SCORING' => 'Appraisal pushed back to employee for scoring successfully.',
             ];
 
             $successMessage = $messages[$validated['status']] ?? 'Appraisal status updated successfully.';
 
             // Redirect based on status
             switch ($validated['status']) {
+                case 'SCORING':
                 case 'CONFIRMATION':
                     return redirect()
                         ->route('supervisor.index')
