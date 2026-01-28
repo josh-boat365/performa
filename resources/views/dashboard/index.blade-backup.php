@@ -13,20 +13,6 @@
 
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
-
-        <!-- Performance Over Time Chart -->
-        <div class="row">
-            <div class="col-xl-12">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h4 class="card-title mb-4">Performance Over Time</h4>
-                        <div id="performanceChart" style="height: 320px;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
         <div class="row">
             <div class="col-xl-12">
                 <div class="card">
@@ -135,36 +121,8 @@
         </div>
     </div>
 
-
     @push('scripts')
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                var batchLabels = @json($batchScores->pluck('batchName'));
-                var batchScores = @json($batchScores->pluck('kpiScore')->map(fn($v) => $v === null ? 0 : $v));
-
-                // Performance Over Time Chart
-                var perfOptions = {
-                    chart: { type: 'line', height: 320 },
-                    series: [{
-                        name: 'Score',
-                        data: batchScores
-                    }],
-                    xaxis: {
-                        categories: batchLabels,
-                        title: { text: 'Batch' }
-                    },
-                    yaxis: {
-                        title: { text: 'Score' }
-                    },
-                    stroke: { curve: 'smooth' },
-                    markers: { size: 5 }
-                };
-                var perfChart = new ApexCharts(document.querySelector('#performanceChart'), perfOptions);
-                perfChart.render();
-
-            });
-        </script>
     @endpush
 
 </x-base-layout>

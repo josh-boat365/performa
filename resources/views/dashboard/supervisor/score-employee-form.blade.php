@@ -45,274 +45,121 @@
             flex: 1;
             height: 20px;
             border-radius: 10px;
-            background-color: #e9ecef;
-        }
 
-        .progress-wrapper .progress-bar {
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 12px;
-            transition: width 0.4s ease;
-        }
+            @push('scripts')
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // --- Scroll Retention ---
+                    const scrollKey = 'supervisorScoreFormScroll_' + '{{ $employeeId }}';
+                    if (sessionStorage.getItem(scrollKey)) {
+                        window.scrollTo({
+                            top: parseInt(sessionStorage.getItem(scrollKey)),
+                            behavior: 'auto'
+                        });
+                    }
+                    window.addEventListener('scroll', function () {
+                        sessionStorage.setItem(scrollKey, window.scrollY);
+                    });
 
-        .progress-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            white-space: nowrap;
-        }
+                    // --- Numeric Validation ---
+                    document.querySelectorAll('input[type="number"][name*="SupScore"]').forEach(input => {
+                        input.setAttribute('required', 'required');
+                        input.setAttribute('min', '0');
+                        if (!input.hasAttribute('max')) {
+                            input.setAttribute('max', '100');
+                        }
+                        input.addEventListener('input', function () {
+                            let val = this.value;
+                            if (val !== '' && (isNaN(val) || val < 0 || val > parseInt(this.getAttribute('max')))) {
+                                this.classList.add('is-invalid');
+                                this.classList.remove('is-valid');
+                            } else if (val !== '') {
+                                this.classList.remove('is-invalid');
+                                this.classList.add('is-valid');
+                            } else {
+                                this.classList.remove('is-valid');
+                                this.classList.add('is-invalid');
+                            }
+                        });
+                    });
 
-        /* Save button states */
-        .btn-save {
-            min-width: 80px;
-            transition: all 0.3s ease;
-        }
+                    // --- AJAX Save: Reload after save to update data ---
+                    document.querySelectorAll('form.ajax-sup-eval-form, form.section-form').forEach(form => {
+                        form.addEventListener('submit', function (e) {
+                            e.preventDefault();
+                            const saveBtn = form.querySelector('button.btn-save');
+                            if (!saveBtn) return;
+                            const originalHTML = saveBtn.innerHTML;
+                            saveBtn.classList.add('btn-saving');
+                            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Saving...';
+                            saveBtn.disabled = true;
 
-        .btn-save.btn-saved {
-            background-color: #198754 !important;
-            border-color: #198754 !important;
-        }
-
-        .btn-save.btn-saving {
-            pointer-events: none;
-            opacity: 0.8;
-        }
-
-        /* Sticky pagination controls */
-        .pagination-sticky {
-            position: sticky;
-            bottom: 0;
-            background: #fff;
-            padding: 15px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            border-radius: 10px 10px 0 0;
-            z-index: 100;
-            margin-top: 20px;
-        }
-
-        /* Section cards animation */
-        .section-tab {
-            transition: all 0.3s ease;
-        }
-
-        .section-tab.border-danger {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
-        }
-
-        /* Form input focus states */
-        .score-input:focus, .comment-input:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-
-        /* Grade summary cards - responsive */
-        .grade-summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .grade-card {
-            padding: 15px;
-            border-radius: 8px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            font-size: 1rem;
-        }
-
-        .grade-card .badge {
-            font-size: 0.85rem;
-            padding: 0.5em 0.8em;
-        }
-
-        .grade-card .text-muted {
-            font-size: 0.95rem;
-        }
-
-        .grade-card strong {
-            font-size: 1.1rem;
-        }
-
-        .grade-card .d-flex.gap-2 .badge {
-            font-size: 0.9rem;
-            padding: 0.4em 0.7em;
-        }
-    </style>
-
-    <div class="container-fluid px-2">
-
-        <!-- Page Title -->
-        <div class="row">
-            <div class="col-12">
-                <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18">
-                        <a href="{{ route('supervisor.index') }}" class="text-primary">
-                            <i class="bx bx-arrow-back me-1"></i>Employee KPIs
-                        </a> / Score Employee
-                    </h4>
-                </div>
-            </div>
-        </div>
-
-        <!-- Progress Bar - Sticky -->
-        <div class="progress-container">
-            <div class="container-fluid">
-                <div class="progress-wrapper">
-                    <div class="progress-info">
-                        <span class="badge bg-primary" id="current-page">1</span>
-                        <span class="text-muted">of</span>
-                        <span class="badge bg-dark" id="total-pages">1</span>
-                    </div>
-                    <div class="progress">
-                        <div id="progress-bar"
-                            class="progress-bar bg-success progress-bar-striped progress-bar-animated"
-                            role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0"
-                            aria-valuemax="100">
-                            <span id="progress-text">0%</span>
-                        </div>
-                    </div>
-                    <span class="text-muted small">Completion</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Grades Summary Card -->
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="bx bx-bar-chart-alt-2 me-2"></i>Grades Summary
-                        </h5>
-                        <span class="badge rounded-pill bg-primary fs-6">REVIEW</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="grade-summary-grid">
-                            <!-- Submitted Employee Grade -->
-                            <x-appraisal.grade-card title="Submitted Employee Grade" badgeClass="bg-secondary"
-                                :employeeName="$submittedEmployeeGrade->employeeName ?? '----'" :items="[
-        'Score' => $submittedEmployeeGrade->totalKpiScore ?? '----',
-        'Grade' => $submittedEmployeeGrade->grade ?? '----',
-        'Remark' => $submittedEmployeeGrade->remark ?? '----'
-    ]" />
-
-                            <!-- Supervisor Grade For Employee -->
-                            <x-appraisal.grade-card title="Supervisor Grade For Employee" badgeClass="bg-primary"
-                                :employeeName="$supervisorGradeForEmployee->employeeName ?? '----'" :items="[
-        'Score' => $supervisorGradeForEmployee->totalKpiScore ?? '----',
-        'Grade' => $supervisorGradeForEmployee->grade ?? '----',
-        'Remark' => $supervisorGradeForEmployee->remark ?? '----'
-    ]" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Supervisor Evaluation Form Card -->
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0">
-                            <i class="bx bx-edit-alt me-2"></i>Supervisor Evaluation Form
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="kpi-form">
-                            @if (isset($appraisal) && $appraisal->isNotEmpty())
-                                @foreach ($appraisal as $index => $kpi)
-                                    <div class="kpi">
-                                        @foreach ($kpi->activeSections as $sectionIndex => $section)
-                                            <div class="card border section-tab mb-3" style="border-radius: 10px; display: none;"
-                                                data-section-page="{{ floor($sectionIndex / 3) }}">
-                                                <div class="card-body {{ $section->metrics->isEmpty() ? 'bg-light' : '' }}">
-                                                    <div class="section-card" style="margin-top: 1rem;">
-                                                        <h5 class="card-title mb-2">
-                                                            {{ $section->sectionName }}
-                                                            <span class="badge bg-danger ms-2">{{ $section->sectionScore }}</span>
-                                                        </h5>
-                                                        <p class="text-muted small">{{ $section->sectionDescription }}</p>
-
-                                                        @if ($section->metrics->isEmpty())
-                                                            <!-- Employee Score Display (readonly) -->
-                                                            <x-appraisal.score-display label="Employee Score and Comment"
-                                                                badgeClass="bg-secondary"
-                                                                :score="optional($section->sectionEmpScore)->sectionEmpScore ?? ''"
-                                                                :comment="optional($section->sectionEmpScore)->employeeComment ?? ''" />
-
-                                                            <!-- Supervisor Score Form -->
-                                                            <div class="mt-3">
-                                                                <span class="mb-2 badge rounded-pill bg-primary">
-                                                                    <strong>Supervisor Score and Comment</strong>
-                                                                </span>
-                                                                <form action="{{ route('supervisor.rating') }}" method="POST"
-                                                                    class="section-form ajax-sup-eval-form mt-2">
-                                                                    @csrf
-                                                                    <div class="d-flex gap-3 p-4">
-                                                                        <div class="col-md-2">
-                                                                            <input class="form-control score-input" type="number"
-                                                                                name="sectionSupScore" required placeholder="Score"
-                                                                                min="0" step="0.01" pattern="\d+(\.\d{1,2})?"
-                                                                                max="{{ $section->sectionScore }}"
-                                                                                @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
-                                                                                title="Max score: {{ $section->sectionScore }}"
-                                                                                value="{{ optional($section->sectionEmpScore)->sectionSupScore == 0 ? '' : optional($section->sectionEmpScore)->sectionSupScore }}">
-                                                                        </div>
-                                                                        <div class="col-md-9">
-                                                                            <textarea class="form-control comment-input"
-                                                                                name="supervisorComment"
-                                                                                placeholder="Enter your comments" rows="2"
-                                                                                @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))>{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
-                                                                        </div>
-                                                                        @if (isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
-                                                                            <div></div>
-                                                                        @else
-                                                                            <input type="hidden" name="scoreId"
-                                                                                value="{{ $section->sectionEmpScore->id ?? '' }}">
-                                                                            <button type="submit" class="btn btn-primary btn-save"
-                                                                                style="height: fit-content">
-                                                                                <i class="bx bx-save me-1"></i>Save
-                                                                            </button>
-                                                                        @endif
-                                                                    </div>
-                                                                </form>
-                                                            </div>
-                                                        @else
-                                                            @foreach ($section->metrics as $metric)
-                                                                <div class="card border border-success mb-3" style="border-radius: 10px;">
-                                                                    <div class="card-body"
-                                                                        style="background-color: rgba(30, 255, 0, 0.05);">
-                                                                        <div class="metric-card">
-                                                                            <h6 class="card-title">
-                                                                                {{ $metric->metricName }}
-                                                                                <span
-                                                                                    class="badge bg-danger ms-2">{{ $metric->metricScore }}</span>
-                                                                            </h6>
-                                                                            <p class="text-muted small">{{ $metric->metricDescription }}</p>
-
-                                                                            <!-- Employee Score Display (readonly) -->
-                                                                            <x-appraisal.score-display label="Employee Score and Comment"
-                                                                                badgeClass="bg-secondary"
-                                                                                :score="$metric->metricEmpScore->metricEmpScore ?? ''"
-                                                                                :comment="$metric->metricEmpScore->employeeComment ?? ''" />
-
-                                                                            <!-- Supervisor Score Form -->
-                                                                            <div class="mt-3">
-                                                                                <span class="mb-2 badge rounded-pill bg-primary">
-                                                                                    <strong>Supervisor Score and Comment</strong>
-                                                                                </span>
-                                                                                <form action="{{ route('supervisor.rating') }}"
-                                                                                    method="POST" class="ajax-sup-eval-form mt-2">
-                                                                                    @csrf
-                                                                                    <div class="d-flex gap-3 p-4">
-                                                                                        <div class="col-md-2">
-                                                                                            <input class="form-control score-input"
-                                                                                                type="number" name="metricSupScore" min="0"
-                                                                                                step="0.01" pattern="\d+(\.\d{1,2})?"
-                                                                                                max="{{ $metric->metricScore }}"
-                                                                                                @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
+                            const formData = new FormData(form);
+                            fetch(form.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                    'Accept': 'application/json'
+                                },
+                                body: formData
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    saveBtn.classList.remove('btn-saving');
+                                    saveBtn.disabled = false;
+                                    if (data.success) {
+                                        saveBtn.classList.add('btn-saved');
+                                        saveBtn.innerHTML = '<i class="bx bx-check me-1"></i>Saved';
+                                        if (typeof Swal !== 'undefined') {
+                                            Swal.fire({
+                                                toast: true,
+                                                icon: 'success',
+                                                title: data.message || 'Saved!',
+                                                position: 'top-end',
+                                                showConfirmButton: false,
+                                                timer: 2000,
+                                                timerProgressBar: true
+                                            });
+                                        }
+                                        setTimeout(() => window.location.reload(), 800);
+                                    } else {
+                                        saveBtn.innerHTML = 'Save';
+                                        if (typeof Swal !== 'undefined') {
+                                            Swal.fire({
+                                                toast: true,
+                                                icon: 'error',
+                                                title: data.message || 'Save failed',
+                                                position: 'top-end',
+                                                showConfirmButton: false,
+                                                timer: 2000,
+                                                timerProgressBar: true
+                                            });
+                                        }
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    saveBtn.classList.remove('btn-saving');
+                                    saveBtn.disabled = false;
+                                    saveBtn.innerHTML = 'Save';
+                                    if (typeof Swal !== 'undefined') {
+                                        Swal.fire({
+                                            toast: true,
+                                            icon: 'error',
+                                            title: 'An error occurred!',
+                                            position: 'top-end',
+                                            showConfirmButton: false,
+                                            timer: 2000,
+                                            timerProgressBar: true
+                                        });
+                                    }
+                                });
+                        });
+                    });
+                });
+            </script>
+            @endpush
                                                                                                 title="Max score: {{ $metric->metricScore }}"
                                                                                                 placeholder="Score" required
                                                                                                 value="{{ optional($metric->metricEmpScore)->metricSupScore == 0 ? '' : optional($metric->metricEmpScore)->metricSupScore }}">
@@ -392,7 +239,7 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-                    <div class="modal-body text-center py-4">
+                    <div class="modal-body text-center py-4" style="max-height: 60vh; overflow-y: auto;">
                         <i class="bx bx-question-mark text-warning" style="font-size: 48px;"></i>
                         <h5 class="mt-3">Submit employee Appraisal for Confirmation?</h5>
                         <p class="text-muted">This action will send the appraisal to the employee for confirmation.</p>
@@ -410,7 +257,7 @@
                                     <i class="bx bx-message-detail me-1"></i>Supervisor Recommendation (Optional)
                                 </label>
                                 <textarea class="form-control" id="supervisorRecommendation" name="supervisorRecommendation"
-                                    rows="4" placeholder="Enter your recommendation here..."></textarea>
+                                    rows="4" placeholder="Enter your recommendation here..." style="word-break: break-word; white-space: pre-line;"></textarea>
                             </div>
 
                             <div class="d-grid">

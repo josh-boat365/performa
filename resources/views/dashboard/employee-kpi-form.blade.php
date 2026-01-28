@@ -5,60 +5,175 @@
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none !important;
-            margin: 0 !important;
-        }
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // --- Scroll Retention ---
+                    const scrollKey = 'employeeKpiFormScroll_' + '{{ $employeeId }}';
+                    // Restore scroll position
+                    if (sessionStorage.getItem(scrollKey)) {
+                        window.scrollTo({
+                            top: parseInt(sessionStorage.getItem(scrollKey)),
+                            behavior: 'auto'
+                        });
+                    }
+                    // Save scroll position on scroll
+                    window.addEventListener('scroll', function () {
+                        sessionStorage.setItem(scrollKey, window.scrollY);
+                    });
 
-        input[type="number"] {
-            -moz-appearance: textfield !important;
-            appearance: textfield !important;
-        }
+                    // --- Submission Button Logic ---
+                    const submitBtn = document.getElementById('submit-btn');
+                    if (submitBtn) {
+                        submitBtn.addEventListener('click', function () {
+                            const form = document.querySelector('form.ajax-eval-form');
+                            if (!form) return;
 
-        /* Progress bar container - sticky at top */
-        .progress-container {
-            position: sticky;
-            top: 60px;
-            z-index: 1020;
-            background: #fff;
-            padding: 10px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-        }
+                            const formData = new FormData(form);
+                            submitBtn.disabled = true;
+                            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Submitting...';
 
-        .progress-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+                            fetch(form.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: formData
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    submitBtn.disabled = false;
+                                    submitBtn.innerHTML = '<i class="bx bx-send me-1"></i>Submit Appraisal';
 
-        .progress-wrapper .progress {
-            flex: 1;
-            height: 20px;
-            border-radius: 10px;
-            background-color: #e9ecef;
-        }
+                                    if (data.success) {
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Appraisal submitted!',
+                                            text: data.message || 'Your appraisal has been submitted.',
+                                            timer: 2000,
+                                            showConfirmButton: false
+                                        });
+                                        setTimeout(() => window.location.reload(), 1200);
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Submission failed',
+                                            text: data.message || 'Please check your form and try again.',
+                                            showConfirmButton: true
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    submitBtn.disabled = false;
+                                    submitBtn.innerHTML = '<i class="bx bx-send me-1"></i>Submit Appraisal';
 
-        .progress-wrapper .progress-bar {
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 12px;
-            transition: width 0.4s ease;
-        }
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'An error occurred!',
+                                        text: 'Please try again later.',
+                                        showConfirmButton: true
+                                    });
+                                });
+                        });
+                    }
 
-        .progress-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            white-space: nowrap;
-        }
+                    // --- Enforce Numeric Validation and Max Value ---
+                    document.querySelectorAll('input[type="number"][name*="EmpScore"]').forEach(input => {
+                        input.setAttribute('required', 'required');
+                        input.setAttribute('min', '0');
+                        if (!input.hasAttribute('max')) {
+                            input.setAttribute('max', '100'); // Set a reasonable max if not present
+                        }
+                        input.addEventListener('input', function () {
+                            let val = this.value;
+                            if (val !== '' && (isNaN(val) || val < 0 || val > parseInt(this.getAttribute('max')))) {
+                                this.classList.add('is-invalid');
+                                this.classList.remove('is-valid');
+                            } else if (val !== '') {
+                                this.classList.remove('is-invalid');
+                                this.classList.add('is-valid');
+                            } else {
+                                this.classList.remove('is-valid');
+                                this.classList.add('is-invalid');
+                            }
+                        });
+                    });
 
-        /* Save button states */
-        .btn-save {
-            min-width: 80px;
-            transition: all 0.3s ease;
-        }
+                    // --- AJAX Save: Reload after save to update data ---
+                    document.querySelectorAll('form.ajax-eval-form').forEach(form => {
+                        form.addEventListener('submit', function (e) {
+                            e.preventDefault();
+                            const formData = new FormData(form);
+                            const saveBtn = form.querySelector('button.btn-save');
+                            if (!saveBtn) return;
+                            saveBtn.classList.add('btn-saving');
+                            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Saving...';
+                            saveBtn.disabled = true;
 
-        .btn-save.btn-saved {
-            background-color: #198754 !important;
+                            fetch(form.action, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: formData
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    saveBtn.classList.remove('btn-saving');
+                                    saveBtn.disabled = false;
+                                    if (data.success) {
+                                        saveBtn.classList.add('btn-saved');
+                                        saveBtn.innerHTML = '<i class="bx bx-check me-1"></i>Saved';
+                                        if (typeof Swal !== 'undefined') {
+                                            Swal.fire({
+                                                toast: true,
+                                                icon: 'success',
+                                                title: data.message || 'Saved!',
+                                                position: 'top-end',
+                                                showConfirmButton: false,
+                                                timer: 2000,
+                                                timerProgressBar: true
+                                            });
+                                        }
+                                        setTimeout(() => window.location.reload(), 800);
+                                    } else {
+                                        saveBtn.innerHTML = 'Save';
+                                        if (typeof Swal !== 'undefined') {
+                                            Swal.fire({
+                                                toast: true,
+                                                icon: 'error',
+                                                title: data.message || 'Save failed',
+                                                position: 'top-end',
+                                                showConfirmButton: false,
+                                                timer: 2000,
+                                                timerProgressBar: true
+                                            });
+                                        }
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    saveBtn.classList.remove('btn-saving');
+                                    saveBtn.disabled = false;
+                                    saveBtn.innerHTML = 'Save';
+                                    if (typeof Swal !== 'undefined') {
+                                        Swal.fire({
+                                            toast: true,
+                                            icon: 'error',
+                                            title: 'An error occurred!',
+                                            position: 'top-end',
+                                            showConfirmButton: false,
+                                            timer: 2000,
+                                            timerProgressBar: true
+                                        });
+                                    }
+                                });
+                        });
+                    });
+                });
+            </script>
             border-color: #198754 !important;
         }
 
@@ -252,10 +367,10 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <div class="p-3 bg-light text-dark border rounded">
+                    <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                        <div class="p-3 bg-light text-dark border rounded" style="word-break: break-word; white-space: pre-line;">
                             @if (isset($gradeDetails['recommendation']) && !empty($gradeDetails['recommendation']) && $gradeDetails['recommendation'] !== 'No Recommendation')
-                                <p class="mb-0">{{ $gradeDetails['recommendation'] }}</p>
+                                <p class="mb-0" style="word-break: break-word; white-space: pre-line;">{{ $gradeDetails['recommendation'] }}</p>
                             @else
                                 <p class="text-center text-muted mb-0">
                                     <i class="bx bx-info-circle me-1"></i>No recommendation available yet
