@@ -93,8 +93,8 @@ class SupervisorScoreController extends Controller
             $response = Http::withToken($accessToken)->put($endpoint, $data);
 
             if ($response->successful()) {
-                $kpis = $response->object();
-                $appraisal = collect();
+                $kpis = $response->object() ?? [];
+                $appraisal = collect() ?? [];
 
                 // Process each KPI
                 foreach ($kpis as $kpi) {
