@@ -183,7 +183,11 @@ $totalEmployees = $reports->sum(function ($report) {
                                                                                                                             <td>{{ $report->batchName ?? 'N/A' }}</td>
                                                                                                                             <td>{{ $employee->employeeName ?? 'N/A' }}</td>
                                                                                                                             <td>{{ $employee->totalScore->grade ?? 'N/A' }}</td>
-                                                                                                                            <td>{{ ($employee->totalScore?->recommendation ?? 'No Recommendation') === 'No Recommendation' ? '___' : $employee->totalScore?->recommendation }}</td>
+                                                                                                                            <td>
+                                                                                                                                <span style="word-break: break-word; white-space: pre-line; display: block;">
+                                                                                                                                    {{ ($employee->totalScore?->recommendation ?? 'No Recommendation') === 'No Recommendation' ? '___' : $employee->totalScore?->recommendation }}
+                                                                                                                                </span>
+                                                                                                                            </td>
                                                                                                                             <td>{{ $employee->totalScore->totalKpiScore ?? 'N/A' }}</td>
                                                                                                                             <td>{{ $employee->totalScore->remark ?? 'N/A' }}</td>
                                                                                                                             <td>

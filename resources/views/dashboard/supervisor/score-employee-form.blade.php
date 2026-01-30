@@ -301,12 +301,11 @@ $supervisorId = $user->id;
                                         <button id="next-btn" class="btn btn-primary">Next</button>
 
                                         <button type="button" data-bs-toggle="modal" class="btn btn-warning"
-                                            data-bs-target=".bs-push-to-emp-modal-lg">Push to Employee</button>
+                                            data-bs-target=".bs-push-to-emp-modal-lg">Push for Amendment</button>
 
                                         <button id="submit-btn" type="button" data-bs-toggle="modal" class="btn btn-success"
                                             data-bs-target=".bs-submit-appraisal-modal-lg" id="submitAppraisalButton"
-                                            disabled>Submit
-                                            Appraisal</button>
+                                            disabled>Submit for Confirmation</button>
                                     </div>
                                 </div>
 
