@@ -295,13 +295,16 @@ $supervisorId = $user->id;
 )
                                 <div></div>
                             @else
+                            <div class="float-start">
+                                <button type="button" data-bs-toggle="modal" class="btn btn-warning"
+                                            data-bs-target=".bs-push-to-emp-modal-lg">Push for Amendment</button></div>
+                            </div>
                                 <div class="float-end">
                                     <div class="d-flex gap-3 pagination-controls">
                                         <button id="prev-btn" class="btn btn-dark" disabled>Previous</button>
                                         <button id="next-btn" class="btn btn-primary">Next</button>
 
-                                        <button type="button" data-bs-toggle="modal" class="btn btn-warning"
-                                            data-bs-target=".bs-push-to-emp-modal-lg">Push for Amendment</button>
+
 
                                         <button id="submit-btn" type="button" data-bs-toggle="modal" class="btn btn-success"
                                             data-bs-target=".bs-submit-appraisal-modal-lg" id="submitAppraisalButton"
