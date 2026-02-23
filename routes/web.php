@@ -256,7 +256,7 @@ Route::post('dashboard/appraisal/report/filter', [ReportController::class, 'inde
 
 // Employee Specific Reports
 Route::get('dashboard/appraisal/report/show/employee/{employeeId}/batch/{batchId}/summary-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.summary');
-Route::get('dashboard/appraisal/report/show/employee/{employeeId}/full-report-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.full.details');
+// Route::get('dashboard/appraisal/report/show/employee/{employeeId}/full-report-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.full.details');
 
 // PDF Generation Routes
 Route::get('/employee/{employeeId}/print-pdf', [ReportController::class, 'generateEmployeePdf'])->name('employee.printPdf');
