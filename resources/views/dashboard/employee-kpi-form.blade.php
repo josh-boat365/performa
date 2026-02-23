@@ -5,176 +5,54 @@
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none !important;
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    // --- Scroll Retention ---
-                    const scrollKey = 'employeeKpiFormScroll_' + '{{ $employeeId }}';
-                    // Restore scroll position
-                    if (sessionStorage.getItem(scrollKey)) {
-                        window.scrollTo({
-                            top: parseInt(sessionStorage.getItem(scrollKey)),
-                            behavior: 'auto'
-                        });
-                    }
-                    // Save scroll position on scroll
-                    window.addEventListener('scroll', function () {
-                        sessionStorage.setItem(scrollKey, window.scrollY);
-                    });
+            margin: 0;
+        }
 
-                    // --- Submission Button Logic ---
-                    const submitBtn = document.getElementById('submit-btn');
-                    if (submitBtn) {
-                        submitBtn.addEventListener('click', function () {
-                            const form = document.querySelector('form.ajax-eval-form');
-                            if (!form) return;
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
 
-                            const formData = new FormData(form);
-                            submitBtn.disabled = true;
-                            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Submitting...';
+        /* Save button styling */
+        .btn-save {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+            transition: all 0.3s ease;
+        }
 
-                            fetch(form.action, {
-                                method: 'POST',
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                },
-                                body: formData
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    submitBtn.disabled = false;
-                                    submitBtn.innerHTML = '<i class="bx bx-send me-1"></i>Submit Appraisal';
+        .btn-save:hover:not(.btn-saved):not(.btn-saving) {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
 
-                                    if (data.success) {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Appraisal submitted!',
-                                            text: data.message || 'Your appraisal has been submitted.',
-                                            timer: 2000,
-                                            showConfirmButton: false
-                                        });
-                                        setTimeout(() => window.location.reload(), 1200);
-                                    } else {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Submission failed',
-                                            text: data.message || 'Please check your form and try again.',
-                                            showConfirmButton: true
-                                        });
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    submitBtn.disabled = false;
-                                    submitBtn.innerHTML = '<i class="bx bx-send me-1"></i>Submit Appraisal';
+        /* Saved state - gray button but still clickable */
+        .btn-save.btn-saved {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: white !important;
+            cursor: pointer !important;
+            opacity: 0.95;
+        }
 
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'An error occurred!',
-                                        text: 'Please try again later.',
-                                        showConfirmButton: true
-                                    });
-                                });
-                        });
-                    }
+        .btn-save.btn-saved:hover {
+            background-color: #5a6268 !important;
+            border-color: #545b62 !important;
+            color: white !important;
+        }
 
-                    // --- Enforce Numeric Validation and Max Value ---
-                    document.querySelectorAll('input[type="number"][name*="EmpScore"]').forEach(input => {
-                        input.setAttribute('required', 'required');
-                        input.setAttribute('min', '0');
-                        if (!input.hasAttribute('max')) {
-                            input.setAttribute('max', '100'); // Set a reasonable max if not present
-                        }
-                        input.addEventListener('input', function () {
-                            let val = this.value;
-                            if (val !== '' && (isNaN(val) || val < 0 || val > parseInt(this.getAttribute('max')))) {
-                                this.classList.add('is-invalid');
-                                this.classList.remove('is-valid');
-                            } else if (val !== '') {
-                                this.classList.remove('is-invalid');
-                                this.classList.add('is-valid');
-                            } else {
-                                this.classList.remove('is-valid');
-                                this.classList.add('is-invalid');
-                            }
-                        });
-                    });
+        .btn-save.btn-saved:focus,
+        .btn-save.btn-saved:active {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: white !important;
+        }
 
-                    // --- AJAX Save: Reload after save to update data ---
-                    document.querySelectorAll('form.ajax-eval-form').forEach(form => {
-                        form.addEventListener('submit', function (e) {
-                            e.preventDefault();
-                            const formData = new FormData(form);
-                            const saveBtn = form.querySelector('button.btn-save');
-                            if (!saveBtn) return;
-                            saveBtn.classList.add('btn-saving');
-                            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Saving...';
-                            saveBtn.disabled = true;
-
-                            fetch(form.action, {
-                                method: 'POST',
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                },
-                                body: formData
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    saveBtn.classList.remove('btn-saving');
-                                    saveBtn.disabled = false;
-                                    if (data.success) {
-                                        saveBtn.classList.add('btn-saved');
-                                        saveBtn.innerHTML = '<i class="bx bx-check me-1"></i>Saved';
-                                        if (typeof Swal !== 'undefined') {
-                                            Swal.fire({
-                                                toast: true,
-                                                icon: 'success',
-                                                title: data.message || 'Saved!',
-                                                position: 'top-end',
-                                                showConfirmButton: false,
-                                                timer: 2000,
-                                                timerProgressBar: true
-                                            });
-                                        }
-                                        setTimeout(() => window.location.reload(), 800);
-                                    } else {
-                                        saveBtn.innerHTML = 'Save';
-                                        if (typeof Swal !== 'undefined') {
-                                            Swal.fire({
-                                                toast: true,
-                                                icon: 'error',
-                                                title: data.message || 'Save failed',
-                                                position: 'top-end',
-                                                showConfirmButton: false,
-                                                timer: 2000,
-                                                timerProgressBar: true
-                                            });
-                                        }
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
-                                    saveBtn.classList.remove('btn-saving');
-                                    saveBtn.disabled = false;
-                                    saveBtn.innerHTML = 'Save';
-                                    if (typeof Swal !== 'undefined') {
-                                        Swal.fire({
-                                            toast: true,
-                                            icon: 'error',
-                                            title: 'An error occurred!',
-                                            position: 'top-end',
-                                            showConfirmButton: false,
-                                            timer: 2000,
-                                            timerProgressBar: true
-                                        });
-                                    }
-                                });
-                        });
-                    });
-                });
-            </script>
-            border-color: #198754 !important;
+        .btn-save:disabled {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: white !important;
+            cursor: not-allowed !important;
+            opacity: 0.65;
         }
 
         .btn-save.btn-saving {
@@ -334,7 +212,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                             <x-appraisal.grade-card
                                 title="Your Submitted Grade"
                                 badgeClass="bg-secondary"
-                                :employeeName="$submittedEmployeeGrade->employeeName ?? '----'"
+                                :employeeName="$gradeDetails['employeeName'] ?? ($submittedEmployeeGrade->employeeName ?? '----')"
                                 :badges="[
                                     $submittedEmployeeGrade->totalKpiScore ?? '----',
                                     $submittedEmployeeGrade->grade ?? '----',
@@ -345,7 +223,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                             <x-appraisal.grade-card
                                 title="Supervisor's Grade"
                                 badgeClass="bg-primary"
-                                :employeeName="$supervisorGradeForEmployee->employeeName ?? '----'"
+                                :employeeName="$gradeDetails['supervisorName'] ?? ($supervisorGradeForEmployee->employeeName ?? '----')"
                                 :badges="[
                                     $supervisorGradeForEmployee->totalKpiScore ?? '----',
                                     $supervisorGradeForEmployee->grade ?? '----',
@@ -356,6 +234,129 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                 </div>
             </div>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // --- Scroll Retention ---
+                const scrollKey = 'employeeKpiFormScroll_' + '{{ $employeeId }}';
+                // Restore scroll position
+                if (sessionStorage.getItem(scrollKey)) {
+                    window.scrollTo({
+                        top: parseInt(sessionStorage.getItem(scrollKey)),
+                        behavior: 'auto'
+                    });
+                }
+                // Save scroll position on scroll
+                window.addEventListener('scroll', function () {
+                    sessionStorage.setItem(scrollKey, window.scrollY);
+                });
+
+                // --- Enforce Numeric Validation and Max Value ---
+                document.querySelectorAll('input[type="number"][name*="EmpScore"]').forEach(input => {
+                    input.setAttribute('required', 'required');
+                    input.setAttribute('min', '0');
+                    if (!input.hasAttribute('max')) {
+                        input.setAttribute('max', '100'); // Set a reasonable max if not present
+                    }
+                    input.addEventListener('input', function () {
+                        let val = this.value;
+                        if (val !== '' && (isNaN(val) || val < 0 || val > parseInt(this.getAttribute('max')))) {
+                            this.classList.add('is-invalid');
+                            this.classList.remove('is-valid');
+                        } else if (val !== '') {
+                            this.classList.remove('is-invalid');
+                            this.classList.add('is-valid');
+                        } else {
+                            this.classList.remove('is-valid');
+                            this.classList.add('is-invalid');
+                        }
+                    });
+                });
+
+                // --- AJAX Save with Save State Management ---
+                document.querySelectorAll('form.ajax-eval-form').forEach(form => {
+                    form.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        const formData = new FormData(form);
+                        const saveBtn = form.querySelector('button.btn-save');
+                        if (!saveBtn) return;
+
+                        saveBtn.classList.add('btn-saving');
+                        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Saving...';
+                        saveBtn.disabled = true;
+
+                        fetch(form.action, {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: formData
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                saveBtn.classList.remove('btn-saving');
+                                saveBtn.disabled = false;
+                                if (data.success) {
+                                    // Mark button as saved - change to gray
+                                    saveBtn.classList.add('btn-saved');
+                                    saveBtn.classList.remove('btn-success');
+                                    saveBtn.classList.add('btn-secondary');
+                                    saveBtn.innerHTML = '<i class="bx bx-check me-1"></i>Saved';
+
+                                    // Store save state in data attribute
+                                    saveBtn.setAttribute('data-saved', 'true');
+
+                                    // Update Next and Submit button states
+                                    updatePaginationButtons();
+
+                                    if (typeof Swal !== 'undefined') {
+                                        Swal.fire({
+                                            toast: true,
+                                            icon: 'success',
+                                            title: data.message || 'Saved!',
+                                            position: 'top-end',
+                                            showConfirmButton: false,
+                                            timer: 2000,
+                                            timerProgressBar: true
+                                        });
+                                    }
+                                } else {
+                                    saveBtn.innerHTML = '<i class="bx bx-save me-1"></i>Save';
+                                    if (typeof Swal !== 'undefined') {
+                                        Swal.fire({
+                                            toast: true,
+                                            icon: 'error',
+                                            title: data.message || 'Save failed',
+                                            position: 'top-end',
+                                            showConfirmButton: false,
+                                            timer: 2000,
+                                            timerProgressBar: true
+                                        });
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                saveBtn.classList.remove('btn-saving');
+                                saveBtn.disabled = false;
+                                saveBtn.innerHTML = '<i class="bx bx-save me-1"></i>Save';
+                                if (typeof Swal !== 'undefined') {
+                                    Swal.fire({
+                                        toast: true,
+                                        icon: 'error',
+                                        title: 'An error occurred!',
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 2000,
+                                        timerProgressBar: true
+                                    });
+                                }
+                            });
+                    });
+                });
+            });
+        </script>
 
         <!-- Recommendation Modal -->
         <div class="modal fade bs-recommendation-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
@@ -455,7 +456,8 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                                                                 value="{{ $kpi->kpi->kpiId ?? '' }}">
                                                                             <button type="submit"
                                                                                 class="btn btn-success btn-save {{ optional($section->sectionEmpScore)->sectionEmpScore ? 'btn-saved' : '' }}"
-                                                                                style="height: fit-content; min-width: 85px;">
+                                                                                style="height: fit-content; min-width: 85px;"
+                                                                                data-saved="{{ optional($section->sectionEmpScore)->sectionEmpScore ? 'true' : 'false' }}">
                                                                                 @if(optional($section->sectionEmpScore)->sectionEmpScore)
                                                                                     <i class="bx bx-check me-1"></i>Saved
                                                                                 @else
@@ -554,7 +556,8 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                     )
                                                                                             <button type="submit"
                                                                                                 class="btn btn-success btn-save {{ optional($metric->metricEmpScore)->metricEmpScore ? 'btn-saved' : '' }}"
-                                                                                                style="height: fit-content; min-width: 85px;">
+                                                                                                style="height: fit-content; min-width: 85px;"
+                                                                                                data-saved="{{ optional($metric->metricEmpScore)->metricEmpScore ? 'true' : 'false' }}">
                                                                                                 @if(optional($metric->metricEmpScore)->metricEmpScore)
                                                                                                     <i class="bx bx-check me-1"></i>Saved
                                                                                                 @else
@@ -753,6 +756,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                         const currentEmployeeId = '{{ $employeeId }}';
                                         const pageStorageKey = `currentPage_employee_${currentEmployeeId}`;
                                         const lastEmployeeKey = 'lastViewedEmployeeId';
+                                        const savedFormsKey = `savedForms_${currentEmployeeId}`;
 
                                         // Check if we're viewing a different employee - if so, reset to page 0
                                         const lastViewedEmployee = sessionStorage.getItem(lastEmployeeKey);
@@ -763,6 +767,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                         } else {
                                             sessionStorage.setItem(lastEmployeeKey, currentEmployeeId);
                                             sessionStorage.setItem(pageStorageKey, '0');
+                                            sessionStorage.setItem(savedFormsKey, JSON.stringify({}));
                                         }
 
                                         const sectionsPerPage = 3;
@@ -770,31 +775,47 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
 
                                         if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
 
-                                        function validateField(field) {
-                                            const value = field.value.trim();
-                                            if (value === '') {
-                                                field.classList.add('is-invalid');
-                                                field.classList.remove('is-valid');
-                                                field.closest('.section-tab')?.classList.add('border-danger');
-                                                return false;
-                                            } else {
-                                                field.classList.remove('is-invalid');
-                                                field.classList.add('is-valid');
-                                                field.closest('.section-tab')?.classList.remove('border-danger');
-                                                return true;
-                                            }
+                                        // Get saved forms from sessionStorage or initialize
+                                        let savedForms = {};
+                                        try {
+                                            const stored = sessionStorage.getItem(savedFormsKey);
+                                            savedForms = stored ? JSON.parse(stored) : {};
+                                        } catch (e) {
+                                            savedForms = {};
                                         }
 
-                                        function checkInputs(page) {
-                                            const start = page * sectionsPerPage;
-                                            const end = start + sectionsPerPage;
-                                            let allFilled = true;
+                                        // Initialize save button states from sessionStorage
+                                        document.querySelectorAll('button.btn-save').forEach((btn, index) => {
+                                            // Get form identifier (use form's closest section index as ID)
+                                            const form = btn.closest('form.ajax-eval-form');
+                                            const section = btn.closest('.section-tab');
+                                            let formId = null;
 
-                                            for (let i = start; i < end && i < sections.length; i++) {
-                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="EmpScore"]');
-                                                const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                                            // Try to get a unique identifier from the form
+                                            if (form && form.dataset.formId) {
+                                                formId = form.dataset.formId;
+                                            } else if (section && section.dataset.sectionId) {
+                                                formId = 'section_' + section.dataset.sectionId;
+                                            } else {
+                                                // Use index as fallback
+                                                formId = 'form_' + index;
+                                            }
 
-                                                if (!scoresFilled) {
+                                            btn.dataset.formId = formId;
+
+                                            // Check if this form was previously saved
+                                            const isSaved = savedForms[formId] === true;
+                                            
+                                            if (isSaved || btn.classList.contains('btn-saved')) {
+                                                btn.setAttribute('data-saved', 'true');
+                                                btn.classList.add('btn-saved');
+                                                btn.classList.remove('btn-success');
+                                                btn.textContent = '✓ Saved';
+                                            } else {
+                                                btn.setAttribute('data-saved', 'false');
+                                                btn.classList.remove('btn-saved');
+                                                btn.classList.add('btn-success');
+                                                btn.textContent = 'Save';
                                                     allFilled = false;
                                                     sections[i].classList.add('border-danger');
                                                 } else {
@@ -803,6 +824,50 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                             }
 
                                             return allFilled;
+                                        }
+
+                                        function checkAllSavedOnPage(page) {
+                                            const start = page * sectionsPerPage;
+                                            const end = start + sectionsPerPage;
+                                            let allSaved = true;
+
+                                            for (let i = start; i < end && i < sections.length; i++) {
+                                                const section = sections[i];
+                                                const saveButtons = section.querySelectorAll('button.btn-save');
+                                                
+                                                saveButtons.forEach(btn => {
+                                                    const formId = btn.dataset.formId || 'form_unknown';
+                                                    // Check both attribute and sessionStorage to ensure persistence
+                                                    const isSaved = btn.getAttribute('data-saved') === 'true' && savedForms[formId] === true;
+                                                    
+                                                    if (!isSaved) {
+                                                        allSaved = false;
+                                                    }
+                                                });
+                                            }
+
+                                            return allSaved;
+                                        }
+
+                                        function checkAllSavedAcrossAllPages() {
+                                            const allSaveButtons = document.querySelectorAll('button.btn-save');
+                                            let allSaved = true;
+
+                                            allSaveButtons.forEach(btn => {
+                                                const formId = btn.dataset.formId || 'form_unknown';
+                                                // Check both attribute and sessionStorage to ensure persistence
+                                                const isSaved = btn.getAttribute('data-saved') === 'true' && savedForms[formId] === true;
+                                                
+                                                if (!isSaved) {
+                                                    allSaved = false;
+                                                }
+                                            });
+
+                                            return allSaved;
+                                        }
+
+                                        function updatePaginationButtons() {
+                                            updateButtons();
                                         }
 
                                         function updateProgressBar() {
@@ -836,8 +901,14 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
 
                                         function updateButtons() {
                                             if (prevBtn) prevBtn.disabled = currentPage === 0;
-                                            if (nextBtn) nextBtn.disabled = currentPage === totalPages - 1 || !checkInputs(currentPage);
-                                            if (submitBtn) submitBtn.disabled = !Array.from({ length: totalPages }).every((_, i) => checkInputs(i));
+
+                                            // Check if all save buttons on current page are saved
+                                            const allCurrentPageSaved = checkAllSavedOnPage(currentPage);
+                                            if (nextBtn) nextBtn.disabled = currentPage === totalPages - 1 || !allCurrentPageSaved;
+
+                                            // Check if all save buttons across all pages are saved
+                                            const allPagesSaved = checkAllSavedAcrossAllPages();
+                                            if (submitBtn) submitBtn.disabled = !allPagesSaved;
                                             updateProgressBar();
                                         }
 
@@ -873,9 +944,37 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
 
                                         if (nextBtn) {
                                             nextBtn.addEventListener('click', function() {
-                                                if (currentPage < totalPages - 1 && checkInputs(currentPage)) {
+                                                // Check both: all inputs filled AND all forms saved on current page
+                                                const inputsFilled = checkInputs(currentPage);
+                                                const allSaved = checkAllSavedOnPage(currentPage);
+                                                
+                                                if (currentPage < totalPages - 1 && inputsFilled && allSaved) {
                                                     currentPage++;
                                                     showPage(currentPage);
+                                                } else if (!inputsFilled) {
+                                                    if (typeof Swal !== 'undefined') {
+                                                        Swal.fire({
+                                                            toast: true,
+                                                            icon: 'warning',
+                                                            title: 'Please fill all score fields on this page',
+                                                            position: 'top-end',
+                                                            showConfirmButton: false,
+                                                            timer: 2000,
+                                                            timerProgressBar: true
+                                                        });
+                                                    }
+                                                } else if (!allSaved) {
+                                                    if (typeof Swal !== 'undefined') {
+                                                        Swal.fire({
+                                                            toast: true,
+                                                            icon: 'warning',
+                                                            title: 'Please save all forms on this page before proceeding',
+                                                            position: 'top-end',
+                                                            showConfirmButton: false,
+                                                            timer: 2000,
+                                                            timerProgressBar: true
+                                                        });
+                                                    }
                                                 }
                                             });
                                         }
@@ -892,8 +991,17 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                                     if (form) {
                                                         const saveBtn = form.querySelector('button.btn-save');
                                                         if (saveBtn && saveBtn.classList.contains('btn-saved')) {
+                                                            const formId = saveBtn.dataset.formId || 'form_unknown';
+                                                            
+                                                            // Remove from saved forms in sessionStorage
+                                                            delete savedForms[formId];
+                                                            sessionStorage.setItem(savedFormsKey, JSON.stringify(savedForms));
+                                                            
+                                                            // Reset to unsaved state
                                                             saveBtn.classList.remove('btn-saved');
+                                                            saveBtn.classList.add('btn-success');
                                                             saveBtn.innerHTML = 'Save';
+                                                            saveBtn.setAttribute('data-saved', 'false');
                                                         }
                                                     }
                                                 });
@@ -903,10 +1011,11 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                         document.querySelectorAll('form.ajax-eval-form').forEach(form => {
                                             form.addEventListener('submit', function(e) {
                                                 e.preventDefault();
-                                                const formData = new FormData(form);
                                                 const saveBtn = form.querySelector('button.btn-save');
 
                                                 if (!saveBtn) return;
+
+                                                const formData = new FormData(form);
 
                                                 // Show saving state
                                                 saveBtn.classList.add('btn-saving');
@@ -922,23 +1031,30 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                                         body: formData
                                                     })
                                                     .then(response => {
-                                                        if (response.status === 401) {
-                                                            return response.json().then(data => {
-                                                                if (data.session_expired) {
-                                                                    Swal.fire({
-                                                                        icon: 'warning',
-                                                                        title: 'Session Expired',
-                                                                        text: 'Please log in again.',
-                                                                        confirmButtonText: 'OK'
-                                                                    }).then(() => {
-                                                                        window.location.href = data.redirect || '{{ route("login") }}';
-                                                                    });
-                                                                    return null;
-                                                                }
-                                                                return data;
-                                                            });
-                                                        }
-                                                        return response.json();
+                                                        // Try to parse the response as JSON
+                                                        return response.json().then(data => {
+                                                            // Check for session expiration
+                                                            if (response.status === 401 && data.session_expired) {
+                                                                Swal.fire({
+                                                                    icon: 'warning',
+                                                                    title: 'Session Expired',
+                                                                    text: 'Please log in again.',
+                                                                    confirmButtonText: 'OK'
+                                                                }).then(() => {
+                                                                    window.location.href = data.redirect || '{{ route("login") }}';
+                                                                });
+                                                                return null;
+                                                            }
+                                                            // Return the data regardless of status code
+                                                            return data;
+                                                        }).catch(err => {
+                                                            // If response is not JSON, return a structured error
+                                                            console.error('Response parsing error:', err);
+                                                            return {
+                                                                success: false,
+                                                                message: 'Server returned an invalid response'
+                                                            };
+                                                        });
                                                     })
                                                     .then(data => {
                                                         if (!data) return;
@@ -947,9 +1063,19 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                                         saveBtn.disabled = false;
 
                                                         if (data.success) {
+                                                            // Get form identifier for tracking
+                                                            const formId = saveBtn.dataset.formId || 'form_unknown';
+                                                            
+                                                            // Mark as saved in sessionStorage
+                                                            savedForms[formId] = true;
+                                                            sessionStorage.setItem(savedFormsKey, JSON.stringify(savedForms));
+
                                                             // Show saved state
+                                                            saveBtn.classList.remove('btn-saving');
                                                             saveBtn.classList.add('btn-saved');
                                                             saveBtn.innerHTML = '<i class="bx bx-check me-1"></i>Saved';
+                                                            saveBtn.setAttribute('data-saved', 'true');
+                                                            saveBtn.disabled = false; // Keep clickable for re-editing
 
                                                             // Update hidden ID field if returned
                                                             if (data.id) {
@@ -1059,62 +1185,4 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const submitBtn = document.getElementById('submit-btn');
-
-            if (submitBtn) {
-                submitBtn.addEventListener('click', function () {
-                    const form = document.querySelector('form.ajax-eval-form');
-                    if (!form) return;
-
-                    const formData = new FormData(form);
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Submitting...';
-
-                    fetch(form.action, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: formData
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = '<i class="bx bx-send me-1"></i>Submit Appraisal';
-
-                            if (data.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Appraisal submitted successfully!',
-                                    showConfirmButton: false,
-                                    timer: 2000
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Submission failed!',
-                                    text: data.message || 'Please try again.',
-                                    showConfirmButton: true
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            submitBtn.disabled = false;
-                            submitBtn.innerHTML = '<i class="bx bx-send me-1"></i>Submit Appraisal';
-
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'An error occurred!',
-                                text: 'Please try again later.',
-                                showConfirmButton: true
-                            });
-                        });
-                });
-            }
-        });
-    </script>
 </x-base-layout>
