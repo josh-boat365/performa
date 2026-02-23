@@ -805,7 +805,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
 
                                             // Check if this form was previously saved
                                             const isSaved = savedForms[formId] === true;
-                                            
+
                                             if (isSaved || btn.classList.contains('btn-saved')) {
                                                 btn.setAttribute('data-saved', 'true');
                                                 btn.classList.add('btn-saved');
@@ -834,12 +834,12 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                             for (let i = start; i < end && i < sections.length; i++) {
                                                 const section = sections[i];
                                                 const saveButtons = section.querySelectorAll('button.btn-save');
-                                                
+
                                                 saveButtons.forEach(btn => {
                                                     const formId = btn.dataset.formId || 'form_unknown';
                                                     // Check both attribute and sessionStorage to ensure persistence
                                                     const isSaved = btn.getAttribute('data-saved') === 'true' && savedForms[formId] === true;
-                                                    
+
                                                     if (!isSaved) {
                                                         allSaved = false;
                                                     }
@@ -857,7 +857,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                                 const formId = btn.dataset.formId || 'form_unknown';
                                                 // Check both attribute and sessionStorage to ensure persistence
                                                 const isSaved = btn.getAttribute('data-saved') === 'true' && savedForms[formId] === true;
-                                                
+
                                                 if (!isSaved) {
                                                     allSaved = false;
                                                 }
@@ -947,7 +947,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                                 // Check both: all inputs filled AND all forms saved on current page
                                                 const inputsFilled = checkInputs(currentPage);
                                                 const allSaved = checkAllSavedOnPage(currentPage);
-                                                
+
                                                 if (currentPage < totalPages - 1 && inputsFilled && allSaved) {
                                                     currentPage++;
                                                     showPage(currentPage);
@@ -992,11 +992,11 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                                         const saveBtn = form.querySelector('button.btn-save');
                                                         if (saveBtn && saveBtn.classList.contains('btn-saved')) {
                                                             const formId = saveBtn.dataset.formId || 'form_unknown';
-                                                            
+
                                                             // Remove from saved forms in sessionStorage
                                                             delete savedForms[formId];
                                                             sessionStorage.setItem(savedFormsKey, JSON.stringify(savedForms));
-                                                            
+
                                                             // Reset to unsaved state
                                                             saveBtn.classList.remove('btn-saved');
                                                             saveBtn.classList.add('btn-success');
@@ -1065,7 +1065,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                                         if (data.success) {
                                                             // Get form identifier for tracking
                                                             const formId = saveBtn.dataset.formId || 'form_unknown';
-                                                            
+
                                                             // Mark as saved in sessionStorage
                                                             savedForms[formId] = true;
                                                             sessionStorage.setItem(savedFormsKey, JSON.stringify(savedForms));

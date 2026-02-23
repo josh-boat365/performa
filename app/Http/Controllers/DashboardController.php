@@ -231,7 +231,7 @@ class DashboardController extends Controller
             // Get employee appraisal report data (includes supervisor info and grades)
             // Using the same endpoint as ReportController for consistent data availability
             $reportData = $this->fetchAppraisalReportData($batchId ?? null, $employeeId ?? null);
-            
+
             if ($reportData) {
                 $gradeDetails = [
                     'kpiScore' => $reportData['kpiScore'],

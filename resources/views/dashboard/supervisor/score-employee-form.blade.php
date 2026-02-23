@@ -644,11 +644,11 @@
 
                 function updateButtons() {
                     if (prevBtn) prevBtn.disabled = currentPage === 0;
-                    
+
                     // Check if all save buttons on current page are saved
                     const allCurrentPageSaved = checkAllSupervisorSavedOnPage(currentPage);
                     if (nextBtn) nextBtn.disabled = currentPage === totalPages - 1 || !allCurrentPageSaved;
-                    
+
                     // Check if all save buttons across all pages are saved
                     const allPagesSaved = checkAllSupervisorSavedAcrossAllPages();
                     if (submitBtn) submitBtn.disabled = !allPagesSaved;
@@ -740,13 +740,13 @@
                                 saveBtn.classList.remove('btn-primary');
                                 saveBtn.classList.add('btn-secondary');
                                 saveBtn.innerHTML = '<i class="bx bx-check me-1"></i>Saved';
-                                
+
                                 // Store save state in data attribute
                                 saveBtn.setAttribute('data-saved', 'true');
-                                
+
                                 // Update Next and Submit button states
                                 updateSupervisorPaginationButtons();
-                                
+
                                 showToast('success', data.message || 'Saved successfully');
                                 // Dynamically update the DOM instead of reloading
                                 updateFormUI(form, data);
