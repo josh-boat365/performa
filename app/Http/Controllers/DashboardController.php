@@ -228,18 +228,40 @@ class DashboardController extends Controller
                 }
             }
 
-            // Get employee total KPI score
-            $gradeDetails = $this->fetchEmployeeTotalKpiScore($batchId ?? null, $employeeId ?? null);
-            if ($gradeDetails) {
-                $gradeDetails['status'] = $kpiStatus ?? 'PENDING';
-            } else {
+            // Get employee appraisal report data (includes supervisor info and grades)
+            // Using the same endpoint as ReportController for consistent data availability
+            $reportData = $this->fetchAppraisalReportData($batchId ?? null, $employeeId ?? null);
+            
+            if ($reportData) {
                 $gradeDetails = [
-                    'kpiScore' => null,
-                    'grade' => null,
-                    'remark' => null,
-                    'recommendation' => null,
-                    'status' => $kpiStatus ?? 'PENDING'
+                    'kpiScore' => $reportData['kpiScore'],
+                    'grade' => $reportData['grade'],
+                    'remark' => $reportData['remark'],
+                    'recommendation' => $reportData['recommendation'],
+                    'status' => $kpiStatus ?? 'PENDING',
+                    'supervisorName' => $reportData['supervisorName'],
+                    'employeeName' => $reportData['employeeName'],
                 ];
+            } else {
+                // Fallback to fetching total KPI score if report data not available
+                $kpiScoreData = $this->fetchEmployeeTotalKpiScore($batchId ?? null, $employeeId ?? null);
+                if ($kpiScoreData) {
+                    $gradeDetails = array_merge($kpiScoreData, [
+                        'status' => $kpiStatus ?? 'PENDING',
+                        'supervisorName' => 'N/A',
+                        'employeeName' => 'N/A',
+                    ]);
+                } else {
+                    $gradeDetails = [
+                        'kpiScore' => null,
+                        'grade' => null,
+                        'remark' => null,
+                        'recommendation' => null,
+                        'status' => $kpiStatus ?? 'PENDING',
+                        'supervisorName' => 'N/A',
+                        'employeeName' => 'N/A',
+                    ];
+                }
             }
 
             // Get logged in user
@@ -778,6 +800,88 @@ class DashboardController extends Controller
             return null;
         } catch (\Exception $e) {
             Log::warning('Exception while fetching employee total KPI score', [
+                'batchId' => $batchId,
+                'employeeId' => $employeeId,
+                'message' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Fetch comprehensive appraisal report data including supervisor info and grades
+     * Uses the same endpoint as ReportController to ensure data is available before submission
+     *
+     * @param int $batchId The Batch ID
+     * @param int $employeeId The Employee ID
+     * @return array|null Appraisal report data with supervisor names, employee names, and grades
+     */
+    private function fetchAppraisalReportData($batchId, $employeeId)
+    {
+        if (empty($batchId) || empty($employeeId)) {
+            return null;
+        }
+
+        try {
+            // Use the same getReports endpoint as ReportController
+            $payload = [
+                'batchId' => (int) $batchId,
+                'employeeId' => (int) $employeeId
+            ];
+
+            $response = $this->appraisalService->getReports($payload);
+
+            // Handle response that might be wrapped in 'data' key
+            $reportsData = $response['data'] ?? $response;
+
+            if (empty($reportsData) || !is_array($reportsData)) {
+                return null;
+            }
+
+            // Extract the batch and employee data from reports
+            $batch = $reportsData[0] ?? null;
+            if (!$batch) {
+                return null;
+            }
+
+            $employees = $batch['employees'] ?? [];
+            $employee = $employees[0] ?? null;
+
+            if (!$employee) {
+                return null;
+            }
+
+            // Extract supervisor information from the first score record
+            $supervisorName = 'N/A';
+            $scores = $employee['scores'] ?? [];
+            if (!empty($scores)) {
+                $supervisorName = $scores[0]['supervisorName'] ?? 'N/A';
+            }
+
+            // Extract total scores
+            $totalScore = $employee['totalScore'] ?? [];
+
+            return [
+                'employeeName' => $employee['employeeName'] ?? 'N/A',
+                'supervisorName' => $supervisorName,
+                'departmentName' => $employee['departmentName'] ?? 'N/A',
+                'roleName' => $employee['roleName'] ?? 'N/A',
+                'branchName' => $employee['branchName'] ?? 'N/A',
+                'kpiScore' => $totalScore['totalKpiScore'] ?? null,
+                'grade' => $totalScore['grade'] ?? null,
+                'remark' => $totalScore['remark'] ?? null,
+                'recommendation' => $totalScore['recommendation'] ?? null,
+            ];
+        } catch (ApiException $e) {
+            // Log the error but don't throw - return null gracefully
+            Log::debug('No appraisal report data found for batch/employee', [
+                'batchId' => $batchId,
+                'employeeId' => $employeeId,
+                'message' => $e->getMessage(),
+            ]);
+            return null;
+        } catch (\Exception $e) {
+            Log::warning('Exception while fetching appraisal report data', [
                 'batchId' => $batchId,
                 'employeeId' => $employeeId,
                 'message' => $e->getMessage(),
