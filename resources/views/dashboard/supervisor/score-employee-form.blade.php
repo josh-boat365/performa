@@ -64,13 +64,29 @@
 
         /* Save button states */
         .btn-save {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
             min-width: 80px;
             transition: all 0.3s ease;
         }
 
+        .btn-save:hover:not(.btn-saved):not(.btn-saving) {
+            background-color: #0c63e4;
+            border-color: #0b5ed7;
+        }
+
+        /* Saved state - gray button */
         .btn-save.btn-saved {
-            background-color: #198754 !important;
-            border-color: #198754 !important;
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: white;
+            cursor: default;
+        }
+
+        .btn-save.btn-saved:hover {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
         }
 
         .btn-save.btn-saving {
@@ -500,6 +516,16 @@
 
                 if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
 
+                // Initialize save button states
+                document.querySelectorAll('button.btn-save').forEach(btn => {
+                    // If button already has btn-saved class (from server), mark as saved
+                    if (btn.classList.contains('btn-saved')) {
+                        btn.setAttribute('data-saved', 'true');
+                    } else {
+                        btn.setAttribute('data-saved', 'false');
+                    }
+                });
+
                 // Helper function to show toast messages
                 function showToast(type, message) {
                     if (typeof Swal !== 'undefined') {
@@ -554,6 +580,40 @@
                     return allFilled;
                 }
 
+                function checkAllSupervisorSavedOnPage(page) {
+                    const start = page * sectionsPerPage;
+                    const end = start + sectionsPerPage;
+                    let allSaved = true;
+
+                    for (let i = start; i < end && i < sections.length; i++) {
+                        const saveButtons = sections[i].querySelectorAll('button.btn-save');
+                        saveButtons.forEach(btn => {
+                            if (btn.getAttribute('data-saved') !== 'true') {
+                                allSaved = false;
+                            }
+                        });
+                    }
+
+                    return allSaved;
+                }
+
+                function checkAllSupervisorSavedAcrossAllPages() {
+                    const allSaveButtons = document.querySelectorAll('button.btn-save');
+                    let allSaved = true;
+
+                    allSaveButtons.forEach(btn => {
+                        if (btn.getAttribute('data-saved') !== 'true') {
+                            allSaved = false;
+                        }
+                    });
+
+                    return allSaved;
+                }
+
+                function updateSupervisorPaginationButtons() {
+                    updateButtons();
+                }
+
                 function updateProgressBar() {
                     let totalValid = 0;
                     sections.forEach(section => {
@@ -584,10 +644,14 @@
 
                 function updateButtons() {
                     if (prevBtn) prevBtn.disabled = currentPage === 0;
-                    if (nextBtn) nextBtn.disabled = currentPage === totalPages - 1 || !checkInputs(currentPage);
-                    if (submitBtn) submitBtn.disabled = !Array.from({
-                        length: totalPages
-                    }).every((_, i) => checkInputs(i));
+                    
+                    // Check if all save buttons on current page are saved
+                    const allCurrentPageSaved = checkAllSupervisorSavedOnPage(currentPage);
+                    if (nextBtn) nextBtn.disabled = currentPage === totalPages - 1 || !allCurrentPageSaved;
+                    
+                    // Check if all save buttons across all pages are saved
+                    const allPagesSaved = checkAllSupervisorSavedAcrossAllPages();
+                    if (submitBtn) submitBtn.disabled = !allPagesSaved;
                     updateProgressBar();
                 }
 
@@ -671,6 +735,18 @@
                             const data = await response.json();
 
                             if (data.success) {
+                                // Mark button as saved - change to gray
+                                saveBtn.classList.add('btn-saved');
+                                saveBtn.classList.remove('btn-primary');
+                                saveBtn.classList.add('btn-secondary');
+                                saveBtn.innerHTML = '<i class="bx bx-check me-1"></i>Saved';
+                                
+                                // Store save state in data attribute
+                                saveBtn.setAttribute('data-saved', 'true');
+                                
+                                // Update Next and Submit button states
+                                updateSupervisorPaginationButtons();
+                                
                                 showToast('success', data.message || 'Saved successfully');
                                 // Dynamically update the DOM instead of reloading
                                 updateFormUI(form, data);
@@ -682,7 +758,9 @@
                             showToast('error', error.message || 'An unexpected error occurred. Please try again.');
                         } finally {
                             saveBtn.classList.remove('btn-saving');
-                            saveBtn.innerHTML = originalHTML;
+                            if (!saveBtn.classList.contains('btn-saved')) {
+                                saveBtn.innerHTML = originalHTML;
+                            }
                             saveBtn.disabled = false;
                         }
                     });
