@@ -38,6 +38,7 @@ class AuthController extends Controller
             'appName' => 'Appraisal',
             'user' => $request->input('username'),
             'password' => $request->input('password'),
+            'authMethod' => 'Database',
             'validateAppAcess' => true
         ];
 
