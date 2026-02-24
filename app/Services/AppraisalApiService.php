@@ -43,14 +43,13 @@ class AppraisalApiService extends BaseApiService
         string $appName,
         string $username,
         string $password,
-        string $authMethod = 'Database',
         bool $validateAppAccess = true
     ): array {
         return $this->post($this->getEndpoint('login'), [
             'appName' => $appName,
             'user' => $username,
             'password' => $password,
-            'authMethod' => $authMethod,
+            'authMethod' => 'Database',
             'validateAppAcess' => $validateAppAccess, // Note: API has typo in 'Acess'
         ]);
     }
