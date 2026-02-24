@@ -102,7 +102,11 @@ class DashboardController extends Controller
                 ]);
             }
 
-            return view("dashboard.index", $this->prepareViewData($employeeKpi, null, $batchScores));
+            // Fetch grades for grading scheme display
+            $grades = $this->appraisalService->getAllGrades();
+            $gradesList = $grades['data'] ?? $grades ?? [];
+
+            return view("dashboard.index", $this->prepareViewData($employeeKpi, null, $batchScores, $gradesList));
         } catch (ApiException $e) {
             Log::error('Failed to retrieve appraisal overview', [
                 'message' => $e->getMessage(),
@@ -945,7 +949,7 @@ class DashboardController extends Controller
      * @param \Illuminate\Support\Collection|array $batchScores Batch scores collection
      * @return array Formatted view data
      */
-    private function prepareViewData(?array $employeeKpi, ?array $gradeDetails, $batchScores = null): array
+    private function prepareViewData(?array $employeeKpi, ?array $gradeDetails, $batchScores = null, $grades = null): array
     {
         return [
             'employeeKpi' => $employeeKpi ?? [
@@ -968,6 +972,7 @@ class DashboardController extends Controller
                 'score' => 0,
             ],
             'batchScores' => $batchScores ?? collect(),
+            'grades' => $grades ?? [],
         ];
     }
 }
