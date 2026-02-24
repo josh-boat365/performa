@@ -6,10 +6,17 @@ $accessToken = session('api_token');
 // Fetch user information
 $responseUser = Http::withToken($accessToken)
     ->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
+$accessToken = session('api_token');
+// Fetch user information
+$responseUser = Http::withToken($accessToken)
+    ->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
 
 // Handle responses
 $user = $responseUser->successful() ? $responseUser->object() : null;
+// Handle responses
+$user = $responseUser->successful() ? $responseUser->object() : null;
 
+$supervisorId = $user->id;
 $supervisorId = $user->id;
 
     @endphp
@@ -242,6 +249,7 @@ $supervisorId = $user->id;
                                                                             <input class="form-control mb-3 score-input" type="number"
                                                                                 name="sectionSupScore" required
                                                                                 placeholder="Enter Score" min="0" step="0.01"
+                                                                                placeholder="Enter Score" min="0" step="0.01"
                                                                                 pattern="\d+(\.\d{1,2})?"
                                                                                 max="{{ $section->sectionScore }}"
                                                                                 @disabled(isset($section->sectionEmpScore) && in_array($section->sectionEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
@@ -314,6 +322,7 @@ $supervisorId = $user->id;
                                                                                         <div class="col-md-9">
                                                                                             <textarea class="form-control mb-3" type="text"
                                                                                                 name="supervisorComment"
+                                                                                                name="supervisorComment"
                                                                                                 @disabled(isset($metric->metricEmpScore) && in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM']))
                                                                                                 placeholder="Enter your comments"
                                                                                                 rows="3">{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
@@ -351,8 +360,15 @@ $supervisorId = $user->id;
     isset($metric->metricEmpScore) &&
     in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM', 'COMPLETED'])
 )
+    isset($metric->metricEmpScore) &&
+    in_array($metric->metricEmpScore->status, ['CONFIRMATION', 'PROBLEM', 'COMPLETED'])
+)
                                 <div></div>
                             @else
+                            <div class="float-start">
+                                <button type="button" data-bs-toggle="modal" class="btn btn-warning"
+                                            data-bs-target=".bs-push-to-emp-modal-lg">Push for Amendment</button></div>
+                            </div>
                             <div class="float-start">
                                 <button type="button" data-bs-toggle="modal" class="btn btn-warning"
                                             data-bs-target=".bs-push-to-emp-modal-lg">Push for Amendment</button></div>
@@ -364,7 +380,11 @@ $supervisorId = $user->id;
 
 
 
+
+
                                         <button id="submit-btn" type="button" data-bs-toggle="modal" class="btn btn-success"
+                                            data-bs-target=".bs-submit-appraisal-modal-lg" id="submitAppraisalButton"
+                                            disabled>Submit for Confirmation</button>
                                             data-bs-target=".bs-submit-appraisal-modal-lg" id="submitAppraisalButton"
                                             disabled>Submit for Confirmation</button>
                                     </div>
@@ -395,6 +415,8 @@ $supervisorId = $user->id;
                                                     <input type="hidden" name="supervisorId" value="{{ $supervisorId }}">
                                                     <input type="hidden" name="status" value="CONFIRMATION">
 
+                                                    {{-- Textarea for supervisor recommendation (optional recommendation
+                                                    comment) --}}
                                                     {{-- Textarea for supervisor recommendation (optional recommendation
                                                     comment) --}}
                                                     <div class="mb-3">
@@ -456,10 +478,49 @@ $supervisorId = $user->id;
                                         </div>
                                     </div>
                                 </div>
+
+                                {{--  Push back to employee modal   --}}
+                                <div class="modal fade bs-push-to-emp-modal-lg" tabindex="-1" role="dialog"
+                                    aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-md modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="myLargeModalLabel">Confirm
+                                                    Appraisal
+                                                    Submit</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <h4 class="text-center mb-4">Are you sure you want to
+                                                    <b>Push Back to </b> employee <b>Appraisal</b> for
+                                                    <b>Scoring</b>?
+
+                                                </h4>
+                                                <form action="{{ route('submit.appraisal') }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="employeeId" value="{{ $employeeId }}">
+                                                    <input type="hidden" name="kpiId" value="{{ $kpi->kpi->kpiId }}">
+                                                    <input type="hidden" name="batchId" value="{{ $kpi->kpi->batchId }}">
+                                                    <input type="hidden" name="supervisorId" value="{{ $supervisorId }}">
+                                                    <input type="hidden" name="status" value="SCORING">
+
+                                                    <div class="d-grid">
+                                                        <button type="submit" id="submitReviewButton"
+                                                            class="btn btn-success">Submit
+                                                            Employee Appraisal
+                                                            Back to Employee</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             @endif
 
                             @push('scripts')
                                 <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
                                     document.addEventListener('DOMContentLoaded', function() {
                                         const sections = document.querySelectorAll('.section-tab');
                                         const prevBtn = document.getElementById('prev-btn');
@@ -487,9 +548,29 @@ $supervisorId = $user->id;
                                             sessionStorage.setItem(pageStorageKey, '0');
                                         }
 
+
+                                        // Use unique key per employee to avoid page persistence across different forms
+                                        const currentEmployeeId = '{{ $employeeId }}';
+                                        const pageStorageKey = `currentPage_supervisor_${currentEmployeeId}`;
+                                        const lastEmployeeKey = 'lastViewedEmployeeId_supervisor';
+
+                                        // Check if we're viewing a different employee - if so, reset to page 0
+                                        const lastViewedEmployee = sessionStorage.getItem(lastEmployeeKey);
+                                        let currentPage = 0;
+
+                                        if (lastViewedEmployee === currentEmployeeId) {
+                                            // Same employee, restore the page
+                                            currentPage = parseInt(sessionStorage.getItem(pageStorageKey) || 0);
+                                        } else {
+                                            // Different employee, start from page 0
+                                            sessionStorage.setItem(lastEmployeeKey, currentEmployeeId);
+                                            sessionStorage.setItem(pageStorageKey, '0');
+                                        }
+
                                         const sectionsPerPage = 3;
                                         const totalPages = Math.ceil(sections.length / sectionsPerPage);
 
+                                        if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
                                         if (totalPagesSpan) totalPagesSpan.textContent = totalPages;
 
                                         // Helper function to show toast messages
@@ -557,13 +638,49 @@ $supervisorId = $user->id;
                                             }
                                         }
 
+                                        // Track saved state for each form
+                                        function initializeSavedState() {
+                                            document.querySelectorAll('form.ajax-sup-eval-form, form.section-form').forEach(form => {
+                                                const scoreInput = form.querySelector('input[type="number"][name*="SupScore"]');
+                                                const saveBtn = form.querySelector('button[type="submit"]');
+
+                                                if (scoreInput && scoreInput.value.trim() !== '') {
+                                                    // Form has pre-filled value (already saved)
+                                                    form.dataset.saved = 'true';
+                                                    if (saveBtn) {
+                                                        saveBtn.textContent = 'Saved';
+                                                        saveBtn.classList.remove('btn-success');
+                                                        saveBtn.classList.add('btn-secondary');
+                                                    }
+                                                } else {
+                                                    form.dataset.saved = 'false';
+                                                }
+                                            });
+                                        }
+
+                                        // Mark form as unsaved when input changes
+                                        function markFormUnsaved(form) {
+                                            form.dataset.saved = 'false';
+                                            const saveBtn = form.querySelector('button[type="submit"]');
+                                            if (saveBtn) {
+                                                saveBtn.textContent = 'Save';
+                                                saveBtn.classList.remove('btn-secondary');
+                                                saveBtn.classList.add('btn-success');
+                                            }
+                                        }
+
                                         function checkInputs(page) {
                                             const start = page * sectionsPerPage;
                                             const end = start + sectionsPerPage;
                                             let allFilled = true;
                                             let allSaved = true;
+                                            let allSaved = true;
 
                                             for (let i = start; i < end && i < sections.length; i++) {
+                                                const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="SupScore"]');
+                                                const form = sections[i].querySelector('form.ajax-sup-eval-form, form.section-form');
+                                                {{-- Comments are no longer required, only scores --}}
+
                                                 const scoreInputs = sections[i].querySelectorAll('input[type="number"][name*="SupScore"]');
                                                 const form = sections[i].querySelector('form.ajax-sup-eval-form, form.section-form');
                                                 {{-- Comments are no longer required, only scores --}}
@@ -573,6 +690,10 @@ $supervisorId = $user->id;
                                                 // Check if form is saved (must be both filled AND saved)
                                                 const isSaved = form ? form.dataset.saved === 'true' : true;
 
+                                                // Check if form is saved (must be both filled AND saved)
+                                                const isSaved = form ? form.dataset.saved === 'true' : true;
+
+                                                if (!scoresFilled) {
                                                 if (!scoresFilled) {
                                                     allFilled = false;
                                                     sections[i].classList.add('border-danger');
@@ -581,12 +702,19 @@ $supervisorId = $user->id;
                                                     allSaved = false;
                                                     sections[i].classList.remove('border-danger');
                                                     sections[i].classList.add('border-warning');
+                                                    sections[i].classList.remove('border-warning');
+                                                } else if (!isSaved) {
+                                                    allSaved = false;
+                                                    sections[i].classList.remove('border-danger');
+                                                    sections[i].classList.add('border-warning');
                                                 } else {
                                                     sections[i].classList.remove('border-danger');
+                                                    sections[i].classList.remove('border-warning');
                                                     sections[i].classList.remove('border-warning');
                                                 }
                                             }
 
+                                            return allFilled && allSaved;
                                             return allFilled && allSaved;
                                         }
 
@@ -595,11 +723,20 @@ $supervisorId = $user->id;
                                             sections.forEach(section => {
                                                 const scoreInputs = section.querySelectorAll('input[type="number"][name*="SupScore"]');
                                                 const form = section.querySelector('form.ajax-sup-eval-form, form.section-form');
+                                                const scoreInputs = section.querySelectorAll('input[type="number"][name*="SupScore"]');
+                                                const form = section.querySelector('form.ajax-sup-eval-form, form.section-form');
                                                 const scoresFilled = Array.from(scoreInputs).every(input => input.value.trim() !== '');
+                                                const isSaved = form ? form.dataset.saved === 'true' : true;
+                                                if (scoresFilled && isSaved) totalValid++;
                                                 const isSaved = form ? form.dataset.saved === 'true' : true;
                                                 if (scoresFilled && isSaved) totalValid++;
                                             });
                                             const percent = Math.round((totalValid / sections.length) * 100);
+                                            if (progressBar) {
+                                                progressBar.style.width = percent + '%';
+                                                progressBar.setAttribute('aria-valuenow', percent);
+                                                progressBar.textContent = percent + '%';
+                                            }
                                             if (progressBar) {
                                                 progressBar.style.width = percent + '%';
                                                 progressBar.setAttribute('aria-valuenow', percent);
@@ -637,6 +774,19 @@ $supervisorId = $user->id;
 
                                         if (prevBtn) {
                                             prevBtn.addEventListener('click', function() {
+                                            }
+
+                                            if (currentPageSpan) currentPageSpan.textContent = page + 1;
+                                            sessionStorage.setItem(pageStorageKey, page);
+                                            updateButtons();
+                                            window.scrollTo({
+                                                top: sections[start].offsetTop,
+                                                behavior: 'smooth'
+                                            });
+                                        }
+
+                                        if (prevBtn) {
+                                            prevBtn.addEventListener('click', function() {
                                                 if (currentPage > 0) {
                                                     currentPage--;
                                                     showPage(currentPage);
@@ -645,6 +795,11 @@ $supervisorId = $user->id;
                                         }
 
                                         if (nextBtn) {
+                                            nextBtn.addEventListener('click', function() {
+                                                if (currentPage < totalPages - 1 && checkInputs(currentPage)) {
+                                                    currentPage++;
+                                                    showPage(currentPage);
+                                                }
                                             nextBtn.addEventListener('click', function() {
                                                 if (currentPage < totalPages - 1 && checkInputs(currentPage)) {
                                                     currentPage++;
@@ -665,7 +820,25 @@ $supervisorId = $user->id;
                                                     updateButtons();
                                                 });
                                             });
+                                        }
 
+                                        document.querySelectorAll('input[type="number"][name*="SupScore"], textarea[name="supervisorComment"]')
+                                            .forEach(input => {
+                                                input.addEventListener('input', function() {
+                                                    validateField(this);
+                                                    // Mark the form as unsaved when input changes
+                                                    const form = this.closest('form.ajax-sup-eval-form, form.section-form');
+                                                    if (form) {
+                                                        markFormUnsaved(form);
+                                                    }
+                                                    updateButtons();
+                                                });
+                                            });
+
+                                        // Modified AJAX form handler with page refresh and scroll preservation
+                                        document.querySelectorAll('form.ajax-sup-eval-form, form.section-form').forEach(form => {
+                                            form.addEventListener('submit', function(e) {
+                                                e.preventDefault();
                                         // Modified AJAX form handler with page refresh and scroll preservation
                                         document.querySelectorAll('form.ajax-sup-eval-form, form.section-form').forEach(form => {
                                             form.addEventListener('submit', function(e) {
@@ -678,7 +851,10 @@ $supervisorId = $user->id;
                                                 // Store scroll position and current page state before submission
                                                 sessionStorage.setItem('preserveScrollPosition', scrollPos.toString());
                                                 sessionStorage.setItem(pageStorageKey, currentPage.toString());
+                                                sessionStorage.setItem(pageStorageKey, currentPage.toString());
 
+                                                saveBtn.innerHTML =
+                                                    '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
                                                 saveBtn.innerHTML =
                                                     '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
                                                 saveBtn.disabled = true;
@@ -693,7 +869,27 @@ $supervisorId = $user->id;
                                                         },
                                                         body: formData
                                                     })
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'X-Requested-With': 'XMLHttpRequest',
+                                                            'X-CSRF-TOKEN': document.querySelector(
+                                                                'meta[name="csrf-token"]').getAttribute('content'),
+                                                            'Accept': 'application/json'
+                                                        },
+                                                        body: formData
+                                                    })
                                                     .then(response => {
+                                                        // Check for 401 status (session expired)
+                                                        if (response.status === 401) {
+                                                            return response.json().then(data => {
+                                                                if (data.session_expired) {
+                                                                    alert('Your session has expired. Please log in again.');
+                                                                    window.location.href = data.redirect || '{{ route("login") }}';
+                                                                    return null;
+                                                                }
+                                                                return data;
+                                                            });
+                                                        }
                                                         // Check for 401 status (session expired)
                                                         if (response.status === 401) {
                                                             return response.json().then(data => {
@@ -717,6 +913,8 @@ $supervisorId = $user->id;
                                                         return response.json();
                                                     })
                                                     .then(data => {
+                                                        if (!data) return; // Session expired, already redirecting
+
                                                         if (!data) return; // Session expired, already redirecting
 
                                                         // Store the response data for after refresh
@@ -752,7 +950,14 @@ $supervisorId = $user->id;
                                             }, 500);
                                         }
 
+                                        function smoothScroll(targetForm) {
+                                            $('html, body').animate({
+                                                scrollTop: $(targetForm).offset().top
+                                            }, 500);
+                                        }
+
                                         // Show the initial page
+                                        initializeSavedState();
                                         initializeSavedState();
                                         showPage(currentPage);
 

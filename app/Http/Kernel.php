@@ -42,7 +42,7 @@ class Kernel extends HttpKernel
 
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
@@ -69,6 +69,7 @@ class Kernel extends HttpKernel
         // 'session.timeout' => \App\Http\Middleware\SessionTimeout::class,
         // 'session.notfound' => \App\Http\Middleware\SessionNotFound::class,
         // 'check.permissions' => \App\Http\Middleware\PermissionMiddleware::class,
+        'check.api.token' => \App\Http\Middleware\CheckApiToken::class,
 
     ];
 }

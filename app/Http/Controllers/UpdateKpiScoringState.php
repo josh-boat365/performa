@@ -25,6 +25,7 @@ class UpdateKpiScoringState extends Controller
             'supervisorId' => 'nullable|integer',
             'supervisorRecommendation' => 'nullable|string',
             'status' => 'required|string|in:REVIEW,COMPLETED,CONFIRMATION,PROBLEM,SCORING',
+            'status' => 'required|string|in:REVIEW,COMPLETED,CONFIRMATION,PROBLEM,SCORING',
         ]);
 
         $batchId = $validated['batchId'];
@@ -39,6 +40,10 @@ class UpdateKpiScoringState extends Controller
                     'supervisorId' => (int) $validated['supervisorId'],
                     'supervisorComment' => $validated['supervisorRecommendation'],
                 ];
+
+                $recommendationResponse = Http::withToken($apiToken)
+                    ->post("{$baseApiUrl}/Recommendation", $recommendationData);
+
 
                 $this->appraisalService->submitRecommendation($recommendationData);
             }
@@ -70,6 +75,7 @@ class UpdateKpiScoringState extends Controller
                 'CONFIRMATION' => 'Appraisal pushed to employee for confirmation successfully.',
                 'PROBLEM' => 'Appraisal pushed to higher supervisor for review successfully.',
                 'SCORING' => 'Appraisal pushed back to employee for scoring successfully.',
+                'SCORING' => 'Appraisal pushed back to employee for scoring successfully.',
             ];
 
             $successMessage = $messages[$validated['status']] ?? 'Appraisal status updated successfully.';
@@ -80,7 +86,7 @@ class UpdateKpiScoringState extends Controller
                     return redirect()
                         ->route('supervisor.index')
                         ->with('toast_success', $successMessage);
-                        
+
                 case 'CONFIRMATION':
                     return redirect()
                         ->route('supervisor.index')

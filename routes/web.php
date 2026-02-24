@@ -55,11 +55,10 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 | Protected Application Routes
 |--------------------------------------------------------------------------
 | All routes below require authentication middleware
+| Note: Session validation is handled at controller level via 401 API responses
 */
 
-// Route::group(
-//     ['middleware' => ['session.notfound']],
-//     function () {
+// Route::middleware(['check.api.token'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
@@ -264,6 +263,7 @@ Route::get('/employee/{employeeId}/print-pdf', [ReportController::class, 'genera
 
 // Test Report Route
 Route::view('/test-report', 'reports.test-report');
+// }); // End of check.api.token middleware group
 
 /*
 |--------------------------------------------------------------------------
