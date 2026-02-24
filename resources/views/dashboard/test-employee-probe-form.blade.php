@@ -1,379 +1,283 @@
 <x-base-layout>
 
-    <style>
-        /* Hide number input spinners/arrows */
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none !important;
-            margin: 0 !important;
-        }
+    <div class="container-fluid px-1">
 
-        input[type="number"] {
-            -moz-appearance: textfield !important;
-            appearance: textfield !important;
-        }
-
-        /* Progress bar container - sticky at top */
-        .progress-container {
-            position: sticky;
-            top: 60px;
-            z-index: 1020;
-            background: #fff;
-            padding: 10px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-        }
-
-        .progress-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .progress-wrapper .progress {
-            flex: 1;
-            height: 20px;
-            border-radius: 10px;
-            background-color: #e9ecef;
-        }
-
-        .progress-wrapper .progress-bar {
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 12px;
-            transition: width 0.4s ease;
-        }
-
-        .progress-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            white-space: nowrap;
-        }
-
-        /* Save button states */
-        .btn-save {
-            min-width: 80px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-save.btn-saved {
-            background-color: #198754 !important;
-            border-color: #198754 !important;
-        }
-
-        .btn-save.btn-saving {
-            pointer-events: none;
-            opacity: 0.8;
-        }
-
-        /* Grade summary cards - responsive */
-        .grade-summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .grade-card {
-            padding: 15px;
-            border-radius: 8px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            font-size: 1rem;
-        }
-
-        .grade-card .badge {
-            font-size: 0.85rem;
-            padding: 0.5em 0.8em;
-        }
-
-        .grade-card .text-muted {
-            font-size: 0.95rem;
-        }
-
-        .grade-card strong {
-            font-size: 1.1rem;
-        }
-
-        /* Section cards animation */
-        .section-tab {
-            transition: all 0.3s ease;
-        }
-
-        .section-tab.border-danger {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
-        }
-
-        /* Form input focus states */
-        .score-input:focus, .comment-input:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-    </style>
-
-    <div class="container-fluid px-2">
-
-        <!-- Page Title -->
+        <!-- start page title -->
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18">
-                        <a href="#" class="text-primary">
-                            <i class="bx bx-arrow-back me-1"></i>Probe
-                        </a> / Select Sections or Metrics to Probe
+                    <h4 class="mb-sm-0 font-size-18"> <a href="#">Probe</a> > Select Sections or Metrics to Probe
                     </h4>
                 </div>
             </div>
         </div>
+        <!-- end page title -->
 
-        <!-- Progress Bar - Sticky -->
-        <div class="progress-container">
-            <div class="container-fluid">
-                <div class="progress-wrapper">
-                    <div class="progress-info">
-                        <span class="badge bg-primary" id="current-page">1</span>
-                        <span class="text-muted">of</span>
-                        <span class="badge bg-dark" id="total-pages">1</span>
-                    </div>
-                    <div class="progress">
-                        <div id="progress-bar" class="progress-bar bg-success progress-bar-striped progress-bar-animated"
-                            role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                            <span id="progress-text">0%</span>
-                        </div>
-                    </div>
-                    <span class="text-muted small">Probing Selection</span>
-                </div>
-            </div>
-        </div>
+        <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
-        <!-- Employee Probing Form Card -->
         <div class="row">
             <div class="col-lg-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="bx bx-target-lock me-2"></i>Employee Probing Form
-                        </h5>
-                        <span class="badge rounded-pill bg-warning fs-6">PROBE</span>
-                    </div>
+                <div class="card">
                     <div class="card-body">
-                        <div id="kpi-form">
-                            @if (isset($appraisal) && $appraisal->isNotEmpty())
-                                @foreach ($appraisal as $kpi)
-                                    <div class="kpi">
-                                        @foreach ($kpi->activeSections as $sectionIndex => $section)
-                                            <div class="card border section-tab mb-3" style="border-radius: 10px;"
-                                                data-section-page="{{ floor($sectionIndex / 3) }}">
-                                                <div class="card-body {{ $section->metrics->isEmpty() ? 'bg-light' : '' }}">
-                                                    <div class="section-card" style="margin-top: 1rem;">
-                                                        <h5 class="card-title mb-2">
-                                                            {{ $section->sectionName }}
-                                                            <span class="badge bg-danger ms-2">{{ $section->sectionScore }}</span>
-                                                        </h5>
-                                                        <p class="text-muted small">{{ $section->sectionDescription }}</p>
+                        <h4 class="card-title mb-4">Employee Probing Form</h4>
 
-                                                        @if ($section->metrics->isEmpty())
-                                                            <form action="{{ route('submit.employee.probe') }}"
-                                                                method="POST"
-                                                                class="section-form ajax-emp-prob-eval-form">
-                                                                @csrf
-                                                                <!-- Employee Score Display -->
-                                                                <div class="mb-3">
-                                                                    <span class="badge rounded-pill bg-secondary mb-2">
-                                                                        <strong>Employee Score and Comment</strong>
-                                                                    </span>
+
+
+                        <div class="p-3 text-muted">
+                            <div id="kpi-form">
+                                @if (isset($appraisal) && $appraisal->isNotEmpty())
+                                    @foreach ($appraisal as $kpi)
+                                        @php
+                                            // Handle both array and object formats
+                                            if (is_array($kpi)) {
+                                                $kpi = (object) $kpi;
+                                            }
+                                        @endphp
+                                        <div class="kpi">
+
+
+                                            @foreach ($kpi->activeSections as $section)
+                                                @php
+                                                    // Handle both array and object formats
+                                                    if (is_array($section)) {
+                                                        $section = (object) $section;
+                                                    }
+                                                    // Convert sectionEmpScore if it's an array
+                                                    if (isset($section->sectionEmpScore) && is_array($section->sectionEmpScore)) {
+                                                        $section->sectionEmpScore = (object) $section->sectionEmpScore;
+                                                    }
+                                                @endphp
+                                                <div class="card border border-primary" @style(['border-radius: 10px;'])>
+                                                    <div class="card-body"
+                                                        style="{{ (isset($section->metrics) && is_object($section->metrics) && $section->metrics->isEmpty()) ? 'background-color: #0000ff0d;' : '' }}">
+                                                        <div class="section-card" style="margin-top: 2rem;">
+                                                            <h4>{{ $section->sectionName }} (<span
+                                                                    style="color: #c80f0f">{{ $section->sectionScore }}</span>)
+                                                            </h4>
+                                                            <p>{{ $section->sectionDescription }}</p>
+
+                                                            @if (isset($section->metrics) && (is_object($section->metrics) ? $section->metrics->isEmpty() : count($section->metrics) === 0))
+                                                                <form action="{{ route('submit.employee.probe') }}" method="POST"
+                                                                    class="section-form ajax-emp-prob-eval-form">
+                                                                    @csrf
                                                                     <div class="d-flex gap-3">
                                                                         <div class="col-md-2">
-                                                                            <input class="form-control score-input"
-                                                                                type="number" name="sectionEmpScore"
-                                                                                required placeholder="Score"
-                                                                                min="0" step="0.01"
+                                                                            <input class="form-control mb-3 score-input" type="number"
+                                                                                name="sectionEmpScore" required
+                                                                                placeholder="Enter Score" min="0" step="0.01"
                                                                                 pattern="\d+(\.\d{1,2})?"
                                                                                 max="{{ $section->sectionScore }}"
                                                                                 @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
-                                                                                title="Max score: {{ $section->sectionScore }}"
+                                                                                title="The Score cannot be more than the section score {{ $section->sectionScore }}"
                                                                                 value="{{ optional($section->sectionEmpScore)->sectionEmpScore ?? '' }}">
                                                                         </div>
-                                                                        <div class="col-md-10">
-                                                                            <textarea class="form-control comment-input" name="employeeComment" required
-                                                                                placeholder="Enter your comments" rows="2"
-                                                                                @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'COMPLETED')>{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}</textarea>
+                                                                        <div class="col-md-9">
+                                                                            <textarea class="form-control mb-3 comment-input"
+                                                                                type="text" name="employeeComment" required disabled
+                                                                                placeholder="Enter your comments"
+                                                                                @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'COMPLETED')
+                                                                                rows="3">{{ optional($section->sectionEmpScore)->employeeComment ?? '' }}</textarea>
                                                                         </div>
                                                                     </div>
-                                                                </div>
 
-                                                                <!-- Supervisor Score Display (readonly) -->
-                                                                <x-appraisal.score-display
-                                                                    label="Supervisor Score and Comment"
-                                                                    badgeClass="bg-primary"
-                                                                    :score="optional($section->sectionEmpScore)->sectionSupScore ?? ''"
-                                                                    :comment="$section->sectionEmpScore->supervisorComment ?? ''" />
+                                                                    <span class="mb-2 badge rounded-pill bg-dark"><strong>Supervisor
+                                                                            Score and Comment</strong></span>
 
-                                                                <!-- Probe Checkbox -->
-                                                                <div class="d-flex gap-3 align-items-center mt-3">
-                                                                    <div class="form-check form-check-dark">
-                                                                        <input style="width:1.8rem; height:2rem"
-                                                                            class="form-check-input" type="checkbox"
-                                                                            name="prob" id="checkProb_section_{{ $section->sectionId }}"
-                                                                            value="true"
-                                                                            @checked(isset($section->sectionEmpScore) && $section->sectionEmpScore->prob === true)>
-                                                                        <label class="form-check-label ms-2" for="checkProb_section_{{ $section->sectionId }}">
-                                                                            Mark for Probe
-                                                                        </label>
+                                                                    <div class="d-flex gap-3">
+                                                                        <div class="col-md-2">
+                                                                            <input class="form-control mb-3" type="number" readonly
+                                                                                placeholder="Enter Score"
+                                                                                @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
+                                                                                value="{{ optional($section->sectionEmpScore)->sectionSupScore ?? '' }}">
+                                                                        </div>
+                                                                        <div class="col-md-8">
+                                                                            <textarea class="form-control" type="text" readonly disabled
+                                                                                placeholder="Enter your comments" rows="3"
+                                                                                @disabled(isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')>{{ $section->sectionEmpScore->supervisorComment ?? '' }}</textarea>
+                                                                        </div>
+                                                                        <div class="form-check form-check-dark mb-3">
+                                                                            <input @style(['width:1.8rem; height:2rem'])
+                                                                                class="form-check-input" type="checkbox" name="prob"
+                                                                                id="checkProb" value="true"
+                                                                                @checked(isset($section->sectionEmpScore) && $section->sectionEmpScore->prob === true)>
+                                                                        </div>
+                                                                        <input type="hidden" name="scoreId"
+                                                                            value="{{ $section->sectionEmpScore->id ?? '' }}">
+
+                                                                        {{-- <input type="hidden" name="metricId"
+                                                                            value="{{ $section->metricId }}"> --}}
+                                                                        <input type="hidden" name="sectionId"
+                                                                            value="{{ $section->sectionId }}">
+                                                                        <input type="hidden" name="kpiId"
+                                                                            value="{{ $kpi->kpi->kpiId }}">
+                                                                        <input type="hidden" name="kpiType"
+                                                                            value="{{ $kpi->kpi->kpiType }}">
+                                                                        <input type="submit" class="btn btn-primary" value="Save"
+                                                                            @style(['height: fit-content'])>
                                                                     </div>
-                                                                    <input type="hidden" name="scoreId"
-                                                                        value="{{ $section->sectionEmpScore->id ?? '' }}">
-                                                                    <input type="hidden" name="sectionId"
-                                                                        value="{{ $section->sectionId }}">
-                                                                    <input type="hidden" name="kpiId"
-                                                                        value="{{ $kpi->kpi->kpiId }}">
-                                                                    <input type="hidden" name="kpiType"
-                                                                        value="{{ $kpi->kpi->kpiType }}">
-                                                                    <button type="submit" class="btn btn-primary btn-save ms-auto">
-                                                                        <i class="bx bx-save me-1"></i>Save
-                                                                    </button>
-                                                                </div>
-                                                            </form>
-                                                        @endif
+                                                                </form>
+                                                            @endif
 
-                                                        @if (isset($section->metrics) && count($section->metrics) > 0)
-                                                            @foreach ($section->metrics as $metric)
-                                                                <div class="card border border-success mb-3" style="border-radius: 10px;">
-                                                                    <div class="card-body" style="background-color: rgba(30, 255, 0, 0.05);">
-                                                                        <div class="metric-card">
-                                                                            <h6 class="card-title">
-                                                                                {{ $metric->metricName }}
-                                                                                <span class="badge bg-danger ms-2">{{ $metric->metricScore }}</span>
-                                                                            </h6>
-                                                                            <p class="text-muted small">{{ $metric->metricDescription }}</p>
 
-                                                                            <form action="{{ route('submit.employee.probe') }}"
-                                                                                method="POST"
-                                                                                class="metric-form ajax-emp-prob-eval-form">
-                                                                                @csrf
-                                                                                <!-- Employee Score -->
-                                                                                <div class="mb-3">
-                                                                                    <span class="badge rounded-pill bg-secondary mb-2">
-                                                                                        <strong>Employee Score and Comment</strong>
-                                                                                    </span>
+                                                            @if (isset($section->metrics) && ((is_object($section->metrics) && $section->metrics->count() > 0) || (is_array($section->metrics) && count($section->metrics) > 0)))
+                                                                @foreach ($section->metrics as $metric)
+                                                                    @php
+                                                                        // Handle both array and object formats
+                                                                        if (is_array($metric)) {
+                                                                            $metric = (object) $metric;
+                                                                        }
+                                                                        // Convert metricEmpScore if it's an array
+                                                                        if (isset($metric->metricEmpScore) && is_array($metric->metricEmpScore)) {
+                                                                            $metric->metricEmpScore = (object) $metric->metricEmpScore;
+                                                                        }
+                                                                    @endphp
+                                                                    <div class="card border border-success" @style(['border-radius: 10px;'])>
+                                                                        <div class="card-body" @style(['background-color: #1eff000d'])>
+                                                                            <div class="metric-card">
+                                                                                <h5>{{ $metric->metricName }} (<span
+                                                                                        style="color: #c80f0f">{{ $metric->metricScore }}</span>)
+                                                                                </h5>
+                                                                                <p>{{ $metric->metricDescription }}</p>
+
+                                                                                <form action="{{ route('submit.employee.probe') }}"
+                                                                                    method="POST"
+                                                                                    class="metric-form ajax-emp-prob-eval-form">
+                                                                                    @csrf
                                                                                     <div class="d-flex gap-3">
                                                                                         <div class="col-md-2">
-                                                                                            <input class="form-control"
-                                                                                                type="number"
-                                                                                                placeholder="Score"
-                                                                                                readonly
+                                                                                            <input class="form-control mb-3" type="number"
+                                                                                                placeholder="Enter Score" readonly
+                                                                                                @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')
                                                                                                 value="{{ $metric->metricEmpScore->metricEmpScore ?? '' }}">
                                                                                         </div>
-                                                                                        <div class="col-md-10">
-                                                                                            <textarea class="form-control" name="employeeComment" required
-                                                                                                placeholder="Enter your comments" rows="2"
+                                                                                        <div class="col-md-9">
+                                                                                            <textarea class="form-control mb-3" type="text"
+                                                                                                required disabled name="employeeComment"
+                                                                                                placeholder="Enter your comments" rows="3"
                                                                                                 @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'COMPLETED')>{{ $metric->metricEmpScore->employeeComment ?? '' }}</textarea>
                                                                                         </div>
                                                                                     </div>
-                                                                                </div>
 
-                                                                                <!-- Supervisor Score Display (readonly) -->
-                                                                                <x-appraisal.score-display
-                                                                                    label="Supervisor Score and Comment"
-                                                                                    badgeClass="bg-primary"
-                                                                                    :score="optional($metric->metricEmpScore)->metricSupScore ?? ''"
-                                                                                    :comment="$metric->metricEmpScore->supervisorComment ?? ''" />
+                                                                                    <span class="mb-2 badge rounded-pill bg-dark"><strong>Supervisor
+                                                                                            Score and
+                                                                                            Comment</strong></span>
 
-                                                                                <!-- Probe Checkbox -->
-                                                                                <div class="d-flex gap-3 align-items-center mt-3">
-                                                                                    <div class="form-check form-check-dark">
-                                                                                        <input style="width:1.8rem; height:2rem"
-                                                                                            class="form-check-input"
-                                                                                            type="checkbox"
-                                                                                            name="prob"
-                                                                                            id="checkProb_metric_{{ $metric->metricId }}"
-                                                                                            value="true"
-                                                                                            @checked(isset($metric->metricEmpScore) && $metric->metricEmpScore->prob === true)>
-                                                                                        <label class="form-check-label ms-2" for="checkProb_metric_{{ $metric->metricId }}">
-                                                                                            Mark for Probe
-                                                                                        </label>
+                                                                                    <div class="d-flex gap-3">
+                                                                                        <div class="col-md-2">
+                                                                                            <input class="form-control mb-3" type="number"
+                                                                                                readonly placeholder="Enter Score"
+                                                                                                @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')
+                                                                                                value="{{ optional($metric->metricEmpScore)->metricSupScore ?? '' }}">
+                                                                                        </div>
+                                                                                        <div class="col-md-8">
+                                                                                            <textarea class="form-control mb-3" type="text"
+                                                                                                readonly disabled
+                                                                                                placeholder="Enter your comments" rows="3"
+                                                                                                @disabled(isset($metric->metricEmpScore) && $metric->metricEmpScore->status === 'CONFIRMATION')>{{ $metric->metricEmpScore->supervisorComment ?? '' }}</textarea>
+                                                                                        </div>
+                                                                                        <div class="form-check form-check-dark mb-3">
+                                                                                            <input @style(['width:1.8rem; height:2rem'])
+                                                                                                class="form-check-input" type="checkbox"
+                                                                                                name="prob" id="checkProb" value="true"
+                                                                                                @checked(isset($metric->metricEmpScore) && $metric->metricEmpScore->prob === true)
+                                                                                                onchange="updateProbValue(this)">
+                                                                                        </div>
+                                                                                        <input type="hidden" name="scoreId"
+                                                                                            value="{{ $metric->metricEmpScore->id ?? '' }}">
+
+                                                                                        <input type="hidden" name="metricId"
+                                                                                            value="{{ $metric->metricId }}">
+                                                                                        <input type="hidden" name="sectionId"
+                                                                                            value="{{ $section->sectionId }}">
+                                                                                        <input type="hidden" name="kpiId"
+                                                                                            value="{{ $kpi->kpi->kpiId }}">
+                                                                                        <input type="hidden" name="kpiType"
+                                                                                            value="{{ $kpi->kpi->kpiType }}">
+                                                                                        <input type="submit" class="btn btn-primary"
+                                                                                            value="Save" @style(['height: fit-content'])>
                                                                                     </div>
-                                                                                    <input type="hidden" name="scoreId"
-                                                                                        value="{{ $metric->metricEmpScore->id ?? '' }}">
-                                                                                    <input type="hidden" name="metricId"
-                                                                                        value="{{ $metric->metricId }}">
-                                                                                    <input type="hidden" name="sectionId"
-                                                                                        value="{{ $section->sectionId }}">
-                                                                                    <input type="hidden" name="kpiId"
-                                                                                        value="{{ $kpi->kpi->kpiId }}">
-                                                                                    <input type="hidden" name="kpiType"
-                                                                                        value="{{ $kpi->kpi->kpiType }}">
-                                                                                    <button type="submit" class="btn btn-primary btn-save ms-auto">
-                                                                                        <i class="bx bx-save me-1"></i>Save
-                                                                                    </button>
-                                                                                </div>
-                                                                            </form>
+                                                                                </form>
+
+
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                            @endforeach
-                                                        @endif
+                                                                @endforeach
+                                                            @else
+                                                                <p></p>
+                                                            @endif
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @endforeach
-                            @else
-                                <div class="text-center py-4">
-                                    <i class="bx bx-info-circle text-muted" style="font-size: 48px;"></i>
-                                    <p class="text-muted mt-2">No KPIs available for probing.</p>
+                                            @endforeach
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <p></p>
+                                @endif
+                            </div>
+
+                            <hr class="mt-10">
+
+                            @if (isset($section) && isset($section->sectionEmpScore) && (is_object($section->sectionEmpScore) ? $section->sectionEmpScore->status === 'CONFIRMATION' : (isset($section->sectionEmpScore['status']) && $section->sectionEmpScore['status'] === 'CONFIRMATION')))
+                                <div class="float-end">
+                                    {{-- <div class="d-flex gap-3"> --}}
+                                        <button type="button" data-bs-toggle="modal" class="btn btn-dark" @style(['width: 100%; height: fit-content']) data-bs-target=".bs-delete-modal-lg">Submit
+                                            Appraisal For Probe</button>
+
+
+                                        {{--
+                                    </div> --}}
                                 </div>
+
+                                <!-- Modal for Delete Confirmation -->
+                                <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
+                                    aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-md modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="myLargeModalLabel">Confirm
+                                                    Supervisor Score</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <h4 class="text-center mb-4">Are you sure you want to
+                                                    <b>Push Your Scores To Probe</b> To a Higher
+                                                    <b>Supervisor?</b>
+                                                </h4>
+                                                <form action="{{ route('submit.appraisal') }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="employeeId" value="{{ $employeeId }}">
+                                                    <input type="hidden" name="kpiId" value="{{ $kpi->kpi->kpiId }}">
+                                                    <input type="hidden" name="batchId" value="{{ $kpi->kpi->batchId }}">
+                                                    <input type="hidden" name="status" value="PROBLEM">
+                                                    <div class="d-grid">
+                                                        <button type="submit" class="btn btn-success">Yes,
+                                                            Send To Supervisor </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                <div></div>
                             @endif
                         </div>
                     </div>
-
-                    <!-- Card Footer with Submit Button -->
-                    @if (isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
-                    <div class="card-footer bg-white">
-                        <div class="d-flex justify-content-end">
-                            <button type="button" data-bs-toggle="modal" class="btn btn-dark"
-                                data-bs-target=".bs-delete-modal-lg">
-                                <i class="bx bx-send me-1"></i>Submit Appraisal For Probe
-                            </button>
-                        </div>
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Submit Confirmation Modal -->
-    @if (isset($section->sectionEmpScore) && $section->sectionEmpScore->status === 'CONFIRMATION')
-        <x-appraisal.confirmation-modal
-            id="bs-delete-modal-lg"
-            title="Push to Probe Supervisor"
-            icon="bx-transfer"
-            iconColor="text-warning"
-            headerClass="bg-dark text-white"
-            message="Push Your Scores To Probe?"
-            description="This will send your selections to a higher supervisor for review."
-            :action="route('submit.appraisal')"
-            buttonText="Yes, Send To Supervisor"
-            buttonClass="btn-success"
-            buttonIcon="bx-check"
-            :hiddenFields="[
-                'employeeId' => $employeeId,
-                'kpiId' => $kpi->kpi->kpiId,
-                'batchId' => $kpi->kpi->batchId,
-                'status' => 'PROBLEM'
-            ]" />
-    @endif
+    </div>
+    <!-- end col -->
+    </div>
 
     @push('scripts')
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const saveForms = document.querySelectorAll('form.ajax-emp-prob-eval-form');
-                const sections = document.querySelectorAll('.section-tab');
-                const progressBar = document.getElementById('progress-bar');
-                const progressText = document.getElementById('progress-text');
 
                 const showToast = (type, message) => {
                     const Toast = Swal.mixin({
@@ -394,66 +298,48 @@
                     });
                 };
 
-                function updateProgressBar() {
-                    const checkboxes = document.querySelectorAll('input[name="prob"]');
-                    const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-                    const percent = checkboxes.length > 0 ? Math.round((checkedCount / checkboxes.length) * 100) : 0;
-
-                    if (progressBar) {
-                        progressBar.style.width = percent + '%';
-                        progressBar.setAttribute('aria-valuenow', percent);
-                    }
-                    if (progressText) {
-                        progressText.textContent = percent + '%';
-                    }
-                }
-
-                // Attach checkbox listeners
-                document.querySelectorAll('input[name="prob"]').forEach(checkbox => {
-                    checkbox.addEventListener('change', updateProgressBar);
-                });
-
                 saveForms.forEach(form => {
-                    form.addEventListener('submit', function(e) {
+                    form.addEventListener('submit', function (e) {
                         e.preventDefault();
                         const scrollPos = window.scrollY;
                         const formData = new FormData(form);
-                        const saveBtn = form.querySelector('button[type="submit"], input[type="submit"]');
-                        const originalHTML = saveBtn.innerHTML;
+                        const saveBtn = form.querySelector(
+                            'button[type="submit"], input[type="submit"]');
+                        const originalText = saveBtn.innerHTML || saveBtn.value;
 
-                        // Add btn-saving class
-                        saveBtn.classList.add('btn-saving');
-                        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Saving...';
+                        const restoreButton = () => {
+                            if (saveBtn.tagName === 'BUTTON') {
+                                saveBtn.innerHTML = originalText;
+                            } else {
+                                saveBtn.value = originalText;
+                                saveBtn.disabled = false;
+                            }
+                        };
+
+                        if (saveBtn.tagName === 'BUTTON') {
+                            saveBtn.innerHTML =
+                                '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
+                        } else {
+                            saveBtn.value = 'Saving...';
+                            saveBtn.disabled = true;
+                        }
 
                         fetch(form.action, {
-                                method: 'POST',
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                },
-                                body: formData
-                            })
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: formData
+                        })
                             .then(response => response.json())
                             .then(data => {
                                 setTimeout(() => window.scrollTo({
                                     top: scrollPos,
                                     behavior: 'smooth'
                                 }), 150);
-
-                                // Show saved state
-                                saveBtn.classList.remove('btn-saving');
-                                saveBtn.classList.add('btn-saved');
-                                saveBtn.innerHTML = '<i class="bx bx-check me-1"></i>Saved';
-
                                 showToast('success', 'Selection saved successfully.');
-
-                                // Reset button after delay
-                                setTimeout(() => {
-                                    saveBtn.classList.remove('btn-saved');
-                                    saveBtn.innerHTML = originalHTML;
-                                }, 2000);
-
-                                updateProgressBar();
                             })
                             .catch(error => {
                                 console.error('Error:', error);
@@ -461,19 +347,18 @@
                                     top: scrollPos,
                                     behavior: 'smooth'
                                 });
-
-                                saveBtn.classList.remove('btn-saving');
-                                saveBtn.innerHTML = originalHTML;
-
                                 showToast('error', 'Something went wrong while saving.');
+                            })
+                            .finally(() => {
+                                restoreButton();
                             });
                     });
                 });
-
-                // Initial progress bar update
-                updateProgressBar();
             });
         </script>
     @endpush
+
+
+    </div>
 
 </x-base-layout>
