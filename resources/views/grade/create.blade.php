@@ -24,7 +24,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Grade</label>
                                 <div>
-                                    <input type="text" class="form-control" required
+                                    <input type="text" class="form-control" name="grade" required
                                         placeholder="Enter grade eg: 'A'" />
                                 </div>
                             </div>
@@ -33,12 +33,12 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <label class="form-label">Min score</label>
-                                        <input type="text" class="form-control" required
+                                        <input type="text" class="form-control" name="minScore" required
                                             placeholder="Enter minimum grade score eg: 80" />
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Max score</label>
-                                        <input type="text" class="form-control" required
+                                        <input type="text" class="form-control" name="maxScore" required
                                             placeholder="Enter maximum grade score eg: 100" />
                                     </div>
                                 </div>
@@ -46,7 +46,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Remark</label>
                                 <div>
-                                    <input type="text" class="form-control"
+                                    <input type="text" class="form-control" name="remark"
                                         placeholder="Enter description eg:This is the highest grade score" />
                                 </div>
                             </div>

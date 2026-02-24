@@ -78,17 +78,17 @@
                                     @forelse ($sections as $section)
                                         <tr>
                                             <th scope="row"><a
-                                                    href="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiId}/section/{$section->score}/index/{$section->id}" ) }}">{{ $section->kpi->name }}</a>
+                                                    href="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiId}/section/{$section['score']}/index/{$section['id']}" ) }}">{{ $section['kpi']['name'] }}</a>
                                             </th>
-                                            <td><a href="#" @style(['text-wrap: auto'])>{{ $section->name }}</a></td>
-                                            <td>{{ $section->score }}</td>
+                                            <td><a href="#" @style(['text-wrap: auto'])>{{ $section['name'] }}</a></td>
+                                            <td>{{ $section['score'] }}</td>
 
-                                            <td><span @style(['text-wrap: auto'])>{{ $section->description }}</span></td>
+                                            <td><span @style(['text-wrap: auto'])>{{ $section['description'] }}</span></td>
                                             <td>
                                                 <span
-                                                    class="dropdown badge rounded-pill {{ $section->active === true ? 'bg-success' : 'bg-dark' }}"
+                                                    class="dropdown badge rounded-pill {{ $section['active'] === true ? 'bg-success' : 'bg-dark' }}"
                                                     data-bs-toggle="dropdown" aria-expanded="false">
-                                                    {{ $section->active === true ? 'Activated' : 'Deactivated' }}
+                                                    {{ $section['active'] === true ? 'Activated' : 'Deactivated' }}
                                                 </span>
                                             </td>
 
@@ -96,18 +96,18 @@
                                             </td>  --}}
                                             <td>
                                                 <a
-                                                    href="{{ url("dashboard/department/kpi/{$kpiId}/section-show/{$section->id}") }}">
+                                                    href="{{ url("dashboard/department/kpi/{$kpiId}/section-show/{$section['id']}") }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i> Edit</span>
                                                 </a>
                                                 {{--  <a href="#" data-bs-toggle="modal"
-                                                    data-bs-target=".bs-delete-modal-lg-{{ $section->id }}">
+                                                    data-bs-target=".bs-delete-modal-lg-{{ $section['id'] }}">
                                                     <span class="badge rounded-pill bg-danger fonte-size-13"><i
                                                             class="bx bxs-trash"></i> Delete</span>
                                                 </a>  --}}
 
                                                 <!-- Modal for Delete Confirmation -->
-                                                <div class="modal fade bs-delete-modal-lg-{{ $section->id }}"
+                                                <div class="modal fade bs-delete-modal-lg-{{ $section['id'] }}"
                                                     tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
                                                     aria-hidden="true">
                                                     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -126,7 +126,7 @@
                                                                     it again
                                                                 </p>
                                                                 <form
-                                                                    action="{{ route('delete.section', $section->id) }}"
+                                                                    action="{{ route('delete.section', $section['id']) }}"
                                                                     method="POST">
                                                                     @csrf
                                                                     <div class="d-grid">

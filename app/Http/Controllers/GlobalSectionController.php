@@ -2,63 +2,86 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreSectionRequest;
+use App\Http\Requests\UpdateSectionRequest;
+use App\Services\AppraisalApiService;
+use App\Exceptions\ApiException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class GlobalSectionController extends Controller
 {
+    private AppraisalApiService $appraisalService;
+
+    public function __construct(AppraisalApiService $appraisalService)
+    {
+        $this->appraisalService = $appraisalService;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
         try {
-            // Fetch sections data using helper method
-            $sectionsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
-            $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
+            $sectionsResponse = $this->appraisalService->getAllSections();
 
-            // Filter the KPIs to include only those with active state of true
-            $activeKpis = collect($kpis)->filter(function ($kpi) {
-                return $kpi->active === true && $kpi->type == 'GLOBAL';
+            // Handle both wrapped and unwrapped sections response
+            if (is_array($sectionsResponse) && isset($sectionsResponse['data']) && is_array($sectionsResponse['data'])) {
+                $sectionsData = $sectionsResponse['data'];
+            } elseif (is_array($sectionsResponse)) {
+                $sectionsData = $sectionsResponse;
+            } else {
+                $sectionsData = [];
+            }
+
+            $sections = collect($sectionsData);
+
+            Log::info('Global Section Index - All Sections count', ['count' => count($sectionsData)]);
+
+            // Log first section to see structure if there are any
+            if (!empty($sectionsData)) {
+                Log::info('Global Section Index - First Section structure', [
+                    'first_section_keys' => array_slice(array_keys($sectionsData[0]), 0, 10),
+                    'has_kpi_nested' => isset($sectionsData[0]['kpi']),
+                    'kpi_type' => $sectionsData[0]['kpi']['type'] ?? 'NOT_FOUND'
+                ]);
+            }
+
+            // Filter sections where the KPI type is 'GLOBAL' or 'PROBATION'
+            $filteredSections = $sections->filter(function ($section) {
+                // Check if kpi is directly nested in section
+                if (isset($section['kpi']) && is_array($section['kpi'])) {
+                    return ($section['kpi']['type'] === 'GLOBAL' || $section['kpi']['type'] === 'PROBATION');
+                }
+                return false;
             });
 
-            // Convert the response to a collection
-            $sectionsCollect = collect($sectionsResponse);
-            // $sections = $sectionsResponse;
-            // dd($sectionsCollect);
+            Log::info('Global Section Index - Filtered Sections count', ['count' => $filteredSections->count()]);
 
+            $sortedSections = $filteredSections->sortByDesc('createdAt');
+            $sections = $this->paginate($sortedSections->toArray(), 25, $request);
 
-            // Filter sections where active is true and the KPI type is 'GLOBAL' or 'PROBATION'
-            $filteredSections =
-                $sectionsCollect->filter(function ($section) {
-                    return ($section->active === true || $section->active === false) &&
-                        ($section->kpi->type === 'GLOBAL' || $section->kpi->type === 'PROBATION');
-                });
+            // Get all KPIs for reference
+            $kpisResponse = $this->appraisalService->getAllKpis();
+            if (is_array($kpisResponse) && isset($kpisResponse['data']) && is_array($kpisResponse['data'])) {
+                $kpisData = $kpisResponse['data'];
+            } elseif (is_array($kpisResponse)) {
+                $kpisData = $kpisResponse;
+            } else {
+                $kpisData = [];
+            }
 
-            $sections = $filteredSections->sortByDesc('createdAt');
-            // dd($sections);
-
-
-            $sections = $this->paginate($sections, 25, $request);
-
-
+            $kpis = collect($kpisData);
+            $activeKpis = $kpis->filter(function ($kpi) {
+                return $kpi['active'] === true && ($kpi['type'] === 'GLOBAL' || $kpi['type'] === 'PROBATION');
+            });
 
             return view('global-kpi.index-section', compact('sections', 'activeKpis'));
-        } catch (\Exception $e) {
-            Log::error('Exception occurred in index method', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return redirect()->back()->with('toast_error', 'Failed to load sections. Please try again.');
+        } catch (ApiException $e) {
+            Log::error('Failed to load sections', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
@@ -67,81 +90,50 @@ class GlobalSectionController extends Controller
      */
     public function create()
     {
+        try {
+            $kpisResponse = $this->appraisalService->getAllKpis();
 
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
+            // Handle both wrapped and unwrapped responses
+            if (is_array($kpisResponse) && isset($kpisResponse['data']) && is_array($kpisResponse['data'])) {
+                $kpisData = $kpisResponse['data'];
+            } elseif (is_array($kpisResponse)) {
+                $kpisData = $kpisResponse;
+            } else {
+                $kpisData = [];
+            }
 
-        $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
+            $kpis = collect($kpisData);
 
-        // Filter the KPIs to include only those with active state of true
-        $activeKpis = collect($kpis)->filter(function ($kpi) {
-            return $kpi->active === true &&  $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION';
-        });
+            // Filter for active GLOBAL/PROBATION KPIs
+            $activeKpis = $kpis->filter(function ($kpi) {
+                return $kpi['active'] === true && ($kpi['type'] === 'GLOBAL' || $kpi['type'] === 'PROBATION');
+            });
 
-        // dd($activeKpis);
-
-        return view('global-kpi.create-section', compact('activeKpis'));
+            return view('global-kpi.create-section', compact('activeKpis'));
+        } catch (ApiException $e) {
+            Log::error('Failed to load KPIs for section creation', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
+        }
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreSectionRequest $request)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // dd($request);
-        // Validate the request data
-        $request->validate([
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'score' => 'required|numeric',
-            'active' => 'required|integer',
-            'kpiId' => 'required|integer',
-        ]);
-
-        // Get the access token from the session
-        $accessToken = session('api_token'); // Replace with your actual access token
-
-        // Prepare the data for the Section creation
-        $sectionData = [
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'score' => (float) $request->input('score'),
-            'active' => $request->input('active') == 1 ? true : false,
-            'kpiId' => $request->input('kpiId'),
-        ];
-
         try {
-            // Make the POST request to the external API
-            $response = Http::withToken($accessToken)
-                ->post('http://192.168.1.200:5123/Appraisal/Section', $sectionData);
-
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->route('global.section.index')->with('toast_success', 'Global Section created successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to create Section', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to Global create Section' . $response->body());
-            }
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while creating Global Section', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            $this->appraisalService->createSection([
+                'name' => $request->input('name'),
+                'description' => $request->input('description'),
+                'score' => (float) $request->input('score'),
+                'active' => $request->input('active') == 1 ? true : false,
+                'kpiId' => $request->input('kpiId'),
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+
+            return redirect()->route('global.section.index')->with('toast_success', 'Global Section created successfully');
+        } catch (ApiException $e) {
+            Log::error('Failed to create Global Section', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
@@ -149,51 +141,41 @@ class GlobalSectionController extends Controller
 
     public function show(string $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $accessToken = session('api_token');
-        $apiUrl = "http://192.168.1.200:5123/Appraisal/Section/{$id}";
-
-        $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
-
-        // Filter the KPIs to include only those with active state of true
-        $activeKpis = collect($kpis)->filter(function ($kpi) {
-            return $kpi->active === true &&  $kpi->type == 'GLOBAL' || $kpi->type == 'PROBATION';
-        });
-
         try {
-            // Make the GET request to the external API
-            $response = Http::withToken($accessToken)->get($apiUrl);
+            $kpisResponse = $this->appraisalService->getAllKpis();
+            $sectionResponse = $this->appraisalService->getSection($id);
 
-            if ($response->successful()) {
-                // Convert the response to an object
-                $sectionData = $response->object();
-
-                return view('global-kpi.edit-section', compact('sectionData', 'activeKpis'));
+            // Handle wrapped and unwrapped section response
+            if (isset($sectionResponse['data'])) {
+                $sectionData = is_array($sectionResponse['data']) ? $sectionResponse['data'] : $sectionResponse['data'];
+            } else {
+                $sectionData = is_array($sectionResponse) && !isset($sectionResponse['data']) ? $sectionResponse : null;
             }
 
-            // Log the error response
-            Log::error('Failed to fetch Global Section', [
-                'status' => $response->status(),
-                'response' => $response->body()
-            ]);
+            // Handle both wrapped and unwrapped KPI responses
+            if (is_array($kpisResponse) && isset($kpisResponse['data']) && is_array($kpisResponse['data'])) {
+                $kpisData = $kpisResponse['data'];
+            } elseif (is_array($kpisResponse)) {
+                $kpisData = $kpisResponse;
+            } else {
+                $kpisData = [];
+            }
 
-            return redirect()->back()->with('toast_error', 'Global Section does not exist.');
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while fetching Global Section', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            $kpis = collect($kpisData);
 
-            return redirect()->back()->with(
-                'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
-            );
+            if (!$sectionData) {
+                return redirect()->back()->with('toast_error', 'Global Section does not exist.');
+            }
+
+            // Filter for active GLOBAL/PROBATION KPIs
+            $activeKpis = $kpis->filter(function ($kpi) {
+                return $kpi['active'] === true && ($kpi['type'] === 'GLOBAL' || $kpi['type'] === 'PROBATION');
+            });
+
+            return view('global-kpi.edit-section', compact('sectionData', 'activeKpis'));
+        } catch (ApiException $e) {
+            Log::error('Failed to fetch Global Section', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
@@ -203,63 +185,22 @@ class GlobalSectionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateSectionRequest $request, string $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // Validate the request data
-        $request->validate([
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'score' => 'required|numeric',
-            'active' => 'required|boolean',
-            'kpiId' => 'required|integer',
-        ]);
-
-        $accessToken = session('api_token');
-        $apiUrl = "http://192.168.1.200:5123/Appraisal/Section/";
-
-        // Prepare the data for the Section update
-        $sectionData = [
-            'id' => $id,
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'score' => (float) $request->input('score'),
-            'active' => (bool)$request->input('active'),
-            'kpiId' => $request->input('kpiId'),
-        ];
-
         try {
-            // Make the PUT request to the external API
-            $response = Http::withToken($accessToken)->put($apiUrl, $sectionData);
-
-            if ($response->successful()) {
-
-                return redirect()->route('global.section.index')->with('toast_success', 'Global Section updated successfully.');
-            }
-
-            // Log the error response
-            Log::error('Failed to update Global Section', [
-                'status' => $response->status(),
-                'response' => $response->body(),
+            $this->appraisalService->updateSection($id, [
+                'id' => $id,
+                'name' => $request->input('name'),
+                'description' => $request->input('description'),
+                'score' => (float) $request->input('score'),
+                'active' => (bool)$request->input('active'),
+                'kpiId' => $request->input('kpiId'),
             ]);
 
-            return redirect()->back()->with('toast_error', 'Update Global Section Error:' . $response->body());
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while updating Global Section', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return redirect()->back()->with(
-                'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
-            );
+            return redirect()->route('global.section.index')->with('toast_success', 'Global Section updated successfully.');
+        } catch (ApiException $e) {
+            Log::error('Failed to update Global Section', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
@@ -270,70 +211,15 @@ class GlobalSectionController extends Controller
      */
     public function destroy($id)
     {
-        // Get the access token from the session
-        $accessToken = session('api_token'); // Replace with your actual access token
-
         try {
-            // Make the DELETE request to the external API
-            $response = Http::withToken($accessToken)
-                ->delete("http://192.168.1.200:5123/Appraisal/Section/{$id}");
-
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->back()->with('toast_success', 'Global Section deleted successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to delete Global Section', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Global Section, there are Metrics <br> dependent on this Section and can not be deleted, <b>DEACTIVATE INSTEAD</b>');
-            }
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while deleting Global Section', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+            $this->appraisalService->deleteSection($id);
+            return redirect()->back()->with('toast_success', 'Global Section deleted successfully');
+        } catch (ApiException $e) {
+            Log::error('Failed to delete Global Section', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
-
-    private function makeApiRequest(string $method, string $url, array $data = null)
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $accessToken = session('api_token');
-
-        try {
-            $response = Http::withToken($accessToken)->$method($url, $data);
-
-            if ($response->successful()) {
-                return $response->object();
-            }
-
-            Log::error('API Request Failed: Global', [
-                'method' => $method,
-                'url' => $url,
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ]);
-
-            return null;
-        } catch (\Exception $e) {
-            Log::error('API Request Exception: Global', [
-                'method' => $method,
-                'url' => $url,
-                'error' => $e->getMessage(),
-            ]);
-            return null;
-        }
-    }
 
     protected function paginate(array|Collection $items, int $perPage, Request $request): LengthAwarePaginator
     {

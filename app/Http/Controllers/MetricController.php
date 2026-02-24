@@ -2,125 +2,109 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreMetricRequest;
+use App\Http\Requests\UpdateMetricRequest;
+use App\Services\AppraisalApiService;
+use App\Exceptions\ApiException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class MetricController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    private AppraisalApiService $appraisalService;
 
+    public function __construct(AppraisalApiService $appraisalService)
+    {
+        $this->appraisalService = $appraisalService;
+    }
     public function index(Request $request, $kpiId, $sectionScore, $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
         try {
-            // Fetch sections data using helper method
+            $metricsResponse = $this->appraisalService->getAllMetrics();
 
-            $metricsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Metric");
+            // Handle both wrapped and unwrapped response
+            if (is_array($metricsResponse) && isset($metricsResponse['data']) && is_array($metricsResponse['data'])) {
+                $metricsData = $metricsResponse['data'];
+            } elseif (is_array($metricsResponse)) {
+                $metricsData = $metricsResponse;
+            } else {
+                $metricsData = [];
+            }
 
+            $metrics = collect($metricsData);
 
-            // dd($metricsResponse);
+            Log::info('Metric Index - All Metrics count', ['count' => count($metricsData)]);
+            Log::info('Metric Index - Looking for section ID', ['sectionId' => $id, 'sectionId_type' => gettype($id)]);
 
+            // Log first metric structure to understand the format
+            if ($metrics->count() > 0) {
+                $firstMetric = $metrics->first();
+                Log::info('First metric structure', [
+                    'metric_keys' => array_keys($firstMetric),
+                    'metric_id_value' => $firstMetric['metricId'] ?? $firstMetric['id'] ?? 'N/A',
+                    'has_section' => isset($firstMetric['section']),
+                    'section_keys' => isset($firstMetric['section']) ? array_keys($firstMetric['section']) : [],
+                    'has_sectionId_field' => isset($firstMetric['sectionId']),
+                ]);
+            }
 
+            // Filter metrics by section ID - mirroring old project pattern
+            $activeMetrics = $metrics->filter(function ($metric) use ($id) {
+                // Try different paths to find section ID
+                $sectionId = null;
 
-            // Filter the KPIs to include only those with active state of true
-            $activeMetrics = collect($metricsResponse)->filter(function ($metric) use ($id) {
-                return $metric->section->id == $id;
+                if (isset($metric['section']) && is_array($metric['section'])) {
+                    // If section is an array/object
+                    $sectionId = $metric['section']['sectionId'] ?? $metric['section']['id'] ?? null;
+                } elseif (isset($metric['sectionId'])) {
+                    // If sectionId is a direct field
+                    $sectionId = $metric['sectionId'];
+                }
+
+                $matches = (int)$sectionId === (int)$id;
+
+                Log::info('Filtering metric', [
+                    'metric_id' => $metric['metricId'] ?? $metric['id'] ?? 'unknown',
+                    'section_id_found' => $sectionId,
+                    'target_id' => $id,
+                    'target_id_type' => gettype($id),
+                    'section_id_type' => gettype($sectionId),
+                    'matches' => $matches
+                ]);
+
+                return $matches;
             });
 
-            // dd($activeMetrics);
+            Log::info('Metric Index - Filtered Metrics count', ['count' => $activeMetrics->count()]);
 
             $sectionId = $id;
-
-            $sortedMetrics = $activeMetrics->sortByDesc('createdAt');
-
-            // Calculate the total score from the sections
-            $totalMetricScore = $sortedMetrics->sum('score');
+            $totalMetricScore = $activeMetrics->sum(function ($metric) {
+                return $metric['metricScore'] ?? $metric['score'] ?? 0;
+            });
             session(['totalMetricScore' => $totalMetricScore]);
 
-            $metrics = $this->paginate($sortedMetrics, 25, $request);
-
+            $sortedMetrics = $activeMetrics->sortByDesc(function ($metric) {
+                return $metric['createdAt'] ?? $metric['metricCreatedAt'] ?? '';
+            });
+            $metrics = $this->paginate($sortedMetrics->toArray(), 25, $request);
 
             return view('metric-setup.index', compact('metrics', 'sectionId', 'totalMetricScore', 'sectionScore', 'kpiId'));
-        } catch (\Exception $e) {
-            Log::error('Exception occurred in index method', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return redirect()->back()->with('toast_error', 'Failed to load metrics. Please try again.');
+        } catch (ApiException $e) {
+            Log::error('Failed to load metrics', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
 
     public function create(string $kpiScore, $sectionMetricScore, $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // $sections = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
-
-        // // Filter the KMetric to include only those with active state of true
-        // $activeSections = collect($sections)->filter(function ($section) {
-        //     return $section->active === true && $section->kpi->type == 'REGULAR';
-        // });
-
-        // dd($activeSections);
-
         $sectionId = $id;
         $totalMetricScore = session('totalMetricScore');
 
-
         return view('metric-setup.create', compact('sectionId', 'kpiScore', 'sectionMetricScore', 'totalMetricScore'));
     }
-
-
-    private function makeApiRequest(string $method, string $url, array $data = null)
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $accessToken = session('api_token');
-
-        try {
-            $response = Http::withToken($accessToken)->$method($url, $data);
-
-            if ($response->successful()) {
-                return $response->object();
-            }
-
-            Log::error('API Request Failed', [
-                'method' => $method,
-                'url' => $url,
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ]);
-
-            return null;
-        } catch (\Exception $e) {
-            Log::error('API Request Exception', [
-                'method' => $method,
-                'url' => $url,
-                'error' => $e->getMessage(),
-            ]);
-            return null;
-        }
-    }
-
 
 
 
@@ -128,236 +112,121 @@ class MetricController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-
-    public function store(Request $request)
+    public function store(StoreMetricRequest $request)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // Validate the request data
-        $request->validate([
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'score' => 'required|integer',
-            'active' => 'required|integer',
-            'sectionId' => 'required|integer',
-        ]);
-
-        $accessToken = session('api_token');
-        $apiUrl = 'http://192.168.1.200:5123/Appraisal/Metric';
-
-        // Prepare the data for Metric creation
-        $metricData = [
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'score' => $request->input('score'),
-            'active' => $request->input('active') == 1 ? true : false,
-            'sectionId' => $request->input('sectionId'),
-        ];
-
-        $sectionId = $metricData['sectionId'];
-
         try {
-            // Make the POST request to the external API
-            $response = Http::withToken($accessToken)->post($apiUrl, $metricData);
+            $sectionId = $request->input('sectionId');
+            $kpiId = $request->input('kpiId');
+            $sectionMetricScore = $request->input('sectionMetricScore');
 
-            if ($response->successful()) {
-                $kpiId = $request->input('kpiId');
-                $sectionScore = $request->input('sectionScore');
-                $id = $sectionId;
-                session([
-                    'kpiId' => $kpiId,
-                    'sectionScore' => $sectionScore
-                ]);
-                return redirect()->route('metric.index', compact('kpiId', 'sectionScore', 'id'))->with('toast_success', 'Metric created successfully.');
-            }
-
-            // Log unsuccessful response
-            Log::error('Failed to create Metric', [
-                'status' => $response->status(),
-                'response' => $response->body(),
+            Log::info('Metric Store - Request data', [
+                'sectionId' => $sectionId,
+                'kpiId' => $kpiId,
+                'name' => $request->input('name'),
+                'score' => $request->input('score'),
             ]);
 
-            return redirect()->back()->with('toast_error', 'Sorry, failed to create Metric.' . $response->body());
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while creating Metric', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+            // Prepare the data exactly like the old project
+            $metricData = [
+                'name' => $request->input('name'),
+                'description' => $request->input('description'),
+                'score' => $request->input('score'),
+                'active' => $request->input('active') == 1 ? true : false,
+                'sectionId' => $sectionId,
+            ];
 
-            return redirect()->back()->with(
-                'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
-            );
+            Log::info('Metric Store - Sending data to API', $metricData);
+
+            $this->appraisalService->createMetric($metricData);
+
+            $id = $sectionId;
+            session(['kpiId' => $kpiId, 'sectionMetricScore' => $sectionMetricScore]);
+
+            return redirect()->route('metric.index', compact('kpiId', 'sectionMetricScore', 'id'))->with('toast_success', 'Metric created successfully.');
+        } catch (ApiException $e) {
+            Log::error('Failed to create Metric', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
-
-
 
     /**
-     * Display the specified resource.
+     * Show the form for editing the specified resource.
      */
-
-
-    public function show(string $kpiId, $sectionMetricScore, $sectionId, $metricId)
+    public function show($kpiId, $sectionMetricScore, $sectionId, $metricId)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $accessToken = session('api_token');
-        $apiUrl = "http://192.168.1.200:5123/Appraisal/Metric/{$metricId}";
-
         try {
-            // Make the GET request to the external API
-            $response = Http::withToken($accessToken)->get($apiUrl);
+            $metricResponse = $this->appraisalService->getMetric($metricId);
+            $metricData = $metricResponse['data'] ?? $metricResponse ?? null;
 
-
-            if ($response->successful()) {
-                // Convert the response to an object for better handling
-                $metricData = $response->object();
-
-                // dd($metricData);
-
-
-                // $kpiId = session('kpiId');
-                // dd($kpiId);
-                // $sectionMetricScore = session('sectionScore');
-
-                return view('metric-setup.edit', compact('metricData', 'sectionId', 'kpiId', 'sectionMetricScore'));
+            if (!$metricData) {
+                return redirect()->back()->with('toast_error', 'Metric does not exist.');
             }
 
-            // Log unsuccessful response
-            Log::error('Failed to fetch Metric', [
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ]);
-
-            return redirect()->back()->with('toast_error', 'Metric does not exist.');
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while fetching Metric', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return redirect()->back()->with(
-                'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
-            );
+            return view('metric-setup.edit', compact('metricData', 'sectionId', 'kpiId', 'sectionMetricScore'));
+        } catch (ApiException $e) {
+            Log::error('Failed to fetch Metric', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit($metricId, $sectionId, $kpiId, $sectionMetricScore)
+    {
+        try {
+            $metricResponse = $this->appraisalService->getMetric($metricId);
+            $metricData = $metricResponse['data'] ?? $metricResponse ?? null;
 
+            if (!$metricData) {
+                return redirect()->back()->with('toast_error', 'Metric does not exist.');
+            }
 
+            return view('metric-setup.edit', compact('metricData', 'sectionId', 'kpiId', 'sectionMetricScore'));
+        } catch (ApiException $e) {
+            Log::error('Failed to fetch Metric', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', 'Failed to load metric. Please try again.');
+        }
+    }
 
     /**
      * Update the specified resource in storage.
      */
-
-    public function update(Request $request, $id)
+    public function update(UpdateMetricRequest $request, $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // Validate the request data
-        $request->validate([
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'score' => 'required|integer',
-            'active' => 'required|boolean',
-            'sectionId' => 'required|integer',
-        ]);
-
-        $accessToken = session('api_token');
-        $apiUrl = "http://192.168.1.200:5123/Appraisal/Metric";
-
-        // Prepare the data for Metric update
-        $metricData = [
-            'id' => $id,
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'score' => $request->input('score'),
-            'active' => (bool)$request->input('active'),
-            'sectionId' => $request->input('sectionId'),
-        ];
-
-        $sectionId = $metricData['sectionId'];
-
         try {
-            // Make the PUT request to the external API
-            $response = Http::withToken($accessToken)->put($apiUrl, $metricData);
+            $sectionId = $request->input('sectionId');
+            $kpiId = $request->input('kpiId');
+            $sectionMetricScore = $request->input('sectionMetricScore');
 
-            if ($response->successful()) {
-                $kpiId = $request->input('kpiId');
-                $sectionMetricScore = $request->input('sectionMetricScore');
-                $id = $sectionId;
-                return redirect()->route('metric.index', compact('kpiId', 'sectionMetricScore', 'id'))->with('toast_success', 'Metric updated successfully.');
-            }
-
-            // Log unsuccessful response
-
-            Log::error('Failed to update Metric', [
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ]);
-            return redirect()->back()->with('toast_error', 'Update Metric Error:' . $response->body());
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while updating Metric', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+            $this->appraisalService->updateMetric($id, [
+                'id' => $id,
+                'name' => $request->input('name'),
+                'description' => $request->input('description'),
+                'score' => $request->input('score'),
+                'active' => (bool)$request->input('active'),
+                'sectionId' => $sectionId,
             ]);
 
-            return redirect()->back()->with(
-                'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
-            );
+            $routeId = $sectionId;
+            return redirect()->route('metric.index', ['kpiId' => $kpiId, 'sectionMetricScore' => $sectionMetricScore, 'id' => $routeId])->with('toast_success', 'Metric updated successfully.');
+        } catch (ApiException $e) {
+            Log::error('Failed to update Metric', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
-
-
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy($id)
     {
-        // Get the access token from the session
-        $accessToken = session('api_token'); // Replace with your actual access token
-
         try {
-            // Make the DELETE request to the external API
-            $response = Http::withToken($accessToken)
-                ->delete("http://192.168.1.200:5123/Appraisal/Metric/{$id}");
-
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->back()->with('toast_success', 'Metric deleted successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to delete Section', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Metric');
-            }
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while deleting Metric', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+            $this->appraisalService->deleteMetric($id);
+            return redirect()->back()->with('toast_success', 'Metric deleted successfully');
+        } catch (ApiException $e) {
+            Log::error('Failed to delete Metric', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 

@@ -6,7 +6,8 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('global.index') }}">GLOBAL KPIS </a> > Setup For Global Kpis
+                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ route('global.index') }}">GLOBAL KPIS </a> > Setup For
+                        Global Kpis
 
                     </h4>
                 </div>
@@ -28,15 +29,15 @@
                             <label for="example-text-input" class="">KPI Name</label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="name" required
-                                    placeholder="Enter Name for KPI" value="{{ old('name') }}"
-                                    id="example-text-input">
+                                    placeholder="Enter Name for KPI" value="{{ old('name') }}" id="example-text-input">
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <label for="example-text-input" class="">KPI Description</label>
                             <div class="col-md-12">
-                               <textarea class="form-control" required name="description" placeholder="Enter Description for KPI" rows="3"
+                                <textarea class="form-control" required name="description"
+                                    placeholder="Enter Description for KPI" rows="3"
                                     id="example-text-input">{{ old('description') }}</textarea>
                             </div>
                         </div>
@@ -54,22 +55,21 @@
                             </div>
                         </div>
 
-                         {{--  <div class="row mb-3">
+                        {{-- <div class="row mb-3">
                             <label for="example-text-input" class="">Select Role For KPI to Belong To</label>
                             <div class="col-md-12">
                                 <select name="empRoleId" class="form-select">
                                     <option>Select Role</option>
 
                                     @foreach ($uniqueRoles as $role)
-                                        <option value="1"
-                                            {{ old('empRoleId') == $role['id'] ? 'selected' : '' }}>
-                                            {{ $role['name'] }}
-                                        </option>
+                                    <option value="1" {{ old('empRoleId')==$role['id'] ? 'selected' : '' }}>
+                                        {{ $role['name'] }}
+                                    </option>
                                     @endforeach
 
                                 </select>
                             </div>
-                        </div>  --}}
+                        </div> --}}
 
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Select Batch For KPI to Belong To</label>
@@ -77,8 +77,7 @@
                                 <select name="batchId" class="form-select">
                                     <option>Select Batch</option>
                                     @foreach ($batch_data as $batch)
-                                        <option value="{{ $batch->id }}"
-                                            {{ old('batchId') == $batch->id ? 'selected' : '' }}>{{ $batch->name }}
+                                        <option value="{{ $batch['id'] }}" {{ old('batchId') == $batch['id'] ? 'selected' : '' }}>{{ $batch['name'] }}
                                         </option>
                                     @endforeach
 
@@ -86,29 +85,29 @@
                             </div>
                         </div>
 
-                        {{--  <div class="row mb-3">
+                        {{-- <div class="row mb-3">
                             <label for="example-text-input" class="">Select Department</label>
                             <div class="col-md-12">
                                 <select name="departmentId" class="form-select">
                                     <option>Select Department</option>
 
                                     @foreach ($uniqueDepartments as $department)
-                                        <option value="{{ $department->id }}"
-                                            {{ old('departmentId') == $department->id ? 'selected' : '' }}>{{ $department->name }}
-                                        </option>
+                                    <option value="{{ $department['id'] }}" {{ old('departmentId')==$department['id']
+                                        ? 'selected' : '' }}>{{ $department['name'] }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
-                        </div>  --}}
+                        </div> --}}
 
-                         {{--  <div class="row mb-3">
+                        {{-- <div class="row mb-3">
                             <label for="example-text-input" class="">Weight Score </label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="global_score" required
                                     placeholder="Enter Weighted Score For Department" value="{{ old('description') }}"
                                     id="example-text-input">
                             </div>
-                        </div>  --}}
+                        </div> --}}
 
                         <input type="hidden" name="active" value="1">
                         <input type="hidden" name="empRoleId" value="1">

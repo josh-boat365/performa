@@ -7,9 +7,10 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"><a href="{{ url("dashboard/department/section-setup/kpi/100/index/{$kpiId}", ) }}">Setup For
+                    <h4 class="mb-sm-0 font-size-18"><a
+                            href="{{ url("dashboard/department/section-setup/kpi/100/index/{$kpiId}", ) }}">Setup For
                             Section</a> > Metrics
-                        {{--  > <a href="#">{{ session('section_metric_name') }}</a>  --}}
+                        {{-- > <a href="#">{{ session('section_metric_name') }}</a> --}}
                     </h4>
                 </div>
             </div>
@@ -17,7 +18,9 @@
         <!-- end page title -->
 
         <div>
-            <form action="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiId}/section/{$sectionScore}/create/{$sectionId}") }}" method="GET">
+            <form
+                action="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiId}/section/{$sectionScore}/create/{$sectionId}") }}"
+                method="GET">
                 @csrf
                 <button type="submit" class="btn btn-success btn-rounded waves-effect waves-light "><i
                         class="bx bxs-plus"></i>Create
@@ -37,8 +40,8 @@
                             <div class="col-sm-8">
                                 <div class="search-box me-2 mb-2 d-inline-block" @style(['width: 50%'])>
                                     <div class="position-relative">
-                                        <input type="text" class="form-control" autocomplete="off"
-                                            id="searchTableList" placeholder="Search...">
+                                        <input type="text" class="form-control" autocomplete="off" id="searchTableList"
+                                            placeholder="Search...">
                                         <i class="bx bx-search-alt search-icon"></i>
                                     </div>
                                 </div>
@@ -64,35 +67,37 @@
                                         <th class="align-middle">Metric Name</th>
                                         <th class="align-middle">Metric Score</th>
                                         <th class="align-middle">Metric Description</th>
-                                        {{--  <th class="align-middle">Created At</th>  --}}
+                                        {{-- <th class="align-middle">Created At</th> --}}
                                         <th class="align-middle">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse ($metrics as $metric)
                                         <tr>
-                                            <td><a href="#">{{ $metric->section->name }}</a></td>
-                                            <td><a href="#">{{ $metric->name }}</a></td>
-                                            <td>{{ $metric->score }}</td>
-                                            <td>{{ $metric->description }}</td>
-                                            {{--  <td>{{ Carbon\Carbon::parse($metric->createdAt)->diffForHumans() }}
-                                            </td>  --}}
+                                            <td><a href="#">{{ $metric['sectionName'] ?? 'N/A' }}</a></td>
+                                            <td><a href="#">{{ $metric['metricName'] ?? $metric['name'] ?? 'N/A' }}</a></td>
+                                            <td>{{ $metric['metricScore'] ?? $metric['score'] ?? 0 }}</td>
+                                            <td>{{ $metric['metricDescription'] ?? $metric['description'] ?? 'N/A' }}</td>
+                                            {{-- <td>{{ Carbon\Carbon::parse($metric['metricCreatedAt'] ?? $metric['createdAt'] ?? '')->diffForHumans() }}
+                                            </td> --}}
                                             <td>
-
-                                                <a href="{{ url("dashboard/department/section/kpi/{$kpiId}/section/{$sectionScore}/{$sectionId}/metric-show/{$metric->id}" ) }}">
+                                                @php
+                                                    $metricId = $metric['metricId'] ?? $metric['id'];
+                                                @endphp
+                                                <a
+                                                    href="{{ url("dashboard/department/section/kpi/{$kpiId}/section/{$sectionScore}/{$sectionId}/metric-show/{$metricId}") }}">
                                                     <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                             class="bx bxs-pencil"></i> Edit</span>
                                                 </a>
                                                 <a href="#" data-bs-toggle="modal"
-                                                    data-bs-target=".bs-delete-modal-lg-{{ $metric->id }}">
+                                                    data-bs-target=".bs-delete-modal-lg-{{ $metricId }}">
                                                     <span class="badge rounded-pill bg-danger fonte-size-13"><i
                                                             class="bx bxs-trash"></i> Delete</span>
                                                 </a>
 
                                                 <!-- Modal for Delete Confirmation -->
-                                                <div class="modal fade bs-delete-modal-lg-{{ $metric->id }}"
-                                                    tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
-                                                    aria-hidden="true">
+                                                <div class="modal fade bs-delete-modal-lg-{{ $metricId }}" tabindex="-1"
+                                                    role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                                     <div class="modal-dialog modal-lg modal-dialog-centered">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
@@ -110,13 +115,13 @@
                                                                     <b>system entirely</b> and you cannot <b>recover</b>
                                                                     it again
                                                                 </p>
-                                                                <form action="{{ route('delete.metric', $metric->id) }}"
+                                                                <form action="{{ route('delete.metric', $metricId) }}"
                                                                     method="POST">
                                                                     @csrf
-                                                                    {{--  @method('DELETE')  --}}
+                                                                    {{-- @method('DELETE') --}}
                                                                     <div class="d-grid">
-                                                                        <button type="submit"
-                                                                            class="btn btn-danger">Yes, Delete</button>
+                                                                        <button type="submit" class="btn btn-danger">Yes,
+                                                                            Delete</button>
                                                                     </div>
                                                                 </form>
                                                             </div>
@@ -145,7 +150,7 @@
 
         @push('scripts')
             <script>
-                document.getElementById('searchTableList').addEventListener('input', function() {
+                document.getElementById('searchTableList').addEventListener('input', function () {
                     const searchTerm = this.value.toLowerCase();
                     const tableRows = document.querySelectorAll('#order-list tbody tr');
 

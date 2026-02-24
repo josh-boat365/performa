@@ -76,7 +76,7 @@ Route::get("dashboard/edit-kpi", [DashboardController::class, "view_kpi"])->name
 Route::get("dashboard/active/batch", [DashboardController::class, "show"])->name("show-batch");
 // Route::get("dashboard/employee-batch-kpi/{id}", [DashboardController::class, "showEmployeeKpi"])->name("show.batch.kpi");
 Route::get("dashboard/employee-batch-kpi/", [DashboardController::class, "showEmployeeKpi"])->name("show.batch.kpi");
-Route::get("dashboard/employee-kpi/{id}", [DashboardController::class, "editEmployeeKpi"])->name("show.employee.kpi");
+Route::get("dashboard/employee-kpi/{id}/{batchId}", [DashboardController::class, "editEmployeeKpi"])->name("show.employee.kpi");
 
 // Employee Self Rating
 Route::post("dashboard/self-rating", [AppraisalScoreController::class, "store"])->name("self.rating");
@@ -89,13 +89,13 @@ Route::post("dashboard/self-rating", [AppraisalScoreController::class, "store"])
 */
 
 // Supervisor KPI Scoring Routes
-Route::get("dashboard/employee-supervisor-kpi-score/{id}", [DashboardController::class, "showEmployeeSupervisorKpiScore"])->name("show.employee.supervisor.kpi.score");
+Route::get("dashboard/employee-supervisor-kpi-score/{id}/{batchId}", [DashboardController::class, "showEmployeeSupervisorKpiScore"])->name("show.employee.supervisor.kpi.score");
 Route::get("dashboard/supervisor/show-employee-kpis", [SupervisorScoreController::class, "index"])->name("supervisor.index");
 Route::get("dashboard/supervisor/show-employee-kpi-form/kpi/{kpiId}/batch/{batchId}/employee-id/{employeeId}", [SupervisorScoreController::class, "edit"])->name("supervisor.edit");
 Route::post("dashboard/supervisor/rating", [SupervisorScoreController::class, "store"])->name("supervisor.rating");
 
 // Employee Probing Routes
-Route::get("dashboard/employee-probe/{id}", [DashboardController::class, "showEmployeeProbe"])->name("show.employee.probe");
+Route::get("dashboard/employee-probe/{id}/{batchId}", [DashboardController::class, "showEmployeeProbe"])->name("show.employee.probe");
 Route::post("dashboard/employee-probe/submit", [AppraisalScoreController::class, "submitProbing"])->name("submit.employee.probe");
 
 // Supervisor Probe Scoring Routes
@@ -254,8 +254,8 @@ Route::get('dashboard/appraisal/report', [ReportController::class, 'index'])->na
 Route::post('dashboard/appraisal/report/filter', [ReportController::class, 'index'])->name('reports.filter');
 
 // Employee Specific Reports
-Route::get('dashboard/appraisal/report/show/employee/{employeeId}/summary-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.summary');
-Route::get('dashboard/appraisal/report/show/employee/{employeeId}/full-report-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.full.details');
+Route::get('dashboard/appraisal/report/show/employee/{employeeId}/batch/{batchId}/summary-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.summary');
+// Route::get('dashboard/appraisal/report/show/employee/{employeeId}/full-report-details', [ReportController::class, 'showEmployeeSummary'])->name('reports.employee.full.details');
 
 // PDF Generation Routes
 Route::get('/employee/{employeeId}/print-pdf', [ReportController::class, 'generateEmployeePdf'])->name('employee.printPdf');

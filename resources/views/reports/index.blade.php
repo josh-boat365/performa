@@ -106,13 +106,14 @@ $totalEmployees = $reports->sum(function ($report) {
 });
         @endphp
 
+
+
         <div class="row">
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h4 class="card-title mb-0">Appraisal Reports Table</h4>
-                            <!-- Results counter -->
                             <span id="resultsCounter" class="badge bg-info text-white fs-6">
                                 Total Results: <span id="totalCount">{{ $totalEmployees }}</span>
                             </span>
@@ -136,94 +137,110 @@ $totalEmployees = $reports->sum(function ($report) {
                         </div>
 
                         <div class="table-responsive" id="tableContainer">
-                            <table id="datatable-buttons"
-                                class="reportsTable table table-bordered table-striped table-hover dt-responsive nowrap">
-                                <thead>
+                            <table id="datatable-buttons" class="table table-bordered table-striped table-hover dt-responsive nowrap w-100">
+                                <thead class="table-light">
                                     <tr>
+                                        <th class="text-center" style="width: 40px;">#</th>
                                         <th>Batch</th>
-                                        <th>Employee Full Name</th>
-                                        <th>Grade</th>
+                                        <th>Employee Name</th>
+                                        <th class="text-center">Grade</th>
                                         <th>Recommendation</th>
-                                        <th>Score</th>
+                                        <th class="text-center">Score</th>
                                         <th>Remark</th>
-                                        <th>Status</th>
+                                        <th class="text-center">Status</th>
                                         <th>Branch</th>
                                         <th>Department</th>
                                         <th>Role</th>
-                                        <th>Supervisor Name</th>
-                                        <th>Probe Name</th>
-                                        <th>Action</th>
+                                        <th>Supervisor</th>
+                                        <th>Probe</th>
+                                        <th class="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="reportsTableBody">
-                                    @if ($reports && $reports->isNotEmpty())
-                                        @forelse ($reports as $report)
-                                            @foreach ($report->employees as $employee)
-                                                                                                                        @php
-                                                $supervisorName = collect($employee->scores)
-                                                    ->pluck('supervisorName')
-                                                    ->unique()
-                                                    ->filter()
-                                                    ->implode(', ');
-
-                                                $probeName = collect($employee->scores)
-                                                    ->pluck('probName')
-                                                    ->unique()
-                                                    ->filter()
-                                                    ->implode(', ');
-
-                                                $status = collect($employee->scores)
-                                                    ->pluck('status')
-                                                    ->unique()
-                                                    ->filter()
-                                                    ->implode(', ');
-                                                                                                                        @endphp
-
-                                                                                                                        <tr>
-                                                                                                                            <td>{{ $report->batchName ?? 'N/A' }}</td>
-                                                                                                                            <td>{{ $employee->employeeName ?? 'N/A' }}</td>
-                                                                                                                            <td>{{ $employee->totalScore->grade ?? 'N/A' }}</td>
-                                                                                                                            <td>
-                                                                                                                                <span style="word-break: break-word; white-space: pre-line; display: block;">
-                                                                                                                                    {{ ($employee->totalScore?->recommendation ?? 'No Recommendation') === 'No Recommendation' ? '___' : $employee->totalScore?->recommendation }}
-                                                                                                                                </span>
-                                                                                                                            </td>
-                                                                                                                            <td>{{ $employee->totalScore->totalKpiScore ?? 'N/A' }}</td>
-                                                                                                                            <td>{{ $employee->totalScore->remark ?? 'N/A' }}</td>
-                                                                                                                            <td>
-                                                                                                                                <span class="badge {{ $status == 'Completed' ? 'bg-success' : ($status == 'Pending' ? 'bg-warning' : 'bg-secondary') }}">
-                                                                                                                                    {{ $status ?? 'N/A' }}
-                                                                                                                                </span>
-                                                                                                                            </td>
-                                                                                                                            <td>{{ $employee->branchName ?? 'N/A' }}</td>
-                                                                                                                            <td>{{ $employee->departmentName ?? 'N/A' }}</td>
-                                                                                                                            <td>{{ $employee->roleName ?? 'N/A' }}</td>
-                                                                                                                            <td>{{ $supervisorName ?? 'N/A' }}</td>
-                                                                                                                            <td>{{ $probeName ?? 'N/A' }}</td>
-                                                                                                                            <td>
-                                                                                                                                <a
-                                                                                                                                    href="{{ route('reports.employee.summary', $employee->employeeId) }}">
-                                                                                                                                    <span class="badge rounded-pill bg-primary">View</span>
-                                                                                                                                </a>
-                                                                                                                            </td>
-                                                                                                                        </tr>
-                                            @endforeach
-                                        @empty
+                                    @php $rowNum = 0; @endphp
+                                    @forelse ($reports as $report)
+                                        @foreach ($report->employees ?? [] as $employee)
+                                            @php
+                                                $rowNum++;
+                                                $scores = collect($employee->scores ?? []);
+                                                $supervisorName = $scores->pluck('supervisorName')->filter()->unique()->implode(', ') ?: 'N/A';
+                                                $probeName = $scores->pluck('probName')->filter()->unique()->implode(', ') ?: 'N/A';
+                                                $status = $scores->pluck('status')->filter()->unique()->first() ?: 'N/A';
+                                                $recommendation = $employee->totalScore->recommendation ?? null;
+                                                $statusClass = match($status) {
+                                                    'Completed' => 'bg-success',
+                                                    'Pending' => 'bg-warning text-dark',
+                                                    'In Progress' => 'bg-info',
+                                                    default => 'bg-secondary'
+                                                };
+                                            @endphp
                                             <tr>
-                                                <td colspan="12" class="text-center">No data available</td>
+                                                <td class="text-center fw-semibold">{{ $rowNum }}</td>
+                                                <td>
+                                                    <span class="badge bg-light text-dark border">
+                                                        {{ $report->batchName ?? 'N/A' }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar-circle me-2">
+                                                            {{ strtoupper(substr($employee->employeeName ?? 'N', 0, 1)) }}
+                                                        </div>
+                                                        <div>
+                                                            <span class="fw-medium">{{ $employee->employeeName ?? 'N/A' }}</span>
+                                                            @if($employee->staffNumber ?? null)
+                                                                <small class="d-block text-muted">{{ $employee->staffNumber }}</small>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-primary">{{ $employee->totalScore->grade ?? 'N/A' }}</span>
+                                                </td>
+                                                <td>{{ $recommendation ?: '—' }}</td>
+                                                <td class="text-center">
+                                                    <strong class="text-primary">{{ $employee->totalScore->totalKpiScore ?? 'N/A' }}</strong>
+                                                </td>
+                                                <td>
+                                                    <span class="text-muted small">{{ $employee->totalScore->remark ?? 'N/A' }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge {{ $statusClass }}">{{ $status }}</span>
+                                                </td>
+                                                <td>{{ $employee->branchName ?? 'N/A' }}</td>
+                                                <td>{{ $employee->departmentName ?? 'N/A' }}</td>
+                                                <td>{{ $employee->roleName ?? 'N/A' }}</td>
+                                                <td>{{ $supervisorName }}</td>
+                                                <td>{{ $probeName }}</td>
+                                                <td class="text-center">
+                                                    <a href="{{ route('reports.employee.summary', ['employeeId' => $employee->employeeId, 'batchId' => $report->batchId]) }}"
+                                                       class="btn btn-sm btn-primary"
+                                                       data-bs-toggle="tooltip"
+                                                       title="View Details">
+                                                        <i class="bx bx-show"></i>
+                                                    </a>
+                                                </td>
                                             </tr>
-                                        @endforelse
-                                    @else
+                                        @endforeach
+                                    @empty
                                         <tr>
-                                            <td colspan="12" class="text-center">No data available</td>
+                                            <td colspan="14" class="text-center py-4">
+                                                <div class="text-muted">
+                                                    <i class="bx bx-folder-open fs-1 d-block mb-2"></i>
+                                                    <p class="mb-0">No reports available</p>
+                                                    @if(request()->anyFilled(['batchId', 'branchId', 'departmentId', 'employeeId']))
+                                                        <small>Try adjusting your filter criteria</small>
+                                                    @endif
+                                                </div>
+                                            </td>
                                         </tr>
-                                    @endif
+                                    @endforelse
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-            </div> <!-- end col -->
+            </div>
         </div>
     </div>
 
@@ -238,22 +255,30 @@ $totalEmployees = $reports->sum(function ($report) {
                 width: '100%'
             });
 
+            // Initialize tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+
             // Show loading state when form is submitted
             $('#filterForm').on('submit', function() {
-                $('#loadingIndicator').show();
-                $('#tableContainer').hide();
+                showLoading();
             });
 
             // Refresh button functionality
             $('#refreshData').on('click', function() {
-                $('#loadingIndicator').show();
-                $('#tableContainer').hide();
-
-                // Add a cache-busting parameter
-                const url = new URL(window.location.href);
-                url.searchParams.set('refresh', Date.now());
-                window.location.href = url.toString();
+                showLoading();
+                location.reload();
             });
+
+            // Loading state helpers
+            function showLoading() {
+                $('#loadingIndicator').fadeIn(200);
+                $('#tableContainer').fadeOut(200);
+            }
+
+            function hideLoading() {
+                $('#loadingIndicator').fadeOut(200);
+                $('#tableContainer').fadeIn(200);
+            }
 
             // Enhance user experience with filter hints
             $('.filter-dropdown').on('change', function() {
@@ -264,16 +289,16 @@ $totalEmployees = $reports->sum(function ($report) {
                 const activeFilters = [];
 
                 if ($('#batchFilter').val()) {
-                    activeFilters.push('Batch: ' + $('#batchFilter option:selected').text());
+                    activeFilters.push('Batch: ' + $('#batchFilter option:selected').text().trim());
                 }
                 if ($('#branchFilter').val()) {
-                    activeFilters.push('Branch: ' + $('#branchFilter option:selected').text());
+                    activeFilters.push('Branch: ' + $('#branchFilter option:selected').text().trim());
                 }
                 if ($('#departmentFilter').val()) {
-                    activeFilters.push('Department: ' + $('#departmentFilter option:selected').text());
+                    activeFilters.push('Department: ' + $('#departmentFilter option:selected').text().trim());
                 }
                 if ($('#employeeFilter').val()) {
-                    activeFilters.push('Employee: ' + $('#employeeFilter option:selected').text());
+                    activeFilters.push('Employee: ' + $('#employeeFilter option:selected').text().trim());
                 }
 
                 // Remove any existing filter status
@@ -281,8 +306,9 @@ $totalEmployees = $reports->sum(function ($report) {
 
                 if (activeFilters.length > 0) {
                     const statusHtml = `
-                        <div id="filterStatus" class="alert alert-info mt-3">
-                            <strong>Active Filters:</strong> ${activeFilters.join(', ')}
+                        <div id="filterStatus" class="alert alert-light border mt-3">
+                            <i class="bx bx-filter-alt me-1"></i>
+                            <strong>Selected Filters:</strong> ${activeFilters.join(' | ')}
                         </div>
                     `;
                     $('#filterForm').after(statusHtml);
@@ -312,6 +338,31 @@ $totalEmployees = $reports->sum(function ($report) {
             padding: 2rem;
             background: #f8f9fa;
             border-radius: 0.5rem;
+        }
+        .avatar-circle {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        .table > :not(caption) > * > * {
+            padding: 0.6rem 0.5rem;
+            vertical-align: middle;
+        }
+        .table thead th {
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .fw-medium {
+            font-weight: 500;
         }
     </style>
 </x-base-layout>

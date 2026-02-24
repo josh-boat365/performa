@@ -59,25 +59,25 @@
                             {{--  {{ dd($kpi, $user, $employees) }}  --}}
                                 <tr>
                                     <th scope="row">
-                                        <a href="{{ url("dashboard/department/section-setup/kpi/{$kpi->score}/index/{$kpi->id}" ) }}">{{ $kpi->name }}</a>
+                                        <a href="{{ url("dashboard/department/section-setup/kpi/{$kpi['score']}/index/{$kpi['id']}" ) }}">{{ $kpi['name'] }}</a>
                                     </th>
                                     <td>
                                         <span class="dropdown badge rounded-pill bg-primary" data-bs-toggle="dropdown"
                                             aria-expanded="false">
-                                            {{ $kpi->type }}
+                                            {{ $kpi['type'] }}
 
                                         </span>
                                     </td>
-                                    <td>{{ $kpi->empRole->name }}</td>
+                                    <td>{{ $kpi['empRole']['name'] }}</td>
                                     {{--  <td>
                                         <span class="badge rounded-pill bg-primary">{{ $kpi->empRole->department }}</span>
                                     </td>  --}}
-                                    <td>{{ $kpi->batch->name }}</td>
+                                    <td>{{ $kpi['batch']['name'] }}</td>
                                     <td>
                                         @foreach ($employees as $employee)
-                                            @if ($employee->id === $kpi->empRole->manager)
+                                            @if ($employee['id'] === $kpi['empRole']['manager'])
                                                 <span class=" badge rounded-pill bg-dark">
-                                                    {{ $employee->firstName }} {{ $employee->surname }}
+                                                    {{ $employee['firstName'] }} {{ $employee['surname'] }}
                                                 </span>
                                             @endif
 
@@ -87,13 +87,13 @@
                                     </td>
                                     <td>
                                         <span @style(['cursor: pointer'])
-                                            class="dropdown badge rounded-pill {{ $kpi->active ? 'bg-success' : 'bg-dark' }}"
+                                            class="dropdown badge rounded-pill {{ $kpi['active'] ? 'bg-success' : 'bg-dark' }}"
                                             data-bs-toggle="dropdown" aria-expanded="false">
-                                            {{ $kpi->active ? 'Activated' : 'Deactivated' }}
+                                            {{ $kpi['active'] ? 'Activated' : 'Deactivated' }}
                                             <div class="dropdown-menu">
                                                 <a href="" class="dropdown-item" data-bs-toggle="modal"
                                                     data-bs-target=".bs-example-modal-lg" class="m-2">
-                                                    {{ $kpi->active ? 'Deactivate' : 'Activate' }}</a>
+                                                    {{ $kpi['active'] ? 'Deactivate' : 'Activate' }}</a>
                                             </div>
                                         </span>
                                         <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog"
@@ -109,12 +109,12 @@
                                                     </div>
                                                     <div class="modal-body">
                                                         <h4 class="text-center mb-4"> Are you sure, you want to
-                                                            {{ $kpi->active ? 'Deactivate' : 'Activate' }} ?</h4>
-                                                        <form action="{{ route('update.kpi.state', $kpi->id) }}"
+                                                            {{ $kpi['active'] ? 'Deactivate' : 'Activate' }} ?</h4>
+                                                        <form action="{{ route('update.kpi.state', $kpi['id']) }}"
                                                             method="POST">
                                                             @csrf
                                                             <input type="hidden" name="active"
-                                                                value="{{ $kpi->active ? 0 : 1 }}">
+                                                                value="{{ $kpi['active'] ? 0 : 1 }}">
                                                             <div class="d-grid">
                                                                 <button type="submit"
                                                                     class="btn btn-success">Yes</button>
@@ -128,18 +128,18 @@
                                     {{--  <td>{{ Carbon\Carbon::parse($kpi->createdAt)->diffForHumans() }}</td>  --}}
                                     <td>
                                         <div class="d-flex gap-3">
-                                            <a href="{{ route('show.kpi', $kpi->id) }}">
+                                            <a href="{{ route('show.kpi', $kpi['id']) }}">
                                                 <span class="badge rounded-pill bg-primary fonte-size-13"><i
                                                         class="bx bxs-pencil"></i>edit</span>
                                             </a>
                                             {{--  <a href="#" data-bs-toggle="modal"
-                                                data-bs-target=".bs-delete-modal-lg-{{ $kpi->id }}">
+                                                data-bs-target=".bs-delete-modal-lg-{{ $kpi['id'] }}">
                                                 <span class="badge rounded-pill bg-danger fonte-size-13"><i
                                                         class="bx bxs-trash"></i> delete</span>
                                             </a>  --}}
 
                                             <!-- Modal for Delete Confirmation -->
-                                            <div class="modal fade bs-delete-modal-lg-{{ $kpi->id }}"
+                                            <div class="modal fade bs-delete-modal-lg-{{ $kpi['id'] }}"
                                                 tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
                                                 aria-hidden="true">
                                                 <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -159,7 +159,7 @@
                                                                 it from the <b>system entirely</b> and you cannot
                                                                 <b>recover</b> it again
                                                             </p>
-                                                            <form action="{{ route('delete.kpi', $kpi->id) }}"
+                                                            <form action="{{ route('delete.kpi', $kpi['id']) }}"
                                                                 method="POST">
                                                                 @csrf
                                                                 @method('DELETE')

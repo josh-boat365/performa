@@ -7,7 +7,7 @@
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                     <h4 class="mb-sm-0 font-size-18">
-                        <a href="{{ route('global.section.index') }}">{{ $sectionData->name }}</a> >
+                        <a href="{{ route('global.section.index') }}">{{ $sectionData['name'] }}</a> >
                         Update Global Section Details
 
                     </h4>
@@ -23,40 +23,42 @@
             <div class="col-md-12">
                 <div class="card card-body">
                     <h3 class="card-title">KPI Section </h3>
-                    <form action="{{ route('update.global.section', $sectionData->id) }}" method="POST">
+                    <form action="{{ route('update.global.section', $sectionData['id']) }}" method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Name</label>
                             <div class="col-md-12">
 
-                                <textarea class="form-control" name="name" required rows="3" id="example-text-input">{{ $sectionData->name }}</textarea>
+                                <textarea class="form-control" name="name" required rows="3"
+                                    id="example-text-input">{{ $sectionData['name'] }}</textarea>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Score</label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="score" required
-                                    value="{{ $sectionData->score }}" id="example-text-input">
+                                    value="{{ $sectionData['score'] }}" id="example-text-input">
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section Description</label>
                             <div class="col-md-12">
-                                <textarea class="form-control" name="description" required rows="3" id="example-text-input">{{ $sectionData->description }}</textarea>
+                                <textarea class="form-control" name="description" required rows="3"
+                                    id="example-text-input">{{ $sectionData['description'] }}</textarea>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Section State</label>
                             <div class="col-md-12">
                                 <select class="form-control" id="stateSelect" name="active" onchange="updateState()">
-                                    <option value="1" {{ $sectionData->active === true ? 'selected' : '' }}>
+                                    <option value="1" {{ $sectionData['active'] === true ? 'selected' : '' }}>
                                         Active</option>
-                                    <option value="0" {{ $sectionData->active === false ? 'selected' : '' }}>
+                                    <option value="0" {{ $sectionData['active'] === false ? 'selected' : '' }}>
                                         Deactivate</option>
                                 </select>
 
                                 <input type="hidden" name="stateHidden" id="stateHidden"
-                                    value="{{ $sectionData->active }}">
+                                    value="{{ $sectionData['active'] }}">
 
                                 <script>
                                     function updateState() {
@@ -67,7 +69,7 @@
                                 </script>
                             </div>
                         </div>
-                        <input type="hidden" name="kpiId" value="{{ $sectionData->kpi->id }}">
+                        <input type="hidden" name="kpiId" value="{{ $sectionData['kpi']['id'] }}">
                         <button type="submit"
                             class="btn btn-success waves-effect waves-light col-md-12 mt-4">Update</button>
                     </form>

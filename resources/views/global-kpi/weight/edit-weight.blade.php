@@ -24,7 +24,7 @@
 
 
 
-                    <form action="{{ route('update.global.weight', $globalWeight->id) }}" class="custom-validation" method="POST">
+                    <form action="{{ route('update.global.weight', $globalWeight['id']) }}" class="custom-validation" method="POST">
                         @csrf
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Select Global KPI</label>
@@ -33,9 +33,9 @@
                                     <option>Select Global KPI</option>
 
                                     @foreach ($activeKpis as $kpi)
-                                        <option value="{{ $kpi->id }}"
-                                            {{ $kpi->id === $globalWeight->kpi->id ? 'selected' : '' }}>
-                                            {{ $kpi->name }}
+                                        <option value="{{ $kpi['id'] }}"
+                                            {{ $kpi['id'] === $globalWeight['kpi']['id'] ? 'selected' : '' }}>
+                                            {{ $kpi['name'] }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -50,8 +50,8 @@
                                     <option>Select Department</option>
 
                                     @foreach ($departments as $department)
-                                        <option value="{{ $department->id }}"
-                                            {{ $globalWeight->department->id == $department->id ? 'selected' : '' }}>{{ $department->name }}
+                                        <option value="{{ $department['id'] }}"
+                                            {{ $globalWeight['department']['id'] == $department['id'] ? 'selected' : '' }}>{{ $department['name'] }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -62,7 +62,7 @@
                             <label for="example-text-input" class="">Weight Score </label>
                             <div class="col-md-12">
                                 <input class="form-control" type="text" name="weight" required
-                                    placeholder="Enter Weighted Score For Department" value="{{ $globalWeight->weight }}"
+                                    placeholder="Enter Weighted Score For Department" value="{{ $globalWeight['weight'] }}"
                                     id="example-text-input">
                             </div>
                         </div>

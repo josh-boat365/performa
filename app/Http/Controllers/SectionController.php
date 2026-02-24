@@ -2,86 +2,56 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreSectionRequest;
+use App\Http\Requests\UpdateSectionRequest;
+use App\Services\AppraisalApiService;
+use App\Exceptions\ApiException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class SectionController extends Controller
 {
+    private AppraisalApiService $appraisalService;
+
+    public function __construct(AppraisalApiService $appraisalService)
+    {
+        $this->appraisalService = $appraisalService;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request, $kpiScore, $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
         try {
-            // Fetch sections data using helper method
-            $sectionsResponse = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Section");
+            $sectionsResponse = $this->appraisalService->getAllSections();
+            // dd($sectionsResponse);
+            $sections = collect($sectionsResponse['data'] ?? $sectionsResponse ?? []);
 
-            // Filter the KPIs to include only those with active state of true
-            $activeSections = collect($sectionsResponse)->filter(function ($section) use ($id) {
-                return $section->kpi->id == $id && $section->kpi->type === 'REGULAR';
+            // Filter sections by KPI ID and REGULAR type
+            $activeSections = $sections->filter(function ($section) use ($id) {
+                $kpiId = $section['kpiId'] ?? $section['kpi']['id'] ?? null;
+                $kpiType = $section['kpi']['type'] ?? null;
+                return $kpiId == $id && $kpiType === 'REGULAR';
             });
-            // Sort the KPIs to place the newly created one first
 
             $sortedSections = $activeSections->sortByDesc('createdAt');
-
-            // dd($activeSections);
-
-            $sections = $this->paginate($sortedSections, 25, $request);
-
-            // dd($sections);
-
-            // Calculate the total score from the sections
             $totalSectionScore = $sortedSections->sum('score');
             session(['totalSectionScore' => $totalSectionScore]);
 
+            $sections = $this->paginate($sortedSections->toArray(), 25, $request);
             $kpiId = $id;
 
-
-
             return view('section-setup.index', compact('sections', 'kpiId', 'kpiScore', 'totalSectionScore'));
-        } catch (\Exception $e) {
-            Log::error('Exception occurred in index method', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            return redirect()->back()->with('toast_error', 'Failed to load sections. Please try again.');
+        } catch (ApiException $e) {
+            Log::error('Failed to load sections', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
-    /**
-     * Helper method to make API requests.
-     *
-     * @param string $method HTTP method (GET, POST, PUT, DELETE)
-     * @param string $url API URL
-     * @param array|null $data Request payload
-     * @return object|null
-     */
-
-
     public function create($id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // $kpis = $this->makeApiRequest('GET', "http://192.168.1.200:5123/Appraisal/Kpi");
-
-        // Filter the KPIs to include only those with active state of true
-        // $activeKpis = collect($kpis)->filter(function ($kpi) use($id) {
-        //     return $kpi->id == $id && $kpi->active === true && $kpi->type === 'REGULAR';
-        // });
-
         $kpiId = $id;
         $kpiScore = 100;
         $totalSectionScore = session('totalSectionScore');
@@ -89,104 +59,40 @@ class SectionController extends Controller
         return view('section-setup.create', compact('kpiId', 'kpiScore', 'totalSectionScore'));
     }
 
-
-    private function makeApiRequest(string $method, string $url, array $data = null)
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $accessToken = session('api_token');
-
-        try {
-            $response = Http::withToken($accessToken)->$method($url, $data);
-
-            if ($response->successful()) {
-                return $response->object();
-            }
-
-            Log::error('API Request Failed', [
-                'method' => $method,
-                'url' => $url,
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ]);
-
-            return null;
-        } catch (\Exception $e) {
-            Log::error('API Request Exception', [
-                'method' => $method,
-                'url' => $url,
-                'error' => $e->getMessage(),
-            ]);
-            return null;
-        }
-    }
-
-
-
-
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreSectionRequest $request)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // Validate the request data
-        $request->validate([
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'score' => 'required|integer',
-            'active' => 'required|integer',
-            'kpiId' => 'required|integer',
-        ]);
-
-        // Get the access token from the session
-        $accessToken = session('api_token'); // Replace with your actual access token
-
-        // Prepare the data for the Section creation
-        $sectionData = [
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'score' => $request->input('score'),
-            'active' => $request->input('active') == 1 ? true : false,
-            'kpiId' => $request->input('kpiId'),
-        ];
-
-        $kpiId = $sectionData['kpiId'];
-
         try {
-            // Make the POST request to the external API
-            $response = Http::withToken($accessToken)
-                ->post('http://192.168.1.200:5123/Appraisal/Section', $sectionData);
+            $kpiId = $request->input('kpiId');
 
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                $kpiScore = 100;
-                $id = $kpiId;
-                return redirect()->route('section.index', compact('kpiScore', 'id'))->with('toast_success', 'Section created successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to create Section', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to create Section' . $response->body());
-            }
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while creating Section', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            Log::info('Section Store - Request data', [
+                'kpiId' => $kpiId,
+                'name' => $request->input('name'),
+                'score' => $request->input('score'),
             ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+
+            // Prepare the data exactly like the old project
+            $sectionData = [
+                'name' => $request->input('name'),
+                'description' => $request->input('description'),
+                'score' => $request->input('score'),
+                'active' => $request->input('active') == 1 ? true : false,
+                'kpiId' => $kpiId,
+            ];
+
+            Log::info('Section Store - Sending data to API', $sectionData);
+
+            $this->appraisalService->createSection($sectionData);
+
+            $kpiScore = 100;
+            $id = $kpiId;
+
+            return redirect()->route('section.index', compact('kpiScore', 'id'))->with('toast_success', 'Section created successfully');
+        } catch (ApiException $e) {
+            Log::error('Failed to create Section', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
@@ -195,49 +101,20 @@ class SectionController extends Controller
 
     public function show(string $kpiId, $sectionId)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $accessToken = session('api_token');
-        $apiUrl = "http://192.168.1.200:5123/Appraisal/Section/{$sectionId}";
-
-
-
         try {
-            // Make the GET request to the external API
-            $response = Http::withToken($accessToken)->get($apiUrl);
+            $sectionResponse = $this->appraisalService->getSection($sectionId);
+            $sectionData = $sectionResponse['data']  ?? $sectionResponse ?? null;
 
-            if ($response->successful()) {
-                // Convert the response to an object
-                $sectionData = $response->object();
-                // dd($sectionData);
-
-                $totalSectionScore = session('totalSectionScore');
-
-                return view('section-setup.edit', compact('sectionData', 'kpiId', 'totalSectionScore'));
+            if (!$sectionData) {
+                return redirect()->back()->with('toast_error', 'Section does not exist.');
             }
 
-            // Log the error response
-            Log::error('Failed to fetch Section', [
-                'status' => $response->status(),
-                'response' => $response->body()
-            ]);
+            $totalSectionScore = session('totalSectionScore');
 
-            return redirect()->back()->with('toast_error', 'Section does not exist.');
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while fetching Section', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return redirect()->back()->with(
-                'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
-            );
+            return view('section-setup.edit', compact('sectionData', 'kpiId', 'totalSectionScore'));
+        } catch (ApiException $e) {
+            Log::error('Failed to fetch Section', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
@@ -247,66 +124,25 @@ class SectionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $kpiId, $id)
+    public function update(UpdateSectionRequest $request, $kpiId, $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // Validate the request data
-        $request->validate([
-            'name' => 'required|string',
-            'description' => 'required|string',
-            'score' => 'required|integer',
-            'active' => 'required|boolean',
-            'kpiId' => 'required|integer',
-        ]);
-
-        $accessToken = session('api_token');
-        $apiUrl = "http://192.168.1.200:5123/Appraisal/Section/";
-
-        // Prepare the data for the Section update
-        $sectionData = [
-            'id' => $id,
-            'name' => $request->input('name'),
-            'description' => $request->input('description'),
-            'score' => $request->input('score'),
-            'active' => (bool)$request->input('active'),
-            'kpiId' => $request->input('kpiId'),
-        ];
-
         try {
-            // Make the PUT request to the external API
-            $response = Http::withToken($accessToken)->put($apiUrl, $sectionData);
+            $this->appraisalService->updateSection($id, [
+                'id' => $id,
+                'name' => $request->input('name'),
+                'description' => $request->input('description'),
+                'score' => $request->input('score'),
+                'active' => (bool)$request->input('active'),
+                'kpiId' => $request->input('kpiId'),
+            ]);
+
             $kpiScore = 100;
-            $id = $kpiId;
+            $routeId = $kpiId;
 
-            if ($response->successful()) {
-                return redirect()
-                    ->route('section.index', compact('kpiScore', 'id'))
-                    ->with('toast_success', 'Section updated successfully.');
-            }
-
-            // Log the error response
-            Log::error('Failed to update Section', [
-                'status' => $response->status(),
-                'response' => $response->body(),
-            ]);
-
-            return redirect()->back()->with('toast_error', 'Update Section Error:' . $response->body());
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while updating Section', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return redirect()->back()->with(
-                'toast_error',
-                'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>'
-            );
+            return redirect()->route('section.index', ['kpiScore' => $kpiScore, 'id' => $routeId])->with('toast_success', 'Section updated successfully.');
+        } catch (ApiException $e) {
+            Log::error('Failed to update Section', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 
@@ -317,32 +153,12 @@ class SectionController extends Controller
      */
     public function destroy($id)
     {
-        // Get the access token from the session
-        $accessToken = session('api_token'); // Replace with your actual access token
-
         try {
-            // Make the DELETE request to the external API
-            $response = Http::withToken($accessToken)
-                ->delete("http://192.168.1.200:5123/Appraisal/Section/{$id}");
-
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->back()->with('toast_success', 'Section deleted successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to delete Section', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete Section');
-            }
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while deleting Section', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+            $this->appraisalService->deleteSection($id);
+            return redirect()->back()->with('toast_success', 'Section deleted successfully');
+        } catch (ApiException $e) {
+            Log::error('Failed to delete Section', ['message' => $e->getMessage()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         }
     }
 

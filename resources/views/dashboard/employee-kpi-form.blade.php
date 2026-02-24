@@ -38,118 +38,131 @@
             </div>
         </div>
 
-        <div class="progress fixed-top" style="height: 10px;">
-            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-        </div>
+        <!-- Progress Bar - Sticky -->
+        @if (!in_array($kpiStatus ?? '', ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))
+            <div class="progress-container">
+                <div class="container-fluid card">
+                    <div class="progress-wrapper p-3 d-flex align-items-center justify-content-between ">
+                        <div class="progress-info">
+                            <span class="">Page</span>
+                            <span class="badge bg-primary" id="current-page">1</span>
+                            <span class="text-muted">of</span>
+                            <span class="">Page</span>
+                            <span class="badge bg-dark" id="total-pages">1</span>
+                        </div>
+                        <div class="progress flex-fill mx-3" style="height: 12px;">
+                            <div id="progress-bar" class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                                role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                <span id="progress-text">0%</span>
+                            </div>
+                        </div>
+                        <span class=" small">Completion</span>
+                    </div>
+                </div>
+            </div>
+        @endif
 
         <!-- end page title -->
         @php
-function getBadgeDetails($status)
-{
-    return match ($status) {
-        'PENDING' => ['class' => 'bg-dark', 'text' => 'PENDING'],
-        'REVIEW' => ['class' => 'bg-warning', 'text' => 'REVIEW'],
-        'CONFIRMATION' => ['class' => 'bg-primary', 'text' => 'CONFIRMATION'],
-        'COMPLETED' => ['class' => 'bg-success', 'text' => 'COMPLETED'],
-        'PROBLEM' => ['class' => 'bg-danger', 'text' => 'PROBE'],
-        default => ['class' => 'bg-secondary', 'text' => 'PENDING'],
-    };
+if (!function_exists('getBadgeDetails')) {
+    function getBadgeDetails($status)
+    {
+        return match ($status) {
+            'PENDING' => ['class' => 'bg-dark', 'text' => 'PENDING'],
+            'REVIEW' => ['class' => 'bg-warning', 'text' => 'REVIEW'],
+            'CONFIRMATION' => ['class' => 'bg-primary', 'text' => 'CONFIRMATION'],
+            'COMPLETED' => ['class' => 'bg-success', 'text' => 'COMPLETED'],
+            'PROBLEM' => ['class' => 'bg-danger', 'text' => 'PROBE'],
+            default => ['class' => 'bg-secondary', 'text' => 'PENDING'],
+        };
+    }
 }
 $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
         @endphp
 
-
         <!-- end page title -->
 
+        <!-- Appraisal Completed Message - Top -->
+        @if (($gradeDetails['status'] ?? null) === 'COMPLETED')
+            <div class="row mb-4">
+                <div class="col-lg-12">
+                    <div class="alert alert-success d-flex align-items-center" role="alert">
+                        <i class="bx bx-check-circle me-3" style="font-size: 2rem;"></i>
+                        <div>
+                            <h5 class="alert-heading mb-0">Appraisal Completed</h5>
+                            <p class="mb-0">Your appraisal has been successfully completed.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        <!-- Appraisal Grades Summary -->
         <div class="row">
             <div class="col-lg-12">
-                <div class="card">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bx bx-bar-chart-alt-2 me-2"></i>Appraisal Grades Summary
+                        </h5>
+                        <span class="badge rounded-pill {{ $badgeDetails['class'] }} fs-6">
+                            {{ $badgeDetails['text'] }}
+                        </span>
+                    </div>
                     <div class="card-body">
-                        <div class="card-title">
-                            <span>Appraisal Grades Summary</span> &nbsp; &nbsp;
-
-                        </div>
-                        <div class="d-flex justify-content-around align-items-start gap-4 p-3">
-                            <!-- Appraisal Grades Summary and Status -->
-                            <div class="flex-fill">
-                                <span class="badge rounded-pill bg-success mb-2">Final Employee Grade</span>
-                                <h5>Grade: <b>{{ $gradeDetails['grade'] ?? '___' }}</b></h5>
-                                <h5>Score: <b>{{ $gradeDetails['kpiScore'] ?? '___' }}</b></h5>
-                                <h5>Remark: <b>{{ $gradeDetails['remark'] ?? '___' }}</b></h5>
-                                <h5>Status: <b><span class="badge rounded-pill {{ $badgeDetails['class'] }}">
-                                            {{ $badgeDetails['text'] }}
-                                        </span></b>
-                                </h5>
-                                <h5><a href="#" data-bs-toggle="modal" data-bs-target=".bs-recommendation-modal-lg">
-                                    <span class="small btn-soft-info">View Supervisor
-                                        Recommendation</span>
-                                </a></h5>
-                            </div>
-
-                             {{--  Recommendation Modal   --}}
-                            <div class="modal fade bs-recommendation-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
-                                aria-hidden="true">
-                                <div class="modal-dialog modal-lg modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="myLargeModalLabel">Supervisors Recommendation About Your Performance</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="d-flex gap-5">
+                            <!-- Final Employee Grade Card -->
+                            <div class="card flex-fill border border-success border-2">
+                                <div class="card-body">
+                                    <span class="badge bg-success mb-3 fs-6">Final Employee Grade</span>
+                                    <div>
+                                        <div class="d-flex gap-2 mb-2 justify-content-between">
+                                        <span class="text-muted fs-6">Grade</span>
+                                        <span class=""><h5 class=" fs-5"><strong>{{ $gradeDetails['grade'] ?? '___' }}</strong></h5></span>
                                         </div>
-                                        <div class="modal-body">
-                                            <h4 class="text-center mb-4">
-                                                Your <b>Recommendation</b> for <b>Improvement</b>
-                                            </h4>
 
-                                            <div class="p-3 mb-2 bg-light text-dark border rounded">
-                                                @if (isset($gradeDetails['recommendation']) && !empty($gradeDetails['recommendation']))
-                                                    <p>{{ ($gradeDetails['recommendation'] ?? 'No Recommendation') === 'No Recommendation' ? '___' : $gradeDetails['recommendation'] }}</p>
-                                                @else
-                                                    <p class="text-center">No Recommendation Available</p>
-                                                @endif
-                                            </div>
-
+                                        <div class="d-flex gap-2 mb-2 justify-content-between">
+                                        <span class="text-muted  fs-6">Score</span>
+                                        <span class=""><h5 class=" fs-5"><strong>{{ $gradeDetails['kpiScore'] ?? '___' }}</strong></h5></span>
                                         </div>
+
+                                        <div class="d-flex gap-2 mb-2 justify-content-between">
+                                        <span class="text-muted  fs-6">Remark</span>
+                                        <span class=""><h5 class=" fs-5"><strong>{{ $gradeDetails['remark'] ?? '___' }}</strong></h5></span>
+                                        </div>
+
+                                        <a href="#" class="btn btn-sm btn-outline-success fs-6" data-bs-toggle="modal" data-bs-target=".bs-recommendation-modal-lg">
+                                            <i class="bx bx-message-detail me-1"></i>View Recommendation
+                                        </a>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Divider -->
-                            <div class="border-end" style="height: 100px;"></div>
+                            <!-- Employee Submitted Grade Card -->
+                            <div class="card flex-fill border border-secondary border-2">
+                                <div class="card-body">
+                                    <span class="badge bg-secondary mb-3 fs-6">Your Submitted Grade</span>
+                                    <h6 class="text-muted mb-3 fs-6">{{ $submittedEmployeeGrade->employeeName ?? '----' }}</h6>
 
-
-                            <!-- Submitted Employee Grade Section -->
-                            <div class="flex-fill">
-                                <span class="badge rounded-pill bg-secondary mb-2">Employee Grades Before Supervisor Review
-                                </span>
-                                <h5 class="mb-3">{{ $submittedEmployeeGrade->employeeName ?? '----' }}</h5>
-
-                                <span class="badge rounded-pill bg-secondary mb-2">Submitted Employee Grade</span>
-                                <div class="d-flex gap-2 mt-2">
-                                    <strong>{{ $submittedEmployeeGrade->totalKpiScore ?? '----' }}</strong>
-                                    <span>|</span>
-                                    <strong>{{ $submittedEmployeeGrade->grade ?? '----' }}</strong>
-                                    <span>|</span>
-                                    <strong>{{ $submittedEmployeeGrade->remark ?? '----' }}</strong>
+                                    <div class="d-flex gap-2 mb-3">
+                                        <span class="badge bg-secondary fs-6">{{ $submittedEmployeeGrade->totalKpiScore ?? '----' }}</span>
+                                        <span class="badge bg-secondary fs-6">{{ $submittedEmployeeGrade->grade ?? '----' }}</span>
+                                        <span class="badge bg-secondary fs-6">{{ $submittedEmployeeGrade->remark ?? '----' }}</span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Divider -->
-                            <div class="border-end" style="height: 100px;"></div>
+                            <!-- Supervisor Grade Card -->
+                            <div class="card flex-fill border border-primary border-2">
+                                <div class="card-body">
+                                    <span class="badge bg-primary mb-3 fs-6">Supervisor's Grade</span>
+                                    <h6 class="text-muted mb-3 fs-6">{{ $supervisorGradeForEmployee->employeeName ?? '----' }}</h6>
 
-                            <!-- Supervisor Grade Section -->
-                            <div class="flex-fill">
-                                <span class="badge rounded-pill bg-primary mb-2">Supervisor Grade For Employee Before
-                                    Confirmation</span>
-                                <h5 class="mb-3">{{ $supervisorGradeForEmployee->employeeName ?? '----' }}</h5>
-
-                                <span class="badge rounded-pill bg-primary mb-2">Supervisor Grade For Employee</span>
-                                <div class="d-flex gap-2 mt-2">
-                                    <strong>{{ $supervisorGradeForEmployee->totalKpiScore ?? '----' }}</strong>
-                                    <span>|</span>
-                                    <strong>{{ $supervisorGradeForEmployee->grade ?? '----' }}</strong>
-                                    <span>|</span>
-                                    <strong>{{ $supervisorGradeForEmployee->remark ?? '----' }}</strong>
+                                    <div class="d-flex gap-2 mb-3">
+                                        <span class="badge bg-primary fs-6">{{ $supervisorGradeForEmployee->totalKpiScore ?? '----' }}</span>
+                                        <span class="badge bg-primary fs-6">{{ $supervisorGradeForEmployee->grade ?? '----' }}</span>
+                                        <span class="badge bg-primary fs-6">{{ $supervisorGradeForEmployee->remark ?? '----' }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -158,31 +171,42 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
             </div>
         </div>
 
-        <!-- end row -->
+        {{--  Recommendation Modal   --}}
+        <div class="modal fade bs-recommendation-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-light">
+                        <h5 class="modal-title" id="myLargeModalLabel">
+                            <i class="bx bx-message-detail me-2"></i>Supervisor's Recommendation
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                        <div class="p-3 bg-light text-dark border rounded" style="word-break: break-word; white-space: pre-line;">
+                            @if (isset($gradeDetails['recommendation']) && !empty($gradeDetails['recommendation']) && $gradeDetails['recommendation'] !== 'No Recommendation')
+                                <p class="mb-0" style="word-break: break-word; white-space: pre-line;">{{ $gradeDetails['recommendation'] }}</p>
+                            @else
+                                <p class="text-center text-muted mb-0">
+                                    <i class="bx bx-info-circle me-1"></i>No recommendation available yet
+                                </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-
-        <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
-
-        <div class="row">
+        <!-- Evaluation Form Section -->
+        <div class="row mt-3">
             <div class="col-lg-12">
-                <div class="card">
-
-
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="bx bx-edit me-2"></i>Employee Evaluation Form
+                        </h5>
+                    </div>
                     <div class="card-body">
-                        <h4 class="card-title mb-4">Employee Evaluation Form</h4>
-
-                        @if (in_array($kpiStatus, ['REVIEW', 'CONFIRMATION', 'COMPLETED', 'PROBLEM']))
-                            <div></div>
-                        @else
-                            <div id="pagination-count" class=" text-center mb-3">
-                                <span><b>Current Page</b></span>
-                                <span class="badge rounded-pill bg-primary" id="current-page">1</span>/ <span><b>Last
-                                        Page</b></span><span class="badge rounded-pill bg-dark"
-                                    id="total-pages">1</span>
-                            </div>
-                        @endif
-
-
                         <div class="p-3 text-muted">
                             <div id="kpi-form">
                                 @if (isset($appraisal) && $appraisal->isNotEmpty())
@@ -483,11 +507,20 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
 
                             <hr class="mt-10">
 
-                            @if (
+                            @if (($gradeDetails['status'] ?? null) === 'COMPLETED')
+                                <div class="mt-4">
+                                    <div class="alert alert-success d-flex align-items-center" role="alert">
+                                        <i class="bx bx-check-circle me-3" style="font-size: 2rem;"></i>
+                                        <div>
+                                            <h5 class="alert-heading mb-0">Appraisal Completed</h5>
+                                            <p class="mb-0">Your appraisal has been successfully completed.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @elseif (
     isset($section->sectionEmpScore) &&
     ($section->sectionEmpScore->status === 'REVIEW' ||
         $section->sectionEmpScore->status === 'CONFIRMATION' ||
-        $section->sectionEmpScore->status === 'COMPLETED' ||
         $section->sectionEmpScore->status === 'PROBLEM')
 )
                                 <div></div>
@@ -498,12 +531,12 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                         <button id="next-btn" class="btn btn-primary">Next</button>
 
                                         <button id="submit-btn" type="button" data-bs-toggle="modal"
-                                            class="btn btn-success" data-bs-target=".bs-delete-modal-lg"
+                                            class="btn btn-success" data-bs-target=".submit-appraisal-modal"
                                             id="submitAppraisalButton" disabled>Submit Appraisal</button>
                                     </div>
                                 </div>
 
-                                <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
+                                <div class="modal fade submit-appraisal-modal" tabindex="-1" role="dialog"
                                     aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-md modal-dialog-centered">
                                         <div class="modal-content">
@@ -548,18 +581,18 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                 <div class="float-end">
                                     <div class="d-flex gap-3">
                                         <button type="button" data-bs-toggle="modal" class="btn btn-primary"
-                                            @style(['width: 8rem; height: fit-content']) data-bs-target=".bs-delete-modal-lg">Accept</button>
+                                            @style(['width: 8rem; height: fit-content']) data-bs-target=".accept-appraisal-modal">Accept</button>
 
                                         <button type="button" data-bs-toggle="modal" class="btn btn-dark"
                                             @style(['width: 8rem; height: fit-content']) data-bs-target=".bs-push-review-modal-lg">Push for Review</button>
 
-                                        <a href="{{ route('show.employee.probe', $kpi->kpi->kpiId) }}"
+                                        <a href="{{ route('show.employee.probe', [$kpi->kpi->kpiId, $kpi->kpi->batchId]) }}"
                                             class="btn btn-warning" @style(['width: 8rem; height: fit-content'])>Probe</a>
                                     </div>
                                 </div>
 
                                 <!-- Modal for Confirmation -->
-                                <div class="modal fade bs-delete-modal-lg" tabindex="-1" role="dialog"
+                                <div class="modal fade accept-appraisal-modal" tabindex="-1" role="dialog"
                                     aria-labelledby="myLargeModalLabel" aria-hidden="true">
                                     <div class="modal-dialog modal-md modal-dialog-centered">
                                         <div class="modal-content">
@@ -584,7 +617,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                                         value="{{ $kpi->kpi->batchId }}">
                                                     <input type="hidden" name="status" value="COMPLETED">
                                                     <div class="d-grid">
-                                                        <button type="submit" class="btn btn-success">Yes,
+                                                        <button type="submit" id="acceptAppraisalButton" class="btn btn-success">Yes,
                                                             Accept </button>
                                                     </div>
                                                 </form>
@@ -1022,6 +1055,7 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
 
                                         function updateNextButtonState() {
                                             const currentPage = parseInt(document.getElementById('current-page').textContent) - 1;
+                                            const totalPages = parseInt(document.getElementById('total-pages').textContent);
                                             const sections = document.querySelectorAll('.section-tab');
                                             const sectionsPerPage = 3;
                                             const start = currentPage * sectionsPerPage;
@@ -1049,7 +1083,8 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                                 });
                                             }
 
-                                            nextBtn.disabled = !(allFilled && allSaved);
+                                            // Disable next button if on last page or if not all fields are filled and saved
+                                            nextBtn.disabled = currentPage === totalPages - 1 || !(allFilled && allSaved);
                                         }
 
                                         document.querySelectorAll('input[type="number"][name*="EmpScore"], button[type="submit"]').forEach(element => {
@@ -1058,6 +1093,49 @@ $badgeDetails = getBadgeDetails($gradeDetails['status'] ?? null);
                                         });
 
                                         updateNextButtonState();
+                                    });
+                                </script>
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        // Handle loading indicator for submit review button (Submit Appraisal For Review)
+                                        const submitReviewButtons = document.querySelectorAll('#submitReviewButton');
+                                        submitReviewButtons.forEach(button => {
+                                            const form = button.closest('form');
+                                            if (form) {
+                                                form.addEventListener('submit', function(e) {
+                                                    const submitBtn = form.querySelector('#submitReviewButton');
+                                                    if (submitBtn && !submitBtn.disabled) {
+                                                        const originalHTML = submitBtn.innerHTML;
+                                                        const modal = form.closest('.modal');
+                                                        const closeBtn = modal ? modal.querySelector('.btn-close') : null;
+
+                                                        submitBtn.disabled = true;
+                                                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+                                                        if (closeBtn) closeBtn.disabled = true;
+                                                    }
+                                                });
+                                            }
+                                        });
+
+                                        // Handle loading indicator for accept appraisal button (Yes, Accept)
+                                        const acceptButton = document.getElementById('acceptAppraisalButton');
+                                        if (acceptButton) {
+                                            const form = acceptButton.closest('form');
+                                            if (form) {
+                                                form.addEventListener('submit', function(e) {
+                                                    if (acceptButton && !acceptButton.disabled) {
+                                                        const originalHTML = acceptButton.innerHTML;
+                                                        const modal = form.closest('.modal');
+                                                        const closeBtn = modal ? modal.querySelector('.btn-close') : null;
+
+                                                        acceptButton.disabled = true;
+                                                        acceptButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+                                                        if (closeBtn) closeBtn.disabled = true;
+                                                    }
+                                                });
+                                            }
+                                        }
                                     });
                                 </script>
                             @endpush

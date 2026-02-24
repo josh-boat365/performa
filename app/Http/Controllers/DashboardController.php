@@ -2,120 +2,909 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AppraisalApiService;
+use App\Services\HrmsApiService;
+use App\Exceptions\ApiException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Traits\HandlesApiResponses;
-
 
 class DashboardController extends Controller
 {
-    use HandlesApiResponses;
+    private AppraisalApiService $appraisalService;
+    private HrmsApiService $hrmsService;
+    private GetKpiGradeController $gradeController;
 
+    public function __construct(
+        AppraisalApiService $appraisalService,
+        HrmsApiService $hrmsService,
+        GetKpiGradeController $gradeController
+    ) {
+        $this->appraisalService = $appraisalService;
+        $this->hrmsService = $hrmsService;
+        $this->gradeController = $gradeController;
+    }
+
+    /**
+     * Display the main dashboard index
+     *
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     */
     public function index()
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $accessToken = session('api_token');
-
         try {
-            $response = $this->fetchDashboardData("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee", $accessToken);
-
-            if (!$response['success']) {
-                // Check if session expired
-                if (isset($response['session_expired']) && $response['session_expired']) {
-                    return $this->sessionExpiredRedirect();
-                }
-                return redirect()->back()->with('toast_error', $response['message']);
+            // Validate session token exists
+            $accessToken = session('api_token');
+            if (!$accessToken) {
+                return redirect()->route('login')->with('toast_error', 'Session not found. Please login again.');
             }
 
-            $kpis = $response['data'];
+            // Get logged in user
+            $loggedInUser = $this->getLoggedInUserInformation();
+            $employeeId = $loggedInUser->id ?? null;
+
+            if (!$employeeId) {
+                return redirect()->route('login')->with('toast_error', 'Could not identify user. Please login again.');
+            }
+
+            // Get all batches
+            $batchesResponse = $this->appraisalService->getAllBatches();
+            $allBatches = $batchesResponse['data'] ?? $batchesResponse ?? [];
+
+            if (empty($allBatches)) {
+                return view("dashboard.index", $this->prepareViewData(null, null, []));
+            }
+
+            // Get current KPI (first KPI for employee)
+            $kpisResponse = $this->appraisalService->getAllKpisForEmployee();
+            $kpis = $kpisResponse['data'] ?? $kpisResponse ?? [];
+
+            $currentBatchId = null;
+            $currentKpiDetails = null;
+            $employeeKpi = null;
+
+            if (!empty($kpis) && isset($kpis[0]['kpiId'])) {
+                $firstKpiId = $kpis[0]['kpiId'];
+                $currentBatchId = $kpis[0]['batchId'] ?? null;
+
+                // Get details for first KPI
+                $kpiDetailsResponse = $this->appraisalService->getKpiForEmployee($firstKpiId, $currentBatchId);
+                $currentKpiDetails = $kpiDetailsResponse['data'] ?? $kpiDetailsResponse ?? [];
+
+                if (!empty($currentKpiDetails)) {
+                    $employeeKpi = $this->processKpiDetails($currentKpiDetails);
+                }
+            }
+
+            // Build batch scores collection - fetch scores for all batches
+            $batchScores = collect();
+
+            foreach ($allBatches as $batch) {
+                $batchId = $batch['id'] ?? $batch['batchId'] ?? null;
+                if (!$batchId) {
+                    continue;
+                }
+
+                // Fetch employee scores for this batch
+                $gradeDetails = $this->fetchEmployeeTotalKpiScore($batchId, $employeeId);
+
+                $batchScores->push((object) [
+                    'batchId' => $batchId,
+                    'batchName' => $batch['name'] ?? $batch['batchName'] ?? 'Unknown',
+                    'batchYear' => $batch['year'] ?? null,
+                    'isCurrentBatch' => $batchId == $currentBatchId,
+                    'kpiScore' => $gradeDetails['kpiScore'] ?? null,
+                    'grade' => $gradeDetails['grade'] ?? null,
+                    'remark' => $gradeDetails['remark'] ?? null,
+                    'recommendation' => $gradeDetails['recommendation'] ?? null,
+                    'status' => $gradeDetails ? 'COMPLETED' : 'PENDING'
+                ]);
+            }
+
+            // Fetch grades for grading scheme display
+            $grades = $this->appraisalService->getAllGrades();
+            $gradesList = $grades['data'] ?? $grades ?? [];
+
+            return view("dashboard.index", $this->prepareViewData($employeeKpi, null, $batchScores, $gradesList));
+        } catch (ApiException $e) {
+            Log::error('Failed to retrieve appraisal overview', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()->with('toast_error', 'Failed to retrieve appraisal data. Please try again.');
+        } catch (\Exception $e) {
+            Log::error('Unexpected error in dashboard index', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()->with('toast_error', 'An unexpected error occurred. Please try again.');
+        }
+    }
+
+    /**
+     * Display available batches for appraisal
+     *
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function show()
+    {
+        try {
+            $response = $this->appraisalService->getAllBatches();
+            $batches = $response['data'] ?? $response ?? [];
+
+            if (empty($batches)) {
+                return view('dashboard.show-batch', ['activeBatches' => []]);
+            }
+
+            // Filter batches to get only those with status "OPEN" and active state true
+            $filteredBatches = array_filter($batches, function ($batch) {
+                return ($batch['status'] ?? null) === 'OPEN' && ($batch['active'] ?? false) === true;
+            });
+
+            $activeBatches = [];
+
+            foreach ($filteredBatches as $batch) {
+                $activeBatches = [
+                    'id' => $batch['id'] ?? null,
+                    'batch_name' => $batch['name'] ?? '',
+                ];
+            }
+
+            return view('dashboard.show-batch', compact('activeBatches'));
+        } catch (ApiException $e) {
+            Log::error('Failed to retrieve batches', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve batches');
+        } catch (\Exception $e) {
+            Log::error('Exception occurred while retrieving batches', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again');
+        }
+    }
+
+    /**
+     * Display KPI form for employee editing
+     *
+     * @param Request $request
+     * @param int|string $id KPI ID
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function editEmployeeKpi(Request $request, $id, $batchId)
+    {
+        try {
+            // Get KPIs for the specified employee
+            $response = $this->appraisalService->getKpiForEmployee($id, $batchId);
+            $kpisData = $response['data'] ?? $response ?? [];
+
+            // Convert all arrays to objects recursively (mimics old project's $response->object())
+            $kpis = $this->arrayToObject($kpisData);
+            // dd($kpis);
 
             if (empty($kpis)) {
-                return view("dashboard.index", $this->prepareViewData(null, null));
+                return redirect()->back()->with('toast_error', 'No KPIs found for this employee');
             }
 
-            $firstKpiId = $kpis[0]['kpiId'] ?? null;
+            // Initialize an empty collection for active appraisals
+            $appraisal = collect();
 
-            if (!$firstKpiId) {
-                return view("dashboard.index", $this->prepareViewData(null, null));
+            $kpiId = $kpis[0]->kpiId ?? null;
+
+            // Process each KPI
+            foreach ($kpis as $kpi) {
+                if ($kpi->kpiActive) {
+                    // Filter active sections
+                    $activeSections = collect($kpi->sections)->filter(function ($section) {
+                        return $section->sectionActive;
+                    });
+
+                    $activeSections->transform(function ($section) {
+                        $section->metrics = collect($section->metrics)->filter(function ($metric) {
+                            return $metric->metricActive;
+                        });
+                        return $section;
+                    });
+
+                    $appraisal->push((object) [
+                        'kpi' => $kpi,
+                        'activeSections' => $activeSections
+                    ]);
+
+                    // Collect statuses from sections
+                    $statuses = [];
+                    if (in_array($kpi->kpiType ?? null, ['GLOBAL', 'REGULAR'])) {
+                        foreach ($kpi->sections as $section) {
+                            $status = $section->sectionEmpScore->status ?? 'PENDING';
+                            $statuses[] = $status;
+                        }
+
+                        $uniqueStatuses = array_unique($statuses);
+                        $kpiStatus = count($uniqueStatuses) > 0 ? reset($uniqueStatuses) : 'PENDING';
+                        $batchId = $kpi->batchId;
+                        $employeeId = $kpi->employeeId;
+                    }
+                }
             }
 
-            $kpiDetailsResponse = $this->fetchDashboardData("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$firstKpiId}", $accessToken);
+            // Get employee appraisal report data (includes supervisor info and grades)
+            // Using the same endpoint as ReportController for consistent data availability
+            $reportData = $this->fetchAppraisalReportData($batchId ?? null, $employeeId ?? null);
 
-            if (!$kpiDetailsResponse['success']) {
-                return redirect()->back()->with('toast_error', $kpiDetailsResponse['message']);
+            if ($reportData) {
+                $gradeDetails = [
+                    'kpiScore' => $reportData['kpiScore'],
+                    'grade' => $reportData['grade'],
+                    'remark' => $reportData['remark'],
+                    'recommendation' => $reportData['recommendation'],
+                    'status' => $kpiStatus ?? 'PENDING',
+                    'supervisorName' => $reportData['supervisorName'],
+                    'employeeName' => $reportData['employeeName'],
+                ];
+            } else {
+                // Fallback to fetching total KPI score if report data not available
+                $kpiScoreData = $this->fetchEmployeeTotalKpiScore($batchId ?? null, $employeeId ?? null);
+                if ($kpiScoreData) {
+                    $gradeDetails = array_merge($kpiScoreData, [
+                        'status' => $kpiStatus ?? 'PENDING',
+                        'supervisorName' => 'N/A',
+                        'employeeName' => 'N/A',
+                    ]);
+                } else {
+                    $gradeDetails = [
+                        'kpiScore' => null,
+                        'grade' => null,
+                        'remark' => null,
+                        'recommendation' => null,
+                        'status' => $kpiStatus ?? 'PENDING',
+                        'supervisorName' => 'N/A',
+                        'employeeName' => 'N/A',
+                    ];
+                }
             }
 
-            $kpiDetails = $kpiDetailsResponse['data'];
-            $employeeKpi = $this->processKpiDetails($kpiDetails);
+            // Get logged in user
+            $loggedInUser = $this->getLoggedInUserInformation();
+            $userId = $loggedInUser->id ?? null;
 
-            $gradeDetails = $this->fetchEmployeeGrade($accessToken, $employeeKpi['batch_id'] ?? '', $employeeKpi['employee_id'] ?? '');
+            // Get employee grades (using GetKpiGradeController service)
+            $submittedEmployeeGrade = null;
+            $supervisorGradeForEmployee = null;
 
-            return view("dashboard.index", $this->prepareViewData($employeeKpi, $gradeDetails));
-        } catch (\Exception $e) {
-            Log::error('Exception occurred while retrieving Appraisal Overview', [
+            if ($kpiId && $batchId && $userId) {
+                try {
+                    $gradeInfo = $this->gradeController->getGrade($kpiId, $batchId, $userId);
+                    $submittedEmployeeGrade = $gradeInfo->submittedEmployeeGrade ?? null;
+                    $supervisorGradeForEmployee = $gradeInfo->supervisorGradeForEmployee ?? null;
+                } catch (\Exception $e) {
+                    Log::warning('Failed to fetch grade information', ['error' => $e->getMessage()]);
+                }
+            }
+
+            return view("dashboard.employee-kpi-form", compact(
+                'appraisal',
+                'batchId',
+                'gradeDetails',
+                'kpiStatus',
+                'employeeId',
+                'userId',
+                'submittedEmployeeGrade',
+                'supervisorGradeForEmployee'
+            ));
+        } catch (ApiException $e) {
+            Log::error('Failed to retrieve KPIs for editing', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
+            return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPI data');
+        } catch (\Exception $e) {
+            Log::error('Exception occurred while retrieving KPIs for editing', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again');
         }
     }
 
-    private function fetchDashboardData($url, $token)
+    /**
+     * Display employee KPI information
+     *
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function showEmployeeKpi()
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
+        // Debug: Log session data to trace toast messages
+        Log::debug('showEmployeeKpi: Session data on page load', [
+            'has_toast_success' => session()->has('toast_success'),
+            'toast_success' => session('toast_success'),
+            'has_toast_error' => session()->has('toast_error'),
+            'toast_error' => session('toast_error'),
+            'has_errors' => session()->has('errors'),
+            'all_flash_keys' => array_keys(session()->all()),
+        ]);
 
         try {
-            $response = Http::withToken($token)->get($url);
+            // Get all KPIs for the employee
+            $response = $this->appraisalService->getAllKpisForEmployee();
+            $kpis = $response['data'] ?? $response ?? [];
 
-            // Handle expired session (401 Unauthorized)
-            if ($response->status() === 401) {
-                return ['success' => false, 'message' => 'session_expired', 'session_expired' => true];
-            }
-
-            if ($response->status() === 400) {
-                return ['success' => false, 'message' => 'Invalid request to the server. Please try again later.'];
-            }
-
-            if (!$response->successful()) {
-                Log::error('Failed to fetch data from API', [
-                    'url' => $url,
-                    'status' => $response->status(),
-                    'response' => $response->body()
+            if (empty($kpis) || !isset($kpis[0]['kpiId'])) {
+                return view("dashboard.show-employee-kpi", [
+                    'employeeKpi' => null,
+                    'gradeDetails' => null
                 ]);
-                return ['success' => false, 'message' => 'Failed to retrieve data from the API.'];
             }
 
-            return ['success' => true, 'data' => $response->json()];
-        } catch (\Exception $e) {
-            Log::error('Exception during API call', [
-                'url' => $url,
-                'message' => $e->getMessage()
+            $firstKpiId = $kpis[0]['kpiId'];
+            $firstBatchId = $kpis[0]['batchId'] ?? null;
+
+            // Get detailed KPI information
+            $kpiResponse = $this->appraisalService->getKpiForEmployee($firstKpiId, $firstBatchId);
+            $kpiDetails = $kpiResponse['data'] ?? $kpiResponse ?? [];
+
+            if (empty($kpiDetails)) {
+                return view("dashboard.show-employee-kpi", [
+                    'employeeKpi' => null,
+                    'gradeDetails' => null
+                ]);
+            }
+
+            // Calculate section counts and status
+            $globalSectionCount = 0;
+            $regularSectionCount = 0;
+            $batchId = null;
+            $employeeId = null;
+            $kpiStatus = 'PENDING';
+
+            foreach ($kpiDetails as $kpi) {
+                if (($kpi['kpiType'] ?? null) === 'GLOBAL') {
+                    $globalSectionCount += count($kpi['sections'] ?? []);
+                }
+
+                if (($kpi['kpiType'] ?? null) === 'REGULAR') {
+                    $regularSectionCount += count($kpi['sections'] ?? []);
+                }
+
+                // Collect statuses
+                if (in_array($kpi['kpiType'] ?? null, ['GLOBAL', 'REGULAR'])) {
+                    $statuses = [];
+                    foreach ($kpi['sections'] ?? [] as $section) {
+                        $status = $section['sectionEmpScore']['status'] ?? 'PENDING';
+                        $statuses[] = $status;
+                    }
+
+                    $uniqueStatuses = array_unique($statuses);
+                    $kpiStatus = count($uniqueStatuses) > 0 ? reset($uniqueStatuses) : 'PENDING';
+                    $batchId = $kpi['batchId'] ?? null;
+                    $employeeId = $kpi['employeeId'] ?? null;
+                }
+            }
+
+            $totalSectionCount = $globalSectionCount + $regularSectionCount;
+
+            // Get employee grade details
+            $gradeDetails = $this->fetchEmployeeTotalKpiScore($batchId, $employeeId);
+            if ($gradeDetails) {
+                $gradeDetails['status'] = $kpiStatus;
+            } else {
+                $gradeDetails = [
+                    'kpiScore' => null,
+                    'grade' => null,
+                    'remark' => null,
+                    'recommendation' => null,
+                    'status' => $kpiStatus
+                ];
+            }
+
+            // Filter for REGULAR KPI type
+            $regularKpiDetails = collect($kpiDetails)->filter(function ($kpi) {
+                return ($kpi['kpiType'] ?? null) === 'REGULAR';
+            })->first();
+
+            // Prepare employee KPI information
+            $employeeKpi = [
+                'id' => $regularKpiDetails['kpiId'] ?? null,
+                'batch_id' => $regularKpiDetails['batchId'] ?? null,
+                'kpi_name' => $regularKpiDetails['kpiName'] ?? 'N/A',
+                'section_count' => $totalSectionCount
+            ];
+
+            return view("dashboard.show-employee-kpi", compact('employeeKpi', 'gradeDetails'));
+        } catch (ApiException $e) {
+            Log::error('Failed to retrieve employee KPIs', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
-            return ['success' => false, 'message' => 'An error occurred while fetching data.'];
+            // Return view with empty data instead of redirecting
+            return view("dashboard.show-employee-kpi", [
+                'employeeKpi' => null,
+                'gradeDetails' => null
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Exception occurred while retrieving employee KPIs', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            // Return view with empty data instead of redirecting
+            return view("dashboard.show-employee-kpi", [
+                'employeeKpi' => null,
+                'gradeDetails' => null
+            ]);
         }
     }
 
-    private function processKpiDetails($kpiDetails)
+    /**
+     * Display supervisor KPI scoring form for employee
+     *
+     * @param Request $request
+     * @param int|string $id KPI ID
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function showEmployeeSupervisorKpiScore(Request $request, $id, $batchId)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
+        try {
+            // Get KPIs for the specified employee
+            $response = $this->appraisalService->getKpiForEmployee($id, $batchId);
+            $kpis = $response['data'] ?? $response ?? [];
+
+            if (empty($kpis)) {
+                return redirect()->back()->with('toast_error', 'No KPIs found');
+            }
+
+            $batchId = $kpis[0]['batchId'] ?? null;
+
+            // Filter KPIs with active sections and metrics
+            $appraisal = collect($kpis)->filter(function ($kpi) {
+                if (!($kpi['kpiActive'] ?? false)) {
+                    return false;
+                }
+
+                // Filter active sections
+                $activeSections = collect($kpi['sections'] ?? [])->filter(function ($section) {
+                    return $section['sectionActive'] ?? false;
+                });
+
+                if ($activeSections->isEmpty()) {
+                    return false;
+                }
+
+                // Filter active metrics in sections
+                $activeSections->transform(function ($section) {
+                    $section['metrics'] = collect($section['metrics'] ?? [])->filter(function ($metric) {
+                        return $metric['metricActive'] ?? false;
+                    });
+                    return $section;
+                });
+
+                return $activeSections->filter(function ($section) {
+                    return collect($section['metrics'] ?? [])->isNotEmpty();
+                })->isNotEmpty();
+            })->map(function ($kpi) {
+                return (object) $kpi;
+            });
+
+            return view("dashboard.employee-supervisor-kpi-score-form", compact('appraisal', 'batchId'));
+        } catch (ApiException $e) {
+            Log::error('Failed to retrieve KPIs for supervisor scoring', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
+        } catch (\Exception $e) {
+            Log::error('Exception occurred while retrieving KPIs for supervisor scoring', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again');
+        }
+    }
+
+    /**
+     * Display probing scoring form for employee
+     *
+     * @param Request $request
+     * @param int|string $id KPI ID
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
+     */
+    public function showEmployeeProbe(Request $request, $id, $batchId)
+    {
+        try {
+            // Get KPIs for the specified employee
+            $response = $this->appraisalService->getKpiForEmployee($id, $batchId);
+            $kpis = $response['data'] ?? $response ?? [];
+
+            if (empty($kpis)) {
+                return redirect()->back()->with('toast_error', 'No KPIs found');
+            }
+
+            // Initialize variables
+            $appraisal = collect();
+            $batchId = null;
+            $kpiStatus = 'PENDING';
+
+            // Process each KPI
+            foreach ($kpis as $kpi) {
+                if ($kpi['kpiActive'] ?? false) {
+                    // Filter active sections
+                    $activeSections = collect($kpi['sections'] ?? [])->filter(function ($section) {
+                        return $section['sectionActive'] ?? false;
+                    });
+
+                    $activeSections->transform(function ($section) {
+                        $section['metrics'] = collect($section['metrics'] ?? [])->filter(function ($metric) {
+                            return $metric['metricActive'] ?? false;
+                        });
+                        return $section;
+                    });
+
+                    $appraisal->push((object) [
+                        'kpi' => (object) $kpi,
+                        'activeSections' => $activeSections
+                    ]);
+
+                    // Get status from first section
+                    if (!empty($kpi['sections'])) {
+                        $firstSection = $kpi['sections'][0];
+                        $kpiStatus = $firstSection['sectionEmpScore']['status'] ?? 'PENDING';
+                    }
+
+                    $batchId = $kpi['batchId'] ?? null;
+                }
+            }
+
+            // Get logged in user information
+            $loggedInUser = $this->getLoggedInUserInformation();
+            $employeeId = $loggedInUser->id ?? null;
+
+            return view("dashboard.test-employee-probe-form", compact('appraisal', 'batchId', 'kpiStatus', 'employeeId'));
+        } catch (ApiException $e) {
+            Log::error('Failed to retrieve KPIs for probing', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
+        } catch (\Exception $e) {
+            Log::error('Exception occurred while retrieving KPIs for probing', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again');
+        }
+    }
+
+    /**
+     * Display my KPIs page
+     *
+     * @return \Illuminate\View\View
+     */
+    public function my_kpis()
+    {
+        return view("dashboard.my-kpis");
+    }
+
+    /**
+     * Display KPI setup page
+     *
+     * @return \Illuminate\View\View
+     */
+    public function kpi_setup()
+    {
+        return view("kpi-setup.kpi-setup");
+    }
+
+    /**
+     * Display score setup page
+     *
+     * @return \Illuminate\View\View
+     */
+    public function score_setup()
+    {
+        return view("kpi-setup.score-setup");
+    }
+
+    /**
+     * Get information about the currently logged-in user
+     *
+     * @return object|null User information object or null on failure
+     */
+    public function getLoggedInUserInformation()
+    {
+        try {
+            $response = $this->hrmsService->getCurrentEmployeeInformation();
+            $user = $response['data'] ?? $response ?? null;
+
+            if (!$user || empty($user)) {
+                Log::warning('No user data returned from HRMS service');
+                return null;
+            }
+
+            // If user is an array, convert to object; if already object, return as is
+            if (is_array($user)) {
+                return (object) $user;
+            }
+            return $user;
+        } catch (ApiException $e) {
+            Log::warning('Failed to retrieve logged-in user information', [
+                'message' => $e->getMessage(),
+            ]);
+            return null;
+        } catch (\Exception $e) {
+            Log::warning('Exception occurred while retrieving user information', [
+                'message' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Fetch employee grade details for a batch
+     *
+     * @param string|int $batchId The batch ID
+     * @param string|int $employeeId The employee ID
+     * @return array|null Grade details or null on failure
+     */
+    private function fetchEmployeeGrade($batchId, $employeeId)
+    {
+        if (empty($batchId) || empty($employeeId)) {
+
+            return [
+                'kpiScore' => null,
+                'grade' => null,
+                'remark' => null,
+                'status' => '---'
+            ];
+        }
+
+
+
+        try {
+
+            // Use getEmployeeTotalKpiScore with PUT request (matches old implementation)
+            $payload = [
+                'batchId' => (int) $batchId,
+                'employeeId' => (int) $employeeId
+            ];
+
+            Log::debug('fetchEmployeeGrade - Requesting total KPI score', [
+                'payload' => $payload,
+                'payload_json' => json_encode($payload)
+            ]);
+
+            $response = $this->appraisalService->getEmployeeTotalKpiScore($payload);
+
+            // Response is already the grade data, not wrapped in ['data']
+            $grade = $response;
+
+            if ($grade && !empty($grade)) {
+                return [
+                    'kpiScore' => $grade['totalKpiScore'] ?? null,
+                    'grade' => $grade['grade'] ?? null,
+                    'remark' => $grade['remark'] ?? null,
+                    'recommendation' => $grade['recommendation'] ?? null,
+                    'status' => $grade['status'] ?? '---'
+                ];
+            }
+            return [
+                'kpiScore' => null,
+                'grade' => null,
+                'remark' => null,
+                'status' => '---'
+            ];
+        } catch (ApiException $e) {
+            Log::warning('Failed to fetch employee grade', [
+                'batchId' => $batchId,
+                'employeeId' => $employeeId,
+                'message' => $e->getMessage(),
+            ]);
+            return [
+                'kpiScore' => null,
+                'grade' => null,
+                'remark' => null,
+                'status' => '---'
+            ];
+        }
+    }
+
+    /**
+     * Fetch employee total KPI score
+     *
+     * This method calls the employee-total-kpiscore endpoint to get the
+     * calculated total KPI score for an employee in a batch.
+     *
+     * @param string|int $batchId The batch ID
+     * @param string|int $employeeId The employee ID
+     * @return array|null Grade details with total KPI score or null on failure
+     */
+    /**
+     * Recursively convert arrays to objects (mimics $response->object())
+     * Keeps arrays as arrays but converts objects/stdClass throughout the structure
+     */
+    private function arrayToObject($data)
+    {
+        if (is_array($data)) {
+            // Check if it's an associative array (should become object)
+            if ($this->isAssociativeArray($data)) {
+                $obj = new \stdClass();
+                foreach ($data as $key => $value) {
+                    $obj->{$key} = $this->arrayToObject($value);
+                }
+                return $obj;
+            }
+            // Sequential array - keep as array but convert items
+            return array_map(fn($item) => $this->arrayToObject($item), $data);
+        } elseif (is_object($data)) {
+            // Convert object properties recursively
+            foreach ($data as $key => $value) {
+                $data->{$key} = $this->arrayToObject($value);
+            }
+            return $data;
+        }
+        return $data;
+    }
+
+    /**
+     * Check if an array is associative (has string keys)
+     */
+    private function isAssociativeArray(array $arr): bool
+    {
+        if (empty($arr)) {
+            return false;
+        }
+        return array_keys($arr) !== range(0, count($arr) - 1);
+    }
+
+    private function fetchEmployeeTotalKpiScore($batchId, $employeeId)
+    {
+        if (empty($batchId) || empty($employeeId)) {
+            return null;
+        }
+
+        try {
+            // Use the service method to get employee total KPI score
+            $payload = [
+                'batchId' => (int) $batchId,
+                'employeeId' => (int) $employeeId
+            ];
+
+            $response = $this->appraisalService->getEmployeeTotalKpiScore($payload);
+
+            // Handle response that might be wrapped in 'data' key
+            $grade = $response['data'] ?? $response;
+
+            if (!empty($grade)) {
+                return [
+                    'kpiScore' => $grade['totalKpiScore'] ?? null,
+                    'grade' => $grade['grade'] ?? null,
+                    'remark' => $grade['remark'] ?? null,
+                    'recommendation' => $grade['recommendation'] ?? null,
+                ];
+            }
+            return null;
+        } catch (ApiException $e) {
+            // Handle 400 errors (no scores processed yet) gracefully
+            if (str_contains($e->getMessage(), 'not found') || str_contains($e->getMessage(), 'Total KPI Score')) {
+                Log::debug('No KPI score found for batch/employee', [
+                    'batchId' => $batchId,
+                    'employeeId' => $employeeId,
+                    'message' => $e->getMessage(),
+                ]);
+                return null;
+            }
+
+            Log::warning('Failed to fetch employee total KPI score', [
+                'batchId' => $batchId,
+                'employeeId' => $employeeId,
+                'message' => $e->getMessage(),
+            ]);
+            return null;
+        } catch (\Exception $e) {
+            Log::warning('Exception while fetching employee total KPI score', [
+                'batchId' => $batchId,
+                'employeeId' => $employeeId,
+                'message' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Fetch comprehensive appraisal report data including supervisor info and grades
+     * Uses the same endpoint as ReportController to ensure data is available before submission
+     *
+     * @param int $batchId The Batch ID
+     * @param int $employeeId The Employee ID
+     * @return array|null Appraisal report data with supervisor names, employee names, and grades
+     */
+    private function fetchAppraisalReportData($batchId, $employeeId)
+    {
+        if (empty($batchId) || empty($employeeId)) {
+            return null;
+        }
+
+        try {
+            // Use the same getReports endpoint as ReportController
+            $payload = [
+                'batchId' => (int) $batchId,
+                'employeeId' => (int) $employeeId
+            ];
+
+            $response = $this->appraisalService->getReports($payload);
+
+            // Handle response that might be wrapped in 'data' key
+            $reportsData = $response['data'] ?? $response;
+
+            if (empty($reportsData) || !is_array($reportsData)) {
+                return null;
+            }
+
+            // Extract the batch and employee data from reports
+            $batch = $reportsData[0] ?? null;
+            if (!$batch) {
+                return null;
+            }
+
+            $employees = $batch['employees'] ?? [];
+            $employee = $employees[0] ?? null;
+
+            if (!$employee) {
+                return null;
+            }
+
+            // Extract supervisor information from the first score record
+            $supervisorName = 'N/A';
+            $scores = $employee['scores'] ?? [];
+            if (!empty($scores)) {
+                $supervisorName = $scores[0]['supervisorName'] ?? 'N/A';
+            }
+
+            // Extract total scores
+            $totalScore = $employee['totalScore'] ?? [];
+
+            return [
+                'employeeName' => $employee['employeeName'] ?? 'N/A',
+                'supervisorName' => $supervisorName,
+                'departmentName' => $employee['departmentName'] ?? 'N/A',
+                'roleName' => $employee['roleName'] ?? 'N/A',
+                'branchName' => $employee['branchName'] ?? 'N/A',
+                'kpiScore' => $totalScore['totalKpiScore'] ?? null,
+                'grade' => $totalScore['grade'] ?? null,
+                'remark' => $totalScore['remark'] ?? null,
+                'recommendation' => $totalScore['recommendation'] ?? null,
+            ];
+        } catch (ApiException $e) {
+            // Log the error but don't throw - return null gracefully
+            Log::debug('No appraisal report data found for batch/employee', [
+                'batchId' => $batchId,
+                'employeeId' => $employeeId,
+                'message' => $e->getMessage(),
+            ]);
+            return null;
+        } catch (\Exception $e) {
+            Log::warning('Exception while fetching appraisal report data', [
+                'batchId' => $batchId,
+                'employeeId' => $employeeId,
+                'message' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Process KPI details into standardized format
+     *
+     * @param array $kpiDetails Raw KPI details from API
+     * @return array Processed KPI details
+     */
+    private function processKpiDetails(array $kpiDetails): array
+    {
+        if (empty($kpiDetails)) {
+            return [];
+        }
 
         $globalSectionCount = 0;
         $regularSectionCount = 0;
@@ -152,660 +941,38 @@ class DashboardController extends Controller
         ];
     }
 
-    private function fetchEmployeeGrade($token, $batchId, $employeeId)
+    /**
+     * Prepare view data with KPI and grade information
+     *
+     * @param array|null $employeeKpi Employee KPI information
+     * @param array|null $gradeDetails Grade and score details
+     * @param \Illuminate\Support\Collection|array $batchScores Batch scores collection
+     * @return array Formatted view data
+     */
+    private function prepareViewData(?array $employeeKpi, ?array $gradeDetails, $batchScores = null, $grades = null): array
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $gradeData = [
-            'batchId' => $batchId,
-            'employeeId' => $employeeId
-        ];
-
-        $response = Http::withToken($token)->put("http://192.168.1.200:5123/Appraisal/Score/employee-total-kpiscore", $gradeData);
-
-        if ($response->successful() && $grade = $response->object()) {
-            return [
-                'kpiScore' => $grade->totalKpiScore ?? null,
-                'grade' => $grade->grade ?? null,
-                'remark' => $grade->remark ?? null,
-                'status' => $grade->status ?? '---'
-            ];
-        }
-
-        return [
-            'kpiScore' => null,
-            'grade' => null,
-            'remark' => null,
-            'status' => '---'
-        ];
-    }
-
-    private function prepareViewData($employeeKpi, $gradeDetails)
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
         return [
             'employeeKpi' => $employeeKpi ?? [
-                'id' => '---',
-                'batch_id' => '---',
-                'kpi_name' => '---',
-                'batch_name' => '---',
-                'section_count' => '---'
+                'id' => null,
+                'batch_id' => null,
+                'employee_id' => null,
+                'kpi_name' => 'No KPI assigned',
+                'kpi_type' => 'REGULAR',
+                'kpi_active' => false,
+                'sections' => [],
+                'kpi_status' => 'PENDING',
+                'grade' => 'N/A',
+                'score' => 0,
+                'remark' => 'No data available',
             ],
             'gradeDetails' => $gradeDetails ?? [
-                'kpiScore' => null,
-                'grade' => null,
-                'remark' => null,
-                'status' => '---'
-            ]
+                'submittedEmployeeGrade' => null,
+                'supervisorGradeForEmployee' => null,
+                'grade' => 'N/A',
+                'score' => 0,
+            ],
+            'batchScores' => $batchScores ?? collect(),
+            'grades' => $grades ?? [],
         ];
-    }
-
-
-
-
-    public function show()
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $accessToken = session('api_token');
-
-        try {
-            $response = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5123/Appraisal/Batch');
-
-            if ($response->successful()) {
-
-                $batches = $response->json();
-
-
-                // Filter batches to get only those with status "OPEN" and active state true
-                $batch = array_filter($batches, function ($batch) {
-                    return $batch['status'] === 'OPEN' && $batch['active'] === true;
-                });
-
-                $activeBatches = [];
-
-                foreach ($batch as $activeBatch) {
-                    // dd($activeBatch);
-                    $activeBatches = [
-                        'id' => $activeBatch['id'],
-                        'batch_name' => $activeBatch['name'],
-                    ];
-                }
-
-
-                // dd($activeBatch['id']);
-
-
-
-                return view('dashboard.show-batch', compact('activeBatches')); // Pass to view
-
-            } else {
-                // Log the error response
-                Log::error('Failed to retrieve Employee Appraisal', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve Appraisal');
-            }
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while retrieving EMployee Appraisal', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
-        }
-    }
-
-    public function editEmployeeKpi(Request $request, $id)
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // Get the access token from the session
-        $accessToken = session('api_token');
-
-        try {
-            // Make the GET request to the external API to get KPIs for the specified employee ID
-            $response = Http::withToken($accessToken)
-                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
-
-            // Check for session expiration (401 Unauthorized)
-            if ($response->status() === 401) {
-                return $this->sessionExpiredRedirect();
-            }
-
-            // Check if the response is successful
-            if (!$response->successful()) {
-                Log::error('Failed to retrieve KPIs', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve Appraisal, <b>Contact Application Support for Assistance</b>');
-            }
-
-            // Decode the response into an object
-            $kpis = $response->object();
-
-            // Initialize an empty collection for active appraisals
-            $appraisal = collect();
-
-            $kpiId = $kpis[0]->kpiId ?? null;
-
-            // Process each KPI
-            foreach ($kpis as $kpi) {
-                if ($kpi->kpiActive) {
-                    // Filter active sections
-                    $activeSections = collect($kpi->sections)->filter(function ($section) {
-                        return $section->sectionActive;
-                    });
-
-                    $activeSections->transform(function ($section) {
-                        $section->metrics = collect($section->metrics)->filter(function ($metric) {
-                            return $metric->metricActive;
-                        });
-                        return $section;
-                    });
-
-
-                    $appraisal->push((object) [
-                        'kpi' => $kpi,
-                        'activeSections' => $activeSections
-                    ]);
-                }
-            }
-
-
-            $grade_data = [];
-
-
-            foreach ($kpis as $kpi) {
-
-                $statuses = []; // Initialize an array to hold statuses
-
-                if (
-                    $kpi->kpiType === 'GLOBAL' || $kpi->kpiType === 'REGULAR'
-                ) {
-                    // Iterate through the sections to collect statuses
-                    foreach ($kpi->sections as $section) {
-                        // Get the status from each section's employee score
-                        $status = $section->sectionEmpScore->status ?? 'PENDING';
-                        $statuses[] = $status; // Add the status to the array
-                    }
-
-                    // Get unique statuses or just pick one
-                    $uniqueStatuses = array_unique($statuses);
-                    $kpiStatus = count($uniqueStatuses) > 0 ? reset($uniqueStatuses) : 'PENDING'; // Get the first unique status or default to 'PENDING'
-
-                    // Set batchId and employeeId
-                    $batchId = $kpi->batchId;
-                    $employeeId = $kpi->employeeId;
-                }
-            }
-
-            $grade_data = [
-                'batchId' => $batchId,
-                'employeeId' => $employeeId
-            ];
-
-
-            $employeeGrade =
-                Http::withToken($accessToken)
-                ->put("http://192.168.1.200:5123/Appraisal/Score/employee-total-kpiscore", $grade_data);
-
-
-            $batchId = $appraisal->isNotEmpty() ? $appraisal->first()->kpi->batchId : null;
-
-            if ($employeeGrade->successful() && !empty($employeeGrade->object())) {
-                $grade = $employeeGrade->object();
-                $gradeDetails = [
-                    'kpiScore' => $grade->totalKpiScore,
-                    'grade' => $grade->grade,
-                    'remark' => $grade->remark,
-                    'recommendation' => $grade->recommendation,
-                    'status' => $kpiStatus
-                ];
-            } else {
-                $gradeDetails = [
-                    'kpiScore' => null,
-                    'grade' => null,
-                    'remark' => null,
-                    'status' => $kpiStatus
-                ];
-            }
-
-
-
-            // dd($user);
-            $employeeId = $this->getLoggedInUserInformation()->id ?? null;
-
-            //Get Employee Grades and Supervisor Grades for Employee
-            $submittedEmployeeGrade = GetKpiGradeController::getGrade($kpiId, $batchId, $employeeId)->submittedEmployeeGrade;
-            $supervisorGradeForEmployee = GetKpiGradeController::getGrade($kpiId, $batchId, $employeeId)->supervisorGradeForEmployee;
-
-
-
-
-
-            // Return the KPI names and section counts to the view
-            return view("dashboard.employee-kpi-form", compact('appraisal', 'batchId', 'gradeDetails', 'kpiStatus', 'employeeId', 'submittedEmployeeGrade', 'supervisorGradeForEmployee'));
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error(
-                'Exception occurred while retrieving KPIs',
-                [
-                    'message' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]
-            );
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
-        }
-    }
-
-
-
-    public function showEmployeeKpi()
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // Get the access token from the session
-        $accessToken = session('api_token');
-
-        if (!$accessToken) {
-            return $this->sessionExpiredRedirect();
-        }
-
-        try {
-            // Make the GET request to the external API to get KPIs for the specified employee
-            $response = Http::withToken($accessToken)
-                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetAllKpiForEmployee");
-
-            // Check for session expiration (401 Unauthorized)
-            if ($response->status() === 401) {
-                return $this->sessionExpiredRedirect();
-            }
-
-            if ($response->successful()) {
-                // Decode the response into an array of KPIs
-                $kpi = $response->json();
-                // dd($kpi);
-                // Initialize variables for employee KPI and grade details
-                $employeeKpi = null;
-                $gradeDetails = null;
-
-                // Check if $kpi is not empty and contains the expected structure
-                if (!empty($kpi) && isset($kpi[0]['kpiId'])) {
-                    $id = $kpi[0]['kpiId'];
-
-                    // Make another GET request to fetch detailed KPI information
-                    $responseKpis = Http::withToken($accessToken)
-                        ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
-
-                    $kpis = $responseKpis->json();
-
-                    // Check if the detailed KPIs are empty
-                    if (!empty($kpis)) {
-                        $globalSectionCount = 0;
-                        $regularSectionCount = 0;
-
-                        // Loop through each KPI to process them
-                        foreach ($kpis as $kpi) {
-                            // Count sections for GLOBAL KPIs
-                            if ($kpi['kpiType'] === 'GLOBAL') {
-                                $globalSectionCount += count($kpi['sections']);
-                            }
-
-                            // Count sections for REGULAR KPIs and get the first section's status
-                            if ($kpi['kpiType'] === 'REGULAR') {
-                                $regularSectionCount += count($kpi['sections']);
-                            }
-
-                            $statuses = []; // Initialize an array to hold statuses
-
-                            if ($kpi['kpiType'] == 'GLOBAL' || $kpi['kpiType'] == 'REGULAR') {
-                                // Iterate through the sections to collect statuses
-                                foreach ($kpi['sections'] as $section) {
-                                    // Get the status from each section's employee score
-                                    $status = $section['sectionEmpScore']['status'] ?? 'PENDING';
-                                    $statuses[] = $status; // Add the status to the array
-                                }
-
-                                // Get unique statuses or just pick one
-                                $uniqueStatuses = array_unique($statuses);
-                                $kpiStatus = count($uniqueStatuses) > 0 ? reset($uniqueStatuses) : 'PENDING'; // Get the first unique status or default to 'PENDING'
-
-                                // Set batchId and employeeId
-                                $batchId = $kpi['batchId'];
-                                $employeeId = $kpi['employeeId'];
-                            }
-                        }
-
-                        // Calculate the total section count
-                        $totalSectionCount = $globalSectionCount + $regularSectionCount;
-
-                        // Prepare data for grade calculation
-                        $grade_data = [
-                            'batchId' => $batchId,
-                            'employeeId' => $employeeId
-                        ];
-
-                        // Make a PUT request to calculate the total KPI score for the employee
-                        $employeeGrade = Http::withToken($accessToken)
-                            ->put("http://192.168.1.200:5123/Appraisal/Score/employee-total-kpiscore", $grade_data);
-
-                        // Prepare grade details based on the response
-                        if ($employeeGrade->successful() && !empty($employeeGrade->object())) {
-                            $grade = $employeeGrade->object();
-                            $gradeDetails = [
-                                'kpiScore' => $grade->totalKpiScore,
-                                'grade' => $grade->grade,
-                                'remark' => $grade->remark,
-                                'recommendation' => $grade->recommendation,
-                                'status' => $kpiStatus
-                            ];
-                        } else {
-                            $gradeDetails = [
-                                'kpiScore' => null,
-                                'grade' => null,
-                                'remark' => null,
-                                'status' => $kpiStatus
-                            ];
-                        }
-
-                        // Prepare the result for the view
-                        $employeeKpi = [
-                            'id' => $kpi['kpiId'],
-                            'batch_id' => $kpi['batchId'],
-                            'kpi_name' => $kpi['kpiName'],
-                            'section_count' => $totalSectionCount
-                        ];
-                    }
-                }
-
-                // Return the view with the data
-                return view("dashboard.show-employee-kpi", compact('employeeKpi', 'gradeDetails'));
-            } else {
-                // Check for session expiration (401 Unauthorized)
-                if ($response->status() === 401) {
-                    return $this->sessionExpiredRedirect();
-                }
-                // Log the error response if the API call fails
-                Log::error('Failed to retrieve KPIs', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
-            }
-        } catch (\Exception $e) {
-            // Log the exception if an error occurs
-            Log::error('Exception occurred while retrieving KPIs', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return redirect()->back()->with('toast_error ', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
-        }
-    }
-
-
-
-
-
-    public function showEmployeeSupervisorKpiScore(Request $request, $id)
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // dd($id);
-        // Get the access token from the session
-        $accessToken = session('api_token');
-
-        try {
-            // Make the GET request to the external API to get KPIs for the specified batch ID
-            $response = Http::withToken($accessToken)
-                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
-
-            // Check if the response is successful
-            if ($response->successful()) {
-                // Decode the response into an array of KPIs
-                $kpi = $response->object();
-
-                $batchId = $kpi[0]->batchId;
-
-                // dd($kpi);
-
-                // Filter the KPIs to include only those with active state of true or false
-                $appraisal = collect($kpi)->filter(function ($kpi) {
-                    // Check if the KPI is active
-                    if ($kpi->kpiActive) {
-                        // Filter sections that are active
-                        $activeSections = collect($kpi->sections)->filter(function ($section) {
-                            return $section->sectionActive; // Only include active sections
-                        });
-
-                        // If there are no active sections, return false
-                        if ($activeSections->isEmpty()) {
-                            return false;
-                        }
-
-                        // Filter metrics within the active sections
-                        $activeSections->transform(function ($section) {
-                            $section->metrics = collect($section->metrics)->filter(function ($metric) {
-                                return $metric->metricActive; // Only include active metrics
-                            });
-
-                            // Return the section only if it has active metrics
-                            return $section->metrics->isNotEmpty() ? $section : null;
-                        });
-
-                        // Remove null sections (those without active metrics)
-                        $activeSections = $activeSections->filter();
-
-                        // Return true if there are any active sections with active metrics
-                        return $activeSections->isNotEmpty();
-                    }
-
-                    return false; // If KPI is not active, return false
-                });
-
-
-
-
-                // Return the KPI names and section counts to the view
-                return view("dashboard.employee-supervisor-kpi-score-form", compact('appraisal', 'batchId'));
-            } else {
-                // Check for session expiration (401 Unauthorized)
-                if ($response->status() === 401) {
-                    return $this->sessionExpiredRedirect();
-                }
-                // Log the error response
-                Log::error('Failed to retrieve KPIs', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
-            }
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Exception occurred while retrieving KPIs', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
-        }
-    }
-
-    public function showEmployeeProbe(Request $request, $id)
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // Get the access token from the session
-        $accessToken = session('api_token');
-
-        try {
-            // Make the GET request to the external API to get KPIs for the specified employee ID
-            $response = Http::withToken($accessToken)
-                ->get("http://192.168.1.200:5123/Appraisal/Kpi/GetKpiForEmployee/{$id}");
-
-            // Check for session expiration (401 Unauthorized)
-            if ($response->status() === 401) {
-                return $this->sessionExpiredRedirect();
-            }
-
-            // Check if the response is successful
-            if (!$response->successful()) {
-                Log::error('Failed to retrieve KPIs', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to retrieve KPIs');
-            }
-
-            // Decode the response into an object
-            $kpis = $response->object();
-
-            // Initialize an empty collection for active appraisals
-            $appraisal = collect();
-
-
-            // Process each KPI
-            foreach ($kpis as $kpi) {
-                if ($kpi->kpiActive) {
-                    // Filter active sections
-                    $activeSections = collect($kpi->sections)->filter(function ($section) {
-                        return $section->sectionActive;
-                    });
-
-                    $activeSections->transform(function ($section) {
-                        $section->metrics = collect($section->metrics)->filter(function ($metric) {
-                            return $metric->metricActive;
-                        });
-                        return $section;
-                    });
-
-
-                    $appraisal->push((object) [
-                        'kpi' => $kpi,
-                        'activeSections' => $activeSections
-                    ]);
-                    // Get the status of the first section safely
-                    if (!empty($kpi->sections)) {
-                        $firstSection = $kpi->sections[0];
-                        $status = $firstSection->sectionEmpScore->status ?? 'PENDING';
-                        $kpiStatus = $status;
-                    } else {
-                        $kpiStatus = 'PENDING'; // Handle the case where there are no sections
-                    }
-                }
-            }
-
-
-
-            // Get the batch ID from the first KPI if available
-            $batchId = $appraisal->isNotEmpty() ? $appraisal->first()->kpi->batchId : null;
-
-            $employeeId = $this->getLoggedInUserInformation()->id ?? null;
-
-            // dd($appraisal);
-
-            // Return the KPI names and section counts to the view
-            return view("dashboard.test-employee-probe-form", compact('appraisal', 'batchId', 'kpiStatus', 'employeeId'));
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error(
-                'Exception occurred while retrieving KPIs : showEmployeeProbe function',
-                [
-                    'message' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]
-            );
-            return redirect()->back()->with('toast_error', 'Something went wrong, check your internet and try again, <b>Or Contact Application Support</b>');
-        }
-    }
-
-
-
-
-    public function my_kpis()
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        return view("dashboard.my-kpis");
-    }
-
-
-    public function kpi_setup()
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        return view("kpi-setup.kpi-setup");
-    }
-    public function score_setup()
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        return view("kpi-setup.score-setup");
-    }
-
-
-    public function getLoggedInUserInformation()
-    {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // Get the access token from the session
-        $accessToken = session('api_token');
-
-        // dd($appraisal);
-        $responseUser   = Http::withToken($accessToken)
-            ->get('http://192.168.1.200:5124/HRMS/Employee/GetEmployeeInformation');
-
-        // Handle responses
-        $user = $responseUser->successful() ? $responseUser->object() : null;
-
-
-        return $user;
     }
 }

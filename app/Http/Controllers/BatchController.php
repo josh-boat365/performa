@@ -2,60 +2,56 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AppraisalApiService;
+use App\Exceptions\ApiException;
+use App\Http\Requests\StoreBatchRequest;
+use App\Http\Requests\UpdateBatchRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class BatchController extends Controller
 {
+    protected $appraisalService;
+
+    public function __construct(AppraisalApiService $appraisalService)
+    {
+        $this->appraisalService = $appraisalService;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
         try {
-            // Get the access token from the request or environment
-            $accessToken = session('api_token'); // Replace with your actual access token
+            // Get all batches using the service
+            $batch_data = $this->appraisalService->getAllBatches();
 
-            // Make the GET request to the external API
-            $response = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5123/Appraisal/batch');
+            // Sort the batch_data array by creation date in descending order
+            usort($batch_data, function ($a, $b) {
+                return strtotime($b['createdAt'] ?? 0) - strtotime($a['createdAt'] ?? 0);
+            });
 
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                $batch_data = $response->json();
+            // Get current page form url e.g. &page=1
+            $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
-                // Sort the batch_data array by creation date in descending order
-                usort($batch_data, function ($a, $b) {
-                    return strtotime($b['createdAt']) - strtotime($a['createdAt']);
-                });
+            // Define how many items we want to be visible in each page
+            $perPage = 10;
 
-                // Get current page form url e.g. &page=1
-                $currentPage = LengthAwarePaginator::resolveCurrentPage();
+            // Slice the collection to get the items to display in current page
+            $currentItems = array_slice($batch_data, ($currentPage - 1) * $perPage, $perPage);
 
-                // Define how many items we want to be visible in each page
-                $perPage = 10;
+            // Create our paginator and pass it to the view
+            $batches = new LengthAwarePaginator($currentItems, count($batch_data), $perPage);
 
-                // Slice the collection to get the items to display in current page
-                $currentItems = array_slice($batch_data, ($currentPage - 1) * $perPage, $perPage);
+            // Append query parameters to the pagination links
+            $batches->setPath(request()->url());
 
-                // Create our paginator and pass it to the view
-                $batches = new LengthAwarePaginator($currentItems, count($batch_data), $perPage);
-
-                // Append query parameters to the pagination links
-                $batches->setPath(request()->url());
-
-                return view("batch-setup.index", compact('batches'));
-            } else {
-                return redirect()->back()->with('toast_error', 'Failed to fetch batches');
-            }
+            return view("batch-setup.index", compact('batches'));
+        } catch (ApiException $e) {
+            Log::error('API Error during batch fetch', ['error' => $e->getMessage(), 'status' => $e->getStatusCode()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         } catch (\Exception $e) {
             // Log the error for debugging purposes
             Log::error('Error during batch fetch', ['error' => $e->getMessage()]);
@@ -71,63 +67,39 @@ class BatchController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreBatchRequest $request)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $accessToken = session('api_token');
-
-        $response = Http::withToken($accessToken)
-            ->get('http://192.168.1.200:5123/Appraisal/batch');
-
-        $batch_data = collect($response->json());
-
-        // Pluck batch by status where pending or open using filter method
-        $batch_data = $batch_data->filter(function ($value, $key) {
-            return $value['status'] == 'PENDING' || $value['status'] == 'OPEN';
-        });
-
-        // Check if there is an existing PENDING or OPEN batch
-        if ($batch_data->count() > 0) {
-            return redirect()->back()->with(
-                'toast_error',
-                'Sorry, you cannot create a new batch while there is an existing PENDING or OPEN batch. <br> Batches: ' .
-                    $batch_data->implode('name', ', ')
-            );
-        }
-
-        // Validate the request data
-        $request->validate([
-            'name' => 'required|string',
-            'year' => 'required|integer',
-        ]);
-
-        // Prepare the data for the batch creation
-        $batchData = [
-            'name' => $request->input('name'),
-            'year' => $request->input('year'),
-        ];
-
         try {
-            // Make the POST request to the external API
-            $response = Http::withToken($accessToken)
-                ->post('http://192.168.1.200:5123/Appraisal/batch', $batchData);
+            // Get all batches to check if there's an existing PENDING or OPEN batch
+            $batch_data = collect($this->appraisalService->getAllBatches());
 
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->back()->with('toast_success', 'Batch created successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to create batch', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to create batch');
+            // Pluck batch by status where pending or open using filter method
+            $batch_data = $batch_data->filter(function ($value, $key) {
+                return $value['status'] == 'PENDING' || $value['status'] == 'OPEN';
+            });
+
+            // Check if there is an existing PENDING or OPEN batch
+            if ($batch_data->count() > 0) {
+                return redirect()->back()->with(
+                    'toast_error',
+                    'Sorry, you cannot create a new batch while there is an existing PENDING or OPEN batch. <br> Batches: ' .
+                        $batch_data->implode('name', ', ')
+                );
             }
+
+            // Prepare the data for the batch creation
+            $batchData = [
+                'name' => $request->input('name'),
+                'year' => $request->input('year'),
+            ];
+
+            // Create the batch using the service
+            $response = $this->appraisalService->createBatch($batchData);
+
+            return redirect()->back()->with('toast_success', 'Batch created successfully');
+        } catch (ApiException $e) {
+            Log::error('API Error during batch creation', ['error' => $e->getMessage(), 'status' => $e->getStatusCode()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while creating batch', [
@@ -145,33 +117,14 @@ class BatchController extends Controller
      */
     public function show(string $id)
     {
-
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        $accessToken = session('api_token');
-
         try {
-            // Make the GET request to the external API
-            $response = Http::withToken($accessToken)
-                ->get('http://192.168.1.200:5123/Appraisal/batch/' . $id);
+            // Get batch by ID using the service
+            $batch_data = $this->appraisalService->getBatch($id);
 
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                $batch_data = $response->json();
-
-                return view('batch-setup.edit', compact('batch_data'));
-            } else {
-                // Log the error response
-                Log::error('Failed to fetch batch', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Batch does not exist');
-            }
+            return view('batch-setup.edit', compact('batch_data'));
+        } catch (ApiException $e) {
+            Log::error('API Error during batch fetch', ['error' => $e->getMessage(), 'status' => $e->getStatusCode()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while fetching batch', [
@@ -188,55 +141,24 @@ class BatchController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateBatchRequest $request, string $id)
     {
-
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
-        // Validate the request data
-        $request->validate([
-            'name' => 'required|string',
-            'year' => 'required|integer',
-            // 'status' => 'required|string',
-            'active' => 'required|integer',
-        ]);
-
-        // dd($request);
-
-        // Get the access token from the request or environment
-        $accessToken = session('api_token'); // Replace with your actual access token
-
-        // Prepare the data for the batch update
-        $batchData = [
-            'id' => $id,
-            'name' => $request->input('name'),
-            'year' => $request->input('year'),
-            // 'status' => $request->input('status'),
-            'active' => $request->input('active') == 1 ? true : false, // Convert to boolean
-        ];
-
-        // dd($batchData);
-
         try {
-            // Make the PUT request to the external API
-            $response = Http::withToken($accessToken)
-                ->put('http://192.168.1.200:5123/Appraisal/batch', $batchData);
+            // Prepare the data for the batch update
+            $batchData = [
+                'id' => $id,
+                'name' => $request->input('name'),
+                'year' => $request->input('year'),
+                'active' => $request->input('active') == 1 ? true : false, // Convert to boolean
+            ];
 
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->route('batch.setup.index')->with('toast_success', 'Batch updated successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to update batch', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to update batch');
-            }
+            // Update the batch using the service
+            $response = $this->appraisalService->updateBatch($id, $batchData);
+
+            return redirect()->route('batch.setup.index')->with('toast_success', 'Batch updated successfully');
+        } catch (ApiException $e) {
+            Log::error('API Error during batch update', ['error' => $e->getMessage(), 'status' => $e->getStatusCode()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while updating batch', [
@@ -249,49 +171,28 @@ class BatchController extends Controller
 
     public function update_state(Request $request, string $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
         // Validate the request data
         $request->validate([
             'active' => 'required|integer',
         ]);
 
-        // dd($request);
-
-        // Get the access token from the request or environment
-        $accessToken = session('api_token');
-
-        // Prepare the data for the batch state update
-        $batchData = [
-            'id' => $id,
-            'active' => $request->input('active') == 1 ? true : false, // Convert to boolean
-        ];
-
-        // dd($batchData);
-
         try {
-            // Make the PUT request to the external API
-            $response = Http::withToken($accessToken)
-                ->put('http://192.168.1.200:5123/Appraisal/batch/update-activation', $batchData);
+            // Prepare the data for the batch state update
+            $batchData = [
+                'id' => $id,
+                'active' => $request->input('active') == 1 ? true : false, // Convert to boolean
+            ];
 
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->route('batch.setup.index')->with('toast_success', 'Batch state updated successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to update batch', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to update batch state');
-            }
+            // Update batch activation using the service
+            $response = $this->appraisalService->updateBatchState($id, $batchData);
+
+            return redirect()->route('batch.setup.index')->with('toast_success', 'Batch state updated successfully');
+        } catch (ApiException $e) {
+            Log::error('API Error during batch state update', ['error' => $e->getMessage(), 'status' => $e->getStatusCode()]);
+            return redirect()->back()->with('toast_error', $e->getMessage());
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while updating batch', [
+            Log::error('Exception occurred while updating batch state', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -301,50 +202,28 @@ class BatchController extends Controller
 
     public function update_status(Request $request, string $id)
     {
-        // Validate session
-        // $sessionValidation = ValidateSessionController::validateSession();
-        // if ($sessionValidation) {
-        //     return $sessionValidation;
-        // }
-
         // Validate the request data
         $request->validate([
-            'status' => 'required|string',
+            'status' => 'required|string|in:PENDING,OPEN,CLOSED,COMPLETED',
         ]);
 
-        // dd($request);
-
-        // Get the access token from the request or environment
-        $accessToken = session('api_token'); // Replace with your actual access token
-
-        // Prepare the data for the batch update
-        $batchData = [
-            'id' => $id,
-            'status' => $request->input('status'),
-
-        ];
-
-        // dd($batchData);
-
         try {
-            // Make the PUT request to the external API
-            $response = Http::withToken($accessToken)
-                ->put('http://192.168.1.200:5123/Appraisal/batch/update-status', $batchData);
+            // Prepare the data for the batch status update
+            $batchData = [
+                'id' => $id,
+                'status' => $request->input('status'),
+            ];
 
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->route('batch.setup.index')->with('toast_success', 'Batch status updated successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to update batch', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to update batch status');
-            }
+            // Update batch status using the service
+            $response = $this->appraisalService->updateBatchStatus($id, $batchData);
+
+            return redirect()->route('batch.setup.index')->with('toast_success', 'Batch status updated successfully');
+        } catch (ApiException $e) {
+            Log::error('API Error during batch status update', ['error' => $e->getMessage(), 'status' => $e->getStatusCode()]);
+            return redirect()->back()->with('toast_error', 'Failed to update batch status: ' . $e->getMessage());
         } catch (\Exception $e) {
             // Log the exception
-            Log::error('Exception occurred while updating batch', [
+            Log::error('Exception occurred while updating batch status', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -360,25 +239,14 @@ class BatchController extends Controller
      */
     public function destroy(Request $request, string $id)
     {
-        // Get the access token from the session
-        $accessToken = session('api_token'); // Replace with your actual access token
-
         try {
-            // Make the DELETE request to the external API
-            $response = Http::withToken($accessToken)
-                ->delete("http://192.168.1.200:5123/Appraisal/Batch/{$id}");
+            // Delete batch using the service
+            $response = $this->appraisalService->deleteBatch($id);
 
-            // Check the response status and return appropriate response
-            if ($response->successful()) {
-                return redirect()->route('batch.setup.index')->with('toast_success', 'Batch deleted successfully');
-            } else {
-                // Log the error response
-                Log::error('Failed to delete batch', [
-                    'status' => $response->status(),
-                    'response' => $response->body()
-                ]);
-                return redirect()->back()->with('toast_error', 'Sorry, failed to delete batch');
-            }
+            return redirect()->route('batch.setup.index')->with('toast_success', 'Batch deleted successfully');
+        } catch (ApiException $e) {
+            Log::error('API Error during batch deletion', ['error' => $e->getMessage(), 'status' => $e->getStatusCode()]);
+            return redirect()->back()->with('toast_error', 'Failed to delete batch: ' . $e->getMessage());
         } catch (\Exception $e) {
             // Log the exception
             Log::error('Exception occurred while deleting batch', [

@@ -6,7 +6,9 @@
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                    <h4 class="mb-sm-0 font-size-18"> <a href="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiScore}/section/{$sectionMetricScore}/index/{$sectionId}" ) }}"> METRICS </a> > Setup For
+                    <h4 class="mb-sm-0 font-size-18"> <a
+                            href="{{ url("dashboard/department/section/metric-setup/kpi/{$kpiScore}/section/{$sectionMetricScore}/index/{$sectionId}") }}">
+                            METRICS </a> > Setup For
                         Metrics
 
                     </h4>
@@ -25,14 +27,14 @@
 
                     <form action="{{ route('store.metric') }}" class="custom-validation" method="POST">
                         @csrf
-                        <input type="hidden" name="kpiId" value="$kpiScore">
-                        <input type="hidden" name="sectionMetricScore" value="$sectionMetricScore">
+                        <input type="hidden" name="kpiId" value="{{ $kpiScore }}">
+                        <input type="hidden" name="sectionMetricScore" value="{{ $sectionMetricScore }}">
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Metric Name</label>
                             <div class="col-md-12">
 
-                                <textarea class="form-control" name="name" required placeholder="Enter Name for Metric" rows="3"
-                                    id="example-text-input">{{ old('name') }}</textarea>
+                                <textarea class="form-control" name="name" required placeholder="Enter Name for Metric"
+                                    rows="3" id="example-text-input">{{ old('name') }}</textarea>
                             </div>
                         </div>
 
@@ -40,7 +42,8 @@
                             <label for="example-text-input" class="">Metric Description</label>
                             <div class="col-md-12">
 
-                                <textarea class="form-control" name="description" required placeholder="Enter Name for Metric" rows="3"
+                                <textarea class="form-control" name="description" required
+                                    placeholder="Enter Name for Metric" rows="3"
                                     id="example-text-input">{{ old('description') }}</textarea>
                             </div>
                         </div>
@@ -48,27 +51,28 @@
                         <div class="row mb-3">
                             <label for="example-text-input" class="">Metric Score</label>
                             <div class="col-md-12">
-                                <input class="form-control" type="number" name="score" max="{{ $totalMetricScore == 0 ? $sectionMetricScore :  $totalMetricScore }}"
-                                    title="The Score cannot be more than the section score {{ $totalMetricScore }}" required
-                                    value="{{ old('score') }}" id="example-text-input">
+                                <input class="form-control" type="number" name="score"
+                                    max="{{ $totalMetricScore == 0 ? $sectionMetricScore : $totalMetricScore }}"
+                                    title="The Score cannot be more than the section score {{ $totalMetricScore }}"
+                                    required value="{{ old('score') }}" id="example-text-input">
                             </div>
                         </div>
 
-                        {{--  <div class="row mb-3">
+                        {{-- <div class="row mb-3">
                             <label for="example-text-input" class="">Select Section For Metric to Belong To</label>
                             <div class="col-md-12">
                                 <select name="sectionId" class="form-select">
                                     <option>Select Section</option>
 
                                     @foreach ($activeSections as $section)
-                                        <option value="{{ $section->id }}"
-                                            {{ old('sectionId') == $section->id ? 'selected' : '' }}>
-                                            {{ $section->name }} - {{ $section->kpi->name }}
-                                        </option>
+                                    <option value="{{ $section->id }}" {{ old('sectionId')==$section->id ? 'selected' :
+                                        '' }}>
+                                        {{ $section->name }} - {{ $section->kpi->name }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
-                        </div>  --}}
+                        </div> --}}
 
                         <input type="hidden" name="active" value="1">
                         <input type="hidden" name="sectionId" value="{{ $sectionId }}">
