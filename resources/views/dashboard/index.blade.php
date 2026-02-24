@@ -14,13 +14,56 @@
         <div class="mt-4 mb-4" style="background-color: gray; height: 1px;"></div>
 
 
-        <!-- Performance Over Time Chart -->
+        <!-- Performance Over Time Chart & Grading Scheme -->
         <div class="row">
-            <div class="col-xl-12">
+            <!-- Performance Chart - Left Side -->
+            <div class="col-xl-7">
                 <div class="card mb-4">
                     <div class="card-body">
                         <h4 class="card-title mb-4">Performance Over Time</h4>
                         <div id="performanceChart" style="height: 320px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grading Scheme - Right Side -->
+            <div class="col-xl-5">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Grading Scheme</h4>
+                        @if($grades && count($grades) > 0)
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" style="font-size: 1rem;">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="align-middle text-center fs-6">Grade</th>
+                                            <th class="align-middle text-center fs-6">Score Range</th>
+                                            <th class="align-middle fs-6">Remark</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($grades as $grade)
+                                            <tr>
+                                                <td class="text-center fw-bold">
+                                                    <span class="badge bg-primary"
+                                                        style="font-size: 0.95rem;">{{ $grade['grade'] ?? '---' }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    {{ $grade['minScore'] ?? '0' }} - {{ $grade['maxScore'] ?? '100' }}
+                                                </td>
+                                                <td>
+                                                    <span class="text-muted">{{ $grade['remark'] ?? '---' }}</span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <div class="alert alert-info mb-0" role="alert">
+                                <i class="fas fa-info-circle"></i> Grading scheme not available.
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -45,12 +88,12 @@
                                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                                     <div>
                                                         <h5 class="card-title mb-1 @if($batch->isCurrentBatch) fw-bold @endif"
-                                                            style="@if($batch->isCurrentBatch) font-size: 1.25rem; @endif">
+                                                            style="@if($batch->isCurrentBatch) font-size: 1.25rem; @endif font-size: 0.95rem;">
                                                             {{ $batch->batchName }}
                                                         </h5>
                                                         @if($batch->batchYear)
                                                             <small class="text-muted @if($batch->isCurrentBatch) fw-semibold @endif"
-                                                                style="@if($batch->isCurrentBatch) font-size: 0.9rem; @endif">
+                                                                style="font-size: 0.8rem;">
                                                                 Year: {{ $batch->batchYear }}
                                                             </small>
                                                         @endif
@@ -65,16 +108,20 @@
                                                     <div class="score-details">
                                                         <div class="row text-center mb-2">
                                                             <div class="col-6">
-                                                                <small class="text-muted d-block @if($batch->isCurrentBatch) fw-semibold @endif">Score</small>
+                                                                <small
+                                                                    class="text-muted d-block @if($batch->isCurrentBatch) fw-semibold @endif"
+                                                                    style="font-size: 0.8rem;">Score</small>
                                                                 <h6 class="@if($batch->isCurrentBatch) fw-bold @else font-weight-bold @endif"
-                                                                    style="@if($batch->isCurrentBatch) font-size: 1.5rem; @endif">
+                                                                    style="@if($batch->isCurrentBatch) font-size: 1.5rem; @endif font-size: 1.3rem;">
                                                                     {{ $batch->kpiScore ?? '---' }}
                                                                 </h6>
                                                             </div>
                                                             <div class="col-6">
-                                                                <small class="text-muted d-block @if($batch->isCurrentBatch) fw-semibold @endif">Grade</small>
+                                                                <small
+                                                                    class="text-muted d-block @if($batch->isCurrentBatch) fw-semibold @endif"
+                                                                    style="font-size: 0.8rem;">Grade</small>
                                                                 <h6 class="@if($batch->isCurrentBatch) fw-bold @else font-weight-bold @endif"
-                                                                    style="@if($batch->isCurrentBatch) font-size: 1.5rem; @endif">
+                                                                    style="@if($batch->isCurrentBatch) font-size: 1.5rem; @endif font-size: 1.3rem;">
                                                                     {{ $batch->grade ?? '---' }}
                                                                 </h6>
                                                             </div>
@@ -82,26 +129,38 @@
 
                                                         @if($batch->remark)
                                                             <div class="mt-2">
-                                                                <small class="text-muted @if($batch->isCurrentBatch) fw-semibold @endif">Remark:</small>
-                                                                <p class="mb-0 small @if($batch->isCurrentBatch) fw-semibold @endif">{{ $batch->remark }}</p>
+                                                                <small class="text-muted @if($batch->isCurrentBatch) fw-semibold @endif"
+                                                                    style="font-size: 0.8rem;">Remark:</small>
+                                                                <p class="mb-0 @if($batch->isCurrentBatch) fw-semibold @endif"
+                                                                    style="font-size: 0.8rem;">{{ $batch->remark }}</p>
                                                             </div>
                                                         @endif
 
                                                         @if($batch->recommendation)
                                                             <div class="mt-2">
-                                                                <small class="text-muted @if($batch->isCurrentBatch) fw-semibold @endif">Recommendation:</small>
-                                                                <button type="button" class="btn btn-outline-primary btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#recommendationModal_{{ $batch->batchId }}">
+                                                                <small class="text-muted @if($batch->isCurrentBatch) fw-semibold @endif"
+                                                                    style="font-size: 0.8rem;">Recommendation:</small>
+                                                                <button type="button" class="btn btn-outline-primary btn-sm ms-2"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#recommendationModal_{{ $batch->batchId }}">
                                                                     View Recommendation
                                                                 </button>
                                                                 <!-- Modal -->
-                                                                <div class="modal fade" id="recommendationModal_{{ $batch->batchId }}" tabindex="-1" aria-labelledby="recommendationModalLabel_{{ $batch->batchId }}" aria-hidden="true">
+                                                                <div class="modal fade" id="recommendationModal_{{ $batch->batchId }}"
+                                                                    tabindex="-1"
+                                                                    aria-labelledby="recommendationModalLabel_{{ $batch->batchId }}"
+                                                                    aria-hidden="true">
                                                                     <div class="modal-dialog modal-dialog-centered">
                                                                         <div class="modal-content">
                                                                             <div class="modal-header">
-                                                                                <h5 class="modal-title" id="recommendationModalLabel_{{ $batch->batchId }}">Recommendation for {{ $batch->batchName }}</h5>
-                                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                                <h5 class="modal-title"
+                                                                                    id="recommendationModalLabel_{{ $batch->batchId }}">
+                                                                                    Recommendation for {{ $batch->batchName }}</h5>
+                                                                                <button type="button" class="btn-close"
+                                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
                                                                             </div>
-                                                                            <div class="modal-body" style="word-break: break-word; white-space: pre-line; max-height: 60vh; overflow-y: auto;">
+                                                                            <div class="modal-body"
+                                                                                style="word-break: break-word; white-space: pre-line; max-height: 60vh; overflow-y: auto;">
                                                                                 {{ $batch->recommendation }}
                                                                             </div>
                                                                         </div>
@@ -112,10 +171,11 @@
                                                     </div>
                                                 @else
                                                     <div class="text-center py-3">
-                                                        <p class="text-muted mb-0">
+                                                        <p class="text-muted mb-0" style="font-size: 0.8rem;">
                                                             <i class="fas fa-hourglass-half"></i> Scores not yet processed
                                                         </p>
-                                                        <small class="text-muted">Status: {{ $batch->status }}</small>
+                                                        <small class="text-muted" style="font-size: 0.8rem;">Status:
+                                                            {{ $batch->status }}</small>
                                                     </div>
                                                 @endif
                                             </div>
