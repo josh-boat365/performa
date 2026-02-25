@@ -183,9 +183,9 @@ $totalEmployees = $reports->sum(function ($report) {
                                                 </td>
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <div class="avatar-circle me-2">
+                                                        {{--  <div class="avatar-circle me-2">
                                                             {{ strtoupper(substr($employee->employeeName ?? 'N', 0, 1)) }}
-                                                        </div>
+                                                        </div>  --}}
                                                         <div>
                                                             <span class="fw-medium">{{ $employee->employeeName ?? 'N/A' }}</span>
                                                             @if($employee->staffNumber ?? null)
